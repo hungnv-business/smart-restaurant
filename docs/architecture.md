@@ -3406,7 +3406,7 @@ smart-restaurant/
 │   ├── angular.json                # Angular configuration
 │   ├── package.json                # Dependencies
 │   └── tsconfig.json               # TypeScript configuration
-├── flutter/                        # Flutter mobile apps
+├── flutter_mobile/                 # Flutter mobile apps
 │   ├── lib/
 │   │   ├── features/               # Feature-based organization
 │   │   │   ├── orders/             # Order management
@@ -3472,7 +3472,7 @@ smart-restaurant/
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.HttpApi.Host",
     "dev:web": "cd angular && npm start",
-    "dev:mobile": "cd flutter && flutter run",
+    "dev:mobile": "cd flutter_mobile && flutter run",
     "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44391",
     "install-libs": "cd angular && abp install-libs",
     "migrate": "cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator",
@@ -3551,7 +3551,7 @@ npm run dev:api
 
 # Start Flutter mobile app
 npm run dev:mobile
-# Equivalent to: cd flutter && flutter run
+# Equivalent to: cd flutter_mobile && flutter run
 
 # Generate ABP service proxies (Tạo ABP service proxy)
 npm run generate-proxy

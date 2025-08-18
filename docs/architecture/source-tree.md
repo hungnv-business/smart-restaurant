@@ -5,15 +5,22 @@
 ```
 smart-restaurant/
 ├── .bmad-core/                     # BMaD Method configuration and templates
+├── .bmad-infrastructure-devops/    # BMaD Infrastructure DevOps
+├── .claude/                        # Claude Code configuration
+├── .cursor/                        # Cursor IDE configuration
+├── .git/                          # Git repository
+├── .github/                       # GitHub Actions (empty)
 ├── aspnet-core/                    # ABP Framework backend (.NET 8)
 ├── angular/                        # Angular 19 frontend application
 ├── docs/                          # Project documentation
+├── flutter_mobile/                # Flutter mobile application
 ├── infrastructure/                # Docker and deployment configuration
-├── poseidon-ng-19.0.0/           # Poseidon PrimeNG theme template
+├── node_modules/                  # Dependencies
 ├── CLAUDE.md                      # Development environment guide
 ├── README.md                      # Project overview
 ├── package.json                   # Root workspace configuration
-└── yarn.lock                      # Dependency lock file
+├── package-lock.json              # NPM lock file
+└── yarn.lock                      # Yarn lock file
 ```
 
 ## Backend Structure - ABP Framework (.NET 8)
@@ -78,14 +85,35 @@ aspnet-core/
     │   │   └── HomeController.cs
     │   ├── Properties/
     │   │   └── launchSettings.json
-    │   ├── wwwroot/                        # Static files
+    │   ├── wwwroot/                        # Static files and ABP resources
     │   │   ├── global-styles.css
-    │   │   └── images/
+    │   │   ├── images/
+    │   │   │   └── logo/                   # Application logos
+    │   │   │       ├── leptonx/            # LeptonX theme logos
+    │   │   │       │   ├── logo-dark.png
+    │   │   │       │   ├── logo-light.png
+    │   │   │       │   └── logo thumbnails
+    │   │   └── libs/                       # Client-side libraries
+    │   │       ├── abp/                    # ABP Framework scripts
+    │   │       │   ├── core/               # Core ABP functionality
+    │   │       │   ├── jquery/             # jQuery integration
+    │   │       │   └── utils/              # ABP utilities
+    │   │       ├── bootstrap/              # Bootstrap CSS/JS
+    │   │       ├── jquery/                 # jQuery library
+    │   │       ├── jquery-validation/      # Form validation
+    │   │       ├── sweetalert2/            # Alert dialogs
+    │   │       └── datatables.net/         # Data tables
+    │   ├── Logs/                           # Application logs
+    │   │   └── logs.txt
     │   ├── Program.cs                      # Application entry point
     │   ├── appsettings.json               # Production configuration
     │   ├── appsettings.Development.json   # Development configuration
-    │   ├── package.json                   # Frontend assets
-    │   └── web.config                     # IIS configuration
+    │   ├── package.json                   # Frontend assets management
+    │   ├── yarn.lock                      # Package lock file
+    │   ├── web.config                     # IIS configuration
+    │   ├── SmartRestaurantBrandingProvider.cs      # App branding
+    │   ├── SmartRestaurantHttpApiHostModule.cs     # Host module
+    │   └── abp.resourcemapping.js          # ABP resource mapping
     │
     ├── SmartRestaurant.HttpApi.Client/     # HTTP client for API consumption
     │   └── SmartRestaurantHttpApiClientModule.cs
@@ -145,43 +173,176 @@ aspnet-core/test/
 ```
 angular/
 ├── angular.json                   # Angular workspace configuration
-├── karma.conf.js                 # Test runner configuration
+├── karma.conf.js                 # Test runner configuration  
 ├── package.json                  # Dependencies and scripts
+├── tailwind.config.js            # Tailwind CSS configuration
 ├── tsconfig.json                 # TypeScript configuration
+├── tsconfig.app.json             # App-specific TypeScript config
+├── tsconfig.spec.json            # Test TypeScript config
 ├── yarn.lock                     # Dependency lock file
+├── dist/                         # Build output directory
 └── src/
     ├── app/
     │   ├── app.component.ts      # Root application component
     │   ├── app.config.ts         # Application configuration
     │   ├── app.routes.ts         # Routing configuration
-    │   ├── route.provider.ts     # Route provider service
     │   ├── home/                 # Home feature module
     │   │   ├── home.component.ts
     │   │   ├── home.component.html
     │   │   ├── home.component.scss
     │   │   ├── home.component.spec.ts
     │   │   └── home.routes.ts
-    │   └── shared/               # Shared components and services
-    │       └── shared.module.ts
+    │   └── layout/               # Poseidon theme layout components
+    │       ├── components/       # Layout UI components
+    │       │   ├── app.breadcrumb.ts     # Breadcrumb navigation
+    │       │   ├── app.configurator.ts   # Theme settings panel
+    │       │   ├── app.footer.ts         # Footer component
+    │       │   ├── app.menu.ts           # Main navigation menu
+    │       │   ├── app.menuitem.ts       # Menu item component
+    │       │   ├── app.rightmenu.ts      # Right sidebar menu
+    │       │   ├── app.search.ts         # Search functionality
+    │       │   ├── app.sidebar.ts        # Left sidebar
+    │       │   ├── app.topbar.ts         # Top navigation bar
+    │       │   └── restaurant.layout.ts  # Main restaurant layout wrapper
+    │       └── service/          # Layout services
+    │           └── layout.service.ts     # Layout state management
     │
-    ├── assets/                   # Static assets
-    │   ├── images/              # Application images
-    │   │   ├── getting-started/ # ABP getting started assets
-    │   │   └── logo/           # Brand logos
-    │   │       ├── logo-light.png
-    │   │       └── logo-light-thumbnail.png
+    ├── assets/                   # Static assets and themes
+    │   ├── demo/                 # Poseidon theme demo assets
+    │   │   ├── code.scss         # Code highlighting styles
+    │   │   ├── demo.scss         # Demo-specific styles
+    │   │   ├── data/             # Sample JSON data
+    │   │   │   ├── chat.json
+    │   │   │   ├── file-management.json
+    │   │   │   ├── kanban.json
+    │   │   │   ├── mail.json
+    │   │   │   └── members.json
+    │   │   └── images/           # Demo images and assets
+    │   │       ├── auth/         # Authentication backgrounds
+    │   │       ├── avatar/       # User avatar images
+    │   │       ├── dashboard/    # Dashboard illustrations
+    │   │       ├── ecommerce/    # E-commerce sample images
+    │   │       ├── landing/      # Landing page assets
+    │   │       └── product/      # Product sample images
+    │   │
+    │   └── layout/               # Core layout styles and assets
+    │       ├── layout.scss       # Main layout stylesheet
+    │       ├── images/           # Layout-specific images
+    │       │   ├── logo-poseidon.png     # Poseidon theme logo
+    │       │   ├── logo-poseidon.svg     # Vector logo
+    │       │   ├── logo-poseidon-dark.png # Dark theme logo
+    │       │   └── profile.jpg           # Default profile image
+    │       ├── sidebar/          # Sidebar theme styles
+    │       │   ├── _sidebar.scss
+    │       │   ├── _sidebar_themes.scss
+    │       │   └── themes/       # Light/dark sidebar themes
+    │       ├── topbar/           # Top bar theme styles
+    │       │   ├── _topbar.scss
+    │       │   └── themes/       # Light/dark topbar themes
+    │       └── variables/        # SCSS theme variables
+    │           ├── _common.scss
+    │           ├── _dark.scss
+    │           └── _light.scss
     │
-    ├── environments/            # Environment configurations
-    │   ├── environment.ts       # Development environment
-    │   └── environment.prod.ts  # Production environment
-    │
-    ├── favicon.ico             # Website icon
-    ├── index.html              # Main HTML file
-    ├── main.ts                 # Application bootstrap
-    ├── polyfills.ts            # Browser compatibility
-    ├── styles.scss             # Global styles
-    └── test.ts                 # Test configuration
+    ├── favicon.ico              # Website icon
+    ├── index.html               # Main HTML file
+    ├── main.ts                  # Application bootstrap
+    ├── styles.scss              # Global styles
+    └── tailwind.css             # Tailwind CSS imports
 ```
+
+## Mobile App Structure - Flutter 3.35.1
+
+### Application Structure (Cấu trúc Ứng dụng)
+
+```
+flutter_mobile/
+├── android/                         # Android platform configuration
+│   ├── app/
+│   │   ├── build.gradle.kts        # Android build configuration
+│   │   └── src/
+│   │       ├── debug/              # Debug configuration
+│   │       ├── main/               # Main Android manifest
+│   │       └── profile/            # Profile configuration
+│   ├── gradle/                     # Gradle wrapper
+│   ├── local.properties           # Local Android SDK path
+│   └── settings.gradle.kts         # Android project settings
+│
+├── ios/                            # iOS platform configuration
+│   ├── Runner/                     # iOS app target
+│   │   ├── AppDelegate.swift       # iOS app delegate
+│   │   ├── Assets.xcassets/        # App icons and images
+│   │   ├── Info.plist             # iOS app configuration
+│   │   └── Runner-Bridging-Header.h
+│   ├── Runner.xcodeproj/           # Xcode project
+│   ├── Runner.xcworkspace/         # Xcode workspace
+│   └── Podfile                     # CocoaPods dependencies
+│
+├── lib/                            # Flutter Dart source code
+│   ├── features/                   # Feature-based organization
+│   │   ├── orders/                 # Gọi món (Order Management)
+│   │   │   └── orders_screen.dart
+│   │   ├── reservations/           # Đặt bàn (Table Reservations)
+│   │   │   └── reservations_screen.dart
+│   │   └── takeaway/               # Mang về (Takeaway Orders)
+│   │       └── takeaway_screen.dart
+│   │
+│   ├── shared/                     # Shared components and services
+│   │   ├── constants/              # Vietnamese constants
+│   │   │   ├── route_constants.dart
+│   │   │   └── vietnamese_constants.dart
+│   │   ├── models/                 # Data models
+│   │   │   ├── user_model.dart
+│   │   │   └── user_model.g.dart   # Generated code
+│   │   ├── services/               # Business services
+│   │   │   ├── api/                # API client services
+│   │   │   │   └── api_client.dart
+│   │   │   ├── auth/               # Authentication service
+│   │   │   │   └── auth_service.dart
+│   │   │   └── router_service.dart # Navigation service
+│   │   ├── utils/                  # Vietnamese utilities
+│   │   │   ├── responsive_helper.dart
+│   │   │   └── vietnamese_formatter.dart
+│   │   └── widgets/                # Reusable UI components
+│   │       ├── login_screen.dart
+│   │       ├── main_scaffold.dart
+│   │       ├── not_found_screen.dart
+│   │       ├── splash_screen.dart
+│   │       └── vietnamese_input_widgets.dart
+│   │
+│   └── main.dart                   # Application entry point
+│
+├── test/                           # Flutter tests
+│   ├── unit/                       # Unit tests
+│   │   └── vietnamese_formatter_test.dart
+│   ├── utils/                      # Test utilities
+│   │   └── test_helpers.dart
+│   ├── widgets/                    # Widget tests
+│   │   └── login_screen_test.dart
+│   └── widget_test.dart            # Default widget tests
+│
+├── integration_test/               # Integration tests
+│   └── app_test.dart              # End-to-end tests
+│
+├── pubspec.yaml                    # Flutter dependencies and configuration
+├── pubspec.lock                    # Dependency lock file
+├── analysis_options.yaml          # Dart analyzer configuration
+└── README.md                       # Flutter app documentation
+```
+
+### Key Flutter Mobile Features (Tính năng Chính của Flutter Mobile)
+
+#### Vietnamese Restaurant Workflows (Quy trình Nhà hàng Việt Nam)
+- **Gọi món (Orders)**: Real-time order management for staff
+- **Đặt bàn (Reservations)**: Table booking system for customers
+- **Mang về (Takeaway)**: Takeaway order processing
+
+#### Technical Implementation (Triển khai Kỹ thuật)
+- **State Management**: Provider pattern for Vietnamese restaurant workflows
+- **API Integration**: RESTful API client connecting to ABP backend
+- **Localization**: Vietnamese-first with English fallback
+- **Responsive Design**: Tablet and phone support for restaurant staff
+- **Authentication**: OAuth integration with ABP Identity system
 
 ## Documentation Structure (Cấu trúc Tài liệu)
 
@@ -270,65 +431,6 @@ infrastructure/
         └── 01-vietnamese-collation.sql  # Vietnamese text support
 ```
 
-## Poseidon Theme Template (Template Theme Poseidon)
-
-### Theme Structure (Cấu trúc Theme)
-
-```
-poseidon-ng-19.0.0/                    # PrimeNG Poseidon theme v19.0.0
-├── README.md                          # Theme documentation
-├── CHANGELOG.md                       # Version history
-├── LICENSE.md                         # License information
-├── package.json                       # Theme dependencies
-├── angular.json                       # Angular configuration
-├── tailwind.config.js                 # Tailwind CSS configuration
-├── tsconfig.json                      # TypeScript configuration
-│
-├── src/
-│   ├── app/
-│   │   ├── layout/                    # Layout components
-│   │   │   ├── components/            # UI components
-│   │   │   │   ├── app.layout.ts      # Main layout wrapper
-│   │   │   │   ├── app.topbar.ts      # Top navigation bar
-│   │   │   │   ├── app.sidebar.ts     # Side navigation
-│   │   │   │   ├── app.menu.ts        # Menu component
-│   │   │   │   ├── app.breadcrumb.ts  # Breadcrumb navigation
-│   │   │   │   ├── app.footer.ts      # Footer component
-│   │   │   │   ├── app.configurator.ts # Theme configurator
-│   │   │   │   ├── app.search.ts      # Search functionality
-│   │   │   │   └── app.rightmenu.ts   # Right menu panel
-│   │   │   └── service/
-│   │   │       └── layout.service.ts  # Layout state management
-│   │   │
-│   │   ├── apps/                      # Sample applications
-│   │   ├── pages/                     # Sample pages
-│   │   ├── types/                     # TypeScript interfaces
-│   │   └── lib/
-│   │       └── utils.ts               # Utility functions
-│   │
-│   ├── assets/
-│   │   ├── demo/                      # Demo-specific styles
-│   │   └── layout/                    # Core layout styles
-│   │       ├── layout.scss            # Main layout stylesheet
-│   │       ├── _breadcrumb.scss       # Breadcrumb styles
-│   │       ├── _topbar.scss           # Top bar styles
-│   │       ├── _responsive.scss       # Responsive design
-│   │       ├── _mixins.scss           # SCSS mixins
-│   │       └── _utils.scss            # Utility classes
-│   │
-│   ├── styles.scss                    # Global styles
-│   ├── tailwind.css                   # Tailwind base styles
-│   └── main.ts                        # Application entry point
-│
-└── public/                            # Static assets
-    ├── demo/                          # Demo data and images
-    │   ├── data/                      # Sample JSON data
-    │   └── images/                    # Demo images and icons
-    ├── images/                        # Theme images and logos
-    └── layout/                        # Layout-specific assets
-        ├── images/                    # Layout images
-        └── styles/                    # Additional styles
-```
 
 ## Key Files for Restaurant Implementation (File Quan trọng cho Triển khai Nhà hàng)
 
@@ -346,6 +448,17 @@ poseidon-ng-19.0.0/                    # PrimeNG Poseidon theme v19.0.0
 - `shared.module.ts` - Shared components for restaurant workflows
 - `environment.ts` - Development environment with API endpoints
 - `styles.scss` - Global styles including Vietnamese font support
+
+### Critical Flutter Mobile Files (File Flutter Mobile Quan trọng)
+
+- `main.dart` - Flutter application entry point and configuration
+- `pubspec.yaml` - Flutter dependencies and Vietnamese localization setup
+- `api_client.dart` - RESTful API client connecting to ABP backend
+- `auth_service.dart` - Authentication service with ABP Identity integration
+- `vietnamese_formatter.dart` - Vietnamese text formatting utilities
+- `vietnamese_constants.dart` - Vietnamese restaurant terminology and text
+- `orders_screen.dart` - Order management interface for restaurant staff
+- `reservations_screen.dart` - Table reservation system for customers
 
 ### Theme Integration Files (File Tích hợp Theme)
 

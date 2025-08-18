@@ -29,7 +29,7 @@ angular/
 
 **Actual ABP Angular Generated Structure (Cấu trúc ABP Angular được tạo thực tế):**
 ```
-angular/ (Based on /Users/cocacola/Desktop/flutter/abp/angular)
+angular/ (ABP Angular frontend application)
 ├── package.json                 # Real ABP Angular dependencies (Dependencies ABP Angular thực tế)
 │   ├── @abp/ng.components: ~9.1.1      # ABP Angular components
 │   ├── @abp/ng.core: ~9.1.1           # ABP Angular core
@@ -47,16 +47,41 @@ angular/ (Based on /Users/cocacola/Desktop/flutter/abp/angular)
 │   │   ├── app-routing.module.ts # Routing with ABP integration
 │   │   ├── route.provider.ts   # ABP route provider configuration
 │   │   ├── home/              # Default home module
-│   │   │   ├── home.module.ts  # Home feature module
 │   │   │   ├── home.component.ts # Home component
-│   │   │   └── home-routing.module.ts # Home routing
-│   │   └── shared/            # Shared module
-│   │       └── shared.module.ts # Shared components and services
+│   │   │   ├── home.component.html # Home template
+│   │   │   ├── home.component.scss # Home styles
+│   │   │   ├── home.component.spec.ts # Home tests
+│   │   │   └── home.routes.ts # Home routing
+│   │   └── layout/            # Poseidon theme layout
+│   │       ├── components/    # Layout components
+│   │       │   ├── app.breadcrumb.ts
+│   │       │   ├── app.configurator.ts
+│   │       │   ├── app.footer.ts
+│   │       │   ├── app.menu.ts
+│   │       │   ├── app.menuitem.ts
+│   │       │   ├── app.rightmenu.ts
+│   │       │   ├── app.search.ts
+│   │       │   ├── app.sidebar.ts
+│   │       │   ├── app.topbar.ts
+│   │       │   └── restaurant.layout.ts
+│   │       └── service/
+│   │           └── layout.service.ts
 │   ├── assets/                # Static assets
-│   │   └── images/           # Asset images including ABP branding
-│   │       ├── getting-started/ # ABP getting started images
-│   │       ├── login/         # Login page backgrounds
-│   │       └── logo/          # Application logos
+│   │   ├── demo/              # Poseidon theme demo assets
+│   │   │   ├── data/          # Sample JSON data
+│   │   │   └── images/        # Demo images and illustrations
+│   │   │       ├── auth/      # Authentication backgrounds
+│   │   │       ├── avatar/    # User avatars
+│   │   │       ├── dashboard/ # Dashboard graphics
+│   │   │       ├── ecommerce/ # E-commerce samples
+│   │   │       └── landing/   # Landing page assets
+│   │   └── layout/            # Theme layout assets
+│   │       ├── images/        # Layout-specific images
+│   │       │   ├── logo-poseidon.png
+│   │       │   └── profile.jpg
+│   │       ├── sidebar/       # Sidebar theme styles
+│   │       ├── topbar/        # Topbar theme styles
+│   │       └── variables/     # SCSS theme variables
 │   ├── environments/          # Environment configuration
 │   │   ├── environment.ts     # Development settings
 │   │   └── environment.prod.ts # Production settings
@@ -509,7 +534,7 @@ angular/src/app/
 │   ├── tables/                # Table service proxies
 │   ├── payments/              # Payment service proxies
 │   └── volo/                  # ABP framework services
-└── restaurant-features/        # Custom restaurant modules (Module nhà hàng tùy chỉnh)
+└── restaurant-features/        # Future: Custom restaurant modules (Tương lai: Module nhà hàng tùy chỉnh)
     ├── dashboard/             # Dashboard module
     │   ├── dashboard.module.ts
     │   ├── dashboard-routing.module.ts
@@ -549,7 +574,7 @@ angular/src/app/
 #### Order Processing Component (Component Xử lý Đơn hàng)
 
 ```typescript
-// angular/src/app/restaurant-features/order-management/components/order-create/order-create.component.ts
+// Future implementation: angular/src/app/restaurant-features/order-management/components/order-create/order-create.component.ts
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';

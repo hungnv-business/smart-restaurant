@@ -6,7 +6,7 @@ A comprehensive restaurant management system built with modern technologies and 
 
 - **Backend**: ABP Framework 8.0 + .NET 8 + PostgreSQL
 - **Frontend**: Angular 19 + PrimeNG + TypeScript
-- **Mobile**: Flutter (planned)
+- **Mobile**: Flutter 3.35.1 (Vietnamese restaurant workflows)
 - **Infrastructure**: Docker + Docker Compose
 - **Database**: PostgreSQL 15+ with Vietnamese collation
 - **Cache**: Redis 7+
@@ -62,13 +62,12 @@ A comprehensive restaurant management system built with modern technologies and 
 
 ```
 smart-restaurant/
-├── aspnet-core/          # ABP Framework Backend
+├── aspnet-core/          # ABP Framework Backend (.NET 8)
 ├── angular/              # Angular 19 Frontend  
-├── flutter/              # Flutter Mobile App (planned)
+├── flutter_mobile/       # Flutter Mobile App (Vietnamese workflows)
 ├── infrastructure/       # Docker & deployment configs
 ├── docs/                 # Documentation
-├── shared/               # Shared TypeScript types
-└── package.json          # Root scripts
+└── package.json          # Root scripts & workspace config
 ```
 
 ## 🛠️ Development Commands
@@ -102,6 +101,18 @@ npm run install-libs
 
 # Run tests
 npm run test:frontend
+```
+
+### Mobile (Flutter)
+```bash
+# Run Flutter mobile app
+npm run dev:mobile
+
+# Run mobile tests  
+npm run test:mobile
+
+# Build mobile app
+npm run build:mobile
 ```
 
 ### Full Stack

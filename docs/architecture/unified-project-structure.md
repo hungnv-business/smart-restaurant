@@ -41,40 +41,46 @@ smart-restaurant/
 ├── angular/                        # Angular 19 frontend
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── core/               # Singleton services
-│   │   │   │   ├── auth/           # ABP authentication
-│   │   │   │   ├── signalr/        # Real-time connections
-│   │   │   │   └── interceptors/   # HTTP interceptors
-│   │   │   ├── shared/             # Shared components
-│   │   │   │   ├── components/     # Reusable UI components
-│   │   │   │   ├── pipes/          # Vietnamese formatting pipes
-│   │   │   │   ├── services/       # Shared services
-│   │   │   │   └── models/         # TypeScript interfaces
-│   │   │   ├── features/           # Feature modules
-│   │   │   │   ├── dashboard/      # Restaurant dashboard
-│   │   │   │   ├── orders/         # Order management
-│   │   │   │   ├── menu/           # Menu management
-│   │   │   │   ├── tables/         # Table management
-│   │   │   │   ├── payments/       # Payment processing
-│   │   │   │   ├── kitchen/        # Kitchen displays
-│   │   │   │   └── reservations/   # Reservation management
-│   │   │   ├── layout/             # App layout
-│   │   │   └── store/              # NgRx state management
-│   │   │       ├── orders/         # Order state
-│   │   │       ├── menu/           # Menu state
-│   │   │       └── tables/         # Table state
-│   │   ├── assets/                 # Static assets
-│   │   │   ├── images/             # Menu images, logos
-│   │   │   └── i18n/               # Vietnamese translations
-│   │   └── environments/           # Environment configurations
-│   ├── tests/                      # Frontend tests
-│   │   ├── unit/                   # Component unit tests
-│   │   ├── integration/            # Service integration tests
-│   │   └── e2e/                    # End-to-end tests
+│   │   │   ├── app.component.ts    # Root application component
+│   │   │   ├── app.config.ts       # Application configuration
+│   │   │   ├── app.routes.ts       # Routing configuration
+│   │   │   ├── home/               # Home feature module
+│   │   │   │   ├── home.component.ts
+│   │   │   │   ├── home.component.html
+│   │   │   │   ├── home.component.scss
+│   │   │   │   ├── home.component.spec.ts
+│   │   │   │   └── home.routes.ts
+│   │   │   └── layout/             # Poseidon theme layout
+│   │   │       ├── components/     # Layout UI components
+│   │   │       │   ├── app.breadcrumb.ts
+│   │   │       │   ├── app.configurator.ts
+│   │   │       │   ├── app.footer.ts
+│   │   │       │   ├── app.menu.ts
+│   │   │       │   ├── app.menuitem.ts
+│   │   │       │   ├── app.rightmenu.ts
+│   │   │       │   ├── app.search.ts
+│   │   │       │   ├── app.sidebar.ts
+│   │   │       │   ├── app.topbar.ts
+│   │   │       │   └── restaurant.layout.ts
+│   │   │       └── service/
+│   │   │           └── layout.service.ts
+│   │   ├── assets/                 # Static assets and themes
+│   │   │   ├── demo/               # Poseidon demo assets
+│   │   │   └── layout/             # Theme styles and images
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   ├── main.ts
+│   │   ├── styles.scss
+│   │   └── tailwind.css
 │   ├── angular.json                # Angular configuration
+│   ├── karma.conf.js               # Test configuration
 │   ├── package.json                # Dependencies
-│   └── tsconfig.json               # TypeScript configuration
-├── flutter/                        # Flutter mobile apps
+│   ├── tailwind.config.js          # Tailwind CSS config
+│   ├── tsconfig.json               # TypeScript configuration
+│   ├── tsconfig.app.json           # App TypeScript config
+│   ├── tsconfig.spec.json          # Test TypeScript config
+│   └── yarn.lock                   # Dependency lock file
+├── flutter_mobile/                 # Flutter mobile apps
 │   ├── lib/
 │   │   ├── features/               # Feature-based organization
 │   │   │   ├── orders/             # Order management
@@ -90,47 +96,32 @@ smart-restaurant/
 │   ├── test/                       # Flutter tests
 │   ├── pubspec.yaml                # Flutter dependencies
 │   └── android/                    # Android-specific code
-├── shared/                         # Shared TypeScript definitions
-│   ├── src/
-│   │   ├── types/                  # TypeScript interfaces
-│   │   │   ├── order.types.ts      # Order-related types
-│   │   │   ├── menu.types.ts       # Menu-related types
-│   │   │   ├── table.types.ts      # Table-related types
-│   │   │   └── payment.types.ts    # Payment-related types
-│   │   ├── constants/              # Shared constants
-│   │   │   ├── order-status.ts     # Order status enum
-│   │   │   ├── payment-methods.ts  # Payment method enum
-│   │   │   └── kitchen-stations.ts # Kitchen station enum
-│   │   └── utils/                  # Shared utilities
-│   │       ├── currency.ts         # Vietnamese currency formatting
-│   │       ├── datetime.ts         # Date/time utilities
-│   │       └── validation.ts       # Common validation rules
-│   └── package.json                # Shared package definition
 ├── infrastructure/                 # Docker & deployment
-│   ├── docker/
-│   │   ├── docker-compose.dev.yml  # Development environment
-│   │   ├── docker-compose.prod.yml # Production environment
-│   │   ├── Dockerfile.api          # Backend container
-│   │   ├── Dockerfile.web          # Frontend container
-│   │   └── nginx.conf              # Nginx configuration
-│   ├── scripts/
-│   │   ├── deploy.sh               # Deployment script
-│   │   ├── backup.sh               # Database backup script
-│   │   └── restore.sh              # Database restore script
-│   └── monitoring/
-│       ├── prometheus.yml          # Metrics configuration
-│       └── grafana/                # Dashboard configurations
+│   └── docker/
+│       ├── docker-compose.dev.yml  # Development environment
+│       ├── docker-compose.prod.yml # Production environment
+│       ├── Dockerfile.api          # Backend container
+│       ├── Dockerfile.web          # Frontend container
+│       ├── nginx.conf              # Nginx configuration
+│       └── init-scripts/           # Database initialization
+│           └── 01-vietnamese-collation.sql
 ├── docs/                           # Documentation
+│   ├── architecture.md             # Main architecture overview
+│   ├── architecture/               # Detailed architecture documents
 │   ├── prd.md                      # Product Requirements Document
-│   ├── architecture.md             # This document
-│   ├── deployment.md               # Deployment guide
-│   ├── api-docs/                   # API documentation
-│   └── user-guides/                # User manuals
+│   ├── prd/                        # Detailed PRD and epics
+│   │   └── epics/                  # Individual epic specifications
+│   ├── qa/                         # Quality assurance
+│   │   ├── assessments/            # Risk assessments
+│   │   └── gates/                  # Quality gates
+│   ├── stories/                    # User story implementations
+│   └── brainstorming-session-results.md
 ├── .env.example                    # Environment template
-├── package.json                    # Root package.json (npm workspaces)
-├── nx.json                         # Nx workspace configuration  
-├── tsconfig.base.json              # Base TypeScript configuration
-└── README.md                       # Project overview
+├── CLAUDE.md                       # Development environment guide
+├── README.md                       # Project overview
+├── package.json                    # Root workspace configuration
+├── package-lock.json               # NPM lock file
+└── yarn.lock                       # Yarn lock file
 ```
 
 **Root Package.json Scripts for ABP Workflow (Script Package.json Gốc cho ABP Workflow):**
@@ -140,7 +131,7 @@ smart-restaurant/
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "cd aspnet-core && dotnet run --project src/SmartRestaurant.HttpApi.Host",
     "dev:web": "cd angular && npm start",
-    "dev:mobile": "cd flutter && flutter run",
+    "dev:mobile": "cd flutter_mobile && flutter run",
     "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44391",
     "install-libs": "cd angular && abp install-libs",
     "migrate": "cd aspnet-core && dotnet run --project src/SmartRestaurant.DbMigrator",

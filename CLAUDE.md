@@ -4,7 +4,7 @@
 Sử dụng song ngữ English (Ngôn ngữ tự nhiên của Việt Nam)
 
 ## Project Overview
-Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, Angular 19, and PostgreSQL.
+Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, Angular 19, Flutter Mobile, and PostgreSQL.
 
 ## Quick Start Commands
 
@@ -16,6 +16,9 @@ docker-compose -f docker-compose.dev.yml up -d
 
 # Or run locally (requires PostgreSQL and Redis running)
 npm run dev
+
+# Start mobile development
+npm run dev:mobile
 ```
 
 ### ABP Framework Specific Commands
@@ -47,7 +50,7 @@ cd angular
 abp install-libs
 
 # Generate ABP service proxies (run after backend API changes)
-abp generate-proxy -t ng -u https://localhost:44391
+abp generate-proxy -t ng -u https://localhost:44346
 
 # Start development server
 npm start
@@ -59,10 +62,40 @@ npm test
 npm run build:prod
 ```
 
+#### Mobile App (Flutter 3.35.1)
+```bash
+# Navigate to mobile app
+cd flutter_mobile
+
+# Get Flutter dependencies
+flutter pub get
+
+# Start development on connected device/emulator
+flutter run
+
+# Run unit tests
+flutter test
+
+# Run widget tests
+flutter test test/widgets/
+
+# Run integration tests
+flutter test integration_test/
+
+# Build APK for Android
+flutter build apk
+
+# Build IPA for iOS (requires Xcode)
+flutter build ios
+```
+
 ### Root Package.json Scripts
 ```bash
 # Start both API and Web in development mode
 npm run dev
+
+# Start mobile development with Flutter
+npm run dev:mobile
 
 # Generate Angular proxies after backend changes
 npm run generate-proxy
@@ -73,11 +106,17 @@ npm run install-libs
 # Run database migrator
 npm run migrate
 
-# Run all tests (backend + frontend)
+# Run all tests (backend + frontend + mobile)
 npm run test
+
+# Run mobile tests specifically
+npm run test:mobile
 
 # Build everything for production
 npm run build:prod
+
+# Build mobile apps for production
+npm run build:mobile
 ```
 
 ## Project Structure
@@ -99,24 +138,81 @@ aspnet-core/
 ```
 angular/
 ├── src/app/
-│   ├── core/                             # Singleton services (auth, signalr)
-│   ├── shared/                           # Shared components and services  
-│   ├── features/                         # Feature modules (orders, menu, etc.)
-│   └── layout/                           # App layout components
-├── tests/                                # Unit, integration, e2e tests
-└── package.json                          # Dependencies and scripts
+│   ├── app.component.ts                  # Root application component
+│   ├── app.config.ts                     # Application configuration
+│   ├── app.routes.ts                     # Routing configuration
+│   ├── home/                             # Home feature module
+│   │   ├── home.component.ts             # Home component
+│   │   ├── home.component.html           # Home template
+│   │   ├── home.component.scss           # Home styles
+│   │   ├── home.component.spec.ts        # Home tests
+│   │   └── home.routes.ts                # Home routing
+│   └── layout/                           # Poseidon theme layout components
+│       ├── components/                   # Layout UI components
+│       │   ├── app.breadcrumb.ts         # Breadcrumb navigation
+│       │   ├── app.configurator.ts       # Theme settings panel
+│       │   ├── app.footer.ts             # Footer component
+│       │   ├── app.menu.ts               # Main navigation menu
+│       │   ├── app.menuitem.ts           # Menu item component
+│       │   ├── app.rightmenu.ts          # Right sidebar menu
+│       │   ├── app.search.ts             # Search functionality
+│       │   ├── app.sidebar.ts            # Left sidebar
+│       │   ├── app.topbar.ts             # Top navigation bar
+│       │   └── restaurant.layout.ts      # Main restaurant layout wrapper
+│       └── service/                      # Layout services
+│           └── layout.service.ts         # Layout state management
+├── src/assets/                           # Static assets and themes
+│   ├── demo/                             # Poseidon theme demo assets
+│   │   ├── data/                         # Sample JSON data
+│   │   └── images/                       # Demo images and illustrations
+│   └── layout/                           # Core layout styles and assets
+│       ├── images/                       # Layout-specific images
+│       ├── sidebar/                      # Sidebar theme styles
+│       ├── topbar/                       # Topbar theme styles
+│       └── variables/                    # SCSS theme variables
+├── angular.json                          # Angular workspace configuration
+├── karma.conf.js                         # Test runner configuration
+├── package.json                          # Dependencies and scripts
+├── tailwind.config.js                    # Tailwind CSS configuration
+├── tsconfig.json                         # TypeScript configuration
+├── tsconfig.app.json                     # App-specific TypeScript config
+├── tsconfig.spec.json                    # Test TypeScript config
+└── yarn.lock                             # Dependency lock file
+```
+
+**Note**: Restaurant feature modules (dashboard, orders, menu, etc.) will be implemented in future development under `features/` directory.
+
+### Mobile App (Flutter 3.35.1)
+```
+flutter_mobile/
+├── lib/
+│   ├── main.dart                         # App entry point
+│   ├── features/                         # Feature modules
+│   │   ├── orders/                       # Gọi món (Orders)
+│   │   ├── reservations/                 # Đặt bàn (Reservations)
+│   │   └── takeaway/                     # Mang về (Takeaway)
+│   └── shared/                           # Shared components and services
+│       ├── constants/                    # Vietnamese text constants
+│       ├── models/                       # Data models
+│       ├── services/                     # API client, auth service
+│       ├── utils/                        # Vietnamese formatters
+│       └── widgets/                      # Reusable widgets
+├── test/                                 # Unit and widget tests
+├── integration_test/                     # Integration tests
+└── pubspec.yaml                          # Dependencies and scripts
 ```
 
 ### Infrastructure
 ```
 infrastructure/
-├── docker/
-│   ├── docker-compose.dev.yml           # Development environment
-│   ├── docker-compose.prod.yml          # Production environment
-│   ├── Dockerfile.api                   # Backend container
-│   ├── Dockerfile.web                   # Frontend container
-│   └── nginx.conf                       # Reverse proxy config
-└── scripts/                             # Deployment and backup scripts
+└── docker/
+    ├── docker-compose.dev.yml           # Development environment
+    ├── docker-compose.prod.yml          # Production environment
+    ├── Dockerfile.api                   # Backend container
+    ├── Dockerfile.web                   # Frontend container
+    ├── nginx.conf                       # Reverse proxy config
+    └── init-scripts/                    # Database initialization
+        └── 01-vietnamese-collation.sql  # Vietnamese text support
 ```
 
 ## Development Workflow
@@ -134,7 +230,7 @@ dotnet run --project src/SmartRestaurant.DbMigrator
 
 # 4. Regenerate Angular proxies if APIs changed
 cd ../angular
-abp generate-proxy -t ng -u https://localhost:44391
+abp generate-proxy -t ng -u https://localhost:44346
 
 # 5. Install ABP libs if needed
 abp install-libs
@@ -153,7 +249,23 @@ npm test
 npm run build
 ```
 
-### 3. Database Operations
+### 3. Making Mobile Changes
+```bash
+cd flutter_mobile
+
+# Make your changes to features/widgets/services
+
+# Get dependencies if pubspec.yaml changed
+flutter pub get
+
+# Run tests
+flutter test
+
+# Check for build errors
+flutter build apk --debug
+```
+
+### 4. Database Operations
 ```bash
 # Create new migration
 cd aspnet-core
@@ -207,7 +319,7 @@ dotnet run --project src/SmartRestaurant.HttpApi.Host
 
 # Then regenerate proxies in another terminal
 cd angular
-abp generate-proxy -t ng -u https://localhost:44391
+abp generate-proxy -t ng -u https://localhost:44346
 ```
 
 #### 3. "Database connection failed"
@@ -235,6 +347,65 @@ npm install
 
 # Try install-libs again
 abp install-libs
+```
+
+### Flutter Mobile Issues
+
+#### 1. "Flutter SDK not found"
+```bash
+# Install Flutter SDK
+# Visit https://flutter.dev/docs/get-started/install
+
+# Add to PATH (macOS/Linux) - replace with your Flutter SDK path
+export PATH="$PATH:/path/to/flutter/bin"
+
+# Verify installation
+flutter doctor
+```
+
+#### 2. "No connected devices"
+```bash
+# List available devices
+flutter devices
+
+# For iOS Simulator (macOS only)
+open -a Simulator
+
+# For Android Emulator
+flutter emulators
+flutter emulators --launch <emulator_id>
+```
+
+#### 3. "Pub get failed"
+```bash
+cd flutter_mobile
+
+# Clear pub cache
+flutter clean
+flutter pub cache clean
+
+# Get dependencies
+flutter pub get
+
+# If dependencies conflict, check pubspec.yaml versions
+```
+
+#### 4. "Build failed on iOS"
+```bash
+# Clean iOS build
+cd flutter_mobile/ios
+rm -rf Pods/ Podfile.lock
+cd ..
+flutter clean
+flutter pub get
+
+# Install CocoaPods dependencies
+cd ios
+pod install
+cd ..
+
+# Try building again
+flutter build ios
 ```
 
 ### PostgreSQL with Vietnamese Collation
@@ -282,8 +453,11 @@ docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
 # Check what's using the ports
 lsof -i :5432  # PostgreSQL
 lsof -i :6379  # Redis
-lsof -i :44391 # API
+lsof -i :44346 # API
 lsof -i :4200  # Angular
+
+# For Flutter mobile development
+lsof -i :8080  # Flutter web (if using)
 
 # Stop conflicting services or change ports in docker-compose files
 ```
@@ -309,6 +483,21 @@ npm run build:prod -- --stats-json
 npx webpack-bundle-analyzer dist/stats.json
 
 # Check for lazy loading opportunities
+```
+
+#### Flutter app performance issues
+```bash
+cd flutter_mobile
+
+# Profile app performance
+flutter run --profile
+
+# Check for jank (frame drops)
+flutter run --trace-skia
+
+# Build release version for performance testing
+flutter build apk --release
+flutter install
 ```
 
 ## Testing
@@ -339,6 +528,24 @@ npm run e2e
 
 # Test coverage
 npm run test:coverage
+```
+
+### Mobile Tests
+```bash
+cd flutter_mobile
+
+# Unit tests
+flutter test
+
+# Widget tests
+flutter test test/widgets/
+
+# Integration tests
+flutter test integration_test/
+
+# Test coverage (requires lcov)
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
 ```
 
 ### Integration Tests
@@ -388,6 +595,8 @@ docker build -f Dockerfile.web -t smartrestaurant-web .
 
 - [ABP Framework Documentation](https://docs.abp.io)
 - [Angular Documentation](https://angular.io/docs)
+- [Flutter Documentation](https://flutter.dev/docs)
+- [Dart Language Guide](https://dart.dev/guides)
 - [PostgreSQL Vietnamese Collation](https://www.postgresql.org/docs/current/collation.html)
 - [Docker Documentation](https://docs.docker.com)
 
