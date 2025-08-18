@@ -24,36 +24,55 @@ Smart Restaurant Management System uses **ABP Framework Modular Monolith** archi
 
 **Actual ABP CLI Generated Structure (Cấu trúc thực tế được tạo bởi ABP CLI):**
 ```
-smart-restaurant/ (Reference: /Users/cocacola/Desktop/flutter/abp)
-├── SmartRestaurant.sln              # Visual Studio solution file (File solution Visual Studio)
-├── SmartRestaurant.abpsln           # ABP Studio solution file (File solution ABP Studio)
-├── SmartRestaurant.abpmdl           # ABP model file (File model ABP)
-├── common.props                     # Common MSBuild properties (Thuộc tính MSBuild chung)
-├── NuGet.Config                     # NuGet package sources (Nguồn package NuGet)
-├── src/                             # Source code projects (Dự án mã nguồn)
-│   ├── SmartRestaurant.Domain.Shared/           # Shared constants, enums, localization
-│   ├── SmartRestaurant.Domain/                 # Domain entities, services, events
-│   ├── SmartRestaurant.Application.Contracts/  # DTOs, interfaces, permissions
-│   ├── SmartRestaurant.Application/            # Application services, business logic
-│   ├── SmartRestaurant.EntityFrameworkCore/    # Data access, DbContext, repositories
-│   ├── SmartRestaurant.HttpApi/                # Web API controllers
-│   ├── SmartRestaurant.HttpApi.Host/           # Web host, configuration, startup
-│   ├── SmartRestaurant.HttpApi.Client/         # HTTP client proxies
-│   └── SmartRestaurant.DbMigrator/             # Database migration console app
-├── test/                            # Test projects (Dự án kiểm thử)
-│   ├── SmartRestaurant.TestBase/              # Test infrastructure
-│   ├── SmartRestaurant.Domain.Tests/          # Domain unit tests
-│   ├── SmartRestaurant.Application.Tests/     # Application service tests
-│   ├── SmartRestaurant.EntityFrameworkCore.Tests/ # Data access tests
-│   └── SmartRestaurant.HttpApi.Client.ConsoleTestApp/ # API client tests
+smart-restaurant/
+├── aspnet-core/                    # ABP Framework backend projects (Dự án backend ABP Framework)
+│   ├── SmartRestaurant.sln              # Visual Studio solution file (File solution Visual Studio)
+│   ├── SmartRestaurant.sln.DotSettings  # ReSharper settings (Cài đặt ReSharper)
+│   ├── common.props                     # Common MSBuild properties (Thuộc tính MSBuild chung)
+│   ├── NuGet.Config                     # NuGet package sources (Nguồn package NuGet)
+│   ├── src/                             # Source code projects (Dự án mã nguồn)
+│   │   ├── SmartRestaurant.Domain.Shared/           # Shared constants, enums, localization
+│   │   ├── SmartRestaurant.Domain/                 # Domain entities, services, events
+│   │   ├── SmartRestaurant.Application.Contracts/  # DTOs, interfaces, permissions
+│   │   ├── SmartRestaurant.Application/            # Application services, business logic
+│   │   ├── SmartRestaurant.EntityFrameworkCore/    # Data access, DbContext, repositories
+│   │   ├── SmartRestaurant.HttpApi/                # Web API controllers
+│   │   ├── SmartRestaurant.HttpApi.Host/           # Web host, configuration, startup
+│   │   ├── SmartRestaurant.HttpApi.Client/         # HTTP client proxies
+│   │   └── SmartRestaurant.DbMigrator/             # Database migration console app
+│   └── test/                            # Test projects (Dự án kiểm thử)
+│       ├── SmartRestaurant.TestBase/              # Test infrastructure
+│       ├── SmartRestaurant.Domain.Tests/          # Domain unit tests
+│       ├── SmartRestaurant.Application.Tests/     # Application service tests
+│       ├── SmartRestaurant.EntityFrameworkCore.Tests/ # Data access tests
+│       └── SmartRestaurant.HttpApi.Client.ConsoleTestApp/ # API client tests
 ├── angular/                         # Angular frontend (ABP Angular template)
 │   ├── src/app/                    # Angular application with ABP integration
 │   ├── package.json                # Dependencies with @abp/ng.* packages
-│   └── dynamic-env.json            # ABP dynamic environment configuration
-├── etc/                             # ABP Studio configuration (Cấu hình ABP Studio)
-│   └── abp-studio/run-profiles/    # Development run profiles
-├── flutter/                         # Flutter mobile app (Optional - custom addition)
-└── docs/                           # Architecture documentation (Custom addition)
+│   ├── angular.json                # Angular workspace configuration
+│   ├── tsconfig.json               # TypeScript configuration
+│   └── karma.conf.js               # Test runner configuration
+├── infrastructure/                 # Docker & deployment configs (Cấu hình Docker & triển khai)
+│   └── docker/                     # Docker containerization
+│       ├── docker-compose.dev.yml  # Development environment
+│       ├── docker-compose.prod.yml # Production environment
+│       ├── Dockerfile.api          # Backend container
+│       ├── Dockerfile.web          # Frontend container
+│       ├── nginx.conf              # Nginx reverse proxy config
+│       └── init-scripts/           # Database initialization scripts
+├── docs/                           # Architecture documentation (Tài liệu kiến trúc)
+│   ├── architecture.md             # Complete architecture document
+│   ├── architecture/               # Detailed architecture components
+│   ├── prd.md                      # Product requirements
+│   └── stories/                    # Development stories
+├── .github/                        # CI/CD workflows (Quy trình CI/CD)
+│   └── workflows/                  # GitHub Actions
+│       ├── ci.yaml                 # Continuous integration
+│       └── deploy.yaml             # Deployment pipeline
+├── package.json                    # Root workspace scripts (Script workspace gốc)
+├── CLAUDE.md                       # Development guide (Hướng dẫn phát triển)
+├── README.md                       # Project overview (Tổng quan dự án)
+└── .env.example                    # Environment template (Template môi trường)
 ```
 
 ## High Level Architecture Diagram (Sơ đồ Kiến trúc Tổng quan)

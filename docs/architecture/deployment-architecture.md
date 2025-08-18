@@ -157,7 +157,7 @@ jobs:
     - name: Restore and Build Backend
       run: |
         dotnet restore SmartRestaurant.sln
-        dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj \
+        dotnet publish aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj \
           -c Release -o ./publish --no-restore
           
     - name: Build Frontend
@@ -423,7 +423,7 @@ The test environment requires Vietnamese-specific data for accurate testing of r
 #### Vietnamese Test Data Seeder (Bộ tạo Dữ liệu Kiểm thử Tiếng Việt)
 
 ```csharp
-// src/SmartRestaurant.DbMigrator/VietnameseTestDataSeeder.cs
+// aspnet-core/src/SmartRestaurant.DbMigrator/VietnameseTestDataSeeder.cs
 public class VietnameseTestDataSeeder : IDataSeedContributor, ITransientDependency
 {
     private readonly IRepository<MenuCategory, Guid> _categoryRepository;

@@ -6,31 +6,38 @@ smart-restaurant/
 │   └── workflows/
 │       ├── ci.yaml                 # Build and test pipeline
 │       └── deploy.yaml             # VPS deployment pipeline
-├── src/                            # ABP Framework backend source projects
-│   ├── SmartRestaurant.Domain/     # Domain entities and business logic
-│   │   ├── Entities/               # Order, MenuItem, Table, Payment
-│   │   ├── Services/               # Domain services
-│   │   └── Events/                 # Domain events
-│   ├── SmartRestaurant.Application/ # Application services
-│   │   ├── Orders/                 # Order management services
-│   │   ├── Menu/                   # Menu management services
-│   │   ├── Tables/                 # Table management services
-│   │   ├── Payments/               # Payment processing services
-│   │   └── Kitchen/                # Kitchen coordination services
-│   ├── SmartRestaurant.EntityFrameworkCore/ # EF Core implementation
-│   │   ├── Configurations/         # Entity configurations
-│   │   ├── Repositories/           # Repository implementations
-│   │   └── Migrations/             # Database migrations
-│   ├── SmartRestaurant.HttpApi/    # Auto-generated API controllers
-│   │   └── Hubs/                   # SignalR hubs (manual)
-│   └── SmartRestaurant.HttpApi.Host/ # Web host application
-│       ├── appsettings.json        # Configuration
-│       └── Program.cs              # Application entry point
-├── test/                           # Backend test projects
-│   ├── SmartRestaurant.Domain.Tests/
-│   ├── SmartRestaurant.Application.Tests/
-│   └── SmartRestaurant.HttpApi.Tests/
-├── SmartRestaurant.sln             # Solution file
+├── aspnet-core/                    # ABP Framework backend source projects
+│   ├── src/
+│   │   ├── SmartRestaurant.Domain.Shared/ # Shared domain constants and resources
+│   │   ├── SmartRestaurant.Domain/     # Domain entities and business logic
+│   │   │   ├── Data/               # Database schema migration
+│   │   │   ├── OpenIddict/         # Authentication data seeding
+│   │   │   └── Settings/           # Application settings
+│   │   ├── SmartRestaurant.Application.Contracts/ # DTOs and interfaces
+│   │   │   └── Permissions/        # Permission definitions
+│   │   ├── SmartRestaurant.Application/ # Application services
+│   │   │   ├── Orders/             # Order management services (future)
+│   │   │   ├── Menu/               # Menu management services (future)
+│   │   │   ├── Tables/             # Table management services (future)
+│   │   │   ├── Payments/           # Payment processing services (future)
+│   │   │   └── Kitchen/            # Kitchen coordination services (future)
+│   │   ├── SmartRestaurant.EntityFrameworkCore/ # EF Core implementation
+│   │   │   ├── EntityFrameworkCore/ # DbContext and configurations
+│   │   │   └── Migrations/         # Database migrations
+│   │   ├── SmartRestaurant.HttpApi/ # Auto-generated API controllers
+│   │   │   └── Controllers/        # Manual controllers if needed
+│   │   ├── SmartRestaurant.HttpApi.Client/ # HTTP client for APIs
+│   │   └── SmartRestaurant.HttpApi.Host/ # Web host application
+│   │       ├── appsettings.json    # Configuration
+│   │       ├── Program.cs          # Application entry point
+│   │       └── wwwroot/            # Static files and ABP resources
+│   ├── test/                       # Backend test projects
+│   │   ├── SmartRestaurant.Domain.Tests/
+│   │   ├── SmartRestaurant.Application.Tests/
+│   │   ├── SmartRestaurant.EntityFrameworkCore.Tests/
+│   │   ├── SmartRestaurant.HttpApi.Client.ConsoleTestApp/
+│   │   └── SmartRestaurant.TestBase/
+│   └── SmartRestaurant.sln         # Solution file
 ├── angular/                        # Angular 19 frontend
 │   ├── src/
 │   │   ├── app/
@@ -141,8 +148,10 @@ smart-restaurant/
     "test:backend": "cd aspnet-core && dotnet test SmartRestaurant.sln",
     "test:frontend": "cd angular && npm test",
     "build:prod": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd aspnet-core && dotnet publish -c Release",
-    "build:frontend": "cd angular && npm run build:prod"
+    "build:backend": "cd aspnet-core && dotnet publish src/SmartRestaurant.HttpApi.Host -c Release",
+    "build:frontend": "cd angular && npm run build:prod",
+    "docker:dev": "cd infrastructure/docker && docker-compose -f docker-compose.dev.yml up -d",
+    "docker:prod": "cd infrastructure/docker && docker-compose -f docker-compose.prod.yml up -d --build"
   }
 }
 ```

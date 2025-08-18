@@ -48,32 +48,53 @@ Smart Restaurant Management System uses **ABP Framework Modular Monolith** archi
 
 **Actual ABP CLI Generated Structure (Cấu trúc thực tế được tạo bởi ABP CLI):**
 ```
-smart-restaurant/ (Current project: /Volumes/Work/data/source-code/SmartRestaurant/aspnet-core)
-├── SmartRestaurant.sln              # Visual Studio solution file (File solution Visual Studio)
-├── SmartRestaurant.sln.DotSettings  # ReSharper settings (Cài đặt ReSharper)
-├── common.props                     # Common MSBuild properties (Thuộc tính MSBuild chung)
-├── NuGet.Config                     # NuGet package sources (Nguồn package NuGet)
-├── src/                             # Source code projects (Dự án mã nguồn)
-│   ├── SmartRestaurant.Domain.Shared/           # Shared constants, enums, localization
-│   ├── SmartRestaurant.Domain/                 # Domain entities, services, events
-│   ├── SmartRestaurant.Application.Contracts/  # DTOs, interfaces, permissions
-│   ├── SmartRestaurant.Application/            # Application services, business logic
-│   ├── SmartRestaurant.EntityFrameworkCore/    # Data access, DbContext, repositories
-│   ├── SmartRestaurant.HttpApi/                # Web API controllers
-│   ├── SmartRestaurant.HttpApi.Host/           # Web host, configuration, startup
-│   ├── SmartRestaurant.HttpApi.Client/         # HTTP client proxies
-│   └── SmartRestaurant.DbMigrator/             # Database migration console app
-├── test/                            # Test projects (Dự án kiểm thử)
-│   ├── SmartRestaurant.TestBase/              # Test infrastructure
-│   ├── SmartRestaurant.Domain.Tests/          # Domain unit tests
-│   ├── SmartRestaurant.Application.Tests/     # Application service tests
-│   ├── SmartRestaurant.EntityFrameworkCore.Tests/ # Data access tests
-│   └── SmartRestaurant.HttpApi.Client.ConsoleTestApp/ # API client tests
-../angular/                         # Angular frontend (ABP Angular template) - outside aspnet-core
+smart-restaurant/
+├── aspnet-core/                    # ABP Framework backend projects (Dự án backend ABP Framework)
+│   ├── SmartRestaurant.sln              # Visual Studio solution file (File solution Visual Studio)
+│   ├── SmartRestaurant.sln.DotSettings  # ReSharper settings (Cài đặt ReSharper)
+│   ├── common.props                     # Common MSBuild properties (Thuộc tính MSBuild chung)
+│   ├── NuGet.Config                     # NuGet package sources (Nguồn package NuGet)
+│   ├── src/                             # Source code projects (Dự án mã nguồn)
+│   │   ├── SmartRestaurant.Domain.Shared/           # Shared constants, enums, localization
+│   │   ├── SmartRestaurant.Domain/                 # Domain entities, services, events
+│   │   ├── SmartRestaurant.Application.Contracts/  # DTOs, interfaces, permissions
+│   │   ├── SmartRestaurant.Application/            # Application services, business logic
+│   │   ├── SmartRestaurant.EntityFrameworkCore/    # Data access, DbContext, repositories
+│   │   ├── SmartRestaurant.HttpApi/                # Web API controllers
+│   │   ├── SmartRestaurant.HttpApi.Host/           # Web host, configuration, startup
+│   │   ├── SmartRestaurant.HttpApi.Client/         # HTTP client proxies
+│   │   └── SmartRestaurant.DbMigrator/             # Database migration console app
+│   └── test/                            # Test projects (Dự án kiểm thử)
+│       ├── SmartRestaurant.TestBase/              # Test infrastructure
+│       ├── SmartRestaurant.Domain.Tests/          # Domain unit tests
+│       ├── SmartRestaurant.Application.Tests/     # Application service tests
+│       ├── SmartRestaurant.EntityFrameworkCore.Tests/ # Data access tests
+│       └── SmartRestaurant.HttpApi.Client.ConsoleTestApp/ # API client tests
+├── angular/                         # Angular frontend (ABP Angular template)
 │   ├── src/app/                    # Angular application with ABP integration
 │   ├── package.json                # Dependencies with @abp/ng.* packages
-│   └── dynamic-env.json            # ABP dynamic environment configuration
-../docs/                            # Architecture documentation (Custom addition) - outside aspnet-core
+│   ├── angular.json                # Angular workspace configuration
+│   ├── tsconfig.json               # TypeScript configuration
+│   └── karma.conf.js               # Test runner configuration
+├── infrastructure/                 # Docker & deployment configs (Cấu hình Docker & triển khai)
+│   └── docker/                     # Docker containerization
+│       ├── docker-compose.dev.yml  # Development environment
+│       ├── docker-compose.prod.yml # Production environment
+│       ├── Dockerfile.api          # Backend container
+│       ├── Dockerfile.web          # Frontend container
+│       └── nginx.conf              # Nginx reverse proxy config
+├── docs/                           # Architecture documentation (Tài liệu kiến trúc)
+│   ├── architecture.md             # This document
+│   ├── prd.md                      # Product requirements
+│   └── stories/                    # Development stories
+├── .github/                        # CI/CD workflows (Quy trình CI/CD)
+│   └── workflows/                  # GitHub Actions
+│       ├── ci.yaml                 # Continuous integration
+│       └── deploy.yaml             # Deployment pipeline
+├── package.json                    # Root workspace scripts (Script workspace gốc)
+├── CLAUDE.md                       # Development guide (Hướng dẫn phát triển)
+├── README.md                       # Project overview (Tổng quan dự án)
+└── .env.example                    # Environment template (Template môi trường)
 ```
 
 ### High Level Architecture Diagram (Sơ đồ Kiến trúc Tổng quan)
@@ -170,7 +191,7 @@ Based on the PRD requirements, the key business entities for Vietnamese restaura
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Orders/Order.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Orders/Order.cs
 public class Order : FullAuditedAggregateRoot<Guid>
 {
     /// <summary>Số đơn hàng hiển thị cho khách hàng (ví dụ: #001, #002)</summary>
@@ -307,7 +328,7 @@ export enum OrderStatus {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Menu/MenuItem.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Menu/MenuItem.cs
 public class MenuItem : FullAuditedEntity<Guid>
 {
     /// <summary>ID danh mục menu (ví dụ: Khai vị, Món chính, Đồ uống)</summary>
@@ -418,7 +439,7 @@ export enum KitchenStation {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Tables/Table.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Tables/Table.cs
 public class Table : FullAuditedEntity<Guid>
 {
     /// <summary>Số bàn hiển thị (ví dụ: "B01", "B02", "VIP1")</summary>
@@ -510,7 +531,7 @@ export enum TableStatus {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Payments/Payment.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Payments/Payment.cs
 public class Payment : FullAuditedEntity<Guid>
 {
     /// <summary>ID đơn hàng cần thanh toán</summary>
@@ -632,7 +653,7 @@ export enum PaymentStatus {
 
 **Application Service Example (Ví dụ Application Service):**
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 public class OrderAppService : ApplicationService, IOrderAppService
 {
     private readonly IOrderRepository _orderRepository;
@@ -661,7 +682,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
     }
 }
 
-// src/SmartRestaurant.Application.Contracts/Orders/IOrderAppService.cs
+// aspnet-core/src/SmartRestaurant.Application.Contracts/Orders/IOrderAppService.cs
 public interface IOrderAppService : IApplicationService
 {
     Task<PagedResultDto<OrderDto>> GetListAsync(GetOrdersInput input);
@@ -673,7 +694,7 @@ public interface IOrderAppService : IApplicationService
 
 **ABP Auto API Configuration (Cấu hình ABP Auto API):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
 [DependsOn(typeof(SmartRestaurantApplicationModule))]
 public class SmartRestaurantHttpApiHostModule : AbpModule
 {
@@ -882,7 +903,7 @@ components:
 
 **Backend Hub Implementation (Triển khai Hub Backend):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/Hubs/KitchenHub.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Hubs/KitchenHub.cs
 public class KitchenHub : AbpHub
 {
     /// <summary>Tham gia nhóm bếp để nhận cập nhật đơn hàng</summary>
@@ -904,7 +925,7 @@ public class KitchenHub : AbpHub
     }
 }
 
-// src/SmartRestaurant.HttpApi.Host/Hubs/TableHub.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Hubs/TableHub.cs
 public class TableHub : AbpHub
 {
     /// <summary>Tham gia nhóm quản lý bàn</summary>
@@ -1259,7 +1280,7 @@ sequenceDiagram
 
 **Database Configuration (Cấu hình Database):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
 public class SmartRestaurantDbContext : AbpDbContext<SmartRestaurantDbContext>
 {
     public DbSet<Order> Orders { get; set; }
@@ -1344,18 +1365,18 @@ public class SmartRestaurantDbContext : AbpDbContext<SmartRestaurantDbContext>
 **Migration Commands (Lệnh Migration):**
 ```bash
 # Create new migration (Tạo migration mới)
-dotnet ef migrations add InitialCreate --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef migrations add InitialCreate --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # Update database (Cập nhật database)
-dotnet ef database update --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef database update --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # Or use ABP DbMigrator (Hoặc sử dụng ABP DbMigrator)
-dotnet run --project src/SmartRestaurant.DbMigrator
+dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator
 ```
 
 **Data Seeding (Khởi tạo Dữ liệu):**
 ```csharp
-// src/SmartRestaurant.Domain/Data/SmartRestaurantDataSeedContributor.cs
+// aspnet-core/src/SmartRestaurant.Domain/Data/SmartRestaurantDataSeedContributor.cs
 public class SmartRestaurantDataSeedContributor : IDataSeedContributor, ITransientDependency
 {
     private readonly IRepository<MenuCategory, Guid> _categoryRepository;
@@ -1438,16 +1459,16 @@ public class SmartRestaurantDataSeedContributor : IDataSeedContributor, ITransie
 **Development Workflow (Quy trình Phát triển):**
 ```bash
 # 1. Add new entity or modify existing entity (Thêm entity mới hoặc sửa entity hiện có)
-# Edit: src/SmartRestaurant.Domain/Entities/
+# Edit: aspnet-core/src/SmartRestaurant.Domain/Entities/
 
 # 2. Add/Update DbSet in DbContext (Thêm/Cập nhật DbSet trong DbContext)
-# Edit: src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
+# Edit: aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
 
 # 3. Create migration (Tạo migration)
-dotnet ef migrations add AddNewFeature --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef migrations add AddNewFeature --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # 4. Apply migration to database (Áp dụng migration vào database)
-dotnet run --project src/SmartRestaurant.DbMigrator
+dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator
 
 # 5. Generate frontend proxies (Tạo proxy frontend)
 npm run generate-proxy
@@ -1455,7 +1476,7 @@ npm run generate-proxy
 
 **Vietnamese Text Search Configuration (Cấu hình Tìm kiếm Tiếng Việt):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/Extensions/DbContextExtensions.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/Extensions/DbContextExtensions.cs
 public static class DbContextExtensions
 {
     /// <summary>Cấu hình tìm kiếm tiếng Việt cho PostgreSQL</summary>
@@ -1481,7 +1502,7 @@ protected override void OnModelCreating(ModelBuilder builder)
 
 **Performance Monitoring (Giám sát Hiệu suất):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/Performance/PerformanceInterceptor.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/Performance/PerformanceInterceptor.cs
 public class PerformanceInterceptor : DbCommandInterceptor
 {
     private readonly ILogger<PerformanceInterceptor> _logger;
@@ -2868,7 +2889,7 @@ export class SignalRService {
 **No Manual Controllers Required (Không cần Controller thủ công)**: ABP Framework automatically generates Web API controllers from Application Services. You only need to create Application Services (ABP Framework tự động tạo Web API controllers từ Application Services. Bạn chỉ cần tạo Application Services).
 
 ```
-src/SmartRestaurant.Application/
+aspnet-core/src/SmartRestaurant.Application/
 ├── Orders/
 │   ├── OrderAppService.cs           # Auto-generates /api/app/order endpoints
 │   └── IOrderAppService.cs          # Interface (in Contracts layer)
@@ -2882,7 +2903,7 @@ src/SmartRestaurant.Application/
 │   └── PaymentAppService.cs         # Auto-generates /api/app/payment endpoints
 └── SmartRestaurantApplicationModule.cs # Module configuration
 
-src/SmartRestaurant.HttpApi/
+aspnet-core/src/SmartRestaurant.HttpApi/
 ├── Hubs/                           # Only manual components needed
 │   ├── KitchenHub.cs               # Kitchen real-time updates
 │   └── TableManagementHub.cs       # Table status updates
@@ -2894,7 +2915,7 @@ src/SmartRestaurant.HttpApi/
 **ABP automatically converts Application Services to REST API controllers (ABP tự động chuyển đổi Application Services thành REST API controllers)**:
 
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 using Volo.Abp.Application.Services;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
@@ -3006,7 +3027,7 @@ namespace SmartRestaurant.Orders
 
 **ABP Auto API Configuration (Cấu hình ABP Auto API):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
 public override void ConfigureServices(ServiceConfigurationContext context)
 {
     // ABP tự động tạo controllers từ Application Services
@@ -3399,12 +3420,12 @@ smart-restaurant/
 {
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "cd aspnet-core && dotnet run --project src/SmartRestaurant.HttpApi.Host",
+    "dev:api": "cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.HttpApi.Host",
     "dev:web": "cd angular && npm start",
     "dev:mobile": "cd flutter && flutter run",
     "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44391",
     "install-libs": "cd angular && abp install-libs",
-    "migrate": "cd aspnet-core && dotnet run --project src/SmartRestaurant.DbMigrator",
+    "migrate": "cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator",
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "cd aspnet-core && dotnet test SmartRestaurant.sln",
     "test:frontend": "cd angular && npm test",
@@ -3476,7 +3497,7 @@ npm run dev:web
 
 # Start backend only (.NET development server)
 npm run dev:api
-# Equivalent to: cd aspnet-core && dotnet run --project src/SmartRestaurant.HttpApi.Host
+# Equivalent to: cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.HttpApi.Host
 
 # Start Flutter mobile app
 npm run dev:mobile
@@ -3492,7 +3513,7 @@ npm run install-libs
 
 # Run database migrations (Chạy migration database)
 npm run migrate
-# Equivalent to: cd aspnet-core && dotnet run --project src/SmartRestaurant.DbMigrator
+# Equivalent to: cd aspnet-core && dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator
 
 # Run all tests
 npm run test
@@ -3509,7 +3530,7 @@ npm run build:prod
 
 # 2. Run database migration if entities changed
 #    (Chạy migration nếu có thay đổi entity)
-dotnet ef migrations add AddNewProperty --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef migrations add AddNewProperty --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 npm run migrate
 
 # 3. Generate frontend proxies to sync with backend changes
@@ -3532,7 +3553,7 @@ NEXT_PUBLIC_APP_NAME=Smart Restaurant Management
 NEXT_PUBLIC_DEFAULT_CULTURE=vi-VN
 NEXT_PUBLIC_DEFAULT_CURRENCY=VND
 
-# Backend (.env in src/SmartRestaurant.HttpApi.Host/)
+# Backend (.env in aspnet-core/src/SmartRestaurant.HttpApi.Host/)
 ConnectionStrings__Default=Host=localhost;Database=SmartRestaurant;Username=postgres;Password=yourpassword
 Redis__Configuration=localhost:6379
 Auth__JwtBearer__Authority=https://localhost:44391
@@ -3708,7 +3729,7 @@ jobs:
     - name: Restore and Build Backend
       run: |
         dotnet restore SmartRestaurant.sln
-        dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj \
+        dotnet publish aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj \
           -c Release -o ./publish --no-restore
           
     - name: Build Frontend
@@ -3974,7 +3995,7 @@ The test environment requires Vietnamese-specific data for accurate testing of r
 #### Vietnamese Test Data Seeder (Bộ tạo Dữ liệu Kiểm thử Tiếng Việt)
 
 ```csharp
-// src/SmartRestaurant.DbMigrator/VietnameseTestDataSeeder.cs
+// aspnet-core/src/SmartRestaurant.DbMigrator/VietnameseTestDataSeeder.cs
 public class VietnameseTestDataSeeder : IDataSeedContributor, ITransientDependency
 {
     private readonly IRepository<MenuCategory, Guid> _categoryRepository;
@@ -5050,7 +5071,7 @@ public class OrderDomainService : DomainService, IOrderDomainService
 
 **Structured Logging with Serilog (Ghi nhận có cấu trúc với Serilog):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/Program.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Program.cs
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -5089,7 +5110,7 @@ _logger.LogWarning("Slow query detected: {QueryType} took {Duration}ms - thresho
 
 **Custom Telemetry for Restaurant Operations (Theo dõi tùy chỉnh cho hoạt động nhà hàng):**
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 public class OrderAppService : ApplicationService, IOrderAppService
 {
     private readonly TelemetryClient _telemetryClient;
@@ -5140,7 +5161,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
 
 **Comprehensive Health Monitoring (Giám sát tình trạng toàn diện):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/HealthChecks/RestaurantHealthCheck.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/HealthChecks/RestaurantHealthCheck.cs
 public class RestaurantHealthCheck : IHealthCheck
 {
     private readonly SmartRestaurantDbContext _dbContext;
@@ -5466,7 +5487,7 @@ public interface IAuditLogService
 
 **Shared Constants and Enums:**
 ```csharp
-// src/SmartRestaurant.Domain.Shared/Constants/VietnameseBusinessConstants.cs
+// aspnet-core/src/SmartRestaurant.Domain.Shared/Constants/VietnameseBusinessConstants.cs
 public static class VietnameseBusinessConstants
 {
     public const string CURRENCY_SYMBOL = "₫";

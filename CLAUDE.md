@@ -1,0 +1,397 @@
+# SmartRestaurant Development Environment Guide
+
+## Project Overview
+Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, Angular 19, and PostgreSQL.
+
+## Quick Start Commands
+
+### Development Environment Setup
+```bash
+# Start development environment with Docker
+cd infrastructure/docker
+docker-compose -f docker-compose.dev.yml up -d
+
+# Or run locally (requires PostgreSQL and Redis running)
+npm run dev
+```
+
+### ABP Framework Specific Commands
+
+#### Backend (.NET 8)
+```bash
+# Navigate to backend
+cd aspnet-core
+
+# Run database migrations
+dotnet run --project src/SmartRestaurant.DbMigrator
+
+# Start API development server
+dotnet run --project src/SmartRestaurant.HttpApi.Host
+
+# Run backend tests
+dotnet test SmartRestaurant.sln
+
+# Build for production
+dotnet publish src/SmartRestaurant.HttpApi.Host -c Release -o publish
+```
+
+#### Frontend (Angular 19)
+```bash
+# Navigate to frontend
+cd angular
+
+# Install ABP libraries (run after backend changes)
+abp install-libs
+
+# Generate ABP service proxies (run after backend API changes)
+abp generate-proxy -t ng -u https://localhost:44391
+
+# Start development server
+npm start
+
+# Run tests
+npm test
+
+# Build for production
+npm run build:prod
+```
+
+### Root Package.json Scripts
+```bash
+# Start both API and Web in development mode
+npm run dev
+
+# Generate Angular proxies after backend changes
+npm run generate-proxy
+
+# Install ABP frontend libraries
+npm run install-libs
+
+# Run database migrator
+npm run migrate
+
+# Run all tests (backend + frontend)
+npm run test
+
+# Build everything for production
+npm run build:prod
+```
+
+## Project Structure
+
+### Backend (ABP Framework)
+```
+aspnet-core/
+├── src/
+│   ├── SmartRestaurant.Domain/           # Domain entities and business logic
+│   ├── SmartRestaurant.Application/      # Application services and DTOs
+│   ├── SmartRestaurant.EntityFrameworkCore/ # EF Core implementation
+│   ├── SmartRestaurant.HttpApi/          # Auto-generated controllers
+│   └── SmartRestaurant.HttpApi.Host/     # Web host application
+├── test/                                 # Test projects
+└── SmartRestaurant.sln                   # Solution file
+```
+
+### Frontend (Angular 19)
+```
+angular/
+├── src/app/
+│   ├── core/                             # Singleton services (auth, signalr)
+│   ├── shared/                           # Shared components and services  
+│   ├── features/                         # Feature modules (orders, menu, etc.)
+│   └── layout/                           # App layout components
+├── tests/                                # Unit, integration, e2e tests
+└── package.json                          # Dependencies and scripts
+```
+
+### Infrastructure
+```
+infrastructure/
+├── docker/
+│   ├── docker-compose.dev.yml           # Development environment
+│   ├── docker-compose.prod.yml          # Production environment
+│   ├── Dockerfile.api                   # Backend container
+│   ├── Dockerfile.web                   # Frontend container
+│   └── nginx.conf                       # Reverse proxy config
+└── scripts/                             # Deployment and backup scripts
+```
+
+## Development Workflow
+
+### 1. Making Backend Changes
+```bash
+# 1. Make changes to Domain/Application layers
+cd aspnet-core
+
+# 2. Add new migration if entities changed
+dotnet ef migrations add YourMigrationName -p src/SmartRestaurant.EntityFrameworkCore
+
+# 3. Update database
+dotnet run --project src/SmartRestaurant.DbMigrator
+
+# 4. Regenerate Angular proxies if APIs changed
+cd ../angular
+abp generate-proxy -t ng -u https://localhost:44391
+
+# 5. Install ABP libs if needed
+abp install-libs
+```
+
+### 2. Making Frontend Changes
+```bash
+cd angular
+
+# Make your changes to components/services
+
+# Run tests
+npm test
+
+# Check for build errors
+npm run build
+```
+
+### 3. Database Operations
+```bash
+# Create new migration
+cd aspnet-core
+dotnet ef migrations add MigrationName -p src/SmartRestaurant.EntityFrameworkCore
+
+# Apply migrations to development database
+dotnet run --project src/SmartRestaurant.DbMigrator
+
+# Rollback migration (if needed)
+dotnet ef database update PreviousMigrationName -p src/SmartRestaurant.EntityFrameworkCore
+
+# Generate SQL script
+dotnet ef migrations script -p src/SmartRestaurant.EntityFrameworkCore
+```
+
+## Configuration
+
+### Database Connection (appsettings.json)
+```json
+{
+  "ConnectionStrings": {
+    "Default": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=SmartRestaurant;"
+  },
+  "Redis": {
+    "Configuration": "localhost:6379,password=redis123"
+  }
+}
+```
+
+### Environment Variables
+Copy `.env.example` to `.env` and update values for production deployment.
+
+## Troubleshooting
+
+### Common ABP Framework Issues
+
+#### 1. "ABP CLI not found"
+```bash
+# Install ABP CLI globally
+dotnet tool install -g Volo.Abp.Cli
+
+# Update ABP CLI
+dotnet tool update -g Volo.Abp.Cli
+```
+
+#### 2. "Proxy generation failed"
+```bash
+# Ensure API is running first
+cd aspnet-core
+dotnet run --project src/SmartRestaurant.HttpApi.Host
+
+# Then regenerate proxies in another terminal
+cd angular
+abp generate-proxy -t ng -u https://localhost:44391
+```
+
+#### 3. "Database connection failed"
+```bash
+# Check PostgreSQL is running
+docker ps | grep postgres
+
+# Or start with Docker Compose
+cd infrastructure/docker
+docker-compose -f docker-compose.dev.yml up postgres -d
+
+# Check connection string in appsettings.json
+```
+
+#### 4. "ABP install-libs failed"
+```bash
+cd angular
+
+# Clear npm cache
+npm cache clean --force
+
+# Remove node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# Try install-libs again
+abp install-libs
+```
+
+### PostgreSQL with Vietnamese Collation
+
+#### Verify Vietnamese text search
+```sql
+-- Connect to SmartRestaurant database
+\c SmartRestaurant
+
+-- Test Vietnamese search function
+SELECT vietnamese_search('pho', 'Phở Bò Tái');
+-- Should return true
+
+-- Test unaccent function
+SELECT remove_vietnamese_accents('Phở Bò Tái Nạm');
+-- Should return 'Pho Bo Tai Nam'
+```
+
+#### Common Vietnamese Text Issues
+```bash
+# If Vietnamese characters don't display correctly:
+# 1. Ensure database encoding is UTF8
+# 2. Check application charset settings
+# 3. Verify locale settings in PostgreSQL container
+```
+
+### Docker Issues
+
+#### Container won't start
+```bash
+# Check logs
+docker-compose -f infrastructure/docker/docker-compose.dev.yml logs
+
+# Rebuild containers
+docker-compose -f infrastructure/docker/docker-compose.dev.yml build --no-cache
+
+# Clean up and restart
+docker-compose -f infrastructure/docker/docker-compose.dev.yml down
+docker system prune -f
+docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
+```
+
+#### Port conflicts
+```bash
+# Check what's using the ports
+lsof -i :5432  # PostgreSQL
+lsof -i :6379  # Redis
+lsof -i :44391 # API
+lsof -i :4200  # Angular
+
+# Stop conflicting services or change ports in docker-compose files
+```
+
+### Performance Issues
+
+#### Slow API responses
+```bash
+# Check database performance
+# Enable query logging in PostgreSQL
+# Monitor with Azure Application Insights (production)
+
+# Check Redis connection
+redis-cli ping
+```
+
+#### Large Angular bundle size
+```bash
+cd angular
+
+# Analyze bundle
+npm run build:prod -- --stats-json
+npx webpack-bundle-analyzer dist/stats.json
+
+# Check for lazy loading opportunities
+```
+
+## Testing
+
+### Backend Tests
+```bash
+cd aspnet-core
+
+# Run all tests
+dotnet test
+
+# Run specific test project
+dotnet test test/SmartRestaurant.Application.Tests
+
+# Generate coverage report
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Frontend Tests
+```bash
+cd angular
+
+# Unit tests
+npm test
+
+# E2E tests
+npm run e2e
+
+# Test coverage
+npm run test:coverage
+```
+
+### Integration Tests
+```bash
+# Full stack test (requires running services)
+cd angular
+npm run test:integration
+```
+
+## Deployment
+
+### Production Deployment
+```bash
+# Build and deploy with Docker Compose
+cd infrastructure/docker
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Or build separately
+docker build -f Dockerfile.api -t smartrestaurant-api .
+docker build -f Dockerfile.web -t smartrestaurant-web .
+```
+
+### Environment-specific Settings
+- Development: `appsettings.Development.json`
+- Production: `appsettings.json` + environment variables
+- Secrets: `appsettings.secrets.json` (not in version control)
+
+## Vietnamese Restaurant Specific Notes
+
+### Menu Data Format
+- Use Vietnamese dish names: "Phở Bò", "Cơm Tấm", etc.
+- Price format: Vietnamese Dong (₫)
+- Text search supports accented characters
+
+### Localization
+- Primary language: Vietnamese (vi)
+- Fallback: English (en)
+- Currency: VND (₫)
+- Date format: dd/MM/yyyy
+
+### Kitchen Integration
+- Real-time order updates via SignalR
+- Print integration for kitchen orders
+- Vietnamese order status terms
+
+## Useful Resources
+
+- [ABP Framework Documentation](https://docs.abp.io)
+- [Angular Documentation](https://angular.io/docs)
+- [PostgreSQL Vietnamese Collation](https://www.postgresql.org/docs/current/collation.html)
+- [Docker Documentation](https://docs.docker.com)
+
+## Support
+
+For issues specific to this project:
+1. Check this troubleshooting guide
+2. Review ABP Framework documentation
+3. Check project GitHub issues
+4. Contact development team

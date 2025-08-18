@@ -1,0 +1,50 @@
+{
+  "name": "smart-restaurant",
+  "version": "1.0.0",
+  "description": "Vietnamese Restaurant Management System using ABP Framework",
+  "private": true,
+  "workspaces": [
+    "angular",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd aspnet-core && dotnet run --project src/SmartRestaurant.HttpApi.Host",
+    "dev:web": "cd angular && npm start",
+    "dev:mobile": "cd flutter && flutter run",
+    "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44391",
+    "install-libs": "cd angular && abp install-libs",
+    "migrate": "cd aspnet-core && dotnet run --project src/SmartRestaurant.DbMigrator",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd aspnet-core && dotnet test SmartRestaurant.sln",
+    "test:frontend": "cd angular && npm test",
+    "test:e2e": "cd angular && npm run e2e",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd aspnet-core && dotnet format SmartRestaurant.sln --verify-no-changes",
+    "lint:frontend": "cd angular && npm run lint",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd aspnet-core && dotnet publish src/SmartRestaurant.HttpApi.Host -c Release",
+    "build:frontend": "cd angular && npm run build:prod",
+    "docker:dev": "cd infrastructure/docker && docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "cd infrastructure/docker && docker-compose -f docker-compose.dev.yml down",
+    "docker:prod": "cd infrastructure/docker && docker-compose -f docker-compose.prod.yml up -d --build",
+    "docker:prod:down": "cd infrastructure/docker && docker-compose -f docker-compose.prod.yml down",
+    "clean": "npm run clean:backend && npm run clean:frontend",
+    "clean:backend": "cd aspnet-core && dotnet clean SmartRestaurant.sln",
+    "clean:frontend": "cd angular && rm -rf node_modules dist .angular && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "restaurant",
+    "management",
+    "vietnamese",
+    "abp-framework",
+    "angular",
+    "dotnet",
+    "postgresql"
+  ],
+  "author": "SmartRestaurant Team",
+  "license": "MIT"
+}

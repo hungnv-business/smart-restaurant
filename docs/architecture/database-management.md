@@ -6,7 +6,7 @@
 
 **Database Configuration (Cấu hình Database):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
 public class SmartRestaurantDbContext : AbpDbContext<SmartRestaurantDbContext>
 {
     public DbSet<Order> Orders { get; set; }
@@ -91,18 +91,18 @@ public class SmartRestaurantDbContext : AbpDbContext<SmartRestaurantDbContext>
 **Migration Commands (Lệnh Migration):**
 ```bash
 # Create new migration (Tạo migration mới)
-dotnet ef migrations add InitialCreate --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef migrations add InitialCreate --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # Update database (Cập nhật database)
-dotnet ef database update --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef database update --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # Or use ABP DbMigrator (Hoặc sử dụng ABP DbMigrator)
-dotnet run --project src/SmartRestaurant.DbMigrator
+dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator
 ```
 
 **Data Seeding (Khởi tạo Dữ liệu):**
 ```csharp
-// src/SmartRestaurant.Domain/Data/SmartRestaurantDataSeedContributor.cs
+// aspnet-core/src/SmartRestaurant.Domain/Data/SmartRestaurantDataSeedContributor.cs
 public class SmartRestaurantDataSeedContributor : IDataSeedContributor, ITransientDependency
 {
     private readonly IRepository<MenuCategory, Guid> _categoryRepository;
@@ -185,16 +185,16 @@ public class SmartRestaurantDataSeedContributor : IDataSeedContributor, ITransie
 **Development Workflow (Quy trình Phát triển):**
 ```bash
 # 1. Add new entity or modify existing entity (Thêm entity mới hoặc sửa entity hiện có)
-# Edit: src/SmartRestaurant.Domain/Entities/
+# Edit: aspnet-core/src/SmartRestaurant.Domain/Entities/
 
 # 2. Add/Update DbSet in DbContext (Thêm/Cập nhật DbSet trong DbContext)
-# Edit: src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
+# Edit: aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurantDbContext.cs
 
 # 3. Create migration (Tạo migration)
-dotnet ef migrations add AddNewFeature --project src/SmartRestaurant.EntityFrameworkCore
+dotnet ef migrations add AddNewFeature --project aspnet-core/src/SmartRestaurant.EntityFrameworkCore
 
 # 4. Apply migration to database (Áp dụng migration vào database)
-dotnet run --project src/SmartRestaurant.DbMigrator
+dotnet run --project aspnet-core/src/SmartRestaurant.DbMigrator
 
 # 5. Generate frontend proxies (Tạo proxy frontend)
 npm run generate-proxy
@@ -202,7 +202,7 @@ npm run generate-proxy
 
 **Vietnamese Text Search Configuration (Cấu hình Tìm kiếm Tiếng Việt):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/Extensions/DbContextExtensions.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/Extensions/DbContextExtensions.cs
 public static class DbContextExtensions
 {
     /// <summary>Cấu hình tìm kiếm tiếng Việt cho PostgreSQL</summary>
@@ -228,7 +228,7 @@ protected override void OnModelCreating(ModelBuilder builder)
 
 **Performance Monitoring (Giám sát Hiệu suất):**
 ```csharp
-// src/SmartRestaurant.EntityFrameworkCore/Performance/PerformanceInterceptor.cs
+// aspnet-core/src/SmartRestaurant.EntityFrameworkCore/Performance/PerformanceInterceptor.cs
 public class PerformanceInterceptor : DbCommandInterceptor
 {
     private readonly ILogger<PerformanceInterceptor> _logger;

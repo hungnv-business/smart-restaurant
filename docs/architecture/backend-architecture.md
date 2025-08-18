@@ -9,7 +9,7 @@
 **No Manual Controllers Required (Không cần Controller thủ công)**: ABP Framework automatically generates Web API controllers from Application Services. You only need to create Application Services (ABP Framework tự động tạo Web API controllers từ Application Services. Bạn chỉ cần tạo Application Services).
 
 ```
-src/SmartRestaurant.Application/
+aspnet-core/src/SmartRestaurant.Application/
 ├── Orders/
 │   ├── OrderAppService.cs           # Auto-generates /api/app/order endpoints
 │   └── IOrderAppService.cs          # Interface (in Contracts layer)
@@ -23,7 +23,7 @@ src/SmartRestaurant.Application/
 │   └── PaymentAppService.cs         # Auto-generates /api/app/payment endpoints
 └── SmartRestaurantApplicationModule.cs # Module configuration
 
-src/SmartRestaurant.HttpApi/
+aspnet-core/src/SmartRestaurant.HttpApi/
 ├── Hubs/                           # Only manual components needed
 │   ├── KitchenHub.cs               # Kitchen real-time updates
 │   └── TableManagementHub.cs       # Table status updates
@@ -35,7 +35,7 @@ src/SmartRestaurant.HttpApi/
 **ABP automatically converts Application Services to REST API controllers (ABP tự động chuyển đổi Application Services thành REST API controllers)**:
 
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 using Volo.Abp.Application.Services;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
@@ -147,7 +147,7 @@ namespace SmartRestaurant.Orders
 
 **ABP Auto API Configuration (Cấu hình ABP Auto API):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
 public override void ConfigureServices(ServiceConfigurationContext context)
 {
     // ABP tự động tạo controllers từ Application Services

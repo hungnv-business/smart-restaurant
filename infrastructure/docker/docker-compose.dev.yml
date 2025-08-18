@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with Vietnamese collation
+  postgres:
+    image: postgres:15
+    container_name: smartrestaurant-postgres-dev
+    environment:
+      POSTGRES_DB: SmartRestaurant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--locale=vi_VN.UTF-8 --encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: smartrestaurant-redis-dev
+    command: redis-server --appendonly yes --requirepass "redis123"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_dev:/data
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+
+  # ABP Backend API (Development)
+  api:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.api
+      target: development
+    container_name: smartrestaurant-api-dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__Default=User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=SmartRestaurant;
+      - Redis__Configuration=redis:6379,password=redis123
+    ports:
+      - "44391:443"
+      - "44390:80"
+    volumes:
+      - ~/.aspnet/https:/https:ro
+      - ../../aspnet-core:/app:delegated
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+
+  # Angular Frontend (Development)
+  web:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.web
+      target: development
+    container_name: smartrestaurant-web-dev
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "4200:4200"
+    volumes:
+      - ../../angular:/app:delegated
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+    command: npm start
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  redis_data_dev:
+    driver: local
+
+networks:
+  smartrestaurant-network:
+    driver: bridge

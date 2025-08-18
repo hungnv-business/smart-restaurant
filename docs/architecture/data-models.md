@@ -12,7 +12,7 @@ Based on the PRD requirements, the key business entities for Vietnamese restaura
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Orders/Order.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Orders/Order.cs
 public class Order : FullAuditedAggregateRoot<Guid>
 {
     /// <summary>Số đơn hàng hiển thị cho khách hàng (ví dụ: #001, #002)</summary>
@@ -149,7 +149,7 @@ export enum OrderStatus {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Menu/MenuItem.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Menu/MenuItem.cs
 public class MenuItem : FullAuditedEntity<Guid>
 {
     /// <summary>ID danh mục menu (ví dụ: Khai vị, Món chính, Đồ uống)</summary>
@@ -260,7 +260,7 @@ export enum KitchenStation {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Tables/Table.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Tables/Table.cs
 public class Table : FullAuditedEntity<Guid>
 {
     /// <summary>Số bàn hiển thị (ví dụ: "B01", "B02", "VIP1")</summary>
@@ -352,7 +352,7 @@ export enum TableStatus {
 
 **Backend Entity (Entity Backend):**
 ```csharp
-// src/SmartRestaurant.Domain/Entities/Payments/Payment.cs
+// aspnet-core/src/SmartRestaurant.Domain/Entities/Payments/Payment.cs
 public class Payment : FullAuditedEntity<Guid>
 {
     /// <summary>ID đơn hàng cần thanh toán</summary>

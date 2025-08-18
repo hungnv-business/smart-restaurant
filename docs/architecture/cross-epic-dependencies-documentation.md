@@ -269,7 +269,7 @@ public interface IAuditLogService
 
 **Shared Constants and Enums:**
 ```csharp
-// src/SmartRestaurant.Domain.Shared/Constants/VietnameseBusinessConstants.cs
+// aspnet-core/src/SmartRestaurant.Domain.Shared/Constants/VietnameseBusinessConstants.cs
 public static class VietnameseBusinessConstants
 {
     public const string CURRENCY_SYMBOL = "₫";

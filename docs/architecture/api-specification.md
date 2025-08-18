@@ -6,7 +6,7 @@
 
 **Application Service Example (Ví dụ Application Service):**
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 public class OrderAppService : ApplicationService, IOrderAppService
 {
     private readonly IOrderRepository _orderRepository;
@@ -35,7 +35,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
     }
 }
 
-// src/SmartRestaurant.Application.Contracts/Orders/IOrderAppService.cs
+// aspnet-core/src/SmartRestaurant.Application.Contracts/Orders/IOrderAppService.cs
 public interface IOrderAppService : IApplicationService
 {
     Task<PagedResultDto<OrderDto>> GetListAsync(GetOrdersInput input);
@@ -47,7 +47,7 @@ public interface IOrderAppService : IApplicationService
 
 **ABP Auto API Configuration (Cấu hình ABP Auto API):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurantHttpApiHostModule.cs
 [DependsOn(typeof(SmartRestaurantApplicationModule))]
 public class SmartRestaurantHttpApiHostModule : AbpModule
 {
@@ -256,7 +256,7 @@ components:
 
 **Backend Hub Implementation (Triển khai Hub Backend):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/Hubs/KitchenHub.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Hubs/KitchenHub.cs
 public class KitchenHub : AbpHub
 {
     /// <summary>Tham gia nhóm bếp để nhận cập nhật đơn hàng</summary>
@@ -278,7 +278,7 @@ public class KitchenHub : AbpHub
     }
 }
 
-// src/SmartRestaurant.HttpApi.Host/Hubs/TableHub.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Hubs/TableHub.cs
 public class TableHub : AbpHub
 {
     /// <summary>Tham gia nhóm quản lý bàn</summary>

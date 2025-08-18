@@ -1,0 +1,343 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Build and push Docker images
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    outputs:
+      api-image: ${{ steps.meta-api.outputs.tags }}
+      web-image: ${{ steps.meta-web.outputs.tags }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract API metadata
+      id: meta-api
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+
+    - name: Extract Web metadata
+      id: meta-web
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+
+    - name: Build and push API image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.api
+        target: production
+        push: true
+        tags: ${{ steps.meta-api.outputs.tags }}
+        labels: ${{ steps.meta-api.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Build and push Web image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.web
+        target: production
+        push: true
+        tags: ${{ steps.meta-web.outputs.tags }}
+        labels: ${{ steps.meta-web.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+  # Deploy to staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: 
+      name: staging
+      url: https://staging.smartrestaurant.yourdomain.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        port: ${{ secrets.STAGING_PORT }}
+        script: |
+          # Create application directory
+          mkdir -p /opt/smartrestaurant
+          cd /opt/smartrestaurant
+          
+          # Download docker-compose files
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o docker-compose.prod.yml \
+               -L "https://api.github.com/repos/${{ github.repository }}/contents/infrastructure/docker/docker-compose.prod.yml"
+          
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o nginx.conf \
+               -L "https://api.github.com/repos/${{ github.repository }}/contents/infrastructure/docker/nginx.conf"
+          
+          # Set environment variables
+          cat > .env << EOF
+          POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
+          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
+          API_BASE_URL=${{ secrets.STAGING_API_BASE_URL }}
+          WEB_BASE_URL=${{ secrets.STAGING_WEB_BASE_URL }}
+          EOF
+          
+          # Login to GitHub Container Registry
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          
+          # Pull latest images
+          docker pull ${{ needs.build-and-push.outputs.api-image }}
+          docker pull ${{ needs.build-and-push.outputs.web-image }}
+          
+          # Update docker-compose with new image tags
+          sed -i "s|smartrestaurant-api:.*|${{ needs.build-and-push.outputs.api-image }}|g" docker-compose.prod.yml
+          sed -i "s|smartrestaurant-web:.*|${{ needs.build-and-push.outputs.web-image }}|g" docker-compose.prod.yml
+          
+          # Stop existing containers
+          docker-compose -f docker-compose.prod.yml down
+          
+          # Start new containers
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # Wait for services to be healthy
+          sleep 30
+          
+          # Check service health
+          docker-compose -f docker-compose.prod.yml ps
+          
+          # Run database migrations
+          docker-compose -f docker-compose.prod.yml exec -T api dotnet SmartRestaurant.DbMigrator.dll
+          
+          # Clean up old images
+          docker image prune -f
+
+    - name: Run staging health checks
+      run: |
+        # Wait a bit more for services to fully start
+        sleep 60
+        
+        # Check API health
+        curl -f ${{ secrets.STAGING_API_BASE_URL }}/health || exit 1
+        
+        # Check Web health  
+        curl -f ${{ secrets.STAGING_WEB_BASE_URL }}/health || exit 1
+        
+        echo "✅ Staging deployment successful!"
+
+  # Deploy to production
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment: 
+      name: production
+      url: https://smartrestaurant.yourdomain.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create database backup
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT }}
+        script: |
+          # Create backup directory
+          mkdir -p /opt/smartrestaurant/backups
+          
+          # Create database backup
+          docker exec smartrestaurant-postgres-prod pg_dump \
+            -U ${{ secrets.PRODUCTION_POSTGRES_USER }} \
+            -d SmartRestaurant \
+            -f /backup/backup_$(date +%Y%m%d_%H%M%S).sql
+          
+          # Keep only last 7 backups
+          cd /opt/smartrestaurant/backups
+          ls -t backup_*.sql | tail -n +8 | xargs rm -f
+
+    - name: Deploy to production VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT }}
+        script: |
+          # Create application directory
+          mkdir -p /opt/smartrestaurant
+          cd /opt/smartrestaurant
+          
+          # Download docker-compose files
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o docker-compose.prod.yml \
+               -L "https://api.github.com/repos/${{ github.repository }}/contents/infrastructure/docker/docker-compose.prod.yml"
+          
+          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               -o nginx.conf \
+               -L "https://api.github.com/repos/${{ github.repository }}/contents/infrastructure/docker/nginx.conf"
+          
+          # Set environment variables
+          cat > .env << EOF
+          POSTGRES_USER=${{ secrets.PRODUCTION_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.PRODUCTION_POSTGRES_PASSWORD }}
+          REDIS_PASSWORD=${{ secrets.PRODUCTION_REDIS_PASSWORD }}
+          API_BASE_URL=${{ secrets.PRODUCTION_API_BASE_URL }}
+          WEB_BASE_URL=${{ secrets.PRODUCTION_WEB_BASE_URL }}
+          EOF
+          
+          # Login to GitHub Container Registry
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          
+          # Pull latest images
+          docker pull ${{ needs.build-and-push.outputs.api-image }}
+          docker pull ${{ needs.build-and-push.outputs.web-image }}
+          
+          # Update docker-compose with new image tags
+          sed -i "s|smartrestaurant-api:.*|${{ needs.build-and-push.outputs.api-image }}|g" docker-compose.prod.yml
+          sed -i "s|smartrestaurant-web:.*|${{ needs.build-and-push.outputs.web-image }}|g" docker-compose.prod.yml
+          
+          # Rolling deployment (zero downtime)
+          docker-compose -f docker-compose.prod.yml up -d --no-deps api
+          sleep 30
+          docker-compose -f docker-compose.prod.yml up -d --no-deps web
+          
+          # Wait for services to be healthy
+          sleep 60
+          
+          # Check service health
+          docker-compose -f docker-compose.prod.yml ps
+          
+          # Run database migrations
+          docker-compose -f docker-compose.prod.yml exec -T api dotnet SmartRestaurant.DbMigrator.dll
+          
+          # Clean up old images
+          docker image prune -f
+
+    - name: Run production health checks
+      run: |
+        # Wait for services to fully start
+        sleep 60
+        
+        # Check API health
+        curl -f ${{ secrets.PRODUCTION_API_BASE_URL }}/health || exit 1
+        
+        # Check Web health
+        curl -f ${{ secrets.PRODUCTION_WEB_BASE_URL }}/health || exit 1
+        
+        # Check Vietnamese content loading
+        curl -s ${{ secrets.PRODUCTION_WEB_BASE_URL }} | grep -q "SmartRestaurant" || exit 1
+        
+        echo "✅ Production deployment successful!"
+
+    - name: Notify deployment success
+      uses: 8398a7/action-slack@v3
+      if: success()
+      with:
+        status: success
+        text: |
+          🎉 SmartRestaurant deployed successfully to production!
+          Version: ${{ github.ref_name }}
+          Environment: https://smartrestaurant.yourdomain.com
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify deployment failure
+      uses: 8398a7/action-slack@v3
+      if: failure()
+      with:
+        status: failure
+        text: |
+          ❌ SmartRestaurant production deployment failed!
+          Version: ${{ github.ref_name }}
+          Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Deployment summary
+  deployment-summary:
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "## Deployment Results" >> $GITHUB_STEP_SUMMARY
+        echo "| Environment | Status | URL |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------------|--------|-----|" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.deploy-staging.result }}" != "skipped" ]]; then
+          echo "| Staging | ${{ needs.deploy-staging.result }} | https://staging.smartrestaurant.yourdomain.com |" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [[ "${{ needs.deploy-production.result }}" != "skipped" ]]; then
+          echo "| Production | ${{ needs.deploy-production.result }} | https://smartrestaurant.yourdomain.com |" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Docker Images" >> $GITHUB_STEP_SUMMARY
+        echo "- API: \`${{ needs.build-and-push.outputs.api-image }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Web: \`${{ needs.build-and-push.outputs.web-image }}\`" >> $GITHUB_STEP_SUMMARY

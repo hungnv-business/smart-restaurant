@@ -32,7 +32,7 @@
 
 **Structured Logging with Serilog (Ghi nhận có cấu trúc với Serilog):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/Program.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/Program.cs
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -71,7 +71,7 @@ _logger.LogWarning("Slow query detected: {QueryType} took {Duration}ms - thresho
 
 **Custom Telemetry for Restaurant Operations (Theo dõi tùy chỉnh cho hoạt động nhà hàng):**
 ```csharp
-// src/SmartRestaurant.Application/Orders/OrderAppService.cs
+// aspnet-core/src/SmartRestaurant.Application/Orders/OrderAppService.cs
 public class OrderAppService : ApplicationService, IOrderAppService
 {
     private readonly TelemetryClient _telemetryClient;
@@ -122,7 +122,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
 
 **Comprehensive Health Monitoring (Giám sát tình trạng toàn diện):**
 ```csharp
-// src/SmartRestaurant.HttpApi.Host/HealthChecks/RestaurantHealthCheck.cs
+// aspnet-core/src/SmartRestaurant.HttpApi.Host/HealthChecks/RestaurantHealthCheck.cs
 public class RestaurantHealthCheck : IHealthCheck
 {
     private readonly SmartRestaurantDbContext _dbContext;
