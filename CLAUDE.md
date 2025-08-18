@@ -1,5 +1,8 @@
 # SmartRestaurant Development Environment Guide
 
+## Rule Markdown file
+Sử dụng song ngữ English (Ngôn ngữ tự nhiên của Việt Nam)
+
 ## Project Overview
 Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, Angular 19, and PostgreSQL.
 

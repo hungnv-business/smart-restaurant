@@ -6,7 +6,7 @@
 |----------|------------|---------|---------|-----------|
 | Frontend Language | TypeScript | 5.0+ | Type-safe frontend development | Strong typing for large Angular applications, better IDE support |
 | Frontend Framework | Angular | 19.x | Primary web framework | ABP integration, enterprise patterns, strong Vietnamese community |
-| UI Component Library | PrimeNG | 17.x | Component library | Rich components, Poseidon theme, restaurant-friendly UI elements |
+| UI Component Library | PrimeNG | 19.x | Component library | Rich components, Poseidon theme, restaurant-friendly UI elements |
 | State Management | NgRx | 17.x | Reactive state management | Complex restaurant workflows, real-time updates integration |
 | Backend Language | C# | 12.0 | Backend development | .NET 8 features, strong typing, performance |
 | Backend Framework | ABP Framework | 8.0 | Application framework | Domain-driven design, multitenancy, localization support |

@@ -23,6 +23,9 @@
       ],
       "@proxy/*": [
         "src/app/proxy/*"
+      ],
+      "@/*": [
+        "src/app/*"
       ]
     },
     "useDefineForClassFields": false

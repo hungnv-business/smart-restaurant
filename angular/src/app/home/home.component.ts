@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   template: `
     <div class="container mt-4">
       <h2>Welcome to SmartRestaurant</h2>
@@ -9,7 +10,7 @@ import { Component } from '@angular/core';
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Getting Started</h5>
-          <p class="card-text">The application is now running successfully without theme dependencies.</p>
+          <p class="card-text">The application is now running successfully with Poseidon layout.</p>
         </div>
       </div>
     </div>

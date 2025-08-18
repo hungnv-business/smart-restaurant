@@ -1,10 +1,26 @@
 import { Routes } from '@angular/router';
+import { RestaurantLayoutComponent } from './layout/components/restaurant.layout';
 
 export const appRoutes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    loadChildren: () => import('./home/home.routes').then(m => m.homeRoutes),
+    component: RestaurantLayoutComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadChildren: () => import('./home/home.routes').then(m => m.homeRoutes),
+      },
+      {
+        path: 'restaurant',
+        children: [
+          {
+            path: 'dashboard',
+            loadChildren: () => import('./home/home.routes').then(m => m.homeRoutes), // Temporary - will be replaced with actual dashboard
+          }
+        ]
+      }
+    ]
   },
   {
     path: 'account',

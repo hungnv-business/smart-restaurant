@@ -1,14 +1,17 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { LayoutService } from './layout/service/layout.service';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <div>
-      <h1>SmartRestaurant App</h1>
-      <router-outlet></router-outlet>
-    </div>
-  `,
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterModule],
+  template: `<router-outlet></router-outlet>`
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  layoutService = inject(LayoutService);
+
+  ngOnInit() {
+    this.layoutService.updateBodyBackground(this.layoutService.layoutConfig().primary);
+  }
+}

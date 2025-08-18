@@ -21,12 +21,13 @@ This unified approach combines what would traditionally be separate backend and 
 | Date (Ngày) | Version (Phiên bản) | Description (Mô tả) | Author (Tác giả) |
 |-------------|---------------------|---------------------|------------------|
 | 2025-08-17 | 1.0 | Initial fullstack architecture for Smart Restaurant Management System (Kiến trúc fullstack ban đầu cho Hệ thống Quản lý Nhà hàng Thông minh) | Winston - Architect |
+| 2025-08-18 | 1.1 | Updated Angular frontend architecture with complete Poseidon theme integration. Updated source code structure, dependencies (PrimeNG 19.x), and component layout to reflect actual implementation (Cập nhật kiến trúc frontend Angular với tích hợp theme Poseidon hoàn chỉnh. Cập nhật cấu trúc source code, dependencies và layout component để phản ánh implementation thực tế) | Claude Code - Development Agent |
 
 ## High Level Architecture (Kiến trúc Tổng quan)
 
 ### Technical Summary (Tóm tắt Kỹ thuật)
 
-Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and Redis caching for peak hours (11:30-13:30, 18:00-21:00). Frontend uses PrimeNG with Poseidon theme for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows like two-level menu management and seasonal category control (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và Redis caching cho giờ cao điểm. Frontend sử dụng PrimeNG với theme Poseidon cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
+Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and Redis caching for peak hours (11:30-13:30, 18:00-21:00). Frontend uses **PrimeNG 19.x with complete Poseidon theme integration** including blue color palette, Google Fonts (Figtree, Roboto Flex), and all interactive components (Settings configurator, Right menu, Search functionality) for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. Backend API configured at https://localhost:44346 with ABP OAuth integration. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và Redis caching cho giờ cao điểm. Frontend sử dụng **PrimeNG 19.x với tích hợp theme Poseidon hoàn chỉnh** bao gồm bảng màu xanh, Google Fonts và tất cả components tương tác cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
 
 ### Platform and Infrastructure Choice (Lựa chọn Nền tảng và Hạ tầng)
 
@@ -70,12 +71,57 @@ smart-restaurant/
 │       ├── SmartRestaurant.Application.Tests/     # Application service tests
 │       ├── SmartRestaurant.EntityFrameworkCore.Tests/ # Data access tests
 │       └── SmartRestaurant.HttpApi.Client.ConsoleTestApp/ # API client tests
-├── angular/                         # Angular frontend (ABP Angular template)
-│   ├── src/app/                    # Angular application with ABP integration
-│   ├── package.json                # Dependencies with @abp/ng.* packages
-│   ├── angular.json                # Angular workspace configuration
+├── angular/                         # Angular 19 frontend with Poseidon theme
+│   ├── src/                        # Source code directory
+│   │   ├── app/                    # Angular application with ABP + Poseidon integration
+│   │   │   ├── app.component.ts    # Root component
+│   │   │   ├── app.config.ts       # ABP configuration with backend URL (https://localhost:44346)
+│   │   │   ├── app.routes.ts       # Routing with RestaurantLayoutComponent wrapper
+│   │   │   ├── home/               # Home feature module
+│   │   │   │   ├── home.component.ts
+│   │   │   │   ├── home.component.html
+│   │   │   │   ├── home.component.scss
+│   │   │   │   ├── home.component.spec.ts
+│   │   │   │   └── home.routes.ts
+│   │   │   └── layout/             # Poseidon layout system
+│   │   │       ├── components/     # All Poseidon layout components
+│   │   │       │   ├── app.topbar.ts         # Top navigation with settings, notifications
+│   │   │       │   ├── app.sidebar.ts        # Side navigation
+│   │   │       │   ├── app.menu.ts           # Complete Poseidon menu structure
+│   │   │       │   ├── app.menuitem.ts       # Menu item component
+│   │   │       │   ├── app.breadcrumb.ts     # Breadcrumb navigation
+│   │   │       │   ├── app.footer.ts         # Footer component
+│   │   │       │   ├── app.configurator.ts   # Theme settings configurator
+│   │   │       │   ├── app.rightmenu.ts      # Right sidebar with activity feed
+│   │   │       │   ├── app.search.ts         # Global search functionality
+│   │   │       │   └── restaurant.layout.ts # Main restaurant layout wrapper
+│   │   │       └── service/        # Layout services
+│   │   │           └── layout.service.ts     # Poseidon layout state management
+│   │   ├── assets/                 # Complete Poseidon assets structure
+│   │   │   ├── demo/               # Demo images and data from Poseidon
+│   │   │   │   ├── images/         # Avatar, product, landing, blog, ecommerce images
+│   │   │   │   └── data/           # JSON data files (chat, mail, etc.)
+│   │   │   └── layout/             # Poseidon layout assets
+│   │   │       ├── layout.scss     # Main Poseidon SCSS file
+│   │   │       ├── _*.scss         # Component SCSS files
+│   │   │       ├── images/         # Layout icons, logos, profile images
+│   │   │       ├── sidebar/        # Sidebar theme SCSS
+│   │   │       ├── topbar/         # Topbar theme SCSS
+│   │   │       ├── variables/      # Theme variables (_common, _dark, _light)
+│   │   │       └── styles/         # Additional styling (preloading animations)
+│   │   ├── index.html              # HTML with Google Fonts (Figtree, Roboto Flex)
+│   │   ├── main.ts                 # Angular bootstrap
+│   │   ├── styles.scss             # Global styles
+│   │   └── tailwind.css            # Tailwind CSS integration
+│   ├── dist/                       # Build output directory
+│   ├── package.json                # Dependencies: PrimeNG 19.x, ABP packages, chart.js
+│   ├── angular.json                # Angular workspace with assets mapping (/layout, /demo)
+│   ├── tailwind.config.js          # Tailwind configuration from Poseidon
 │   ├── tsconfig.json               # TypeScript configuration
-│   └── karma.conf.js               # Test runner configuration
+│   ├── tsconfig.app.json           # App-specific TypeScript config
+│   ├── tsconfig.spec.json          # Test TypeScript config
+│   ├── karma.conf.js               # Test runner configuration
+│   └── yarn.lock                   # Dependency lock file
 ├── infrastructure/                 # Docker & deployment configs (Cấu hình Docker & triển khai)
 │   └── docker/                     # Docker containerization
 │       ├── docker-compose.dev.yml  # Development environment
@@ -102,9 +148,9 @@ smart-restaurant/
 ```mermaid
 graph TB
     subgraph "Client Layer"
-        WEB[Angular Web App<br/>PrimeNG + Poseidon]
-        MOB[Flutter Mobile<br/>Staff & Customer]
-        TAB[Tablet Interface<br/>Touch-optimized]
+        WEB[Angular 19 Web App<br/>PrimeNG 19.x + Poseidon Theme<br/>Blue Color Palette]
+        MOB[Flutter Mobile<br/>Staff & Customer Apps]
+        TAB[Tablet Interface<br/>Poseidon Touch-optimized<br/>Static Menu Layout]
     end
     
     subgraph "Load Balancer & Proxy"
@@ -157,7 +203,7 @@ graph TB
 |----------|------------|---------|---------|-----------|
 | Frontend Language | TypeScript | 5.0+ | Type-safe frontend development | Strong typing for large Angular applications, better IDE support |
 | Frontend Framework | Angular | 19.x | Primary web framework | ABP integration, enterprise patterns, strong Vietnamese community |
-| UI Component Library | PrimeNG | 17.x | Component library | Rich components, Poseidon theme, restaurant-friendly UI elements |
+| UI Component Library | PrimeNG | 19.x | Component library | Rich components, Poseidon theme, restaurant-friendly UI elements |
 | State Management | NgRx | 17.x | Reactive state management | Complex restaurant workflows, real-time updates integration |
 | Backend Language | C# | 12.0 | Backend development | .NET 8 features, strong typing, performance |
 | Backend Framework | ABP Framework | 8.0 | Application framework | Domain-driven design, multitenancy, localization support |
@@ -175,7 +221,7 @@ graph TB
 | CI/CD | GitHub Actions | Latest | Continuous integration/deployment | Free for public repos, Docker integration |
 | Monitoring | Application Insights | Latest | Application monitoring | .NET integration, restaurant metrics |
 | Logging | Serilog + ELK Stack | Latest | Structured logging | .NET integration, searchable logs |
-| CSS Framework | PrimeNG Theme (Poseidon) | Latest | UI styling | Restaurant-optimized design system |
+| CSS Framework | PrimeNG Theme (Poseidon) | 19.x | UI styling | Restaurant-optimized design system with blue color palette |
 
 ## Data Models (Các Mô hình Dữ liệu)
 
@@ -1575,8 +1621,12 @@ angular/ (Current project: /Volumes/Work/data/source-code/SmartRestaurant/angula
 │   ├── @abp/ng.oauth: ~9.3.1          # OAuth integration
 │   ├── @abp/ng.identity: ~9.3.1       # Identity management
 │   ├── @abp/ng.tenant-management: ~9.3.1  # Multi-tenancy
-│   ├── @abp/ng.theme.lepton-x: ~4.3.1    # LeptonX theme (not Poseidon)
-│   └── @angular/*: ~20.0.0            # Angular 20.0.0 packages
+│   ├── @primeng/themes: ^19.0.2          # PrimeNG theme system (Poseidon Aura preset)
+│   ├── primeng: ^19.0.6               # PrimeNG components
+│   ├── primeicons: ^7.0.0             # PrimeNG icons
+│   ├── chart.js: ^4.3.0               # Charts for dashboard
+│   ├── tailwindcss-primeui: ^0.5.1    # Tailwind PrimeUI integration
+│   └── @angular/*: ~19.0.0            # Angular 19.0.0 packages
 ├── angular.json                 # Angular CLI configuration
 ├── dynamic-env.json            # ABP dynamic environment configuration
 ├── src/

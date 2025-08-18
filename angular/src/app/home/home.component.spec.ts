@@ -44,53 +44,14 @@ describe("HomeComponent", () => {
 
 
 
-  describe('when login state is true', () => {
-    beforeAll(() => {
-      mockOAuthService.hasValidAccessToken.and.returnValue(true)
-    });
+  it("should render welcome message", () => {
+    const compiled = fixture.nativeElement;
+    expect(compiled.querySelector('h2').textContent).toContain('Welcome to SmartRestaurant');
+  });
 
-    it("hasLoggedIn should be true", () => {
-
-      expect(fixture.componentInstance.hasLoggedIn).toBeTrue();
-      expect(mockOAuthService.hasValidAccessToken).toHaveBeenCalled()
-    })
-
-    it("button should not be exists", () => {
-      const element = fixture.nativeElement
-      const button = element.querySelector('[role="button"]')
-      expect(button).toBeNull()
-    })
-
-  })
-
-  describe('when login state is false', () => {
-    beforeAll(() => {
-      mockOAuthService.hasValidAccessToken.and.returnValue(false)
-    });
-
-    it("hasLoggedIn should be false", () => {
-
-      expect(fixture.componentInstance.hasLoggedIn).toBeFalse();
-      expect(mockOAuthService.hasValidAccessToken).toHaveBeenCalled()
-    })
-
-    it("button should be exists", () => {
-      const element = fixture.nativeElement
-      const button = element.querySelector('[role="button"]')
-      expect(button).toBeDefined()
-    })
-    describe('when button clicked', () => {
-
-      beforeEach(() => {
-        const element = fixture.nativeElement
-        const button = element.querySelector('[role="button"]')
-        button.click()
-      });
-
-      it("navigateToLogin have been called", () => {
-        expect(mockAuthService.navigateToLogin).toHaveBeenCalled()
-      })
-    })
-  })
+  it("should render card with getting started info", () => {
+    const compiled = fixture.nativeElement;
+    expect(compiled.querySelector('.card-title').textContent).toContain('Getting Started');
+  });
 
 });
