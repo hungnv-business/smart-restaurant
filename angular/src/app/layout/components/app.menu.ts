@@ -39,21 +39,27 @@ export class AppMenu implements OnInit {
 
         // Only show User Management if user has permission
         if (this.permissionService.getGrantedPolicy(PERMISSIONS.USERS.DEFAULT)) {
+            const userManagementItems = [
+                {
+                    label: 'Người dùng',
+                    icon: 'pi pi-fw pi-users',
+                    routerLink: ['/user-management/users']
+                }
+            ];
+
+            // Add roles menu if user has role permission
+            if (this.permissionService.getGrantedPolicy(PERMISSIONS.ROLES.DEFAULT)) {
+                userManagementItems.push({
+                    label: 'Vai trò',
+                    icon: 'pi pi-fw pi-shield',
+                    routerLink: ['/user-management/roles']
+                });
+            }
+
             this.model.push({
                 label: 'Quản lý Nhân viên',
                 icon: 'pi pi-fw pi-users',
-                items: [
-                    {
-                        label: 'Danh sách Nhân viên',
-                        icon: 'pi pi-fw pi-list',
-                        routerLink: ['/user-management']
-                    },
-                    {
-                        label: 'ABP Identity (Admin)',
-                        icon: 'pi pi-fw pi-cog',
-                        routerLink: ['/identity']
-                    }
-                ]
+                items: userManagementItems
             });
         }
     }

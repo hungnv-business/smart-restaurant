@@ -5,7 +5,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { appRoutes } from './app.routes';
 import { provideAbpCore, withOptions } from '@abp/ng.core';
-import { registerLocale } from '@abp/ng.core/locale';
+import { registerLocale, storeLocaleData } from '@abp/ng.core/locale';
 import { provideAbpOAuth } from '@abp/ng.oauth';
 import { provideSettingManagementConfig } from '@abp/ng.setting-management/config';
 import { provideAccountConfig } from '@abp/ng.account/config';
@@ -17,6 +17,11 @@ import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 import { MessageService } from 'primeng/api';
 import { environment } from '../environments/environment';
+import(
+  /* webpackChunkName: "_locale-your-locale-js"*/
+  /* webpackMode: "eager" */
+  '@angular/common/locales/vi'
+).then((m) => storeLocaleData(m.default, 'vi'));
 
 const MyPreset = definePreset(Aura, {
     semantic: {

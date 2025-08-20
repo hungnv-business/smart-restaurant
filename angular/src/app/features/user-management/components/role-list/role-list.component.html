@@ -1,0 +1,121 @@
+<div class="card">
+  <p-toolbar styleClass="mb-12">
+    <ng-template #start>
+      <p-button
+        *abpPermission="PERMISSIONS.ROLES.CREATE"
+        label="Thêm vai trò"
+        icon="pi pi-plus"
+        severity="secondary"
+        class="mr-2"
+        (onClick)="openCreateDialog()"
+      />
+      <p-button
+        *abpPermission="PERMISSIONS.ROLES.DELETE"
+        severity="secondary"
+        label="Xóa"
+        icon="pi pi-trash"
+        outlined
+        (onClick)="deleteSelectedRoles()"
+        [disabled]="!selectedRoles || !selectedRoles.length"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="roles()"
+    [rows]="pageSize"
+    [paginator]="true"
+    [globalFilterFields]="filterFields"
+    styleClass="role-table"
+    [(selection)]="selectedRoles"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} vai trò"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <h5 class="m-0">Quản lý vai trò</h5>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            (input)="onGlobalFilter(dt, $event)"
+            placeholder="Tìm kiếm..."
+          />
+        </p-iconfield>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th class="header-cell col-checkbox">
+          <p-tableHeaderCheckbox *abpPermission="PERMISSIONS.ROLES.DELETE" />
+        </th>
+        <th class="header-cell col-xl" pSortableColumn="name">
+          <span class="flex items-center gap-2">Tên vai trò <p-sortIcon field="name" /></span>
+        </th>
+        <th class="header-cell col-md" pSortableColumn="isDefault">
+          <span class="flex items-center gap-2">Mặc định <p-sortIcon field="isDefault" /></span>
+        </th>
+        <th class="header-cell col-md" pSortableColumn="isPublic">
+          <span class="flex items-center gap-2">Công khai <p-sortIcon field="isPublic" /></span>
+        </th>
+        <th class="header-cell col-sm"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-role>
+      <tr>
+        <td class="body-cell col-checkbox">
+          <p-tableCheckbox [value]="role" *abpPermission="PERMISSIONS.ROLES.DELETE" />
+        </td>
+        <td class="body-cell col-xl">{{ role.name }}</td>
+        <td class="body-cell col-md">
+          <p-tag
+            [value]="role.isDefault ? 'Có' : 'Không'"
+            [severity]="role.isDefault ? 'success' : 'secondary'"
+          />
+        </td>
+        <td class="body-cell col-md">
+          <p-tag
+            [value]="role.isPublic ? 'Có' : 'Không'"
+            [severity]="role.isPublic ? 'success' : 'secondary'"
+          />
+        </td>
+        <td class="body-cell col-sm">
+          <div class="action-buttons">
+            <p-button
+              *abpPermission="PERMISSIONS.ROLES.UPDATE"
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [outlined]="true"
+              (click)="openEditDialog(role.id!)"
+              pTooltip="Sửa"
+            />
+            <p-button
+              *abpPermission="PERMISSIONS.ROLES.DELETE"
+              icon="pi pi-trash"
+              severity="danger"
+              [rounded]="true"
+              [outlined]="true"
+              (click)="deleteRole(role)"
+              pTooltip="Xóa"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmdialog />
+
+<app-role-form
+  [(visible)]="roleDialogVisible"
+  [roleId]="selectedRoleId"
+  (roleSaved)="onRoleSaved()"
+/>

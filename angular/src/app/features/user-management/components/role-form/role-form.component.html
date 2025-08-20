@@ -1,0 +1,105 @@
+<p-dialog 
+    [(visible)]="visible"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    [header]="isEditMode ? 'Sửa vai trò' : 'Thêm vai trò mới'"
+    (onHide)="cancel()"
+>
+    <ng-template #content>
+        <div *ngIf="!loading; else loadingTemplate">
+        <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+            <div class="flex flex-col gap-6 w-full">
+                <!-- Role Name -->
+                <div class="flex flex-col gap-2">
+                    <label for="name" class="block font-semibold text-sm required">Tên vai trò</label>
+                    <input 
+                        type="text" 
+                        pInputText 
+                        id="name"
+                        formControlName="name"
+                        placeholder="Nhập tên vai trò (VD: Manager, Staff)"
+                        class="w-full"
+                        [class.p-invalid]="getControl('name')?.invalid && (getControl('name')?.dirty || getControl('name')?.touched)"
+                    />
+                    <app-validation-error 
+                        [control]="getControl('name')"
+                        fieldName="Tên vai trò"
+                    />
+                </div>
+
+
+                <!-- Role Properties -->
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-3 mb-4">
+                        <p-checkbox 
+                            formControlName="isDefault"
+                            [binary]="true"
+                            inputId="isDefault"
+                        />
+                        <label for="isDefault" class="cursor-pointer font-medium select-none">
+                            Vai trò mặc định
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3">
+                        <p-checkbox 
+                            formControlName="isPublic"
+                            [binary]="true"
+                            inputId="isPublic"
+                        />
+                        <label for="isPublic" class="cursor-pointer font-medium select-none">
+                            Vai trò công khai
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Permissions -->
+                <div class="flex flex-col gap-3" *ngIf="permissionTreeNodes.length > 0">
+                    <label class="block font-semibold text-sm">Quyền hạn</label>
+                    <div class="border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
+                        <p-tree
+                            [value]="permissionTreeNodes"
+                            [(selection)]="selectedTreeNodes"
+                            selectionMode="checkbox"
+                            [propagateSelectionUp]="true"
+                            [propagateSelectionDown]="true"
+                            [filter]="true"
+                            filterPlaceholder="Tìm kiếm quyền..."
+                            class="w-full"
+                        >
+                        </p-tree>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+        </div>
+
+        <ng-template #loadingTemplate>
+            <div class="flex flex-col items-center justify-center p-8 gap-4">
+                <p-progressSpinner 
+                    styleClass="w-16 h-16" 
+                    strokeWidth="4"
+                    animationDuration=".5s"
+                />
+                <p class="text-gray-600 text-sm m-0">Đang tải...</p>
+            </div>
+        </ng-template>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button 
+            label="Lưu" 
+            icon="pi pi-check"
+            [disabled]="roleForm.invalid || loading"
+            [loading]="loading"
+            (click)="onSubmit()"
+        />
+        <p-button 
+            label="Hủy" 
+            icon="pi pi-times" 
+            severity="secondary"
+            (click)="cancel()"
+        />
+    </ng-template>
+</p-dialog>
