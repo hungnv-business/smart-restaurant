@@ -1973,6 +1973,13 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
+"@playwright/test@^1.54.2":
+  version "1.54.2"
+  resolved "https://registry.npmjs.org/@playwright/test/-/test-1.54.2.tgz"
+  integrity sha512-A+znathYxPf+72riFd1r1ovOLqsIIB0jKIoPjyK2kqEIe30/6jF6BC7QNluHuwUmsD2tv1XZVugN8GqfTMOxsA==
+  dependencies:
+    playwright "1.54.2"
+
 "@popperjs/core@^2.11.8", "@popperjs/core@~2.11.0":
   version "2.11.8"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
@@ -4169,6 +4176,11 @@ fsevents@~2.3.2, fsevents@~2.3.3:
   resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
+fsevents@2.3.2:
+  version "2.3.2"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz"
+  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
+
 function-bind@^1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz"
@@ -6015,6 +6027,20 @@ piscina@5.1.1:
   optionalDependencies:
     "@napi-rs/nice" "^1.0.1"
 
+playwright-core@1.54.2:
+  version "1.54.2"
+  resolved "https://registry.npmjs.org/playwright-core/-/playwright-core-1.54.2.tgz"
+  integrity sha512-n5r4HFbMmWsB4twG7tJLDN9gmBUeSPcsBZiWSE4DnYz9mJMAFqr2ID7+eGC9kpEnxExJ1epttwR59LEWCk8mtA==
+
+playwright@^1.54.2, playwright@1.54.2:
+  version "1.54.2"
+  resolved "https://registry.npmjs.org/playwright/-/playwright-1.54.2.tgz"
+  integrity sha512-Hu/BMoA1NAdRUuulyvQC0pEqZ4vQbGfn8f7wPXcnqQmM+zct9UliKxsIkLNmz/ku7LElUNqmaiv1TG/aL5ACsw==
+  dependencies:
+    playwright-core "1.54.2"
+  optionalDependencies:
+    fsevents "2.3.2"
+
 postcss-import@^15.1.0:
   version "15.1.0"
   resolved "https://registry.npmjs.org/postcss-import/-/postcss-import-15.1.0.tgz"
@@ -6785,6 +6811,7 @@ smart-buffer@^4.2.0:
     "@abp/ng.setting-management" "~9.3.1"
     "@abp/ng.tenant-management" "~9.3.1"
     "@angular/animations" "~20.0.0"
+    "@angular/cdk" "19.0.0"
     "@angular/common" "~20.0.0"
     "@angular/compiler" "~20.0.0"
     "@angular/core" "~20.0.0"
@@ -6793,8 +6820,17 @@ smart-buffer@^4.2.0:
     "@angular/platform-browser" "~20.0.0"
     "@angular/platform-browser-dynamic" "~20.0.0"
     "@angular/router" "~20.0.0"
+    "@primeng/themes" "^19.0.2"
     bootstrap-icons "~1.8.0"
+    chart.js "^4.3.0"
+    chartjs-adapter-date-fns "^3.0.0"
+    chartjs-chart-matrix "^2.0.1"
+    date-fns "^4.1.0"
+    primeicons "^7.0.0"
+    primeng "^19.0.6"
+    quill "^2.0.3"
     rxjs "~7.8.0"
+    tailwindcss-primeui "^0.5.1"
     tslib "^2.0.0"
     zone.js "~0.15.0"
 

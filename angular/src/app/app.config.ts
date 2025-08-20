@@ -2,6 +2,7 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withInMemoryScrolling, withEnabledBlockingInitialNavigation } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { appRoutes } from './app.routes';
 import { provideAbpCore, withOptions } from '@abp/ng.core';
 import { registerLocale } from '@abp/ng.core/locale';
@@ -14,6 +15,8 @@ import { provideFeatureManagementConfig } from '@abp/ng.feature-management';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
+import { MessageService } from 'primeng/api';
+import { environment } from '../environments/environment';
 
 const MyPreset = definePreset(Aura, {
     semantic: {
@@ -88,27 +91,7 @@ export const appConfig: ApplicationConfig = {
         provideAnimationsAsync(),
         providePrimeNG({theme: {preset: MyPreset, options: {darkModeSelector: '.app-dark'}}}),
         provideAbpCore(withOptions({
-            environment: {
-                production: false,
-                hmr: false,
-                application: {
-                    baseUrl: 'http://localhost:4200',
-                    name: 'SmartRestaurant',
-                    logoUrl: '/layout/images/logo-white.svg'
-                },
-                oAuthConfig: {
-                    issuer: 'https://localhost:44346',
-                    redirectUri: location.origin,
-                    clientId: 'SmartRestaurant_Angular',
-                    responseType: 'code',
-                    scope: 'offline_access SmartRestaurant'
-                },
-                apis: {
-                    default: {
-                        url: 'https://localhost:44346'
-                    }
-                }
-            },
+            environment,
             registerLocaleFn: registerLocale(),
         })),
         provideAbpOAuth(),
@@ -117,6 +100,7 @@ export const appConfig: ApplicationConfig = {
         provideIdentityConfig(),
         provideTenantManagementConfig(),
         provideFeatureManagementConfig(),
+        MessageService,
         // Logo configuration handled by Poseidon layout system
     ],
 };

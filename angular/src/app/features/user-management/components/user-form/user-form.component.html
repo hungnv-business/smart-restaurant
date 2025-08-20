@@ -1,0 +1,155 @@
+<p-dialog 
+    [(visible)]="visible"
+    [modal]="true"
+    [style]="{ width: '600px' }"
+    [header]="isEditMode ? 'Sửa người dùng' : 'Thêm người dùng mới'"
+    (onHide)="cancel()"
+>
+    <ng-template #content>
+        <div *ngIf="!loading; else loadingTemplate">
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+            <div class="flex flex-col gap-4 w-full">
+                <!-- Username -->
+                <div class="flex flex-col gap-2">
+                    <label for="userName" class="block font-semibold text-sm required">Tên đăng nhập</label>
+                    <input 
+                        type="text" 
+                        pInputText 
+                        id="userName"
+                        formControlName="userName"
+                        placeholder="Nhập tên đăng nhập"
+                        class="w-full"
+                        [class.p-invalid]="getControl('userName')?.invalid && (getControl('userName')?.dirty || getControl('userName')?.touched)"
+                    />
+                    <app-validation-error 
+                        [control]="getControl('userName')"
+                        fieldName="Tên đăng nhập"
+                    />
+                </div>
+
+                <!-- Email -->
+                <div class="flex flex-col gap-2">
+                    <label for="email" class="block font-semibold text-sm required">Email</label>
+                    <input 
+                        type="email" 
+                        pInputText 
+                        id="email"
+                        formControlName="email"
+                        placeholder="Nhập địa chỉ email"
+                        class="w-full"
+                        [class.p-invalid]="getControl('email')?.invalid && (getControl('email')?.dirty || getControl('email')?.touched)"
+                    />
+                    <app-validation-error 
+                        [control]="getControl('email')"
+                        fieldName="Email"
+                    />
+                </div>
+
+                <!-- Name & Surname -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex flex-col gap-2 flex-1">
+                        <label for="name" class="block font-semibold text-sm">Họ</label>
+                        <input 
+                            type="text" 
+                            pInputText 
+                            id="name"
+                            formControlName="name"
+                            placeholder="Nhập tên"
+                            class="w-full"
+                        />
+                    </div>
+                    <div class="flex flex-col gap-2 flex-1">
+                        <label for="surname" class="block font-semibold text-sm">Tên</label>
+                        <input 
+                            type="text" 
+                            pInputText 
+                            id="surname"
+                            formControlName="surname"
+                            placeholder="Nhập họ"
+                            class="w-full"
+                        />
+                    </div>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="flex flex-col gap-2">
+                    <label for="phoneNumber" class="block font-semibold text-sm">Số điện thoại</label>
+                    <input 
+                        type="tel" 
+                        pInputText 
+                        id="phoneNumber"
+                        formControlName="phoneNumber"
+                        placeholder="Nhập số điện thoại"
+                        class="w-full"
+                    />
+                </div>
+
+                <!-- Roles -->
+                <div class="flex flex-col gap-3">
+                    <label class="block font-semibold text-sm">Vai trò</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div 
+                            class="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition-colors" 
+                            *ngFor="let role of availableRoles"
+                        >
+                            <input 
+                                type="checkbox" 
+                                [id]="'role-' + role" 
+                                [checked]="isRoleSelected(role)"
+                                (change)="toggleRole(role, $event)"
+                                class="cursor-pointer"
+                            />
+                            <label [for]="'role-' + role" class="cursor-pointer text-sm select-none">
+                                {{ getRoleLabel(role) }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Status -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <input 
+                            type="checkbox" 
+                            id="isActive" 
+                            formControlName="isActive"
+                            class="cursor-pointer"
+                        />
+                        <label for="isActive" class="cursor-pointer font-medium select-none">
+                            Kích hoạt tài khoản
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+        </div>
+
+        <ng-template #loadingTemplate>
+            <div class="flex flex-col items-center justify-center p-8 gap-4">
+                <p-progressSpinner 
+                    styleClass="w-16 h-16" 
+                    strokeWidth="4"
+                    animationDuration=".5s"
+                />
+                <p class="text-gray-600 text-sm m-0">Đang tải...</p>
+            </div>
+        </ng-template>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button 
+            label="Lưu" 
+            icon="pi pi-check"
+            [disabled]="userForm.invalid || loading"
+            [loading]="loading"
+            (click)="onSubmit()"
+        />
+        <p-button 
+            label="Hủy" 
+            icon="pi pi-times" 
+            severity="secondary"
+            (click)="cancel()"
+        />
+    </ng-template>
+</p-dialog>

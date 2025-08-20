@@ -1,5 +1,5 @@
 import {Component, computed, ElementRef, inject, model, signal, ViewChild} from '@angular/core';
-import {RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {StyleClassModule} from 'primeng/styleclass';
 import {LayoutService} from '../service/layout.service';
@@ -13,6 +13,7 @@ import {BadgeModule} from 'primeng/badge';
 import {OverlayBadgeModule} from 'primeng/overlaybadge';
 import {AvatarModule} from 'primeng/avatar';
 import {FormsModule} from "@angular/forms";
+import {AuthService} from '@abp/ng.core';
 
 interface NotificationsBars {
     id: string;
@@ -176,7 +177,8 @@ interface NotificationsBars {
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="label-small dark:text-surface-400 flex gap-2 py-2 px-2.5 rounded-lg items-center hover:bg-emphasis transition-colors duration-150 cursor-pointer">
+                                    <a class="label-small dark:text-surface-400 flex gap-2 py-2 px-2.5 rounded-lg items-center hover:bg-emphasis transition-colors duration-150 cursor-pointer"
+                                       (click)="onLogout()">
                                         <i class="pi pi-power-off"></i>
                                         <span>Log out</span>
                                     </a>
@@ -195,6 +197,8 @@ interface NotificationsBars {
 })
 export class AppTopbar {
     layoutService = inject(LayoutService);
+    authService = inject(AuthService);
+    router = inject(Router);
 
     isDarkTheme = computed(() => this.layoutService.layoutConfig().darkTheme);
 
@@ -307,5 +311,13 @@ export class AppTopbar {
 
     toggleSearchBar() {
         this.layoutService.layoutState.update((value) => ({...value, searchBarActive: !value.searchBarActive}));
+    }
+
+    onLogout() {
+        this.authService.logout().subscribe({
+            next: () => {
+                this.router.navigate(['/auth/login']);
+            }
+        });
     }
 }

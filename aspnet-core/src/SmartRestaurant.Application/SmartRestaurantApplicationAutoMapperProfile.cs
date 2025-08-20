@@ -6,8 +6,7 @@ public class SmartRestaurantApplicationAutoMapperProfile : Profile
 {
     public SmartRestaurantApplicationAutoMapperProfile()
     {
-        /* You can configure your AutoMapper mapping configuration here.
-         * Alternatively, you can split your mapping configurations
-         * into multiple profile classes for a better organization. */
+        // Add your object-to-object mapping configurations here
+        // For users, we will use ABP's built-in IIdentityUserAppService
     }
 }

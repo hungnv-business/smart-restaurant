@@ -4,6 +4,39 @@
     "AppName": "SmartRestaurant",
     "Menu:Home": "Trang chủ",
     "Welcome": "Chào mừng bạn",
-    "LongWelcomeMessage": "Chào mừng bạn đến ứng dụng. Đây là một dự án khởi nghiệp dựa trên khung ABP. Để biết thêm thông tin, hãy truy cập abp.io."
+    "LongWelcomeMessage": "Chào mừng bạn đến ứng dụng. Đây là một dự án khởi nghiệp dựa trên khung ABP. Để biết thêm thông tin, hãy truy cập abp.io.",
+    
+    "Permission:SmartRestaurant": "Quản lý nhà hàng thông minh",
+    
+    "Permission:Dashboard": "Bảng điều khiển",
+    
+    "Permission:Orders": "Quản lý đơn hàng",
+    "Permission:Menu": "Quản lý thực đơn",
+    "Permission:Menu.Categories": "Danh mục món ăn",
+    "Permission:Menu.Items": "Món ăn",
+    
+    "Permission:Tables": "Quản lý bàn ăn",
+    "Permission:Kitchen": "Bếp & Phục vụ",
+    "Permission:Kitchen.UpdateStatus": "Cập nhật trạng thái món",
+    
+    "Permission:Payments": "Thanh toán",
+    
+    "Permission:Reports": "Báo cáo & Thống kê",
+    "Permission:Reports.Revenue": "Báo cáo doanh thu",
+    "Permission:Reports.Popular": "Món ăn bán chạy",
+    "Permission:Reports.Staff": "Hiệu suất nhân viên",
+    
+    "Permission:Settings": "Cài đặt",
+    "Permission:Settings.Printers": "Máy in bếp",
+    
+    "Permission:Inventory": "Quản lý kho",
+    
+    "Permission:Customers": "Quản lý khách hàng",
+    
+    "Permission:Payroll": "Quản lý lương & Nhân sự",
+    "Permission:Payroll.Salary": "Tính lương",
+    
+    "Permission:Delivery": "Mang về & Giao hàng",
+    "Permission:Delivery.Takeaway": "Đơn mang về"
   }
 }

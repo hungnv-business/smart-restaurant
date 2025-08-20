@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartRestaurant.Domain.Shared\SmartRestaurant.Domain.Shared.csproj" />
+    <ProjectReference Include="..\SmartRestaurant.Application.Contracts\SmartRestaurant.Application.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
