@@ -17,7 +17,9 @@
       "Bash(dotnet build:*)",
       "Bash(touch:*)",
       "Bash(git checkout:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []
