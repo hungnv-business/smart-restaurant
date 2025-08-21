@@ -32,7 +32,7 @@ This section documents the explicit dependencies between different epics in the 
 - [ ] Authentication system functional
 - [ ] Development environment documented in README
 
-### Epic 2: Menu Management System (Hệ thống Quản lý Menu)
+### Epic 1: Menu Management System (Hệ thống Quản lý Menu)
 **Prerequisites:** Epic 1 (Repository Setup)
 **Dependencies:**
 - Database schema from Epic 1
@@ -75,7 +75,7 @@ public enum KitchenStation
 - [ ] Category enable/disable affects item availability
 - [ ] Frontend menu display components functional
 
-### Epic 3: Order Processing System (Hệ thống Xử lý Đơn hàng)
+### Epic 2: Order Processing System (Hệ thống Xử lý Đơn hàng)
 **Prerequisites:** Epic 1 (Repository Setup), Epic 2 (Menu Management)
 **Dependencies:**
 - MenuItem entities from Epic 2
@@ -119,7 +119,7 @@ public enum OrderStatus
 - [ ] Order calculation includes correct pricing from menu
 - [ ] Table management integrated
 
-### Epic 4: Payment Processing System (Hệ thống Xử lý Thanh toán)
+### Epic 3: Payment Processing System (Hệ thống Xử lý Thanh toán)
 **Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Order Processing)
 **Dependencies:**
 - Order entities from Epic 3
@@ -163,7 +163,7 @@ public enum PaymentMethod
 - [ ] Receipt generation with Vietnamese formatting
 - [ ] Payment failure handling and retry logic
 
-### Epic 5: Kitchen Display System (Hệ thống Hiển thị Bếp)
+### Epic 4: Kitchen Display System (Hệ thống Hiển thị Bếp)
 **Prerequisites:** Epic 1 (Repository Setup), Epic 2 (Menu Management), Epic 3 (Order Processing)
 **Dependencies:**
 - Order entities and status workflow from Epic 3
@@ -188,7 +188,7 @@ public enum PaymentMethod
 - [ ] Kitchen staff can update order status
 - [ ] Printer integration working with ESC/POS commands
 
-### Epic 6: Reporting and Analytics (Báo cáo và Phân tích)
+### Epic 5: Reporting and Analytics (Báo cáo và Phân tích)
 **Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Order Processing), Epic 4 (Payment Processing)
 **Dependencies:**
 - Order data from Epic 3

@@ -1,8 +1,8 @@
-# Epic 12: Customer Management (Khách hàng)
+# Epic 11: Customer Management (Khách hàng)
 
 **Expanded Goal:** Create comprehensive customer relationship management system with customer profiles, loyalty programs, order history, feedback collection, and personalized service features to enhance customer experience and retention (Tạo hệ thống quản lý quan hệ khách hàng toàn diện với hồ sơ khách hàng, chương trình khách hàng thân thiết, lịch sử đơn hàng, thu thập phản hồi và tính năng dịch vụ cá nhân hóa để nâng cao trải nghiệm và giữ chân khách hàng).
 
-## Story 12.1: Customer Profile & History Management (Quản lý Hồ sơ & Lịch sử Khách hàng)
+## Story 11.1: Customer Profile & History Management (Quản lý Hồ sơ & Lịch sử Khách hàng)
 **As a** customer service staff (nhân viên chăm sóc khách hàng),  
 **I want** to maintain detailed customer profiles and order history (tôi muốn duy trì hồ sơ khách hàng chi tiết và lịch sử đơn hàng),  
 **so that** personalized service can be provided (để có thể cung cấp dịch vụ cá nhân hóa).
@@ -14,7 +14,7 @@
 4. Customer visit tracking and behavior analysis (Theo dõi lượt ghé thăm và phân tích hành vi khách hàng)
 5. Personalized recommendations based on history (Gợi ý cá nhân hóa dựa trên lịch sử)
 
-## Story 12.2: Loyalty Program & Feedback System (Chương trình Khách hàng Thân thiết & Hệ thống Phản hồi)
+## Story 11.2: Loyalty Program & Feedback System (Chương trình Khách hàng Thân thiết & Hệ thống Phản hồi)
 **As a** marketing manager (quản lý marketing),  
 **I want** to implement loyalty programs and collect customer feedback (tôi muốn triển khai chương trình khách hàng thân thiết và thu thập phản hồi khách hàng),  
 **so that** customer retention and satisfaction can be improved (để giữ chân khách hàng và sự hài lòng có thể được cải thiện).

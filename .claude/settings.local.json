@@ -19,7 +19,9 @@
       "Bash(git checkout:*)",
       "Bash(mv:*)",
       "Bash(npm test:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(sed:*)",
+      "Bash(rg:*)"
     ],
     "deny": [],
     "ask": []

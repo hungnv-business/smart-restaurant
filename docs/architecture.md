@@ -5277,11 +5277,17 @@ This section documents the explicit dependencies between different epics in the 
 | Epic | Depends On (Phụ thuộc vào) | Provides To (Cung cấp cho) | Integration Points (Điểm tích hợp) |
 |------|------------|-------------|------------------|
 | **1. Repository Setup** | None | All epics | Base ABP project structure, development environment |
-| **2. Menu Management** | Repository Setup | Order Processing, Kitchen Display | MenuItem entities, MenuCategory enums, menu APIs |
-| **3. Order Processing** | Repository Setup, Menu Management | Payment Processing, Kitchen Display | Order entities, OrderItem relationships, order status workflow |
-| **4. Payment Processing** | Repository Setup, Order Processing | Reporting | Payment entities, Vietnamese banking integration, order completion |
-| **5. Kitchen Display** | Repository Setup, Menu Management, Order Processing | None | Real-time order updates, kitchen station routing, SignalR hubs |
-| **6. Reporting** | Repository Setup, Order Processing, Payment Processing | None | Data aggregation services, analytics endpoints |
+| **2. Table Layout Management** | Repository Setup | Order Processing | Table entities, layout management, table status |
+| **3. Menu Management** | Repository Setup | Order Processing, Kitchen Display | MenuItem entities, MenuCategory enums, menu APIs |
+| **4. Inventory Management** | Repository Setup, Menu Management | Order Processing | Ingredient entities, stock tracking, purchase management |
+| **5. Order Processing** | Repository Setup, Table Layout, Menu Management | Payment Processing, Kitchen Display | Order entities, OrderItem relationships, order status workflow |
+| **6. Takeaway & Delivery** | Repository Setup, Menu Management, Order Processing | Payment Processing | Takeaway workflow, delivery tracking |
+| **7. Payment Processing** | Repository Setup, Order Processing | Reporting | Payment entities, Vietnamese banking integration, order completion |
+| **8. Deployment & Production** | Repository Setup | All other epics | VPS setup, Docker deployment, monitoring |
+| **9. Reporting & Analytics** | Repository Setup, Order Processing, Payment Processing | None | Data aggregation services, analytics endpoints |
+| **10. Table Reservation** | Repository Setup, Table Layout, Menu Management | Order Processing | Phone reservations, pre-ordering capability |
+| **11. Customer Management** | Repository Setup | Order Processing, Reporting | Customer profiles, loyalty programs, feedback |
+| **12. Payroll & HR** | Repository Setup | None | Employee management, payroll calculation, attendance |
 
 ### Detailed Epic Dependencies (Phụ thuộc Epic Chi tiết)
 
@@ -5300,7 +5306,50 @@ This section documents the explicit dependencies between different epics in the 
 - [ ] Authentication system functional
 - [ ] Development environment documented in README
 
-#### Epic 2: Menu Management System (Hệ thống Quản lý Menu)
+#### Epic 2: Table Layout Management (Quản lý Bố cục Bàn)
+**Prerequisites:** Epic 1 (Repository Setup)
+**Dependencies:**
+- Database schema from Epic 1
+- ABP application services framework
+- Authentication system
+
+**Deliverables:**
+- Table and TableLayout entities
+- Visual table layout editor
+- Table status management (Available, Occupied, Reserved)
+- Flexible seating arrangements
+
+**Shared Components for Other Epics:**
+```csharp
+// Shared entities that other epics depend on
+public class Table : FullAuditedEntity<Guid>
+{
+    public string Name { get; set; }
+    public int Capacity { get; set; }
+    public TableStatus Status { get; set; }
+    public decimal PositionX { get; set; }
+    public decimal PositionY { get; set; }
+}
+
+public enum TableStatus
+{
+    Available, Occupied, Reserved, Maintenance
+}
+```
+
+**Integration Checkpoints:**
+- [ ] Table entity available for Order relationships
+- [ ] Table status updates for order assignment
+- [ ] Layout editor functional for restaurant setup
+- [ ] Table capacity validation for group seating
+
+**Handoff Criteria:**
+- [ ] Table CRUD APIs working with Swagger documentation
+- [ ] Visual layout editor functional in Angular frontend
+- [ ] Table status changes reflect real-time availability
+- [ ] Table assignment logic working correctly
+
+#### Epic 3: Menu Management System (Hệ thống Quản lý Menu)
 **Prerequisites:** Epic 1 (Repository Setup)
 **Dependencies:**
 - Database schema from Epic 1
@@ -5343,62 +5392,18 @@ public enum KitchenStation
 - [ ] Category enable/disable affects item availability
 - [ ] Frontend menu display components functional
 
-#### Epic 3: Order Processing System (Hệ thống Xử lý Đơn hàng)
-**Prerequisites:** Epic 1 (Repository Setup), Epic 2 (Menu Management)
+#### Epic 4: Inventory Management (Quản lý Kho)
+**Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Menu Management)
 **Dependencies:**
-- MenuItem entities from Epic 2
-- Menu availability service
-- Table management entities
+- MenuItem entities from Epic 3
+- Menu ingredient relationships
+- Stock tracking requirements
 
 **Deliverables:**
-- Order and OrderItem entities
-- Order workflow management
-- Real-time order status updates
-- Table assignment logic
-
-**Shared Components for Other Epics:**
-```csharp
-// Shared for Payment Processing
-public class Order : FullAuditedAggregateRoot<Guid>
-{
-    public string OrderNumber { get; set; }
-    public OrderStatus Status { get; set; }
-    public decimal TotalAmount { get; set; }
-    public Guid TableId { get; set; }
-    public virtual ICollection<OrderItem> OrderItems { get; set; }
-}
-
-// Shared for Kitchen Display
-public enum OrderStatus
-{
-    Pending, Confirmed, Preparing, Ready, Served, Paid
-}
-```
-
-**Integration Checkpoints:**
-- [ ] OrderItem correctly references MenuItem with proper pricing
-- [ ] Order status changes trigger SignalR notifications
-- [ ] Table availability updates when orders are placed
-- [ ] Order validation against menu availability works
-
-**Handoff Criteria:**
-- [ ] Complete order workflow from creation to completion
-- [ ] Real-time status updates functional
-- [ ] Order calculation includes correct pricing from menu
-- [ ] Table management integrated
-
-#### Epic 4: Payment Processing System (Hệ thống Xử lý Thanh toán)
-**Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Order Processing)
-**Dependencies:**
-- Order entities from Epic 3
-- Order completion workflow
-- Vietnamese banking API integration
-
-**Deliverables:**
-- Payment entities and workflows
-- Vietnamese QR payment integration
-- Payment status tracking
-- Receipt generation
+- Ingredient and IngredientCategory entities
+- Purchase invoice management
+- Stock level tracking and alerts
+- Inventory consumption tracking
 
 **Shared Components for Other Epics:**
 ```csharp
@@ -5431,8 +5436,8 @@ public enum PaymentMethod
 - [ ] Receipt generation with Vietnamese formatting
 - [ ] Payment failure handling and retry logic
 
-#### Epic 5: Kitchen Display System (Hệ thống Hiển thị Bếp)
-**Prerequisites:** Epic 1 (Repository Setup), Epic 2 (Menu Management), Epic 3 (Order Processing)
+#### Epic 5: Order Processing System (Hệ thống Xử lý Đơn hàng)
+**Prerequisites:** Epic 1 (Repository Setup), Epic 2 (Table Layout), Epic 3 (Menu Management)
 **Dependencies:**
 - Order entities and status workflow from Epic 3
 - MenuItem kitchen station assignments from Epic 2
@@ -5456,8 +5461,8 @@ public enum PaymentMethod
 - [ ] Kitchen staff can update order status
 - [ ] Printer integration working with ESC/POS commands
 
-#### Epic 6: Reporting and Analytics (Báo cáo và Phân tích)
-**Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Order Processing), Epic 4 (Payment Processing)
+#### Epic 6: Takeaway & Delivery (Mang về & Giao hàng)
+**Prerequisites:** Epic 1 (Repository Setup), Epic 3 (Menu Management), Epic 5 (Order Processing)
 **Dependencies:**
 - Order data from Epic 3
 - Payment data from Epic 4

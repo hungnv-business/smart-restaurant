@@ -166,40 +166,37 @@ Single repository containing all components: ABP Framework backend, Angular fron
 ### Epic 1: Source Code Foundation & Infrastructure (Tạo Source Code & Hạ tầng Cốt lõi)
 **Goal:** Establish project foundation, development environment, basic authentication, and core infrastructure setup to enable all subsequent development work (Thiết lập nền tảng dự án, môi trường phát triển, xác thực cơ bản và thiết lập hạ tầng cốt lõi để cho phép tất cả công việc phát triển tiếp theo).
 
-### Epic 2: User Management & Role System (Quản lý Người dùng & Hệ thống Vai trò)
-**Goal:** Create comprehensive user management system with role-based access control for restaurant staff including owners, managers, cashiers, kitchen staff, and waitstaff (Tạo hệ thống quản lý người dùng toàn diện với kiểm soát truy cập dựa trên vai trò cho nhân viên nhà hàng bao gồm chủ sở hữu, quản lý, thu ngân, nhân viên bếp và nhân viên phục vụ).
-
-### Epic 3: Table Layout Management (Quản lý Bố cục Bàn)
+### Epic 2: Table Layout Management (Quản lý Bố cục Bàn)
 **Goal:** Design and implement flexible table layout management system supporting different seating arrangements, table status tracking, and reservation capabilities (Thiết kế và triển khai hệ thống quản lý bố cục bàn linh hoạt hỗ trợ các cách sắp xếp chỗ ngồi khác nhau, theo dõi trạng thái bàn và khả năng đặt bàn).
 
-### Epic 4: Menu Management System (Quản lý Menu)
+### Epic 3: Menu Management System (Quản lý Menu)
 **Goal:** Implement two-level menu management with category and individual dish control, seasonal enable/disable functionality, pricing, and Vietnamese-only interface (Triển khai quản lý menu hai cấp với điều khiển danh mục và món ăn riêng lẻ, chức năng bật/tắt theo mùa, định giá và giao diện chỉ tiếng Việt).
 
-### Epic 5: Inventory Management (Quản lý Kho)
+### Epic 4: Inventory Management (Quản lý Kho)
 **Goal:** Create inventory tracking system with automatic deduction based on ingredient mapping, stock level monitoring, and supplier management (Tạo hệ thống theo dõi kho với tự động trừ kho dựa trên ánh xạ nguyên liệu, giám sát mức tồn kho và quản lý nhà cung cấp).
 
-### Epic 6: Order Processing & Kitchen Coordination (Order)
+### Epic 5: Order Processing & Kitchen Coordination (Order)
 **Goal:** Enable end-to-end order workflow from order taking through real-time kitchen coordination with multi-station printing and order status tracking (Kích hoạt quy trình đơn hàng đầu cuối từ nhận đơn đến phối hợp bếp thời gian thực với in đa trạm và theo dõi trạng thái đơn hàng).
 
-### Epic 7: Takeaway & Delivery Orders (Gọi đồ mang về)
+### Epic 6: Takeaway & Delivery Orders (Gọi đồ mang về)
 **Goal:** Implement comprehensive takeaway and delivery order management system with customer ordering interface, packaging specifications, delivery tracking, and integration with main order system (Triển khai hệ thống quản lý đơn hàng mang về và giao hàng toàn diện với giao diện đặt món của khách hàng, thông số đóng gói, theo dõi giao hàng và tích hợp với hệ thống đặt món chính).
 
-### Epic 8: Payment Processing (Thanh toán)
+### Epic 7: Payment Processing (Thanh toán)
 **Goal:** Implement Vietnamese payment processing workflows supporting cash, debt/credit, and QR bank transfer with mandatory staff confirmation (Triển khai quy trình xử lý thanh toán Việt Nam hỗ trợ tiền mặt, nợ/tín dụng và chuyển khoản ngân hàng QR với xác nhận nhân viên bắt buộc).
 
-### Epic 9: Deployment & Production Management (Deploy)
+### Epic 8: Deployment & Production Management (Deploy)
 **Goal:** Establish deployment pipeline, production monitoring, backup procedures, and maintenance workflows for reliable system operation (Thiết lập pipeline triển khai, giám sát sản xuất, quy trình sao lưu và quy trình bảo trì cho hoạt động hệ thống đáng tin cậy).
 
-### Epic 10: Reporting & Analytics (Báo cáo)
+### Epic 9: Reporting & Analytics (Báo cáo)
 **Goal:** Provide comprehensive reporting dashboard with revenue analytics, operational metrics, and business intelligence for data-driven decisions (Cung cấp bảng điều khiển báo cáo toàn diện với phân tích doanh thu, chỉ số vận hành và thông tin kinh doanh cho các quyết định dựa trên dữ liệu).
 
-### Epic 11: Table Reservation System (Đặt bàn)
+### Epic 10: Table Reservation System (Đặt bàn)
 **Goal:** Implement comprehensive table reservation system with advance booking, walk-in management, and integration with table layout system (Triển khai hệ thống đặt bàn toàn diện với đặt chỗ trước, quản lý khách vãng lai và tích hợp với hệ thống bố cục bàn).
 
-### Epic 12: Customer Management (Khách hàng)
+### Epic 11: Customer Management (Khách hàng)
 **Goal:** Create customer relationship management system with customer profiles, loyalty programs, order history, and feedback collection (Tạo hệ thống quản lý quan hệ khách hàng với hồ sơ khách hàng, chương trình khách hàng thân thiết, lịch sử đơn hàng và thu thập phản hồi).
 
-### Epic 13: Payroll & HR Management (Tính lương)
+### Epic 12: Payroll & HR Management (Tính lương)
 **Goal:** Implement staff payroll calculation system with work hour tracking, salary management, and integration with user role system (Triển khai hệ thống tính lương nhân viên với theo dõi giờ làm việc, quản lý lương và tích hợp với hệ thống vai trò người dùng).
 
 ---
@@ -285,53 +282,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Error tracking and notification system implemented (Hệ thống phát hiện lỗi và cảnh báo tự động)
 5. System status dashboard accessible (Màn hình theo dõi tình trạng hệ thống)
 
-
-
-### Epic 2: User Management & Role System (Quản lý Người dùng & Hệ thống Vai trò)
-
-**Expanded Goal:** Create comprehensive user management system with role-based access control, authentication workflows, and permission management specifically designed for restaurant staff hierarchy and Vietnamese restaurant operations (Tạo hệ thống quản lý người dùng toàn diện với kiểm soát truy cập dựa trên vai trò, quy trình xác thực và quản lý quyền được thiết kế đặc biệt cho cấu trúc nhân viên nhà hàng và hoạt động nhà hàng Việt Nam).
-
-#### Story 2.1: Role-Based Access Control System (Hệ thống Kiểm soát Truy cập theo Vai trò)
-**As a** restaurant owner (chủ nhà hàng),  
-**I want** to define different user roles with specific permissions (tôi muốn định nghĩa các vai trò người dùng khác nhau với quyền cụ thể),  
-**so that** each staff member can access only the functions relevant to their job (để mỗi nhân viên chỉ có thể truy cập các chức năng liên quan đến công việc của họ).
-
-**Acceptance Criteria (Tiêu chí Chấp nhận):**
-1. Define roles: Owner, Manager, Cashier, Kitchen Staff, Waitstaff with specific permissions (Định nghĩa vai trò: Chủ sở hữu, Quản lý, Thu ngân, Nhân viên bếp, Nhân viên phục vụ với quyền cụ thể)
-2. Permission matrix implementation for each role (Triển khai ma trận quyền cho mỗi vai trò)
-3. Role assignment and modification interface (Giao diện phân công và sửa đổi vai trò)
-4. Role-based menu and feature visibility (Hiển thị menu và tính năng dựa trên vai trò)
-5. Audit trail for role changes (Đường kiểm toán cho thay đổi vai trò)
-
-#### Story 2.2: User Account Management (Quản lý Tài khoản Người dùng)
-**As a** restaurant manager (quản lý nhà hàng),  
-**I want** to create and manage staff accounts efficiently (tôi muốn tạo và quản lý tài khoản nhân viên một cách hiệu quả),  
-**so that** all staff can access the system with appropriate credentials (để tất cả nhân viên có thể truy cập hệ thống với thông tin đăng nhập phù hợp).
-
-**Acceptance Criteria:**
-1. User creation with Vietnamese name support (Tạo người dùng với hỗ trợ tên tiếng Việt)
-2. Profile management with contact information (Quản lý hồ sơ với thông tin liên lạc)
-3. Password reset and security features (Đặt lại mật khẩu và tính năng bảo mật)
-4. User deactivation and reactivation (Vô hiệu hóa và kích hoạt lại người dùng)
-5. Bulk user operations for staff management (Thao tác hàng loạt cho quản lý nhân viên)
-
-#### Story 2.3: Authentication & Session Management (Xác thực & Quản lý Phiên)
-**As a** system user (người dùng hệ thống),  
-**I want** secure and convenient login experience (tôi muốn trải nghiệm đăng nhập an toàn và thuận tiện),  
-**so that** I can access the system quickly during busy restaurant hours (để tôi có thể truy cập hệ thống nhanh chóng trong giờ cao điểm của nhà hàng).
-
-**Acceptance Criteria:**
-1. Touch-friendly login interface for tablets (Giao diện đăng nhập thân thiện cảm ứng cho tablet)
-2. Session management with auto-logout for security (Quản lý phiên với tự động đăng xuất để bảo mật)
-3. Remember device functionality for trusted devices (Chức năng nhớ thiết bị cho các thiết bị tin cậy)
-4. Multi-session support for shared devices (Hỗ trợ đa phiên cho thiết bị dùng chung)
-5. Failed login attempt monitoring (Giám sát các lần đăng nhập không thành công)
-
-### Epic 3: Table Layout Management (Quản lý Bố cục Bàn)
+### Epic 2: Table Layout Management (Quản lý Bố cục Bàn)
 
 **Expanded Goal:** Design and implement flexible table layout management system supporting different seating arrangements, table status tracking, visual layout editor, and integration with reservation and order systems for efficient restaurant floor management (Thiết kế và triển khai hệ thống quản lý bố cục bàn linh hoạt hỗ trợ các cách sắp xếp chỗ ngồi khác nhau, theo dõi trạng thái bàn, trình chỉnh sửa bố cục trực quan và tích hợp với hệ thống đặt bàn và đặt món để quản lý sàn nhà hàng hiệu quả).
 
-#### Story 3.1: Visual Table Layout Editor (Trình chỉnh sửa Bố cục Bàn Trực quan)
+#### Story 2.1: Visual Table Layout Editor (Trình chỉnh sửa Bố cục Bàn Trực quan)
 **As a** restaurant manager (quản lý nhà hàng),  
 **I want** to design and modify table layouts visually (tôi muốn thiết kế và chỉnh sửa bố cục bàn một cách trực quan),  
 **so that** the system reflects the actual restaurant floor plan (để hệ thống phản ánh đúng mặt bằng thực tế của nhà hàng).
@@ -343,11 +298,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Save and load multiple layout configurations (Lưu và tải nhiều cấu hình bố cục)
 5. Visual representation matching restaurant floor (Biểu diễn trực quan khớp với sàn nhà hàng)
 
-### Epic 4: Menu Management System (Quản lý Menu)
+### Epic 3: Menu Management System (Quản lý Menu)
 
 **Expanded Goal:** Implement comprehensive two-level menu management with category and individual dish control, seasonal enable/disable functionality, pricing management, Vietnamese-only interface, and integration with inventory tracking for complete menu operations (Triển khai quản lý menu hai cấp toàn diện với điều khiển danh mục và món ăn riêng lẻ, chức năng bật/tắt theo mùa, quản lý định giá, giao diện chỉ tiếng Việt và tích hợp với theo dõi kho để vận hành menu hoàn chỉnh).
 
-#### Story 4.1: Menu Category Aggregate Management (Quản lý Aggregate Danh mục Menu)
+#### Story 3.1: Menu Category Aggregate Management (Quản lý Aggregate Danh mục Menu)
 **As a** restaurant manager (quản lý nhà hàng),  
 **I want** to create and manage menu categories using ABP aggregate patterns with seasonal control (tôi muốn tạo và quản lý danh mục menu sử dụng mẫu aggregate ABP với điều khiển theo mùa),  
 **so that** menu can be adapted to seasonal availability with proper domain boundaries (để menu có thể được thích ứng với sự có sẵn theo mùa với rành giới miền phù hợp).
@@ -360,7 +315,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 5. PostgreSQL full-text search configuration with Vietnamese language support (Cấu hình tìm kiếm toàn văn PostgreSQL với hỗ trợ ngôn ngữ tiếng Việt)
 6. ABP audit logging automatically applied to all category changes (ABP audit logging tự động áp dụng cho tất cả thay đổi danh mục)
 
-#### Story 4.2: Individual Dish Management (Quản lý Món ăn Riêng lẻ)
+#### Story 3.2: Individual Dish Management (Quản lý Món ăn Riêng lẻ)
 **As a** kitchen manager (quản lý bếp),  
 **I want** to manage individual dishes with detailed information and pricing (tôi muốn quản lý từng món ăn với thông tin chi tiết và định giá),  
 **so that** accurate dish information and costs are available to staff and customers (để thông tin món ăn và chi phí chính xác có sẵn cho nhân viên và khách hàng).
@@ -373,11 +328,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 5. Cooking time, preparation notes, and kitchen station assignment (Thời gian nấu, ghi chú chuẩn bị và phân công trạm bếp)
 
 
-### Epic 5: Inventory Management (Quản lý Kho)
+### Epic 4: Inventory Management (Quản lý Kho)
 
 **Expanded Goal:** Create comprehensive inventory management system focused on ingredient category management for purchase invoices and stock-in tracking with automatic deduction, cost calculation, and low stock alerts for efficient restaurant inventory control (Tạo hệ thống quản lý kho toàn diện tập trung vào quản lý danh mục nguyên liệu cho hóa đơn mua và theo dõi nhập kho với trừ kho tự động, tính toán chi phí và cảnh báo hết hàng để kiểm soát kho nhà hàng hiệu quả).
 
-#### Story 5.1: Ingredient Category Management (Quản lý Danh mục Nguyên liệu)
+#### Story 4.1: Ingredient Category Management (Quản lý Danh mục Nguyên liệu)
 **As a** inventory manager (quản lý kho),  
 **I want** to manage ingredient categories and items for purchase invoice creation (tôi muốn quản lý danh mục và mặt hàng nguyên liệu để tạo hóa đơn mua),  
 **so that** purchase invoices can be created systematically and ingredients can be tracked properly (để hóa đơn mua có thể được tạo một cách có hệ thống và nguyên liệu có thể được theo dõi đúng cách).
@@ -389,7 +344,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Cost tracking per unit for purchase invoice creation (Theo dõi giá thành theo đơn vị để tạo hóa đơn mua)
 5. Supplier information linking for each ingredient (Liên kết thông tin nhà cung cấp cho từng nguyên liệu)
 
-#### Story 5.2: Purchase Invoice & Stock-In Management (Quản lý Hóa đơn Mua & Nhập kho)
+#### Story 4.2: Purchase Invoice & Stock-In Management (Quản lý Hóa đơn Mua & Nhập kho)
 **As a** purchase manager (quản lý mua hàng),  
 **I want** to create and manage purchase invoices with detailed stock-in tracking (tôi muốn tạo và quản lý hóa đơn mua với theo dõi nhập kho chi tiết),  
 **so that** all purchases are recorded for cost calculation, automatic stock deduction, and inventory alerts (để tất cả giao dịch mua được ghi nhận để tính chi phí, trừ kho tự động và cảnh báo tồn kho).
@@ -401,7 +356,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Automatic inventory level updates upon stock-in confirmation (Cập nhật mức tồn kho tự động khi xác nhận nhập kho)
 5. Foundation for automatic stock deduction when orders are processed (Nền tảng cho trừ kho tự động khi xử lý đơn hàng)
 
-#### Story 5.3: Inventory Tracking & Alert System (Theo dõi Tồn kho & Hệ thống Cảnh báo)
+#### Story 4.3: Inventory Tracking & Alert System (Theo dõi Tồn kho & Hệ thống Cảnh báo)
 **As a** restaurant owner (chủ nhà hàng),  
 **I want** to monitor current stock levels with automatic alerts for low inventory (tôi muốn giám sát mức tồn kho hiện tại với cảnh báo tự động khi sắp hết hàng),  
 **so that** restaurant operations are not disrupted by stockouts and purchasing can be planned effectively (để hoạt động nhà hàng không bị gián đoạn do hết hàng và có thể lập kế hoạch mua hàng hiệu quả).
@@ -413,11 +368,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Integration foundation for automatic deduction when menu items are ordered (Nền tảng tích hợp để trừ kho tự động khi đặt món)
 5. Inventory reports for purchase planning and cost analysis (Báo cáo tồn kho để lập kế hoạch mua hàng và phân tích chi phí)
 
-### Epic 6: Order Processing & Kitchen Coordination (Order)
+### Epic 5: Order Processing & Kitchen Coordination (Order)
 
 **Expanded Goal:** Enable complete end-to-end order workflow from table selection through real-time kitchen coordination, implementing the complete waitstaff workflow: view table status → select customer table → browse menu → order items → confirm order → print to kitchen → serve customers → confirm completion (Kích hoạt quy trình đơn hàng đầu cuối hoàn chỉnh từ chọn bàn đến phối hợp bếp thời gian thực, triển khai quy trình nhân viên phục vụ hoàn chỉnh: xem trạng thái bàn → chọn bàn khách → duyệt menu → gọi món → xác nhận đơn → in cho bếp → phục vụ khách → xác nhận hoàn thành).
 
-#### Story 6.1: Waitstaff Order Management Workflow (Quy trình Gọi món của Nhân viên Phục vụ)
+#### Story 5.1: Waitstaff Order Management Workflow (Quy trình Gọi món của Nhân viên Phục vụ)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to complete the entire order process from table selection through order confirmation and kitchen coordination (tôi muốn hoàn thành toàn bộ quy trình gọi món từ chọn bàn đến xác nhận đơn hàng và phối hợp với bếp),  
 **so that** I can efficiently serve customers through a seamless workflow: view table status → select customer table → browse menu → order items → confirm order → coordinate with kitchen → serve customers → confirm completion (để tôi có thể phục vụ khách hàng hiệu quả thông qua quy trình mượt mà: xem trạng thái bàn → chọn bàn khách → duyệt menu → gọi món → xác nhận đơn → phối hợp bếp → phục vụ khách → xác nhận hoàn thành).
@@ -431,7 +386,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 6. **Service Completion Workflow**: Service completion confirmation interface with integration to table status updates and order history tracking (Quy trình hoàn thành phục vụ: Giao diện xác nhận hoàn thành phục vụ với tích hợp cập nhật trạng thái bàn và theo dõi lịch sử đơn hàng)
 7. **Payment Button Integration**: Payment processing button placed alongside print and service action buttons for seamless payment workflow integration with Epic 8 (Tích hợp nút thanh toán: Nút xử lý thanh toán đặt cạnh các nút in và thao tác phục vụ để tích hợp quy trình thanh toán mượt mà với Epic 8)
 
-#### Story 6.2: Kitchen Priority Management Dashboard (Bảng điều khiển Quản lý Ưu tiên Bếp)
+#### Story 4.2: Kitchen Priority Management Dashboard (Bảng điều khiển Quản lý Ưu tiên Bếp)
 **As a** kitchen staff (nhân viên bếp),  
 **I want** to see all tables with pending orders prioritized by order time and dish preparation speed (tôi muốn xem tất cả các bàn có đơn hàng chưa phục vụ được ưu tiên theo thời gian gọi món và tốc độ chế biến),  
 **so that** I can optimize cooking sequence to serve quick dishes first while maintaining order priority (để tôi có thể tối ưu thứ tự nấu ăn, phục vụ món nhanh trước trong khi vẫn duy trì ưu tiên đơn hàng).
@@ -443,11 +398,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Smart preparation suggestions balancing FIFO order priority with quick-serve opportunities (Gợi ý chuẩn bị thông minh cân bằng ưu tiên đơn hàng đến trước với cơ hội phục vụ nhanh)
 5. Real-time updates when dishes are completed and served to tables (Cập nhật thời gian thực khi món được hoàn thành và phục vụ cho bàn)
 
-### Epic 7: Takeaway & Delivery Orders (Gọi đồ mang về)
+### Epic 6: Takeaway & Delivery Orders (Gọi đồ mang về)
 
 **Simplified Goal:** Enable simple takeaway order processing workflow: customer arrives → staff takes order → prints kitchen bill → confirms completion → processes payment. Orders display on kitchen screen with takeaway marking to differentiate from dine-in orders (Kích hoạt quy trình xử lý đơn mang về đơn giản: khách tới quán → nhân viên gọi món → in bill bếp → xác nhận hoàn thành → xử lý thanh toán. Đơn hàng hiển thị trên màn hình bếp với đánh dấu mang về để phân biệt với đơn ăn tại quán).
 
-#### Story 7.1: Takeaway Order Processing Workflow (Quy trình Xử lý Đơn hàng Mang về)
+#### Story 5.1: Takeaway Order Processing Workflow (Quy trình Xử lý Đơn hàng Mang về)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to process takeaway orders with a simple workflow without table assignment (tôi muốn xử lý đơn hàng mang về với quy trình đơn giản không cần phân bàn),  
 **so that** customers can quickly order food for takeaway (để khách hàng có thể nhanh chóng gọi món mang về).
@@ -455,15 +410,15 @@ Single repository containing all components: ABP Framework backend, Angular fron
 **Acceptance Criteria:**
 1. **Takeaway Order Creation**: Direct menu access without table selection for takeaway orders (Tạo đơn mang về: Truy cập menu trực tiếp không cần chọn bàn cho đơn mang về)
 2. **Menu Browsing & Item Selection**: Same menu interface as dine-in with quantity and notes functionality (Duyệt menu và chọn món: Giao diện menu giống như ăn tại quán với chức năng số lượng và ghi chú)
-3. **Kitchen Integration with Takeaway Marking**: Orders print to kitchen with clear "TAKEAWAY" marking and display on Story 6.2 kitchen screen (Tích hợp bếp với đánh dấu mang về: Đơn hàng in ra bếp với dấu hiệu "MANG VỀ" rõ ràng và hiển thị trên màn hình bếp Story 6.2)
+3. **Kitchen Integration with Takeaway Marking**: Orders print to kitchen with clear "TAKEAWAY" marking and display on Story 5.2 kitchen screen (Tích hợp bếp với đánh dấu mang về: Đơn hàng in ra bếp với dấu hiệu "MANG VỀ" rõ ràng và hiển thị trên màn hình bếp Story 5.2)
 4. **Order Status Tracking**: Real-time status updates (Confirmed, Preparing, Ready for Pickup) (Theo dõi trạng thái đơn: Cập nhật trạng thái thời gian thực - Đã xác nhận, Đang chuẩn bị, Sẵn sàng lấy)
 5. **Payment Processing Integration**: Direct integration with Epic 8 payment processing (Tích hợp xử lý thanh toán: Tích hợp trực tiếp với xử lý thanh toán Epic 8)
 
-### Epic 8: Payment Processing (Thanh toán)
+### Epic 7: Payment Processing (Thanh toán)
 
 **Integrated Goal:** Implement integrated payment processing within order management interface supporting Vietnamese payment methods (cash, QR bank transfer) with payment buttons directly accessible from order lists for seamless workflow (Triển khai xử lý thanh toán tích hợp trong giao diện quản lý đơn hàng hỗ trợ phương thức thanh toán Việt Nam - tiền mặt, chuyển khoản QR - với nút thanh toán truy cập trực tiếp từ danh sách đơn hàng để quy trình mượt mà).
 
-#### Story 8.1: Integrated Payment Processing (Xử lý Thanh toán Tích hợp)
+#### Story 7.1: Integrated Payment Processing (Xử lý Thanh toán Tích hợp)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to process customer payments with a simple one-step workflow that automatically prints invoices (tôi muốn xử lý thanh toán khách hàng với quy trình một bước đơn giản tự động in hóa đơn),  
 **so that** I can quickly complete payment processing and reset table availability (để tôi có thể nhanh chóng hoàn thành xử lý thanh toán và đặt lại trạng thái bàn khả dụng).
@@ -474,7 +429,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 3. **Automatic Table Reset**: After clicking "Payment Completed", system automatically resets table status to "Available" and clears order data for next customers (Tự động đặt lại bàn: Sau khi bấm "Đã thanh toán", hệ thống tự động đặt lại trạng thái bàn thành "Khả dụng" và xóa dữ liệu đơn hàng cho khách tiếp theo)
 4. **Invoice Content Requirements**: Printed invoice must include restaurant name, contact info, itemized dishes with prices, total amount, timestamp, and restaurant payment QR code (Yêu cầu nội dung hóa đơn: Hóa đơn in phải bao gồm tên quán, thông tin liên hệ, chi tiết món ăn với giá, tổng tiền, thời gian và QR code thanh toán của quán)
 
-#### Story 8.2: Financial Reconciliation & Reporting (Đối soát Tài chính & Báo cáo)
+#### Story 7.2: Financial Reconciliation & Reporting (Đối soát Tài chính & Báo cáo)
 **As a** restaurant owner (chủ nhà hàng),  
 **I want** to track all payment transactions with detailed reporting (tôi muốn theo dõi tất cả giao dịch thanh toán với báo cáo chi tiết),  
 **so that** financial records are accurate and auditable (để hồ sơ tài chính chính xác và có thể kiểm toán).
@@ -486,11 +441,11 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. **Transaction History**: Complete payment transaction history with search and filter capabilities (Lịch sử giao dịch: Lịch sử giao dịch thanh toán đầy đủ với khả năng tìm kiếm và lọc)
 5. **Backend Integration**: Database integration to track all payments processed through the integrated interface (Tích hợp backend: Tích hợp cơ sở dữ liệu để theo dõi tất cả thanh toán được xử lý qua giao diện tích hợp)
 
-### Epic 9: Deployment & Production Management (Deploy)
+### Epic 8: Deployment & Production Management (Deploy)
 
 **VPS Deployment Goal:** Establish production deployment on VPS using Docker containers with GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database, and Redis caching for reliable and cost-effective restaurant system operation (Thiết lập triển khai production trên VPS sử dụng Docker containers với GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database và Redis caching để vận hành hệ thống nhà hàng đáng tin cậy và tiết kiệm chi phí).
 
-#### Story 9.1: VPS Setup & Docker Deployment (Thiết lập VPS & Triển khai Docker)
+#### Story 8.1: VPS Setup & Docker Deployment (Thiết lập VPS & Triển khai Docker)
 **As a** system administrator (quản trị viên hệ thống),  
 **I want** to setup production VPS environment with Docker containers and automated deployment from GitHub (tôi muốn thiết lập môi trường VPS production với Docker containers và triển khai tự động từ GitHub),  
 **so that** the restaurant system runs reliably on cost-effective VPS infrastructure (để hệ thống nhà hàng chạy ổn định trên hạ tầng VPS tiết kiệm chi phí).
@@ -502,7 +457,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. **SSL Certificate**: Let's Encrypt SSL certificate setup with automatic renewal for HTTPS access (Chứng chỉ SSL: Thiết lập chứng chỉ SSL Let's Encrypt với gia hạn tự động cho truy cập HTTPS)
 5. **Domain Configuration**: Domain name setup with DNS pointing to VPS IP address for production access (Cấu hình domain: Thiết lập tên miền với DNS trỏ về IP VPS để truy cập production)
 
-#### Story 9.2: Production Configuration & Security (Cấu hình Production & Bảo mật)
+#### Story 8.2: Production Configuration & Security (Cấu hình Production & Bảo mật)
 **As a** system administrator (quản trị viên hệ thống),  
 **I want** to configure production environment with proper security and performance settings (tôi muốn cấu hình môi trường production với cài đặt bảo mật và hiệu suất phù hợp),  
 **so that** the restaurant system operates securely and efficiently in production (để hệ thống nhà hàng hoạt động an toàn và hiệu quả trong production).
@@ -514,7 +469,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. **Performance Optimization**: Nginx optimization for static files, gzip compression, caching headers, and rate limiting (Tối ưu hiệu suất: Tối ưu Nginx cho static files, nén gzip, cache headers và rate limiting)
 5. **Backup Strategy**: Automated daily database backups stored locally and optionally uploaded to cloud storage (Chiến lược Backup: Backup database tự động hàng ngày lưu trữ local và tùy chọn upload lên cloud storage)
 
-#### Story 9.3: Monitoring & Maintenance (Giám sát & Bảo trì)
+#### Story 8.3: Monitoring & Maintenance (Giám sát & Bảo trì)
 **As a** restaurant owner (chủ nhà hàng),  
 **I want** to monitor system health and receive alerts for any issues (tôi muốn giám sát sức khỏe hệ thống và nhận cảnh báo cho bất kỳ sự cố nào),  
 **so that** restaurant operations continue smoothly without technical disruptions (để hoạt động nhà hàng tiếp tục diễn ra suôn sẻ mà không bị gián đoạn kỹ thuật).
@@ -526,7 +481,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. **Maintenance Procedures**: Documentation and scripts for common maintenance tasks like database cleanup, log rotation, and system updates (Quy trình bảo trì: Tài liệu và scripts cho các tác vụ bảo trì thường gặp như dọn dẹp database, rotate log và cập nhật hệ thống)
 5. **Disaster Recovery**: Simple backup restoration procedures and emergency contact information for technical support (Khôi phục thảm họa: Quy trình phục hồi backup đơn giản và thông tin liên hệ khẩn cấp cho hỗ trợ kỹ thuật)
 
-### Epic 10: Reporting & Analytics (Báo cáo)
+### Epic 9: Reporting & Analytics (Báo cáo)
 
 **Expanded Goal:** Provide comprehensive reporting dashboard with revenue analytics, operational metrics, business intelligence, and data visualization to enable data-driven business decisions for restaurant optimization (Cung cấp bảng điều khiển báo cáo toàn diện với phân tích doanh thu, chỉ số vận hành, thông tin kinh doanh và trực quan hóa dữ liệu để cho phép các quyết định kinh doanh dựa trên dữ liệu để tối ưu hóa nhà hàng).
 
@@ -554,7 +509,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Staff productivity tracking and performance reports (Theo dõi năng suất nhân viên và báo cáo hiệu suất)
 5. Customer satisfaction indicators and feedback analysis (Chỉ báo hài lòng khách hàng và phân tích phản hồi)
 
-### Epic 11: Table Reservation System (Đặt bàn)
+### Epic 10: Table Reservation System (Đặt bàn)
 
 **Simple Goal:** Enable phone-based table reservations with pre-ordering capability that reuses existing order management workflow from Story 6.1 for efficient and familiar operation (Kích hoạt đặt bàn qua điện thoại với khả năng đặt món trước sử dụng lại quy trình quản lý đơn hàng hiện tại từ Story 6.1 để vận hành hiệu quả và quen thuộc).
 
@@ -571,7 +526,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 5. **Arrival Processing**: When customers arrive, convert "Reserved" status to "Occupied" and automatically begin kitchen preparation for pre-ordered items (Xử lý khi khách đến: Khi khách đến, chuyển trạng thái "Đã đặt" thành "Đang sử dụng" và tự động bắt đầu chuẩn bị bếp cho món đã đặt trước)
 6. **Integration with Existing Workflow**: Seamless transition to existing Story 6.1 order management workflow for additional orders and service completion (Tích hợp với quy trình hiện có: Chuyển đổi mượt mà sang quy trình quản lý đơn hàng Story 6.1 hiện có cho đơn hàng bổ sung và hoàn thành phục vụ)
 
-### Epic 12: Customer Management (Khách hàng)
+### Epic 11: Customer Management (Khách hàng)
 
 **Expanded Goal:** Create comprehensive customer relationship management system with customer profiles, loyalty programs, order history, feedback collection, and personalized service features to enhance customer experience and retention (Tạo hệ thống quản lý quan hệ khách hàng toàn diện với hồ sơ khách hàng, chương trình khách hàng thân thiết, lịch sử đơn hàng, thu thập phản hồi và tính năng dịch vụ cá nhân hóa để nâng cao trải nghiệm và giữ chân khách hàng).
 
@@ -599,7 +554,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 4. Birthday and anniversary special recognition (Nhận biết đặc biệt sinh nhật và kỷ niệm)
 5. Customer satisfaction survey automation (Tự động hóa khảo sát sự hài lòng khách hàng)
 
-### Epic 13: Payroll & HR Management (Tính lương)
+### Epic 12: Payroll & HR Management (Tính lương)
 
 **Expanded Goal:** Implement comprehensive staff payroll calculation system with work hour tracking, salary management, attendance monitoring, and integration with user role system for efficient human resource management in restaurant operations (Triển khai hệ thống tính lương nhân viên toàn diện với theo dõi giờ làm việc, quản lý lương, giám sát chuyên cần và tích hợp với hệ thống vai trò người dùng để quản lý nguồn nhân lực hiệu quả trong hoạt động nhà hàng).
 

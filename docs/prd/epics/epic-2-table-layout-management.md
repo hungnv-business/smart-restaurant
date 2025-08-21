@@ -1,8 +1,8 @@
-# Epic 3: Table Layout Management (Quản lý Bố cục Bàn)
+# Epic 2: Table Layout Management (Quản lý Bố cục Bàn)
 
 **Expanded Goal:** Design and implement flexible table layout management system supporting different seating arrangements, table status tracking, visual layout editor, and integration with reservation and order systems for efficient restaurant floor management (Thiết kế và triển khai hệ thống quản lý bố cục bàn linh hoạt hỗ trợ các cách sắp xếp chỗ ngồi khác nhau, theo dõi trạng thái bàn, trình chỉnh sửa bố cục trực quan và tích hợp với hệ thống đặt bàn và đặt món để quản lý sàn nhà hàng hiệu quả).
 
-## Story 3.1: Visual Table Layout Editor (Trình chỉnh sửa Bố cục Bàn Trực quan)
+## Story 2.1: Visual Table Layout Editor (Trình chỉnh sửa Bố cục Bàn Trực quan)
 **As a** restaurant manager (quản lý nhà hàng),  
 **I want** to design and modify table layouts visually (tôi muốn thiết kế và chỉnh sửa bố cục bàn một cách trực quan),  
 **so that** the system reflects the actual restaurant floor plan (để hệ thống phản ánh đúng mặt bằng thực tế của nhà hàng).

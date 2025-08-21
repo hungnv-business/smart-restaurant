@@ -1,8 +1,8 @@
-# Epic 6: Order Processing & Kitchen Coordination (Order)
+# Epic 5: Order Processing & Kitchen Coordination (Order)
 
 **Expanded Goal:** Enable complete end-to-end order workflow from table selection through real-time kitchen coordination, implementing the complete waitstaff workflow: view table status → select customer table → browse menu → order items → confirm order → print to kitchen → serve customers → confirm completion (Kích hoạt quy trình đơn hàng đầu cuối hoàn chỉnh từ chọn bàn đến phối hợp bếp thời gian thực, triển khai quy trình nhân viên phục vụ hoàn chỉnh: xem trạng thái bàn → chọn bàn khách → duyệt menu → gọi món → xác nhận đơn → in cho bếp → phục vụ khách → xác nhận hoàn thành).
 
-## Story 6.1: Waitstaff Order Management Workflow (Quy trình Gọi món của Nhân viên Phục vụ)
+## Story 5.1: Waitstaff Order Management Workflow (Quy trình Gọi món của Nhân viên Phục vụ)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to complete the entire order process from table selection through order confirmation and kitchen coordination (tôi muốn hoàn thành toàn bộ quy trình gọi món từ chọn bàn đến xác nhận đơn hàng và phối hợp với bếp),  
 **so that** I can efficiently serve customers through a seamless workflow: view table status → select customer table → browse menu → order items → confirm order → coordinate with kitchen → serve customers → confirm completion (để tôi có thể phục vụ khách hàng hiệu quả thông qua quy trình mượt mà: xem trạng thái bàn → chọn bàn khách → duyệt menu → gọi món → xác nhận đơn → phối hợp bếp → phục vụ khách → xác nhận hoàn thành).
@@ -16,7 +16,7 @@
 6. **Service Completion Workflow**: Service completion confirmation interface with integration to table status updates and order history tracking (Quy trình hoàn thành phục vụ: Giao diện xác nhận hoàn thành phục vụ với tích hợp cập nhật trạng thái bàn và theo dõi lịch sử đơn hàng)
 7. **Payment Button Integration**: Payment processing button placed alongside print and service action buttons for seamless payment workflow integration with Epic 8 (Tích hợp nút thanh toán: Nút xử lý thanh toán đặt cạnh các nút in và thao tác phục vụ để tích hợp quy trình thanh toán mượt mà với Epic 8)
 
-## Story 6.2: Kitchen Priority Management Dashboard (Bảng điều khiển Quản lý Ưu tiên Bếp)
+## Story 5.2: Kitchen Priority Management Dashboard (Bảng điều khiển Quản lý Ưu tiên Bếp)
 **As a** kitchen staff (nhân viên bếp),  
 **I want** to see all tables with pending orders prioritized by order time and dish preparation speed (tôi muốn xem tất cả các bàn có đơn hàng chưa phục vụ được ưu tiên theo thời gian gọi món và tốc độ chế biến),  
 **so that** I can optimize cooking sequence to serve quick dishes first while maintaining order priority (để tôi có thể tối ưu thứ tự nấu ăn, phục vụ món nhanh trước trong khi vẫn duy trì ưu tiên đơn hàng).

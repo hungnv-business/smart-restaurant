@@ -1,8 +1,8 @@
-# Epic 11: Table Reservation System (Đặt bàn)
+# Epic 10: Table Reservation System (Đặt bàn)
 
 **Simple Goal:** Enable phone-based table reservations with pre-ordering capability that reuses existing order management workflow from Story 6.1 for efficient and familiar operation (Kích hoạt đặt bàn qua điện thoại với khả năng đặt món trước sử dụng lại quy trình quản lý đơn hàng hiện tại từ Story 6.1 để vận hành hiệu quả và quen thuộc).
 
-## Story 11.1: Phone Reservation Processing (Xử lý Đặt bàn qua Điện thoại)
+## Story 10.1: Phone Reservation Processing (Xử lý Đặt bàn qua Điện thoại)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to process customer phone reservations with table assignment and pre-ordering using existing menu interface (tôi muốn xử lý đặt bàn qua điện thoại của khách hàng với phân bàn và đặt món trước sử dụng giao diện menu hiện có),  
 **so that** customers can reserve tables and pre-order food using the same familiar workflow as regular orders (để khách hàng có thể đặt bàn và đặt món trước sử dụng cùng quy trình quen thuộc như gọi món thường).

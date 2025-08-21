@@ -1,8 +1,8 @@
-# Epic 8: Payment Processing (Thanh toán)
+# Epic 7: Payment Processing (Thanh toán)
 
 **Integrated Goal:** Implement integrated payment processing within order management interface supporting Vietnamese payment methods (cash, QR bank transfer) with payment buttons directly accessible from order lists for seamless workflow (Triển khai xử lý thanh toán tích hợp trong giao diện quản lý đơn hàng hỗ trợ phương thức thanh toán Việt Nam - tiền mặt, chuyển khoản QR - với nút thanh toán truy cập trực tiếp từ danh sách đơn hàng để quy trình mượt mà).
 
-## Story 8.1: Integrated Payment Processing (Xử lý Thanh toán Tích hợp)
+## Story 7.1: Integrated Payment Processing (Xử lý Thanh toán Tích hợp)
 **As a** waitstaff (nhân viên phục vụ),  
 **I want** to process customer payments with a simple one-step workflow that automatically prints invoices (tôi muốn xử lý thanh toán khách hàng với quy trình một bước đơn giản tự động in hóa đơn),  
 **so that** I can quickly complete payment processing and reset table availability (để tôi có thể nhanh chóng hoàn thành xử lý thanh toán và đặt lại trạng thái bàn khả dụng).
@@ -13,7 +13,7 @@
 3. **Automatic Table Reset**: After clicking "Payment Completed", system automatically resets table status to "Available" and clears order data for next customers (Tự động đặt lại bàn: Sau khi bấm "Đã thanh toán", hệ thống tự động đặt lại trạng thái bàn thành "Khả dụng" và xóa dữ liệu đơn hàng cho khách tiếp theo)
 4. **Invoice Content Requirements**: Printed invoice must include restaurant name, contact info, itemized dishes with prices, total amount, timestamp, and restaurant payment QR code (Yêu cầu nội dung hóa đơn: Hóa đơn in phải bao gồm tên quán, thông tin liên hệ, chi tiết món ăn với giá, tổng tiền, thời gian và QR code thanh toán của quán)
 
-## Story 8.2: Financial Reconciliation & Reporting (Đối soát Tài chính & Báo cáo)
+## Story 7.2: Financial Reconciliation & Reporting (Đối soát Tài chính & Báo cáo)
 **As a** restaurant owner (chủ nhà hàng),  
 **I want** to track all payment transactions with detailed reporting (tôi muốn theo dõi tất cả giao dịch thanh toán với báo cáo chi tiết),  
 **so that** financial records are accurate and auditable (để hồ sơ tài chính chính xác và có thể kiểm toán).
