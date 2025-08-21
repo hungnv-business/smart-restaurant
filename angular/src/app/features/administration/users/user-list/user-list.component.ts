@@ -6,7 +6,6 @@ import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
-import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
@@ -29,7 +28,6 @@ import { PERMISSIONS } from '../../../../shared/constants/permissions';
     TableModule,
     ButtonModule,
     RippleModule,
-    ToastModule,
     ToolbarModule,
     InputTextModule,
     TagModule,
@@ -38,16 +36,15 @@ import { PERMISSIONS } from '../../../../shared/constants/permissions';
     ConfirmDialogModule,
     TooltipModule,
     UserFormComponent,
-    PermissionDirective
+    PermissionDirective,
   ],
   templateUrl: './user-list.component.html',
-  styleUrl: './user-list.component.scss',
   providers: [ConfirmationService],
 })
 export class UserListComponent extends ComponentBase implements OnInit {
   // Permissions constants
   readonly PERMISSIONS = PERMISSIONS;
-  
+
   // Table configuration
   filterFields: string[] = ['userName', 'email', 'name', 'surname', 'phoneNumber'];
 
@@ -127,8 +124,6 @@ export class UserListComponent extends ComponentBase implements OnInit {
     return this.getFullName(user.name, user.surname);
   }
 
-  // Permission checks removed - using *abpPermission directive in template
-
   // Table operations
   onGlobalFilter(table: Table, event: Event): void {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
@@ -140,12 +135,9 @@ export class UserListComponent extends ComponentBase implements OnInit {
       maxResultCount: 50,
     };
 
-    // Load users and available roles in parallel
-    forkJoin({
-      users: this.identityUserService.getList(input),
-    }).subscribe({
+    this.identityUserService.getList(input).subscribe({
       next: result => {
-        this.users.set(result.users.items || []);
+        this.users.set(result.items || []);
 
         // Load roles for each user
         this.loadUserRoles();
@@ -155,6 +147,13 @@ export class UserListComponent extends ComponentBase implements OnInit {
         this.users.set([]);
       },
     });
+  }
+
+  /**
+   * Get status label in Vietnamese
+   */
+  getStatusLabel(status: boolean): string {
+    return status ? 'Hoạt động' : 'Vô hiệu';
   }
 
   private loadUserRoles() {
@@ -196,18 +195,20 @@ export class UserListComponent extends ComponentBase implements OnInit {
   private performDeleteSelectedUsers() {
     if (!this.selectedUsers?.length) return;
 
-    for (const user of this.selectedUsers) {
-      this.identityUserService.delete(user.id!).subscribe({
-        next: () => {
-          this.loadUsers();
-        },
-        error: error => {
-          this.handleApiError(error, `Không thể xóa ${user.userName}`);
-        },
-      });
-    }
+    const deleteRequests = this.selectedUsers.map(user =>
+      this.identityUserService.delete(user.id!)
+    );
 
-    this.selectedUsers = [];
-    this.showSuccess('Thành công', 'Đã xóa người dùng đã chọn');
+    forkJoin(deleteRequests).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.selectedUsers = [];
+        this.showSuccess('Thành công', `Đã xóa ${deleteRequests.length} người dùng`);
+      },
+      error: (error) => {
+        this.handleApiError(error, 'Có lỗi xảy ra khi xóa người dùng');
+        this.loadUsers(); // Reload to refresh the list
+      },
+    });
   }
 }

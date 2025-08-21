@@ -16,7 +16,7 @@
         icon="pi pi-trash"
         outlined
         (onClick)="deleteSelectedRoles()"
-        [disabled]="!selectedRoles || !selectedRoles.length"
+        [disabled]="!selectedRoles || !selectedRoles.length || !hasDeletableRoles()"
       />
     </ng-template>
   </p-toolbar>
@@ -25,14 +25,14 @@
     #dt
     [value]="roles()"
     [rows]="pageSize"
-    [paginator]="true"
+    [paginator]="paginator"
     [globalFilterFields]="filterFields"
-    styleClass="role-table"
+    styleClass="w-full"
     [(selection)]="selectedRoles"
-    [rowHover]="true"
+    [rowHover]="rowHover"
     dataKey="id"
     currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} vai trò"
-    [showCurrentPageReport]="true"
+    [showCurrentPageReport]="showCurrentPageReport"
     [rowsPerPageOptions]="rowsPerPageOptions"
   >
     <ng-template #caption>
@@ -52,42 +52,55 @@
 
     <ng-template #header>
       <tr>
-        <th class="header-cell col-checkbox">
+        <th class="min-w-12">
           <p-tableHeaderCheckbox *abpPermission="PERMISSIONS.ROLES.DELETE" />
         </th>
-        <th class="header-cell col-xl" pSortableColumn="name">
+        <th class="min-w-48" pSortableColumn="name">
           <span class="flex items-center gap-2">Tên vai trò <p-sortIcon field="name" /></span>
         </th>
-        <th class="header-cell col-md" pSortableColumn="isDefault">
+        <th class="min-w-32" pSortableColumn="isDefault">
           <span class="flex items-center gap-2">Mặc định <p-sortIcon field="isDefault" /></span>
         </th>
-        <th class="header-cell col-md" pSortableColumn="isPublic">
+        <th class="min-w-32" pSortableColumn="isPublic">
           <span class="flex items-center gap-2">Công khai <p-sortIcon field="isPublic" /></span>
         </th>
-        <th class="header-cell col-sm"></th>
+        <th class="min-w-32" pSortableColumn="isStatic">
+          <span class="flex items-center gap-2">Hệ thống <p-sortIcon field="isStatic" /></span>
+        </th>
+        <th class="min-w-20"></th>
       </tr>
     </ng-template>
 
     <ng-template #body let-role>
       <tr>
-        <td class="body-cell col-checkbox">
-          <p-tableCheckbox [value]="role" *abpPermission="PERMISSIONS.ROLES.DELETE" />
+        <td class="w-12 min-w-12">
+          <p-tableCheckbox 
+            [value]="role" 
+            *abpPermission="PERMISSIONS.ROLES.DELETE"
+            [disabled]="role.isStatic" 
+          />
         </td>
-        <td class="body-cell col-xl">{{ role.name }}</td>
-        <td class="body-cell col-md">
+        <td class="min-w-48">{{ role.name }}</td>
+        <td class="min-w-32">
           <p-tag
             [value]="role.isDefault ? 'Có' : 'Không'"
             [severity]="role.isDefault ? 'success' : 'secondary'"
           />
         </td>
-        <td class="body-cell col-md">
+        <td class="min-w-32">
           <p-tag
             [value]="role.isPublic ? 'Có' : 'Không'"
             [severity]="role.isPublic ? 'success' : 'secondary'"
           />
         </td>
-        <td class="body-cell col-sm">
-          <div class="action-buttons">
+        <td class="min-w-32">
+          <p-tag
+            [value]="role.isStatic ? 'Có' : 'Không'"
+            [severity]="role.isStatic ? 'warning' : 'secondary'"
+          />
+        </td>
+        <td class="min-w-20">
+          <div class="flex gap-2 justify-end">
             <p-button
               *abpPermission="PERMISSIONS.ROLES.UPDATE"
               icon="pi pi-pencil"
@@ -102,8 +115,9 @@
               severity="danger"
               [rounded]="true"
               [outlined]="true"
+              [disabled]="role.isStatic"
               (click)="deleteRole(role)"
-              pTooltip="Xóa"
+              [pTooltip]="role.isStatic ? 'Không thể xóa vai trò hệ thống' : 'Xóa'"
             />
           </div>
         </td>

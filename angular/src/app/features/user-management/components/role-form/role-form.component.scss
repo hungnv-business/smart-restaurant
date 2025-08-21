@@ -1,7 +1,0 @@
-/* Role Form Dialog Component Styles - Using Tailwind CSS */
-
-// Keep only non-Tailwind specific styles
-label.required::after {
-  content: ' *';
-  color: #ef4444; // red-500
-}

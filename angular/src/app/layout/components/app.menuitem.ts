@@ -69,7 +69,7 @@ import { LayoutService } from '../service/layout.service';
 
             <ul #submenu class="layout-root-submenulist !z-50" *ngIf="item.items && item.visible !== false" [@children]="submenuAnimation" (@children.done)="onSubmenuAnimated($event)">
                 <ng-template ngFor let-child let-i="index" [ngForOf]="item.items">
-                    <li app-menuitem [item]="child" [index]="i" [parentKey]="key" [class]="child['badgeClass']"></li>
+                    <li app-menuitem *ngIf="child.visible !== false" [item]="child" [index]="i" [parentKey]="key" [class]="child['badgeClass']"></li>
                 </ng-template>
             </ul>
         </ng-container>

@@ -13,7 +13,8 @@ import { ToastModule } from 'primeng/toast';
 import { AuthService } from '@abp/ng.core';
 
 // Shared Components
-import { ValidationErrorComponent, ComponentBase } from '../../../shared/components';
+import { ValidationErrorComponent } from '../../shared/components/validation-error/validation-error.component';
+import { ComponentBase } from '../../shared/base/component-base';
 
 @Component({
     selector: 'app-login',

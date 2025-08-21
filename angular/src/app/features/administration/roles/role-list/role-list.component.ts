@@ -6,7 +6,6 @@ import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
-import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
@@ -29,7 +28,6 @@ import { RoleFormComponent } from '../role-form/role-form.component';
     TableModule,
     ButtonModule,
     RippleModule,
-    ToastModule,
     ToolbarModule,
     InputTextModule,
     TagModule,
@@ -41,7 +39,6 @@ import { RoleFormComponent } from '../role-form/role-form.component';
     RoleFormComponent,
   ],
   templateUrl: './role-list.component.html',
-  styleUrl: './role-list.component.scss',
   providers: [ConfirmationService],
 })
 export class RoleListComponent extends ComponentBase implements OnInit {
@@ -87,6 +84,11 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   }
 
   deleteRole(role: IdentityRoleDto) {
+    if (role.isStatic) {
+      this.showWarning('Không thể xóa', 'Không thể xóa vai trò hệ thống');
+      return;
+    }
+
     this.confirmationService.confirm({
       message: `Bạn có chắc chắn muốn xóa vai trò "${role.name}"?`,
       header: 'Xác nhận',
@@ -102,14 +104,30 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   deleteSelectedRoles() {
     if (!this.selectedRoles?.length) return;
 
+    // Filter out static roles
+    const deletableRoles = this.selectedRoles.filter(role => !role.isStatic);
+    const staticRoles = this.selectedRoles.filter(role => role.isStatic);
+
+    if (staticRoles.length > 0) {
+      const staticRoleNames = staticRoles.map(role => role.name).join(', ');
+      this.showWarning(
+        'Không thể xóa', 
+        `Không thể xóa các vai trò hệ thống: ${staticRoleNames}`
+      );
+    }
+
+    if (deletableRoles.length === 0) {
+      return;
+    }
+
     this.confirmationService.confirm({
-      message: 'Bạn có chắc chắn muốn xóa các vai trò đã chọn?',
+      message: `Bạn có chắc chắn muốn xóa ${deletableRoles.length} vai trò đã chọn?`,
       header: 'Xác nhận',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Xóa',
       rejectLabel: 'Hủy',
       accept: () => {
-        this.performDeleteSelectedRoles();
+        this.performDeleteSelectedRoles(deletableRoles);
       },
     });
   }
@@ -117,6 +135,11 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   // Table operations
   onGlobalFilter(table: Table, event: Event): void {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  }
+
+  hasDeletableRoles(): boolean {
+    if (!this.selectedRoles?.length) return false;
+    return this.selectedRoles.some(role => !role.isStatic);
   }
 
   // Private methods
@@ -148,21 +171,23 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
-  private performDeleteSelectedRoles() {
-    if (!this.selectedRoles?.length) return;
+  private performDeleteSelectedRoles(rolesToDelete: IdentityRoleDto[]) {
+    if (!rolesToDelete?.length) return;
 
-    for (const role of this.selectedRoles) {
-      this.identityRoleService.delete(role.id!).subscribe({
-        next: () => {
-          this.loadRoles();
-        },
-        error: (error) => {
-          this.handleApiError(error, `Không thể xóa vai trò ${role.name}`);
-        },
-      });
-    }
+    const deleteRequests = rolesToDelete.map(role =>
+      this.identityRoleService.delete(role.id!)
+    );
 
-    this.selectedRoles = [];
-    this.showSuccess('Thành công', 'Đã xóa các vai trò đã chọn');
+    forkJoin(deleteRequests).subscribe({
+      next: () => {
+        this.loadRoles();
+        this.selectedRoles = [];
+        this.showSuccess('Thành công', `Đã xóa ${rolesToDelete.length} vai trò`);
+      },
+      error: (error) => {
+        this.handleApiError(error, 'Có lỗi xảy ra khi xóa vai trò');
+        this.loadRoles(); // Reload to refresh the list
+      },
+    });
   }
 }

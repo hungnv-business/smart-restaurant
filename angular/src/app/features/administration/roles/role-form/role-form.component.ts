@@ -4,7 +4,6 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  FormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -34,7 +33,6 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
@@ -45,7 +43,6 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
     ValidationErrorComponent,
   ],
   templateUrl: './role-form.component.html',
-  styleUrl: './role-form.component.scss',
 })
 export class RoleFormComponent extends ComponentBase implements OnInit, OnChanges {
   @Input() visible = false;
@@ -223,7 +220,6 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
         this.permissionTreeNodes = this.permissionTreeService.buildPermissionTree(
           this.availablePermissions
         );
-        console.log(this.permissionTreeNodes);
       }
     } catch (error) {
       console.error('Error loading permissions:', error);
@@ -290,9 +286,6 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
       .map(node => node.key || '')
       .filter(key => key !== '');
 
-    console.log('selectedTreeNodes:', this.selectedTreeNodes);
-    console.log('selectedPermissionKeys:', selectedPermissionKeys);
-
     // Build permissions array for update
     const permissions: any[] = [];
     this.availablePermissions.groups.forEach((group: any) => {
@@ -309,8 +302,6 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
       permissions: permissions,
     };
 
-    console.log(permissions);
-
     try {
       await firstValueFrom(this.permissionsService.update('R', roleName, updateInput));
     } catch (error) {
@@ -319,8 +310,4 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
     }
   }
 
-  // Helper method for template
-  getControl(fieldName: string) {
-    return this.roleForm.get(fieldName);
-  }
 }

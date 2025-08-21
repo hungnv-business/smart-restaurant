@@ -25,14 +25,14 @@
     #dt
     [value]="users()"
     [rows]="pageSize"
-    [paginator]="true"
+    [paginator]="paginator"
     [globalFilterFields]="filterFields"
-    styleClass="user-table"
+    styleClass="w-full"
     [(selection)]="selectedUsers"
-    [rowHover]="true"
+    [rowHover]="rowHover"
     dataKey="id"
     currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} người dùng"
-    [showCurrentPageReport]="true"
+    [showCurrentPageReport]="showCurrentPageReport"
     [rowsPerPageOptions]="rowsPerPageOptions"
   >
     <ng-template #caption>
@@ -52,49 +52,49 @@
 
     <ng-template #header>
       <tr>
-        <th class="header-cell col-checkbox">
+        <th class="min-w-12">
           <p-tableHeaderCheckbox *abpPermission="PERMISSIONS.USERS.DELETE" />
         </th>
-        <th class="header-cell col-lg" pSortableColumn="userName">
+        <th class="min-w-48" pSortableColumn="userName">
           <span class="flex items-center gap-2">Tên đăng nhập <p-sortIcon field="userName" /></span>
         </th>
-        <th class="header-cell col-xl" pSortableColumn="email">
+        <th class="min-w-60" pSortableColumn="email">
           <span class="flex items-center gap-2">Email <p-sortIcon field="email" /></span>
         </th>
-        <th class="header-cell col-lg" pSortableColumn="name">
+        <th class="min-w-48" pSortableColumn="name">
           <span class="flex items-center gap-2">Họ tên <p-sortIcon field="name" /></span>
         </th>
-        <th class="header-cell col-md" pSortableColumn="phoneNumber">
+        <th class="min-w-40" pSortableColumn="phoneNumber">
           <span class="flex items-center gap-2">Điện thoại <p-sortIcon field="phoneNumber" /></span>
         </th>
-        <th class="header-cell col-md" pSortableColumn="isActive">
+        <th class="min-w-40" pSortableColumn="isActive">
           <span class="flex items-center gap-2">Trạng thái <p-sortIcon field="isActive" /></span>
         </th>
-        <th class="header-cell col-md">Vai trò</th>
-        <th class="header-cell col-sm"></th>
+        <th class="min-w-40">Vai trò</th>
+        <th class="min-w-32"></th>
       </tr>
     </ng-template>
 
     <ng-template #body let-user>
       <tr>
-        <td class="body-cell col-checkbox">
+        <td class="w-12 min-w-12">
           <p-tableCheckbox [value]="user" *abpPermission="PERMISSIONS.USERS.DELETE" />
         </td>
-        <td class="body-cell col-lg">{{ user.userName }}</td>
-        <td class="body-cell col-xl">{{ user.email }}</td>
-        <td class="body-cell col-lg">{{ getUserFullName(user) }}</td>
-        <td class="body-cell col-md">{{ user.phoneNumber }}</td>
-        <td class="body-cell col-md">
+        <td class="min-w-48">{{ user.userName }}</td>
+        <td class="min-w-60">{{ user.email }}</td>
+        <td class="min-w-48">{{ getUserFullName(user) }}</td>
+        <td class="min-w-40">{{ user.phoneNumber }}</td>
+        <td class="min-w-40">
           <p-tag
             [value]="getStatusLabel(user.isActive)"
             [severity]="user.isActive ? 'success' : 'danger'"
           />
         </td>
-        <td class="body-cell col-md">
+        <td class="min-w-40">
           {{ getUserRoles(user) }}
         </td>
-        <td class="body-cell col-sm">
-          <div class="action-buttons">
+        <td class="min-w-32">
+          <div class="flex gap-2 justify-end">
             <p-button
               *abpPermission="PERMISSIONS.USERS.UPDATE"
               icon="pi pi-pencil"

@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { VIETNAMESE_TEXTS } from '../constants/vietnamese-texts';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -188,36 +186,5 @@ export class VietnameseFormatterService {
         return word.charAt(0).toUpperCase() + word.slice(1);
       })
       .join(' ');
-  }
-
-  /**
-   * Format table status with Vietnamese text
-   */
-  formatTableStatus(status: string): { text: string; class: string } {
-    const statusMap: { [key: string]: { text: string; class: string } } = {
-      'AVAILABLE': { text: VIETNAMESE_TEXTS.RESTAURANT.TABLE_AVAILABLE, class: 'success' },
-      'OCCUPIED': { text: VIETNAMESE_TEXTS.RESTAURANT.TABLE_OCCUPIED, class: 'danger' },
-      'RESERVED': { text: VIETNAMESE_TEXTS.RESTAURANT.TABLE_RESERVED, class: 'warning' },
-      'CLEANING': { text: VIETNAMESE_TEXTS.RESTAURANT.TABLE_CLEANING, class: 'info' }
-    };
-    
-    return statusMap[status] || { text: status, class: 'secondary' };
-  }
-
-  /**
-   * Format order status with Vietnamese text
-   */
-  formatOrderStatus(status: string): { text: string; class: string } {
-    const statusMap: { [key: string]: { text: string; class: string } } = {
-      'NEW': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_NEW, class: 'info' },
-      'CONFIRMED': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_CONFIRMED, class: 'primary' },
-      'PREPARING': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_PREPARING, class: 'warning' },
-      'READY': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_READY, class: 'success' },
-      'SERVED': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_SERVED, class: 'success' },
-      'COMPLETED': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_COMPLETED, class: 'secondary' },
-      'CANCELLED': { text: VIETNAMESE_TEXTS.RESTAURANT.ORDER_CANCELLED, class: 'danger' }
-    };
-    
-    return statusMap[status] || { text: status, class: 'secondary' };
   }
 }

@@ -12,6 +12,9 @@ export abstract class ComponentBase implements OnDestroy {
 
   pageSize = 10;
   rowsPerPageOptions = [10, 20, 30, 50, 100];
+  showCurrentPageReport = false;
+  paginator = false;
+  rowHover = true;
   // Common role labels in Vietnamese
   protected readonly ROLE_LABELS = {
     Admin: 'Quản trị viên',
@@ -21,7 +24,6 @@ export abstract class ComponentBase implements OnDestroy {
     Cashier: 'Thu ngân',
     Customer: 'Khách hàng',
   };
-
 
   /**
    * Observable to handle component destruction and unsubscribe from observables
@@ -202,13 +204,6 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected getRoleLabel(role: string): string {
     return this.ROLE_LABELS[role as keyof typeof this.ROLE_LABELS] || role;
-  }
-
-  /**
-   * Get status label in Vietnamese
-   */
-  protected getStatusLabel(status: boolean): string {
-    return status ? 'Hoạt động' : 'Vô hiệu';
   }
 
   /**

@@ -18,15 +18,14 @@ export const appRoutes: Routes = [
             loadChildren: () => import('./home/home.routes').then(m => m.homeRoutes), // Temporary - will be replaced with actual dashboard
           },
           {
-            path: 'user-management',
+            path: 'administration',
             canMatch: [RestaurantGuard],
             loadChildren: () =>
-              import('./features/user-management/user-management.routes').then(
-                m => m.USER_MANAGEMENT_ROUTES
+              import('./features/administration/administration.routes').then(
+                m => m.ADMINISTRATION_ROUTES
               ),
             data: {
-              permission: PERMISSIONS.USERS.DEFAULT,
-              breadcrumb: 'Quản lý nhân viên',
+              breadcrumb: 'Quản trị hệ thống',
             },
           },
           // Future restaurant features - will be implemented in later stories

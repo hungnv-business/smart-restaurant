@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { firstValueFrom } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 import { IdentityUserService } from '@abp/ng.identity/proxy';
 import { IdentityUserCreateDto, IdentityUserUpdateDto } from '@abp/ng.identity/proxy';
@@ -25,7 +25,6 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
     ValidationErrorComponent,
   ],
   templateUrl: './user-form.component.html',
-  styleUrl: './user-form.component.scss',
 })
 export class UserFormComponent extends ComponentBase implements OnInit, OnChanges {
   @Input() visible = false;
@@ -36,7 +35,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
   userForm!: FormGroup;
   isEditMode = false;
   loading = false;
-  availableRoles = [];
+  availableRoles: string[] = [];
 
   constructor(private fb: FormBuilder, private identityUserService: IdentityUserService) {
     super();
@@ -83,29 +82,32 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     this.loading = true;
     
     // Load user info and roles in parallel
-    Promise.all([
-      firstValueFrom(this.identityUserService.get(id)),
-      firstValueFrom(this.identityUserService.getRoles(id))
-    ]).then(([user, userRoles]) => {
-      this.userForm.patchValue({
-        userName: user.userName,
-        email: user.email,
-        name: user.name,
-        surname: user.surname,
-        phoneNumber: user.phoneNumber,
-        isActive: user.isActive,
-        roles: userRoles.items.map(role => role.name) || [],
-      });
+    forkJoin({
+      user: this.identityUserService.get(id),
+      userRoles: this.identityUserService.getRoles(id)
+    }).subscribe({
+      next: ({ user, userRoles }) => {
+        this.userForm.patchValue({
+          userName: user.userName,
+          email: user.email,
+          name: user.name,
+          surname: user.surname,
+          phoneNumber: user.phoneNumber,
+          isActive: user.isActive,
+          roles: userRoles.items.map(role => role.name) || [],
+        });
 
-      // Disable username in edit mode
-      if (this.isEditMode) {
-        this.userForm.get('userName')?.disable();
+        // Disable username in edit mode
+        if (this.isEditMode) {
+          this.userForm.get('userName')?.disable();
+        }
+
+        this.loading = false;
+      },
+      error: (error) => {
+        this.handleApiError(error, 'Không thể tải thông tin người dùng');
+        this.loading = false;
       }
-
-      this.loading = false;
-    }).catch(error => {
-      this.handleApiError(error, 'Không thể tải thông tin người dùng');
-      this.loading = false;
     });
   }
 
@@ -146,7 +148,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     const createInput: IdentityUserCreateDto = {
       userName: formValue.userName,
       email: formValue.email,
-      password: 'TempPassword123!', // Temporary password
+      password: 'Password@123', // Default password - user should change on first login
       name: formValue.name,
       surname: formValue.surname,
       phoneNumber: formValue.phoneNumber,
@@ -217,8 +219,4 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     this.loading = false;
   }
 
-  // Helper method for template
-  getControl(fieldName: string) {
-    return this.userForm.get(fieldName);
-  }
 }

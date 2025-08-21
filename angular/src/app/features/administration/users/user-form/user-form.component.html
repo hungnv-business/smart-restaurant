@@ -19,10 +19,10 @@
                         formControlName="userName"
                         placeholder="Nhập tên đăng nhập"
                         class="w-full"
-                        [class.p-invalid]="getControl('userName')?.invalid && (getControl('userName')?.dirty || getControl('userName')?.touched)"
+                        [class.p-invalid]="isFieldInvalid(userForm, 'userName')"
                     />
                     <app-validation-error 
-                        [control]="getControl('userName')"
+                        [control]="getFormControl(userForm, 'userName')"
                         fieldName="Tên đăng nhập"
                     />
                 </div>
@@ -37,10 +37,10 @@
                         formControlName="email"
                         placeholder="Nhập địa chỉ email"
                         class="w-full"
-                        [class.p-invalid]="getControl('email')?.invalid && (getControl('email')?.dirty || getControl('email')?.touched)"
+                        [class.p-invalid]="isFieldInvalid(userForm, 'email')"
                     />
                     <app-validation-error 
-                        [control]="getControl('email')"
+                        [control]="getFormControl(userForm, 'email')"
                         fieldName="Email"
                     />
                 </div>
