@@ -138,18 +138,11 @@
     </ng-template>
 
     <ng-template #footer>
-        <p-button 
-            label="Lưu" 
-            icon="pi pi-check"
-            [disabled]="userForm.invalid || loading"
+        <app-form-footer-actions
+            [disabled]="userForm.invalid"
             [loading]="loading"
-            (click)="onSubmit()"
-        />
-        <p-button 
-            label="Hủy" 
-            icon="pi pi-times" 
-            severity="secondary"
-            (click)="cancel()"
-        />
+            (save)="onSubmit()"
+            (cancel)="cancel()">
+        </app-form-footer-actions>
     </ng-template>
 </p-dialog>

@@ -21,8 +21,20 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
         menuPermission.AddChild(SmartRestaurantPermissions.Menu.Categories, L("Permission:Menu.Categories"));
         menuPermission.AddChild(SmartRestaurantPermissions.Menu.Items, L("Permission:Menu.Items"));
 
+        // Table Management permissions
+        var tablesPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Tables.Default, L("Permission:Tables"));
+
+        // Layout Section permissions
+        var layoutSectionPermission = tablesPermission.AddChild(SmartRestaurantPermissions.Tables.LayoutSection.Default, L("Permission:Tables.LayoutSection"));
+        layoutSectionPermission.AddChild(SmartRestaurantPermissions.Tables.LayoutSection.Create, L("Permission:Tables.LayoutSection.Create"));
+        layoutSectionPermission.AddChild(SmartRestaurantPermissions.Tables.LayoutSection.Edit, L("Permission:Tables.LayoutSection.Edit"));
+        layoutSectionPermission.AddChild(SmartRestaurantPermissions.Tables.LayoutSection.Delete, L("Permission:Tables.LayoutSection.Delete"));
+
         // Table permissions
-        smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Tables.Default, L("Permission:Tables"));
+        var tablePermission = tablesPermission.AddChild(SmartRestaurantPermissions.Tables.Table.Default, L("Permission:Tables.Table"));
+        tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Create, L("Permission:Tables.Table.Create"));
+        tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Edit, L("Permission:Tables.Table.Edit"));
+        tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Delete, L("Permission:Tables.Table.Delete"));
 
         // Kitchen permissions
         var kitchenPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Kitchen.Default, L("Permission:Kitchen"));

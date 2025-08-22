@@ -15,7 +15,8 @@ export const environment = {
   },
   apis: {
     default: {
-      url: 'https://localhost:44346'
+      url: 'https://localhost:44346',
+      rootNamespace: "SmartRestaurant",
     }
   }
 };

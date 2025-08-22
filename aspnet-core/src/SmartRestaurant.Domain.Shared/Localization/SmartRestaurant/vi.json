@@ -16,6 +16,14 @@
     "Permission:Menu.Items": "Món ăn",
     
     "Permission:Tables": "Quản lý bàn ăn",
+    "Permission:Tables.LayoutSection": "Khu vực bố cục",
+    "Permission:Tables.LayoutSection.Create": "Tạo khu vực bố cục",
+    "Permission:Tables.LayoutSection.Edit": "Sửa khu vực bố cục",
+    "Permission:Tables.LayoutSection.Delete": "Xóa khu vực bố cục",
+    "Permission:Tables.Table": "Quản lý bàn",
+    "Permission:Tables.Table.Create": "Tạo bàn",
+    "Permission:Tables.Table.Edit": "Sửa bàn", 
+    "Permission:Tables.Table.Delete": "Xóa bàn",
     "Permission:Kitchen": "Bếp & Phục vụ",
     "Permission:Kitchen.UpdateStatus": "Cập nhật trạng thái món",
     

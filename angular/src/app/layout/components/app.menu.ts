@@ -44,7 +44,7 @@ export class AppMenu extends ComponentBase implements OnInit {
                 label: 'Bảng điều khiển',
                 icon: 'pi pi-fw pi-chart-bar',
                 routerLink: ['/dashboard'],
-                visible: this.hasPermission(PERMISSIONS.RESTAURANT.ORDERS_VIEW)
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.DASHBOARD)
             },
 
             // Orders Management
@@ -52,55 +52,68 @@ export class AppMenu extends ComponentBase implements OnInit {
                 label: 'Quản lý đơn hàng',
                 icon: 'pi pi-fw pi-shopping-cart',
                 routerLink: ['/orders'],
-                visible: this.hasPermission(PERMISSIONS.RESTAURANT.ORDERS_VIEW)
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.ORDERS)
             },
 
             // Menu Management
             {
                 label: 'Quản lý thực đơn',
                 icon: 'pi pi-fw pi-book',
-                visible: this.hasAnyPermission([PERMISSIONS.RESTAURANT.MENU_VIEW, PERMISSIONS.RESTAURANT.MENU_CREATE, PERMISSIONS.RESTAURANT.MENU_UPDATE]),
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU.DEFAULT),
                 items: [
                     {
                         label: 'Danh mục món ăn',
                         icon: 'pi pi-fw pi-tags',
                         routerLink: ['/menu/categories'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU.CATEGORIES)
                     },
                     {
                         label: 'Món ăn',
                         icon: 'pi pi-fw pi-star',
                         routerLink: ['/menu/items'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU.ITEMS)
                     }
                 ]
             },
 
-            // Tables Management  
+            // Table Management  
             {
                 label: 'Quản lý bàn ăn',
-                icon: 'pi pi-fw pi-table',
-                routerLink: ['/tables'],
-                visible: this.hasPermission(PERMISSIONS.RESTAURANT.ORDERS_VIEW)
+                icon: 'pi pi-fw pi-th-large',
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.TABLES.DEFAULT),
+                items: [
+                    {
+                        label: 'Khu vực bố cục',
+                        icon: 'pi pi-fw pi-sitemap',
+                        routerLink: ['/table-management/layout-sections'],
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.TABLES.LAYOUT_SECTION.DEFAULT)
+                    },
+                    {
+                        label: 'Quản lý bàn',
+                        icon: 'pi pi-fw pi-table',
+                        routerLink: ['/table-management/tables'],
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.TABLES.TABLE.DEFAULT)
+                    }
+                ]
             },
 
             // Kitchen & Service
             {
                 label: 'Bếp & Phục vụ',
                 icon: 'pi pi-fw pi-wrench',
-                visible: this.hasAnyPermission([PERMISSIONS.RESTAURANT.KITCHEN_VIEW, PERMISSIONS.RESTAURANT.KITCHEN_MANAGE]),
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT),
                 items: [
                     {
                         label: 'Bếp & Phục vụ',
                         icon: 'pi pi-fw pi-cog',
                         routerLink: ['/kitchen'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT)
                     },
                     {
                         label: 'Cập nhật trạng thái món',
                         icon: 'pi pi-fw pi-refresh',
                         routerLink: ['/kitchen/status'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN_MANAGE)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.UPDATE_STATUS)
                     }
                 ]
             },
@@ -110,32 +123,32 @@ export class AppMenu extends ComponentBase implements OnInit {
                 label: 'Thanh toán',
                 icon: 'pi pi-fw pi-credit-card',
                 routerLink: ['/payments'],
-                visible: this.hasPermission(PERMISSIONS.RESTAURANT.ORDERS_VIEW)
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.PAYMENTS)
             },
 
             // Reports
             {
                 label: 'Báo cáo & Thống kê',
                 icon: 'pi pi-fw pi-chart-bar',
-                visible: this.hasAnyPermission([PERMISSIONS.RESTAURANT.REPORTS_VIEW, PERMISSIONS.RESTAURANT.REPORTS_EXPORT]),
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS.DEFAULT),
                 items: [
                     {
                         label: 'Báo cáo doanh thu',
                         icon: 'pi pi-fw pi-chart-line',
                         routerLink: ['/reports/revenue'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS.REVENUE)
                     },
                     {
                         label: 'Món ăn bán chạy',
                         icon: 'pi pi-fw pi-star-fill',
                         routerLink: ['/reports/popular'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS.POPULAR)
                     },
                     {
                         label: 'Hiệu suất nhân viên',
                         icon: 'pi pi-fw pi-users',
                         routerLink: ['/reports/staff'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.REPORTS.STAFF)
                     }
                 ]
             },
@@ -167,19 +180,19 @@ export class AppMenu extends ComponentBase implements OnInit {
             {
                 label: 'Cài đặt',
                 icon: 'pi pi-fw pi-cog',
-                visible: this.hasAnyPermission([PERMISSIONS.RESTAURANT.SETTINGS_VIEW, PERMISSIONS.RESTAURANT.SETTINGS_MANAGE]),
+                visible: this.hasPermission(PERMISSIONS.RESTAURANT.SETTINGS.DEFAULT),
                 items: [
                     {
                         label: 'Máy in bếp',
                         icon: 'pi pi-fw pi-print',
                         routerLink: ['/settings/printers'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.SETTINGS_MANAGE)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.SETTINGS.PRINTERS)
                     },
                     {
                         label: 'Cài đặt chung',
                         icon: 'pi pi-fw pi-cog',
                         routerLink: ['/settings'],
-                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.SETTINGS_VIEW)
+                        visible: this.hasPermission(PERMISSIONS.RESTAURANT.SETTINGS.DEFAULT)
                     }
                 ]
             }

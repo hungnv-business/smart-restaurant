@@ -26,6 +26,22 @@ public static class SmartRestaurantPermissions
     public static class Tables
     {
         public const string Default = GroupName + ".Tables";
+
+        public static class LayoutSection
+        {
+            public const string Default = GroupName + ".LayoutSection";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
+
+        public static class Table
+        {
+            public const string Default = GroupName + ".Table";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
     }
 
     public static class Kitchen

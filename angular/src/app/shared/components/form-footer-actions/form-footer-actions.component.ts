@@ -1,0 +1,42 @@
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+
+@Component({
+  selector: 'app-form-footer-actions',
+  standalone: true,
+  imports: [CommonModule, ButtonModule],
+  template: `
+    <div class="flex justify-end gap-2 pt-4">
+      <p-button 
+        [label]="'Lưu'" 
+        [icon]="'pi pi-check'"
+        [disabled]="disabled || loading"
+        [loading]="loading"
+        (click)="onSave()"
+      />
+      <p-button 
+        [label]="'Huỷ'" 
+        [icon]="'pi pi-times'" 
+        severity="secondary"
+        [disabled]="loading"
+        (click)="onCancel()"
+      />
+    </div>
+  `
+})
+export class FormFooterActionsComponent {
+  @Input() disabled = false;
+  @Input() loading = false;
+
+  @Output() save = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+
+  onSave(): void {
+    this.save.emit();
+  }
+
+  onCancel(): void {
+    this.cancel.emit();
+  }
+}

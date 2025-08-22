@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartRestaurant.Entities.Tables;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -24,6 +26,10 @@ public class SmartRestaurantDbContext :
     ITenantManagementDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    
+    // Table Management
+    public DbSet<LayoutSection> LayoutSections { get; set; }
+    public DbSet<Table> Tables { get; set; }
 
     #region Entities from the modules
 
@@ -76,11 +82,40 @@ public class SmartRestaurantDbContext :
 
         /* Configure your own tables/entities inside here */
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(SmartRestaurantConsts.DbTablePrefix + "YourEntities", SmartRestaurantConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        // Configure LayoutSection entity
+        builder.Entity<LayoutSection>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "LayoutSections", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.SectionName).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Description).HasMaxLength(512);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasIndex(x => x.DisplayOrder);
+            b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+        });
+        
+        // Configure Table entity
+        builder.Entity<Table>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Tables", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.TableName).IsRequired().HasMaxLength(64);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            b.Property(x => x.Status).IsRequired();
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasOne(x => x.LayoutSection)
+                .WithMany(x => x.Tables)
+                .HasForeignKey(x => x.LayoutSectionId)
+                .IsRequired(false);
+                
+            b.HasIndex(x => x.LayoutSectionId);
+            b.HasIndex(x => new { x.LayoutSectionId, x.DisplayOrder });
+            b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+        });
     }
 }

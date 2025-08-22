@@ -21,7 +21,9 @@
       "Bash(npm test:*)",
       "Bash(npm run test:*)",
       "Bash(sed:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet test:*)"
     ],
     "deny": [],
     "ask": []

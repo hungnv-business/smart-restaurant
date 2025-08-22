@@ -17,31 +17,82 @@ export const PERMISSIONS = {
     DELETE: 'AbpIdentity.Roles.Delete',
   },
 
-  // Future SmartRestaurant specific permissions
+  // SmartRestaurant specific permissions (matching C# structure exactly)
   RESTAURANT: {
+    // Dashboard
+    DASHBOARD: 'SmartRestaurant.Dashboard',
+
     // Orders
-    ORDERS_VIEW: 'SmartRestaurant.Orders.Default',
-    ORDERS_CREATE: 'SmartRestaurant.Orders.Create',
-    ORDERS_UPDATE: 'SmartRestaurant.Orders.Update',
-    ORDERS_DELETE: 'SmartRestaurant.Orders.Delete',
+    ORDERS: 'SmartRestaurant.Orders',
 
     // Menu
-    MENU_VIEW: 'SmartRestaurant.Menu.Default',
-    MENU_CREATE: 'SmartRestaurant.Menu.Create',
-    MENU_UPDATE: 'SmartRestaurant.Menu.Update',
-    MENU_DELETE: 'SmartRestaurant.Menu.Delete',
+    MENU: {
+      DEFAULT: 'SmartRestaurant.Menu',
+      CATEGORIES: 'SmartRestaurant.Menu.Categories',
+      ITEMS: 'SmartRestaurant.Menu.Items',
+    },
+
+    // Tables (parent permission)
+    TABLES: {
+      DEFAULT: 'SmartRestaurant.Tables',
+      
+      // Layout Sections
+      LAYOUT_SECTION: {
+        DEFAULT: 'SmartRestaurant.LayoutSection',
+        CREATE: 'SmartRestaurant.LayoutSection.Create',
+        EDIT: 'SmartRestaurant.LayoutSection.Edit',
+        DELETE: 'SmartRestaurant.LayoutSection.Delete',
+      },
+      
+      // Tables
+      TABLE: {
+        DEFAULT: 'SmartRestaurant.Table',
+        CREATE: 'SmartRestaurant.Table.Create',
+        EDIT: 'SmartRestaurant.Table.Edit',
+        DELETE: 'SmartRestaurant.Table.Delete',
+      },
+    },
 
     // Kitchen
-    KITCHEN_VIEW: 'SmartRestaurant.Kitchen.View',
-    KITCHEN_MANAGE: 'SmartRestaurant.Kitchen.Manage',
+    KITCHEN: {
+      DEFAULT: 'SmartRestaurant.Kitchen',
+      UPDATE_STATUS: 'SmartRestaurant.Kitchen.UpdateStatus',
+    },
+
+    // Payments
+    PAYMENTS: 'SmartRestaurant.Payments',
 
     // Reports
-    REPORTS_VIEW: 'SmartRestaurant.Reports.View',
-    REPORTS_EXPORT: 'SmartRestaurant.Reports.Export',
+    REPORTS: {
+      DEFAULT: 'SmartRestaurant.Reports',
+      REVENUE: 'SmartRestaurant.Reports.Revenue',
+      POPULAR: 'SmartRestaurant.Reports.Popular',
+      STAFF: 'SmartRestaurant.Reports.Staff',
+    },
 
     // Settings
-    SETTINGS_VIEW: 'SmartRestaurant.Settings.View',
-    SETTINGS_MANAGE: 'SmartRestaurant.Settings.Manage',
+    SETTINGS: {
+      DEFAULT: 'SmartRestaurant.Settings',
+      PRINTERS: 'SmartRestaurant.Settings.Printers',
+    },
+
+    // Inventory
+    INVENTORY: 'SmartRestaurant.Inventory',
+
+    // Customers
+    CUSTOMERS: 'SmartRestaurant.Customers',
+
+    // Payroll
+    PAYROLL: {
+      DEFAULT: 'SmartRestaurant.Payroll',
+      SALARY: 'SmartRestaurant.Payroll.Salary',
+    },
+
+    // Delivery
+    DELIVERY: {
+      DEFAULT: 'SmartRestaurant.Delivery',
+      TAKEAWAY: 'SmartRestaurant.Delivery.Takeaway',
+    },
   },
 } as const;
 

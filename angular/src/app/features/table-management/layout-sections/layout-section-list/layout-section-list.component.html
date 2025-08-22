@@ -1,0 +1,186 @@
+<div class="card">
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <p-button
+        label="Thêm khu vực"
+        icon="pi pi-plus"
+        severity="secondary"
+        class="mr-2"
+        (onClick)="openNew()"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <div class="flex items-center justify-between mb-4">
+    <h5 class="m-0">Quản lý Khu vực Bố cục</h5>
+  </div>
+
+  <!-- Drag-and-Drop Layout Sections -->
+  <div cdkDropList (cdkDropListDropped)="onSectionDrop($event)" class="min-h-96">
+    <!-- Loading State -->
+    @if (loading) {
+    <div class="flex justify-center items-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      <span class="ml-3 text-lg">Đang tải danh sách khu vực...</span>
+    </div>
+    }
+
+    <!-- Section Cards -->
+    @if (!loading && layoutSections.length > 0) { @for (section of layoutSections; track section.id;
+    let i = $index) {
+    <div
+      cdkDrag
+      class="flex items-stretch bg-white border border-gray-300 rounded-xl mb-4 shadow-sm transition-all duration-200 overflow-hidden hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5 last:mb-0"
+      [attr.data-section-name]="section.sectionName"
+    >
+      <!-- Drag Handle -->
+      <div
+        cdkDragHandle
+        class="flex items-center justify-center w-12 bg-gray-50 border-r border-gray-200 cursor-grab hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 active:cursor-grabbing"
+        pTooltip="Kéo thả để sắp xếp lại"
+      >
+        <i class="pi pi-bars text-lg"></i>
+      </div>
+
+      <!-- Section Content -->
+      <div class="flex-1 p-5 flex flex-col gap-4">
+        <div class="flex justify-between items-start flex-wrap gap-4">
+          <div class="flex-1 min-w-48">
+            <h6 class="m-0 mb-1 text-gray-900 font-semibold text-lg leading-snug">
+              {{ section.sectionName }}
+            </h6>
+            <span class="text-sm text-gray-600 font-medium"
+              >Thứ tự: {{ section.displayOrder }}</span
+            >
+          </div>
+
+          <div class="flex gap-3 items-center">
+            <p-inputSwitch [(ngModel)]="section.isActive"> </p-inputSwitch>
+            <span
+               [class.text-green-600]="section.isActive"
+              [class.text-red-600]="!section.isActive"
+            >
+              {{ section.isActive ? 'Hoạt động' : 'Vô hiệu' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-1">
+          <span class="text-gray-600 text-sm leading-relaxed block">{{
+            section.description || 'Chưa có mô tả'
+          }}</span>
+        </div>
+
+        <div>
+          <span class="flex items-center gap-2 text-xs text-gray-600">
+            <i class="pi pi-calendar text-sm"></i>
+            {{ section.creationTime | date : 'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+        <div class="flex justify-between items-center mt-2 pt-4 border-t border-gray-200">
+          <!-- Manual ordering buttons (alternative to drag-drop) -->
+          <div class="flex gap-1">
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-chevron-up"
+              class="p-button-text p-button-sm p-button-rounded"
+              [disabled]="i === 0"
+              pTooltip="Di chuyển lên"
+              (click)="moveUp(section)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-chevron-down"
+              class="p-button-text p-button-sm p-button-rounded"
+              [disabled]="i === layoutSections.length - 1"
+              pTooltip="Di chuyển xuống"
+              (click)="moveDown(section)"
+            ></button>
+          </div>
+
+          <!-- Edit and Delete actions -->
+          <div class="flex gap-2">
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-text p-button-info"
+              pTooltip="Chỉnh sửa thông tin khu vực"
+              (click)="editSection(section)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-danger"
+              pTooltip="Xóa khu vực này"
+              (click)="deleteSection(section)"
+            ></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag Preview (shows when dragging) -->
+      <div
+        *cdkDragPreview
+        class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg font-medium text-sm"
+      >
+        <i class="pi pi-bars"></i>
+        <span>{{ section.sectionName }}</span>
+      </div>
+    </div>
+    } }
+
+    <!-- Empty State -->
+    @if (!loading && layoutSections.length === 0) {
+    <div class="flex items-center justify-center min-h-72 p-12">
+      <div class="text-center max-w-96">
+        <i class="pi pi-info-circle text-6xl text-gray-500 mb-6"></i>
+        <h5 class="text-gray-900 m-0 mb-4 text-xl font-semibold">Chưa có khu vực bố cục nào</h5>
+        <p class="text-gray-600 m-0 mb-8 leading-relaxed">
+          Hãy thêm khu vực đầu tiên để bắt đầu quản lý bố cục nhà hàng của bạn
+        </p>
+        <button
+          pButton
+          pRipple
+          type="button"
+          icon="pi pi-plus"
+          class="p-button-outlined p-button-lg"
+          label="Thêm khu vực đầu tiên"
+          (click)="openNew()"
+        ></button>
+      </div>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Create/Edit Dialog -->
+<p-dialog
+  [(visible)]="displayDialog"
+  [header]="isEditMode ? 'Chỉnh sửa Khu vực' : 'Thêm Khu vực mới'"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  [style]="{ width: '500px' }"
+  (onHide)="onDialogHide()"
+>
+  <app-layout-section-form
+    [section]="selectedSection"
+    [isEditMode]="isEditMode"
+    (saved)="onSectionSaved()"
+    (cancelled)="onDialogHide()"
+  >
+  </app-layout-section-form>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

@@ -28,26 +28,37 @@ export const appRoutes: Routes = [
               breadcrumb: 'Quản trị hệ thống',
             },
           },
+          {
+            path: 'table-management',
+            loadChildren: () =>
+              import('./features/table-management/table-management.routes').then(
+                m => m.TABLE_MANAGEMENT_ROUTES
+              ),
+            data: {
+              breadcrumb: 'Quản lý Bàn',
+              permission: PERMISSIONS.RESTAURANT.TABLES.DEFAULT
+            },
+          },
           // Future restaurant features - will be implemented in later stories
           {
             path: 'orders',
             redirectTo: 'dashboard', // Placeholder - will be implemented in story for orders
-            data: { permission: PERMISSIONS.RESTAURANT.ORDERS_VIEW },
+            data: { permission: PERMISSIONS.RESTAURANT.ORDERS },
           },
           {
             path: 'menu',
             redirectTo: 'dashboard', // Placeholder - will be implemented in story for menu
-            data: { permission: PERMISSIONS.RESTAURANT.MENU_VIEW },
+            data: { permission: PERMISSIONS.RESTAURANT.MENU.DEFAULT },
           },
           {
             path: 'kitchen',
             redirectTo: 'dashboard', // Placeholder - will be implemented in story for kitchen
-            data: { permission: PERMISSIONS.RESTAURANT.KITCHEN_VIEW },
+            data: { permission: PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT },
           },
           {
             path: 'reports',
             redirectTo: 'dashboard', // Placeholder - will be implemented in story for reports
-            data: { permission: PERMISSIONS.RESTAURANT.REPORTS_VIEW },
+            data: { permission: PERMISSIONS.RESTAURANT.REPORTS.DEFAULT },
           },
           {
             path: '',

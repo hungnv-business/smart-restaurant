@@ -1,0 +1,109 @@
+<form [formGroup]="sectionForm" (ngSubmit)="onSubmit()">
+  <div class="flex flex-col gap-4 w-full">
+    
+    <!-- Section Name -->
+    <div class="flex flex-col gap-2">
+      <label for="sectionName" class="block font-semibold text-sm required">
+        Tên Khu vực
+      </label>
+      <input 
+        pInputText 
+        id="sectionName" 
+        formControlName="sectionName" 
+        placeholder="Nhập tên khu vực (ví dụ: Dãy 1, Khu VIP)"
+        [class.p-invalid]="isFieldInvalid(sectionForm, 'sectionName')"
+        class="w-full">
+      
+      <app-validation-error 
+        [control]="sectionForm.get('sectionName')"
+        fieldName="Tên khu vực">
+      </app-validation-error>
+    </div>
+
+    <!-- Section Name Suggestions -->
+    <div class="flex flex-col gap-2">
+      <label class="block font-medium text-sm text-600">Gợi ý tên khu vực:</label>
+      <div class="flex flex-wrap gap-2">
+        @for (suggestion of sectionNameSuggestions; track suggestion) {
+          <span 
+            class="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-full cursor-pointer hover:bg-blue-200 transition-colors"
+            (click)="onSectionNameSuggestionClick(suggestion)">
+            {{ suggestion }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label for="description" class="block font-semibold text-sm">Mô tả</label>
+      <textarea 
+        pInputTextarea 
+        id="description" 
+        formControlName="description" 
+        placeholder="Mô tả chi tiết về khu vực (tùy chọn)"
+        [rows]="3"
+        [class.p-invalid]="isFieldInvalid(sectionForm, 'description')"
+        class="w-full">
+      </textarea>
+      
+      <app-validation-error 
+        [control]="sectionForm.get('description')"
+        fieldName="Mô tả">
+      </app-validation-error>
+    </div>
+
+    <!-- Display Order and Active Status Row -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <!-- Display Order -->
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="displayOrder" class="block font-semibold text-sm required">
+          Thứ tự hiển thị
+        </label>
+        <p-inputNumber
+          inputId="displayOrder"
+          formControlName="displayOrder"
+          [min]="1"
+          [max]="999"
+          [showButtons]="true"
+          buttonLayout="horizontal"
+          incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus"
+          [class.p-invalid]="isFieldInvalid(sectionForm, 'displayOrder')"
+          class="w-full">
+        </p-inputNumber>
+        
+        <app-validation-error 
+          [control]="sectionForm.get('displayOrder')"
+          fieldName="Thứ tự hiển thị">
+        </app-validation-error>
+      </div>
+
+      <!-- Active Status -->
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="isActive" class="block font-semibold text-sm">Trạng thái</label>
+        <div class="flex items-center">
+          <p-inputSwitch 
+            formControlName="isActive">
+          </p-inputSwitch>
+          <span class="ml-2" 
+            [class.text-green-600]="sectionForm.get('isActive')?.value" 
+            [class.text-red-600]="!sectionForm.get('isActive')?.value">
+            {{ sectionForm.get('isActive')?.value ? 'Hoạt động' : 'Vô hiệu hóa' }}
+          </span>
+        </div>
+        <small class="text-600 text-sm">
+          Khu vực vô hiệu hóa sẽ không được hiển thị trong danh sách chọn bàn
+        </small>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <app-form-footer-actions
+      [disabled]="sectionForm.invalid"
+      [loading]="loading"
+      (save)="onSubmit()"
+      (cancel)="onCancel()">
+    </app-form-footer-actions>
+  </div>
+</form>

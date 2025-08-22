@@ -39,7 +39,6 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
     ProgressSpinnerModule,
     CheckboxModule,
     TreeModule,
-    LocalizationPipe,
     ValidationErrorComponent,
   ],
   templateUrl: './role-form.component.html',

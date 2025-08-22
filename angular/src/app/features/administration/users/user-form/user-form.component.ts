@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -11,6 +10,7 @@ import { IdentityUserService } from '@abp/ng.identity/proxy';
 import { IdentityUserCreateDto, IdentityUserUpdateDto } from '@abp/ng.identity/proxy';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
+import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 
 @Component({
   selector: 'app-user-form',
@@ -18,11 +18,11 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ButtonModule,
     InputTextModule,
     DialogModule,
     ProgressSpinnerModule,
     ValidationErrorComponent,
+    FormFooterActionsComponent,
   ],
   templateUrl: './user-form.component.html',
 })

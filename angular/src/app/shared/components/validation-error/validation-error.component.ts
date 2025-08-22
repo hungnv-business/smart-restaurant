@@ -18,7 +18,6 @@ import { AbstractControl, FormControl } from '@angular/forms';
 export class ValidationErrorComponent {
   @Input() control!: AbstractControl | FormControl | null;
   @Input() fieldName: string = '';
-  @Input() customMessages: { [key: string]: string } = {};
 
   shouldShowError(): boolean {
     return !!(this.control && this.control.invalid && (this.control.dirty || this.control.touched));
@@ -31,13 +30,6 @@ export class ValidationErrorComponent {
 
     const errors = this.control.errors;
     
-    // Check for custom messages first
-    for (const errorType in errors) {
-      if (this.customMessages[errorType]) {
-        return this.customMessages[errorType];
-      }
-    }
-
     // Default Vietnamese error messages
     if (errors['required']) {
       return `${this.fieldName} là bắt buộc`;
