@@ -874,6 +874,47 @@
       "rootPath": "app",
       "remoteServiceName": "Default",
       "controllers": {
+        "SmartRestaurant.Common.GlobalAppService": {
+          "controllerName": "Global",
+          "controllerGroupName": "Global",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "SmartRestaurant.Common.GlobalAppService",
+          "interfaces": [
+            {
+              "type": "SmartRestaurant.Common.IGlobalAppService",
+              "name": "IGlobalAppService",
+              "methods": [
+                {
+                  "name": "GetTableStatusesAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.IntLookupItemDto>",
+                    "typeSimple": "[SmartRestaurant.Common.Dto.IntLookupItemDto]"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "GetTableStatusesAsync": {
+              "uniqueName": "GetTableStatusesAsync",
+              "name": "GetTableStatusesAsync",
+              "httpMethod": "GET",
+              "url": "api/app/global/table-statuses",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.IntLookupItemDto>",
+                "typeSimple": "[SmartRestaurant.Common.Dto.IntLookupItemDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
+            }
+          }
+        },
         "SmartRestaurant.TableManagement.LayoutSections.LayoutSectionAppService": {
           "controllerName": "LayoutSection",
           "controllerGroupName": "LayoutSection",
@@ -1179,6 +1220,695 @@
               },
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.TableManagement.LayoutSections.ILayoutSectionAppService"
+            }
+          }
+        },
+        "SmartRestaurant.TableManagement.Tables.TableAppService": {
+          "controllerName": "Table",
+          "controllerGroupName": "Table",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "SmartRestaurant.TableManagement.Tables.TableAppService",
+          "interfaces": [
+            {
+              "type": "SmartRestaurant.TableManagement.Tables.ITableAppService",
+              "name": "ITableAppService",
+              "methods": [
+                {
+                  "name": "GetTablesBySectionAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "layoutSectionId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.TableManagement.Tables.Dto.TableDto>",
+                    "typeSimple": "[SmartRestaurant.TableManagement.Tables.Dto.TableDto]"
+                  }
+                },
+                {
+                  "name": "GetAllSectionsWithTablesAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.TableManagement.Tables.Dto.SectionWithTablesDto>",
+                    "typeSimple": "[SmartRestaurant.TableManagement.Tables.Dto.SectionWithTablesDto]"
+                  }
+                },
+                {
+                  "name": "AssignToSectionAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                      "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "UpdateDisplayOrderAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                      "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "ToggleActiveStatusAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                      "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                },
+                {
+                  "name": "GetNextDisplayOrderAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "layoutSectionId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Int32",
+                    "typeSimple": "number"
+                  }
+                },
+                {
+                  "name": "GetAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                    "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+                  }
+                },
+                {
+                  "name": "GetListAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
+                      "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                      "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.TableManagement.Tables.Dto.TableDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.TableManagement.Tables.Dto.TableDto>"
+                  }
+                },
+                {
+                  "name": "CreateAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                      "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                    "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+                  }
+                },
+                {
+                  "name": "UpdateAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                      "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                    "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+                  }
+                },
+                {
+                  "name": "DeleteAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "GetTablesBySectionAsyncByLayoutSectionId": {
+              "uniqueName": "GetTablesBySectionAsyncByLayoutSectionId",
+              "name": "GetTablesBySectionAsync",
+              "httpMethod": "GET",
+              "url": "api/app/table/tables-by-section/{layoutSectionId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "layoutSectionId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "layoutSectionId",
+                  "name": "layoutSectionId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.TableManagement.Tables.Dto.TableDto>",
+                "typeSimple": "[SmartRestaurant.TableManagement.Tables.Dto.TableDto]"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "GetAllSectionsWithTablesAsync": {
+              "uniqueName": "GetAllSectionsWithTablesAsync",
+              "name": "GetAllSectionsWithTablesAsync",
+              "httpMethod": "GET",
+              "url": "api/app/table/sections-with-tables",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.TableManagement.Tables.Dto.SectionWithTablesDto>",
+                "typeSimple": "[SmartRestaurant.TableManagement.Tables.Dto.SectionWithTablesDto]"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "AssignToSectionAsyncByIdAndInput": {
+              "uniqueName": "AssignToSectionAsyncByIdAndInput",
+              "name": "AssignToSectionAsync",
+              "httpMethod": "POST",
+              "url": "api/app/table/{id}/assign-to-section",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "UpdateDisplayOrderAsyncByInput": {
+              "uniqueName": "UpdateDisplayOrderAsyncByInput",
+              "name": "UpdateDisplayOrderAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/table/display-order",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "ToggleActiveStatusAsyncByIdAndInput": {
+              "uniqueName": "ToggleActiveStatusAsyncByIdAndInput",
+              "name": "ToggleActiveStatusAsync",
+              "httpMethod": "POST",
+              "url": "api/app/table/{id}/toggle-active-status",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "GetNextDisplayOrderAsyncByLayoutSectionId": {
+              "uniqueName": "GetNextDisplayOrderAsyncByLayoutSectionId",
+              "name": "GetNextDisplayOrderAsync",
+              "httpMethod": "GET",
+              "url": "api/app/table/next-display-order/{layoutSectionId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "layoutSectionId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "layoutSectionId",
+                  "name": "layoutSectionId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Int32",
+                "typeSimple": "number"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.Tables.ITableAppService"
+            },
+            "CreateAsyncByInput": {
+              "uniqueName": "CreateAsyncByInput",
+              "name": "CreateAsync",
+              "httpMethod": "POST",
+              "url": "api/app/table",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.ICreateAppService<SmartRestaurant.TableManagement.Tables.Dto.TableDto,SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto>"
+            },
+            "UpdateAsyncByIdAndInput": {
+              "uniqueName": "UpdateAsyncByIdAndInput",
+              "name": "UpdateAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/table/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                  "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.IUpdateAppService<SmartRestaurant.TableManagement.Tables.Dto.TableDto,System.Guid,SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto>"
+            },
+            "DeleteAsyncById": {
+              "uniqueName": "DeleteAsyncById",
+              "name": "DeleteAsync",
+              "httpMethod": "DELETE",
+              "url": "api/app/table/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.IDeleteAppService<System.Guid>"
+            },
+            "GetAsyncById": {
+              "uniqueName": "GetAsyncById",
+              "name": "GetAsync",
+              "httpMethod": "GET",
+              "url": "api/app/table/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.TableManagement.Tables.Dto.TableDto",
+                "typeSimple": "SmartRestaurant.TableManagement.Tables.Dto.TableDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.TableManagement.Tables.Dto.TableDto,SmartRestaurant.TableManagement.Tables.Dto.TableDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
+            },
+            "GetListAsyncByInput": {
+              "uniqueName": "GetListAsyncByInput",
+              "name": "GetListAsync",
+              "httpMethod": "GET",
+              "url": "api/app/table",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
+                  "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                  "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "Sorting",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "SkipCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "MaxResultCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                }
+              ],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.TableManagement.Tables.Dto.TableDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.TableManagement.Tables.Dto.TableDto>"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.TableManagement.Tables.Dto.TableDto,SmartRestaurant.TableManagement.Tables.Dto.TableDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
             }
           }
         }
@@ -3937,6 +4667,39 @@
     }
   },
   "types": {
+    "SmartRestaurant.Common.Dto.IntLookupItemDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Id",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
     "SmartRestaurant.TableManagement.LayoutSections.Dto.CreateLayoutSectionDto": {
       "baseType": null,
       "isEnum": false,
@@ -4107,6 +4870,435 @@
           "regex": null
         }
       ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.AssignTableToSectionDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "LayoutSectionId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "NewPosition",
+          "jsonName": null,
+          "type": "System.Int32?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "2147483647",
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.CreateTableDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": 64,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.TableStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.SectionWithTablesDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Id",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "SectionName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Description",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Tables",
+          "jsonName": null,
+          "type": "[SmartRestaurant.TableManagement.Tables.Dto.TableDto]",
+          "typeSimple": "[SmartRestaurant.TableManagement.Tables.Dto.TableDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalTables",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ActiveTables",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.TableDto": {
+      "baseType": "Volo.Abp.Application.Dtos.FullAuditedEntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.TableStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.ToggleActiveStatusDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDisplayOrderDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "NewPosition",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "2147483647",
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableManagement.Tables.Dto.UpdateTableDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": 64,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.TableStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.TableStatus": {
+      "baseType": "System.Enum",
+      "isEnum": true,
+      "enumNames": [
+        "Available",
+        "Occupied",
+        "Reserved",
+        "Cleaning"
+      ],
+      "enumValues": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "genericArguments": null,
+      "properties": null
     },
     "Volo.Abp.Account.ChangePasswordInput": {
       "baseType": null,

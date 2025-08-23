@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, Renderer2 } from '@angular/core';
+import { Component, computed, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
@@ -74,7 +74,7 @@ import { AppSearch } from './app.search';
   `,
   styleUrls: [],
 })
-export class RestaurantLayoutComponent implements OnInit {
+export class RestaurantLayoutComponent implements OnInit, OnDestroy {
   overlayMenuOpenSubscription: Subscription = new Subscription();
   menuOutsideClickListener: any;
 

@@ -130,7 +130,7 @@ namespace SmartRestaurant.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TableName")
+                    b.Property<string>("TableNumber")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");

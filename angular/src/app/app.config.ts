@@ -15,7 +15,8 @@ import { provideFeatureManagementConfig } from '@abp/ng.feature-management';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 import { environment } from '../environments/environment';
 import(
   /* webpackChunkName: "_locale-your-locale-js"*/
@@ -106,6 +107,8 @@ export const appConfig: ApplicationConfig = {
         provideTenantManagementConfig(),
         provideFeatureManagementConfig(),
         MessageService,
+        DialogService,
+        ConfirmationService,
         // Logo configuration handled by Poseidon layout system
     ],
 };

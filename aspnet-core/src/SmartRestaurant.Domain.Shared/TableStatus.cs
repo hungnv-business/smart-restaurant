@@ -1,4 +1,4 @@
-namespace SmartRestaurant.Entities.Tables
+namespace SmartRestaurant
 {
     /// <summary>Trạng thái của bàn ăn trong nhà hàng</summary>
     public enum TableStatus
@@ -12,7 +12,7 @@ namespace SmartRestaurant.Entities.Tables
         /// <summary>Bàn đã được đặt trước</summary>
         Reserved = 2,
         
-        /// <summary>Bàn tạm thời ngưng phục vụ (bảo trì, dọn dẹp, v.v.)</summary>
-        OutOfService = 3
+        /// <summary>Bàn đang được dọn dẹp</summary>
+        Cleaning = 3
     }
 }

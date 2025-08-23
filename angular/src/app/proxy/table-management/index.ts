@@ -1,2 +1,3 @@
 import * as LayoutSections from './layout-sections';
-export { LayoutSections };
+import * as Tables from './tables';
+export { LayoutSections, Tables };

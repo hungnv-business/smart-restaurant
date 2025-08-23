@@ -103,7 +103,7 @@ public class SmartRestaurantDbContext :
             b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Tables", SmartRestaurantConsts.DbSchema);
             b.ConfigureByConvention();
             
-            b.Property(x => x.TableName).IsRequired().HasMaxLength(64);
+            b.Property(x => x.TableNumber).IsRequired().HasMaxLength(64);
             b.Property(x => x.DisplayOrder).IsRequired();
             b.Property(x => x.Status).IsRequired();
             b.Property(x => x.IsActive).IsRequired();

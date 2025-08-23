@@ -1,0 +1,71 @@
+<div class="p-4 min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <h2 class="text-2xl font-bold text-blue-600 m-0">Quản Lý Vị Trí Bàn</h2>
+    <p-button 
+      label="Refresh" 
+      icon="pi pi-refresh" 
+      (click)="refresh()"
+      [loading]="loading"
+      pTooltip="Làm mới dữ liệu">
+    </p-button>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start" cdkDropListGroup>
+    <div 
+      *ngFor="let section of layoutSections" 
+      class="bg-slate-50 rounded-xl p-4 min-h-96 border-2 border-slate-200 transition-all duration-300 overflow-y-auto max-h-screen"
+      cdkDropList
+      [cdkDropListData]="sectionTables[section.id!]"
+      [id]="section.id!"
+      (cdkDropListDropped)="onTableDrop($event)">
+      
+      <!-- Section Header -->
+      <div class="p-3 mb-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-semibold text-blue-900 m-0">{{ section.sectionName }}</h3>
+            <p *ngIf="section.description" class="text-sm text-blue-700 mt-1 mb-0">
+              {{ section.description }}
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-badge 
+              [value]="(sectionTables[section.id!] || []).length" 
+              severity="info">
+            </p-badge>
+            <p-button 
+              icon="pi pi-plus" 
+              size="small"
+              severity="success"
+              [rounded]="true"
+              pTooltip="Thêm bàn mới"
+              (click)="openCreateTableDialog(section.id!)">
+            </p-button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Table Cards -->
+      <div class="space-y-0">
+        <app-table-card
+          *ngFor="let table of sectionTables[section.id!]" 
+          [table]="table"
+          [tableStatusOptions]="tableStatusOptions"
+          (tableUpdated)="onTableUpdated()"
+          (tableDeleted)="onTableDeleted()">
+        </app-table-card>
+      </div>
+      
+      <!-- Empty section placeholder -->
+      <div 
+        *ngIf="!sectionTables[section.id!] || sectionTables[section.id!].length === 0"
+        class="p-4 text-center text-gray-500 border-2 border-dashed border-gray-300 rounded-lg transition-all duration-300 hover:border-gray-400">
+        <i class="pi pi-table text-2xl mb-2 block text-gray-400"></i>
+        <p class="mb-2 text-gray-600">Chưa có bàn trong khu vực này</p>
+        <p class="text-xs text-gray-500 mb-0">Kéo thả bàn vào đây để phân bổ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dialogs handled by DialogService and ConfirmationService -->

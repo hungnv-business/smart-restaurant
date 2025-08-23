@@ -255,7 +255,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
   }
 
   private findNodeInAllGroups(key: string): TreeNode | null {
-    for (let groupNode of this.permissionTreeNodes) {
+    for (const groupNode of this.permissionTreeNodes) {
       const found = this.findNode([groupNode], key);
       if (found) return found;
     }
@@ -263,7 +263,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
   }
 
   private findNode(nodes: TreeNode[], key: string): TreeNode | null {
-    for (let node of nodes) {
+    for (const node of nodes) {
       if (node.key === key) {
         return node;
       }

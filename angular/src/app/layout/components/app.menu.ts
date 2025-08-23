@@ -91,7 +91,7 @@ export class AppMenu extends ComponentBase implements OnInit {
                     {
                         label: 'Quản lý bàn',
                         icon: 'pi pi-fw pi-table',
-                        routerLink: ['/table-management/tables'],
+                        routerLink: ['/table-management/table-positioning'],
                         visible: this.hasPermission(PERMISSIONS.RESTAURANT.TABLES.TABLE.DEFAULT)
                     }
                 ]

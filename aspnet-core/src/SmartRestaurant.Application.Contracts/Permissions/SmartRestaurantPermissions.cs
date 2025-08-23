@@ -41,6 +41,8 @@ public static class SmartRestaurantPermissions
             public const string Create = Default + ".Create";
             public const string Edit = Default + ".Edit";
             public const string Delete = Default + ".Delete";
+            public const string AssignTableToSection = Default + ".AssignTableToSection";
+            public const string EditTableOrder = Default + ".EditTableOrder";
         }
     }
 

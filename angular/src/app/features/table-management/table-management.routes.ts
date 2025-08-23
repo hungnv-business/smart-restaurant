@@ -10,8 +10,16 @@ export const TABLE_MANAGEMENT_ROUTES: Routes = [
     data: { breadcrumb: 'Quản lý Khu vực Bố cục' }
   },
   {
+    path: 'table-positioning',
+    loadComponent: () =>
+      import('./table-positioning/table-layout-kanban/table-layout-kanban.component').then(
+        (m) => m.TableLayoutKanbanComponent
+      ),
+    data: { breadcrumb: 'Quản lý Vị trí Bàn' }
+  },
+  {
     path: '',
-    redirectTo: 'layout-sections',
+    redirectTo: 'table-positioning',
     pathMatch: 'full'
   }
 ];

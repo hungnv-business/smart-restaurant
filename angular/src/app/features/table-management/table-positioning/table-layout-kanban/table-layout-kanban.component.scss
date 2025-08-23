@@ -1,0 +1,60 @@
+// Minimal custom styles - prioritize Tailwind CSS
+
+// CDK Drop List states that Tailwind can't handle
+.cdk-drop-list {
+  &.cdk-drop-list-dragging {
+    @apply bg-cyan-50 border-cyan-200;
+  }
+  
+  &.cdk-drop-list-receiving {
+    @apply bg-cyan-50 border-cyan-200;
+  }
+}
+
+// CDK Drag states
+.cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  
+  &:not(.cdk-drag-disabled) {
+    cursor: move;
+  }
+  
+  &.cdk-drag-disabled {
+    cursor: default;
+  }
+}
+
+// Custom scrollbar styles (can't be done with Tailwind)
+.overflow-y-auto {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    @apply bg-slate-100 rounded-sm;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-sm;
+    
+    &:hover {
+      @apply bg-slate-400;
+    }
+  }
+}
+
+// Mobile responsive adjustments that need media queries
+@media (max-width: 640px) {
+  .min-h-screen {
+    padding: 0.5rem !important;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .min-h-96 {
+    min-height: 18rem !important;
+    padding: 0.75rem !important;
+  }
+}

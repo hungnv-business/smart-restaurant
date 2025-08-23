@@ -1,0 +1,78 @@
+<form [formGroup]="tableForm" (ngSubmit)="onSubmit()">
+  <div class="p-4">
+    <div class="flex flex-col gap-4">
+      <div>
+        <label for="tableNumber" class="block text-sm font-medium text-gray-700 mb-2">
+          Số bàn <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="tableNumber"
+          type="text"
+          pInputText
+          formControlName="tableNumber"
+          placeholder="Ví dụ: B01, VIP1"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(tableForm, 'tableNumber')"
+        />
+        <app-validation-error 
+          [control]="tableForm.get('tableNumber')"
+          fieldName="Số bàn">
+        </app-validation-error>
+      </div>
+
+      <div>
+        <label for="tableStatus" class="block text-sm font-medium text-gray-700 mb-2">
+          Trạng thái
+        </label>
+        <p-dropdown
+          id="tableStatus"
+          formControlName="status"
+          [options]="tableStatusOptions"
+          optionLabel="displayName"
+          optionValue="id"
+          placeholder="Chọn trạng thái"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(tableForm, 'status')"
+          appendTo="body">
+        </p-dropdown>
+        <app-validation-error 
+          [control]="tableForm.get('status')"
+          fieldName="Trạng thái">
+        </app-validation-error>
+      </div>
+
+      <div>
+        <label for="displayOrder" class="block text-sm font-medium text-gray-700 mb-2">
+          Thứ tự hiển thị <span class="text-red-500">*</span>
+        </label>
+        <p-inputNumber
+          inputId="displayOrder"
+          formControlName="displayOrder"
+          [min]="0"
+          [max]="999"
+          [showButtons]="true"
+          buttonLayout="horizontal"
+          incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus"
+          [class.p-invalid]="isFieldInvalid(tableForm, 'displayOrder')"
+          class="w-full">
+        </p-inputNumber>
+        <app-validation-error 
+          [control]="tableForm.get('displayOrder')"
+          fieldName="Thứ tự hiển thị">
+        </app-validation-error>
+        <small class="text-gray-500 text-xs mt-1 block">
+          Thứ tự hiển thị bàn trong khu vực
+        </small>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <app-form-footer-actions
+      [disabled]="tableForm.invalid"
+      [loading]="loading"
+      (save)="onSubmit()"
+      (cancel)="onCancel()">
+    </app-form-footer-actions>
+  </div>
+</form>

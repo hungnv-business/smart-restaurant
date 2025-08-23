@@ -6,10 +6,10 @@ namespace SmartRestaurant.Entities.Tables
 {
     public class Table : FullAuditedEntity<Guid>
     {
-        /// <summary>Tên bàn (ví dụ: "Bàn 01", "Bàn VIP A1")</summary>
+        /// <summary>Số bàn hiển thị (ví dụ: "B01", "B02", "VIP1")</summary>
         [Required]
         [MaxLength(64)]
-        public string TableName { get; set; }
+        public string TableNumber { get; set; }
         
         /// <summary>Số thứ tự bàn trong khu vực</summary>
         public int DisplayOrder { get; set; }
@@ -33,18 +33,33 @@ namespace SmartRestaurant.Entities.Tables
 
         public Table(
             Guid id,
-            string tableName,
+            string tableNumber,
             int displayOrder = 0,
             TableStatus status = TableStatus.Available,
             bool isActive = true,
             Guid? layoutSectionId = null
         ) : base(id)
         {
-            TableName = tableName;
+            TableNumber = tableNumber;
             DisplayOrder = displayOrder;
             Status = status;
             IsActive = isActive;
             LayoutSectionId = layoutSectionId;
+        }
+
+        public void AssignToSection(Guid layoutSectionId)
+        {
+            LayoutSectionId = layoutSectionId;
+        }
+
+        public void UpdateDisplayOrder(int displayOrder)
+        {
+            DisplayOrder = displayOrder;
+        }
+
+        public void UpdateStatus(TableStatus status)
+        {
+            Status = status;
         }
     }
 }

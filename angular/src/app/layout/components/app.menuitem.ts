@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, HostBinding, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostBinding, Input, OnDestroy, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
 import { Subscription } from 'rxjs';
@@ -104,7 +104,7 @@ import { LayoutService } from '../service/layout.service';
         ])
     ]
 })
-export class AppMenuitem implements OnInit, OnDestroy {
+export class AppMenuitem implements OnInit, OnDestroy, AfterViewChecked {
     @Input() item: any;
 
     @Input() index!: number;
@@ -203,7 +203,7 @@ export class AppMenuitem implements OnInit, OnDestroy {
 
     updateActiveStateFromRoute() {
         if (this.item && this.item.routerLink) {
-            let activeRoute = this.router.isActive(this.item.routerLink[0], {
+            const activeRoute = this.router.isActive(this.item.routerLink[0], {
                 paths: 'exact',
                 queryParams: 'ignored',
                 matrixParams: 'ignored',

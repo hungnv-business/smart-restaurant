@@ -35,6 +35,8 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
         tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Create, L("Permission:Tables.Table.Create"));
         tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Edit, L("Permission:Tables.Table.Edit"));
         tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.Delete, L("Permission:Tables.Table.Delete"));
+        tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.AssignTableToSection, L("Permission:Tables.Table.AssignTableToSection"));
+        tablePermission.AddChild(SmartRestaurantPermissions.Tables.Table.EditTableOrder, L("Permission:Tables.Table.EditTableOrder"));
 
         // Kitchen permissions
         var kitchenPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Kitchen.Default, L("Permission:Kitchen"));
