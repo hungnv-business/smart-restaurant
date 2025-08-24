@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -8,15 +8,16 @@ import {
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TreeModule } from 'primeng/tree';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { firstValueFrom } from 'rxjs';
 
 import { IdentityRoleService } from '@abp/ng.identity/proxy';
-import { IdentityRoleCreateDto, IdentityRoleUpdateDto } from '@abp/ng.identity/proxy';
+import { IdentityRoleCreateDto, IdentityRoleUpdateDto, IdentityRoleDto } from '@abp/ng.identity/proxy';
 import { PermissionsService } from '@abp/ng.permission-management/proxy';
+import { RoleFormDialogData } from './role-form-dialog.service';
 import {
   GetPermissionListResultDto,
   UpdatePermissionsDto,
@@ -35,7 +36,6 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
-    DialogModule,
     ProgressSpinnerModule,
     CheckboxModule,
     TreeModule,
@@ -43,28 +43,29 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
   ],
   templateUrl: './role-form.component.html',
 })
-export class RoleFormComponent extends ComponentBase implements OnInit, OnChanges {
-  @Input() visible = false;
-  @Input() roleId?: string;
-  @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() roleSaved = new EventEmitter<void>();
-
+export class RoleFormComponent extends ComponentBase implements OnInit {
   roleForm!: FormGroup;
-  isEditMode = false;
   loading = false;
+  roleId?: string;
+  role: IdentityRoleDto | null = null;
 
   // Permission management
   availablePermissions: GetPermissionListResultDto | null = null;
   permissionTreeNodes: TreeNode[] = [];
   selectedTreeNodes: TreeNode[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private identityRoleService: IdentityRoleService,
-    private permissionsService: PermissionsService,
-    private permissionTreeService: PermissionTreeService
-  ) {
+  // Injected services
+  private fb = inject(FormBuilder);
+  private identityRoleService = inject(IdentityRoleService);
+  private permissionsService = inject(PermissionsService);
+  private permissionTreeService = inject(PermissionTreeService);
+  private dialogRef = inject(DynamicDialogRef);
+  private config = inject(DynamicDialogConfig);
+
+  constructor() {
     super();
+    const data = this.config.data as RoleFormDialogData;
+    this.roleId = data?.roleId;
     this.initializeForm();
   }
 
@@ -72,20 +73,8 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
     this.loadPermissions();
 
     if (this.roleId) {
-      this.isEditMode = true;
       this.loadRole(this.roleId);
     } else {
-      this.isEditMode = false;
-      this.resetRoleForm();
-    }
-  }
-
-  ngOnChanges() {
-    if (this.visible && this.roleId) {
-      this.isEditMode = true;
-      this.loadRole(this.roleId);
-    } else if (this.visible && !this.roleId) {
-      this.isEditMode = false;
       this.resetRoleForm();
     }
   }
@@ -103,6 +92,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
 
     try {
       const role = await firstValueFrom(this.identityRoleService.get(id));
+      this.role = role;
 
       this.roleForm.patchValue({
         name: role.name,
@@ -114,9 +104,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
       await this.loadRolePermissions(role.name);
 
       // Disable name field in edit mode for system roles
-      if (this.isEditMode) {
-        this.roleForm.get('name')?.disable();
-      }
+      this.roleForm.get('name')?.disable();
 
       this.loading = false;
     } catch (error) {
@@ -133,7 +121,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
     const formValue = this.roleForm.getRawValue();
     this.loading = true;
 
-    if (this.isEditMode) {
+    if (this.roleId) {
       await this.updateRole(formValue);
     } else {
       await this.createRole(formValue);
@@ -155,8 +143,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
       await this.updateRolePermissions(formValue.name);
 
       this.showSuccess('Thành công', 'Đã tạo vai trò mới');
-      this.hideDialog();
-      this.roleSaved.emit();
+      this.dialogRef.close(true);
     } catch (error) {
       this.handleApiError(error, 'Không thể tạo vai trò');
       this.loading = false;
@@ -179,22 +166,15 @@ export class RoleFormComponent extends ComponentBase implements OnInit, OnChange
       await this.updateRolePermissions(formValue.name);
 
       this.showSuccess('Thành công', 'Đã cập nhật vai trò');
-      this.hideDialog();
-      this.roleSaved.emit();
+      this.dialogRef.close(true);
     } catch (error) {
       this.handleApiError(error, 'Không thể cập nhật vai trò');
       this.loading = false;
     }
   }
 
-  hideDialog() {
-    this.visible = false;
-    this.visibleChange.emit(false);
-    this.resetRoleForm();
-  }
-
   cancel() {
-    this.hideDialog();
+    this.dialogRef.close(false);
   }
 
   private resetRoleForm() {

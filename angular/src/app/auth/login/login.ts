@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -121,12 +121,12 @@ export class LoginComponent extends ComponentBase implements OnInit {
     isLoading: boolean = false;
     private returnUrl: string = '/';
     
-    constructor(
-        private fb: FormBuilder,
-        private authService: AuthService,
-        private router: Router,
-        private route: ActivatedRoute
-    ) {
+    private fb = inject(FormBuilder);
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    
+    constructor() {
         super();
         this.loginForm = this.createForm();
     }

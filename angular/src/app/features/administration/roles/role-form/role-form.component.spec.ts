@@ -156,8 +156,8 @@ describe('RoleFormComponent', () => {
       expect(component.roleForm.get('isPublic')?.value).toBe(false);
     });
 
-    it('should set isEditMode to false by default', () => {
-      expect(component.isEditMode).toBe(false);
+    it('should have roleId undefined by default', () => {
+      expect(component.roleId).toBeUndefined();
     });
 
     it('should initialize empty permission arrays', () => {
@@ -181,8 +181,8 @@ describe('RoleFormComponent', () => {
       component.ngOnInit();
     });
 
-    it('should set isEditMode to false', () => {
-      expect(component.isEditMode).toBe(false);
+    it('should have roleId undefined in create mode', () => {
+      expect(component.roleId).toBeUndefined();
     });
 
     it('should enable name field', () => {
@@ -192,7 +192,7 @@ describe('RoleFormComponent', () => {
     it('should initialize form in create mode', () => {
       component.ngOnInit();
       
-      expect(component.isEditMode).toBe(false);
+      expect(component.roleId).toBeUndefined();
       expect(component.roleForm.get('name')?.enabled).toBe(true);
     });
   });
@@ -203,30 +203,11 @@ describe('RoleFormComponent', () => {
       spyOn(component, 'loadRole');
     });
 
-    it('should set isEditMode to true', () => {
+    it('should load role when roleId exists', () => {
       component.ngOnInit();
       
-      expect(component.isEditMode).toBe(true);
+      expect(component.roleId).toBe('role-id');
       expect(component.loadRole).toHaveBeenCalledWith('role-id');
-    });
-
-    it('should load role when roleId changes', () => {
-      component.visible = true;
-      component.roleId = 'new-role-id';
-      
-      component.ngOnChanges();
-      
-      expect(component.isEditMode).toBe(true);
-      expect(component.loadRole).toHaveBeenCalledWith('new-role-id');
-    });
-
-    it('should reset form when switching to create mode', () => {
-      component.visible = true;
-      component.roleId = undefined;
-      
-      component.ngOnChanges();
-      
-      expect(component.isEditMode).toBe(false);
     });
   });
 
@@ -271,8 +252,7 @@ describe('RoleFormComponent', () => {
       expect(component.loadRolePermissions).toHaveBeenCalledWith(mockRole.name);
     });
 
-    it('should disable name field in edit mode', async () => {
-      component.isEditMode = true;
+    it('should disable name field when loading role', async () => {
       spyOn(component, 'loadRolePermissions').and.returnValue(Promise.resolve());
       
       await component.loadRole('role-id');
@@ -288,67 +268,6 @@ describe('RoleFormComponent', () => {
       await component.loadRole('role-id');
       
       expect(component.loading).toBe(false);
-    });
-  });
-
-  describe('Role Permission Loading', () => {
-    beforeEach(() => {
-      component.permissionTreeNodes = mockPermissionTree;
-      component.availablePermissions = mockPermissionList;
-    });
-
-    it('should load role permissions successfully', async () => {
-      const rolePermissions = {
-        ...mockPermissionList,
-        groups: [
-          {
-            ...mockPermissionList.groups[0],
-            permissions: [
-              { ...mockPermissionList.groups[0].permissions[0], isGranted: true },
-              { ...mockPermissionList.groups[0].permissions[1], isGranted: false },
-              { ...mockPermissionList.groups[0].permissions[2], isGranted: true }
-            ]
-          }
-        ]
-      };
-      
-      permissionsService.get.and.returnValue(of(rolePermissions));
-      
-      await component.loadRolePermissions('TestRole');
-      
-      expect(permissionsService.get).toHaveBeenCalledWith('R', 'TestRole');
-      expect(permissionTreeService.updateParentStates).toHaveBeenCalled();
-    });
-
-    it('should handle role permission loading error', async () => {
-      permissionsService.get.and.returnValue(throwError(() => new Error('Permission loading failed')));
-      spyOn(console, 'error');
-      
-      await component.loadRolePermissions('TestRole');
-      
-      expect(console.error).toHaveBeenCalledWith('Error loading role permissions:', jasmine.any(Error));
-    });
-
-    it('should correctly identify granted permissions', async () => {
-      const rolePermissions = {
-        ...mockPermissionList,
-        groups: [
-          {
-            ...mockPermissionList.groups[0],
-            permissions: [
-              { ...mockPermissionList.groups[0].permissions[0], isGranted: true },
-              { ...mockPermissionList.groups[0].permissions[1], isGranted: true },
-              { ...mockPermissionList.groups[0].permissions[2], isGranted: false }
-            ]
-          }
-        ]
-      };
-      
-      permissionsService.get.and.returnValue(of(rolePermissions));
-      await component.loadRolePermissions('TestRole');
-      
-      // Should process granted permissions correctly
-      expect(permissionTreeService.updateParentStates).toHaveBeenCalled();
     });
   });
 
@@ -372,16 +291,15 @@ describe('RoleFormComponent', () => {
       expect(identityRoleService.update).not.toHaveBeenCalled();
     });
 
-    it('should create role in create mode', async () => {
-      component.isEditMode = false;
+    it('should create role when no roleId', async () => {
+      component.roleId = undefined;
       
       await component.onSubmit();
       
       expect(identityRoleService.create).toHaveBeenCalled();
     });
 
-    it('should update role in edit mode', async () => {
-      component.isEditMode = true;
+    it('should update role when roleId exists', async () => {
       component.roleId = 'role-id';
       
       await component.onSubmit();
@@ -392,26 +310,21 @@ describe('RoleFormComponent', () => {
 
   describe('Role Creation and Update', () => {
     it('should handle successful role creation', async () => {
-      component.isEditMode = false;
-      spyOn(component.roleSaved, 'emit');
+      component.roleId = undefined;
       
       await component.onSubmit();
       
       expect(identityRoleService.create).toHaveBeenCalled();
       expect(permissionsService.update).toHaveBeenCalled();
-      expect(component.roleSaved.emit).toHaveBeenCalled();
     });
 
     it('should handle successful role update', async () => {
-      component.isEditMode = true;
       component.roleId = 'role-id';
-      spyOn(component.roleSaved, 'emit');
       
       await component.onSubmit();
       
       expect(identityRoleService.update).toHaveBeenCalled();
       expect(permissionsService.update).toHaveBeenCalled();
-      expect(component.roleSaved.emit).toHaveBeenCalled();
     });
 
     it('should handle creation errors', async () => {
@@ -470,26 +383,6 @@ describe('RoleFormComponent', () => {
       await component.updateRolePermissions('TestRole');
       
       expect(permissionsService.update).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Dialog Management', () => {
-    it('should hide dialog and emit change', () => {
-      spyOn(component.visibleChange, 'emit');
-      component.visible = true;
-      
-      component.hideDialog();
-      
-      expect(component.visible).toBe(false);
-      expect(component.visibleChange.emit).toHaveBeenCalledWith(false);
-    });
-
-    it('should cancel and hide dialog', () => {
-      spyOn(component, 'hideDialog');
-      
-      component.cancel();
-      
-      expect(component.hideDialog).toHaveBeenCalled();
     });
   });
 

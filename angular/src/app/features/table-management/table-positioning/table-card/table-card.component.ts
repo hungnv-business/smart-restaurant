@@ -9,7 +9,6 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
-import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 
 // Application imports
@@ -17,7 +16,7 @@ import { ComponentBase } from '../../../../shared/base/component-base';
 import { TableService } from '../../../../proxy/table-management/tables/table.service';
 import { TableDto, ToggleActiveStatusDto } from '../../../../proxy/table-management/tables/dto/models';
 import { TableStatus } from '../../../../proxy/table-status.enum';
-import { TableFormDialogService, TableFormDialogData } from '../table-form-dialog/table-form-dialog.service';
+import { TableFormDialogService } from '../table-form-dialog/table-form-dialog.service';
 import { IntLookupItemDto } from '@proxy/common/dto';
 
 @Component({
@@ -29,8 +28,7 @@ import { IntLookupItemDto } from '@proxy/common/dto';
     CardModule,
     ButtonModule,
     TooltipModule,
-    BadgeModule,
-    ConfirmDialog
+    BadgeModule
   ],
   templateUrl: './table-card.component.html',
   styleUrls: ['./table-card.component.scss']

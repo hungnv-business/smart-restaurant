@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   CdkDragDrop,
@@ -15,6 +15,8 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialog } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 // Application imports
 import { ComponentBase } from '../../../../shared/base/component-base';
@@ -29,7 +31,6 @@ import { LayoutSectionDto } from '../../../../proxy/table-management/layout-sect
 import { IntLookupItemDto } from '@proxy/common/dto';
 import {
   TableFormDialogService,
-  TableFormDialogData,
 } from '../table-form-dialog/table-form-dialog.service';
 import { TableCardComponent } from '../table-card/table-card.component';
 
@@ -44,9 +45,10 @@ import { TableCardComponent } from '../table-card/table-card.component';
     TooltipModule,
     BadgeModule,
     ToastModule,
+    ConfirmDialog,
     TableCardComponent,
   ],
-  providers: [],
+  providers: [ConfirmationService],
   templateUrl: './table-layout-kanban.component.html',
   styleUrls: ['./table-layout-kanban.component.scss'],
 })
@@ -60,11 +62,11 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
   creatingTable = false;
   selectedSectionId = '';
 
-  constructor(
-    private tableService: TableService,
-    private tableFormDialogService: TableFormDialogService,
-    private globalService: GlobalService
-  ) {
+  private tableService = inject(TableService);
+  private tableFormDialogService = inject(TableFormDialogService);
+  private globalService = inject(GlobalService);
+  
+  constructor() {
     super();
   }
 

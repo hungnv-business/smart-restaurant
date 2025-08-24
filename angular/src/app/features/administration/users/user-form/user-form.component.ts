@@ -1,14 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
-import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { forkJoin } from 'rxjs';
 
 import { IdentityUserService } from '@abp/ng.identity/proxy';
-import { IdentityUserCreateDto, IdentityUserUpdateDto } from '@abp/ng.identity/proxy';
+import { IdentityUserCreateDto, IdentityUserUpdateDto, IdentityUserDto } from '@abp/ng.identity/proxy';
 import { ComponentBase } from '../../../../shared/base/component-base';
+import { UserFormDialogData } from './user-form-dialog.service';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 
@@ -19,51 +20,41 @@ import { FormFooterActionsComponent } from '../../../../shared/components/form-f
     CommonModule,
     ReactiveFormsModule,
     InputTextModule,
-    DialogModule,
     ProgressSpinnerModule,
     ValidationErrorComponent,
     FormFooterActionsComponent,
   ],
   templateUrl: './user-form.component.html',
 })
-export class UserFormComponent extends ComponentBase implements OnInit, OnChanges {
-  @Input() visible = false;
-  @Input() userId?: string;
-  @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() userSaved = new EventEmitter<void>();
-
+export class UserFormComponent extends ComponentBase implements OnInit {
   userForm!: FormGroup;
-  isEditMode = false;
   loading = false;
   availableRoles: string[] = [];
+  userId?: string;
+  user: IdentityUserDto | null = null;
 
-  constructor(private fb: FormBuilder, private identityUserService: IdentityUserService) {
+  // Injected services
+  private fb = inject(FormBuilder);
+  private identityUserService = inject(IdentityUserService);
+  private dialogRef = inject(DynamicDialogRef);
+  private config = inject(DynamicDialogConfig);
+
+  constructor() {
     super();
+    const data = this.config.data as UserFormDialogData;
+    this.userId = data?.userId;
     this.initializeForm();
   }
 
   ngOnInit() {
-    // Watch for userId changes to load user data
     this.identityUserService.getAssignableRoles().subscribe(res => {
       this.availableRoles = res.items.map(e => e.name);
       if (this.userId) {
-        this.isEditMode = true;
         this.loadUser(this.userId);
       } else {
-        this.isEditMode = false;
         this.resetUserForm();
       }
     });
-  }
-
-  ngOnChanges() {
-    if (this.visible && this.userId) {
-      this.isEditMode = true;
-      this.loadUser(this.userId);
-    } else if (this.visible && !this.userId) {
-      this.isEditMode = false;
-      this.resetUserForm();
-    }
   }
 
   private initializeForm() {
@@ -87,6 +78,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
       userRoles: this.identityUserService.getRoles(id)
     }).subscribe({
       next: ({ user, userRoles }) => {
+        this.user = user;
         this.userForm.patchValue({
           userName: user.userName,
           email: user.email,
@@ -98,9 +90,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
         });
 
         // Disable username in edit mode
-        if (this.isEditMode) {
-          this.userForm.get('userName')?.disable();
-        }
+        this.userForm.get('userName')?.disable();
 
         this.loading = false;
       },
@@ -137,7 +127,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     const formValue = this.userForm.getRawValue();
     this.loading = true;
 
-    if (this.isEditMode) {
+    if (this.userId) {
       this.updateUser(formValue);
     } else {
       this.createUser(formValue);
@@ -160,8 +150,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     this.identityUserService.create(createInput).subscribe({
       next: () => {
         this.showSuccess('Thành công', 'Đã tạo người dùng mới');
-        this.hideDialog();
-        this.userSaved.emit();
+        this.dialogRef.close(true);
       },
       error: error => {
         this.handleApiError(error, 'Không thể tạo người dùng');
@@ -185,8 +174,7 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     this.identityUserService.update(this.userId!, updateInput).subscribe({
       next: () => {
         this.showSuccess('Thành công', 'Đã cập nhật người dùng');
-        this.hideDialog();
-        this.userSaved.emit();
+        this.dialogRef.close(true);
       },
       error: error => {
         this.handleApiError(error, 'Không thể cập nhật người dùng');
@@ -195,14 +183,8 @@ export class UserFormComponent extends ComponentBase implements OnInit, OnChange
     });
   }
 
-  hideDialog() {
-    this.visible = false;
-    this.visibleChange.emit(false);
-    this.resetUserForm();
-  }
-
   cancel() {
-    this.hideDialog();
+    this.dialogRef.close(false);
   }
 
   private resetUserForm() {

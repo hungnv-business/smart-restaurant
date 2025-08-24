@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -110,14 +110,14 @@ export class ForbiddenComponent implements OnInit, OnDestroy {
   currentUserRole: string | null = null;
   currentTime = new Date();
 
-  private timeInterval: any;
+  private timeInterval: number | null = null;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private configState: ConfigStateService
-  ) {}
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private configState = inject(ConfigStateService);
+  
+  constructor() {}
 
   ngOnInit() {
     // Get query parameters
@@ -130,14 +130,14 @@ export class ForbiddenComponent implements OnInit, OnDestroy {
     this.loadCurrentUserRole();
 
     // Update time every second
-    this.timeInterval = setInterval(() => {
+    this.timeInterval = window.setInterval(() => {
       this.currentTime = new Date();
-    }, 1000);
+    }, 1000) as number;
   }
 
   ngOnDestroy() {
     if (this.timeInterval) {
-      clearInterval(this.timeInterval);
+      window.clearInterval(this.timeInterval);
     }
   }
 

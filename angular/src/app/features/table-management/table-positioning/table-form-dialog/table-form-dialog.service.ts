@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DialogService, DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Observable } from 'rxjs';
 
@@ -7,8 +7,7 @@ import { map } from 'rxjs/operators';
 
 export interface TableFormDialogData {
   sectionId?: string;
-  id?: string;
-  isEditMode: boolean;
+  tableId?: string;
   title?: string;
 }
 
@@ -17,7 +16,7 @@ export interface TableFormDialogData {
   providedIn: 'root',
 })
 export class TableFormDialogService {
-  constructor(private dialogService: DialogService) {}
+  private dialogService = inject(DialogService);
 
   /**
    * Mở dialog tạo bàn mới
@@ -25,7 +24,6 @@ export class TableFormDialogService {
   openCreateTableDialog(sectionId: string): Observable<boolean> {
     const dialogData: TableFormDialogData = {
       sectionId: sectionId,
-      isEditMode: false,
       title: 'Thêm Bàn Mới',
     };
 
@@ -35,10 +33,9 @@ export class TableFormDialogService {
   /**
    * Mở dialog chỉnh sửa bàn
    */
-  openEditTableDialog(id: string): Observable<boolean> {
+  openEditTableDialog(tableId: string): Observable<boolean> {
     const dialogData: TableFormDialogData = {
-      id,
-      isEditMode: true,
+      tableId,
       title: 'Chỉnh Sửa Bàn',
     };
 

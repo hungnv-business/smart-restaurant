@@ -1,7 +1,11 @@
 {
   "root": true,
   "ignorePatterns": [
-    "projects/**/*"
+    "projects/**/*",
+    "src/app/proxy/**/*",
+    "src/app/layout/**/*",
+    "src/app/features/administration/**/*",
+    "**/*.spec.ts"
   ],
   "overrides": [
     {
@@ -10,7 +14,7 @@
       ],
       "parserOptions": {
         "project": [
-          "./tsconfig.json"
+          "tsconfig.json"
         ],
         "createDefaultProgram": true
       },
@@ -42,22 +46,36 @@
             "default": {
               "memberTypes": [
                 // 1. @Input decorated fields
-                ["decorated-field", "decorated-accessor"],
-                
+                [
+                  "decorated-field",
+                  "decorated-accessor"
+                ],
                 // 2. Static fields
-                ["public-static-field", "protected-static-field", "private-static-field"],
-                
+                [
+                  "public-static-field",
+                  "protected-static-field",
+                  "private-static-field"
+                ],
                 // 3. Instance fields by visibility
-                ["public-field", "protected-field", "private-field"],
-                
+                [
+                  "public-field",
+                  "protected-field",
+                  "private-field"
+                ],
                 // 4. Constructors
                 "constructor",
-                
                 // 5. Static methods
-                ["public-static-method", "protected-static-method", "private-static-method"],
-                
+                [
+                  "public-static-method",
+                  "protected-static-method",
+                  "private-static-method"
+                ],
                 // 6. Instance methods by visibility
-                ["public-method", "protected-method", "private-method"]
+                [
+                  "public-method",
+                  "protected-method",
+                  "private-method"
+                ]
               ],
               "order": "alphabetically-case-insensitive"
             },
@@ -65,34 +83,37 @@
               "memberTypes": [
                 // 1. @Input/@Output/@ViewChild decorators first
                 "decorated-field",
-                "decorated-accessor", 
-                
+                "decorated-accessor",
                 // 2. Static fields
                 "public-static-field",
-                "protected-static-field", 
+                "protected-static-field",
                 "private-static-field",
-                
                 // 3. Instance fields by visibility (public → protected → private)
                 "public-field",
                 "protected-field",
                 "private-field",
-                
                 // 4. Constructor
                 "constructor",
-                
                 // 5. Getters/Setters
-                ["public-get", "public-set"],
-                ["protected-get", "protected-set"],
-                ["private-get", "private-set"],
-                
+                [
+                  "public-get",
+                  "public-set"
+                ],
+                [
+                  "protected-get",
+                  "protected-set"
+                ],
+                [
+                  "private-get",
+                  "private-set"
+                ],
                 // 6. Static methods
                 "public-static-method",
                 "protected-static-method",
                 "private-static-method",
-                
                 // 7. Instance methods by visibility
                 "public-method",
-                "protected-method", 
+                "protected-method",
                 "private-method"
               ]
             }

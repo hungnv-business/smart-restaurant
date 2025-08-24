@@ -71,8 +71,8 @@
     <app-form-footer-actions
       [disabled]="tableForm.invalid"
       [loading]="loading"
-      (save)="onSubmit()"
-      (cancel)="onCancel()">
+      (formSave)="onSubmit()"
+      (formCancel)="onCancel()">
     </app-form-footer-actions>
   </div>
 </form>

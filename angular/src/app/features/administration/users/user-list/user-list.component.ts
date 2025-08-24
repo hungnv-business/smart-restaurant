@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { Table, TableModule } from 'primeng/table';
@@ -16,7 +16,7 @@ import { TooltipModule } from 'primeng/tooltip';
 
 import { IdentityUserService } from '@abp/ng.identity/proxy';
 import { IdentityUserDto, GetIdentityUsersInput } from '@abp/ng.identity/proxy';
-import { UserFormComponent } from '../user-form/user-form.component';
+import { UserFormDialogService } from '../user-form/user-form-dialog.service';
 import { PermissionDirective } from '@abp/ng.core';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
 
@@ -35,7 +35,6 @@ import { PERMISSIONS } from '../../../../shared/constants/permissions';
     IconFieldModule,
     ConfirmDialogModule,
     TooltipModule,
-    UserFormComponent,
     PermissionDirective,
   ],
   templateUrl: './user-list.component.html',
@@ -52,14 +51,12 @@ export class UserListComponent extends ComponentBase implements OnInit {
   users = signal<IdentityUserDto[]>([]);
   selectedUsers!: IdentityUserDto[] | null;
 
-  // Dialog state
-  userDialogVisible = false;
-  selectedUserId?: string;
+  // Injected services
+  private identityUserService = inject(IdentityUserService);
+  private confirmationService = inject(ConfirmationService);
+  private userFormDialogService = inject(UserFormDialogService);
 
-  constructor(
-    private identityUserService: IdentityUserService,
-    private confirmationService: ConfirmationService
-  ) {
+  constructor() {
     super();
   }
 
@@ -69,18 +66,19 @@ export class UserListComponent extends ComponentBase implements OnInit {
 
   // Dialog operations
   openCreateDialog() {
-    this.selectedUserId = undefined;
-    this.userDialogVisible = true;
+    this.userFormDialogService.openCreateUserDialog().subscribe((success) => {
+      if (success) {
+        this.loadUsers();
+      }
+    });
   }
 
   openEditDialog(userId: string) {
-    this.selectedUserId = userId;
-    this.userDialogVisible = true;
-  }
-
-  onUserSaved() {
-    this.loadUsers();
-    this.userDialogVisible = false;
+    this.userFormDialogService.openEditUserDialog(userId).subscribe((success) => {
+      if (success) {
+        this.loadUsers();
+      }
+    });
   }
 
   deleteUser(user: IdentityUserDto) {

@@ -162,25 +162,5 @@
   </div>
 </div>
 
-<!-- Create/Edit Dialog -->
-<p-dialog
-  [(visible)]="displayDialog"
-  [header]="isEditMode ? 'Chỉnh sửa Khu vực' : 'Thêm Khu vực mới'"
-  [modal]="true"
-  [closable]="true"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="p-fluid"
-  [style]="{ width: '500px' }"
-  (onHide)="onDialogHide()"
->
-  <app-layout-section-form
-    [section]="selectedSection"
-    [isEditMode]="isEditMode"
-    (saved)="onSectionSaved()"
-    (cancelled)="onDialogHide()"
-  >
-  </app-layout-section-form>
-</p-dialog>
 
 <p-confirmDialog></p-confirmDialog>

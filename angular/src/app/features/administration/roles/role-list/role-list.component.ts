@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { Table, TableModule } from 'primeng/table';
@@ -18,7 +18,7 @@ import { PermissionDirective } from '@abp/ng.core';
 import { IdentityRoleService } from '@abp/ng.identity/proxy';
 import { IdentityRoleDto, GetIdentityRolesInput } from '@abp/ng.identity/proxy';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
-import { RoleFormComponent } from '../role-form/role-form.component';
+import { RoleFormDialogService } from '../role-form/role-form-dialog.service';
 
 @Component({
   selector: 'app-role-list',
@@ -36,7 +36,6 @@ import { RoleFormComponent } from '../role-form/role-form.component';
     ConfirmDialogModule,
     TooltipModule,
     PermissionDirective,
-    RoleFormComponent,
   ],
   templateUrl: './role-list.component.html',
   providers: [ConfirmationService],
@@ -52,14 +51,12 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   roles = signal<IdentityRoleDto[]>([]);
   selectedRoles!: IdentityRoleDto[] | null;
 
-  // Dialog state
-  roleDialogVisible = false;
-  selectedRoleId?: string;
+  // Injected services
+  private identityRoleService = inject(IdentityRoleService);
+  private confirmationService = inject(ConfirmationService);
+  private roleFormDialogService = inject(RoleFormDialogService);
 
-  constructor(
-    private identityRoleService: IdentityRoleService,
-    private confirmationService: ConfirmationService
-  ) {
+  constructor() {
     super();
   }
 
@@ -69,18 +66,19 @@ export class RoleListComponent extends ComponentBase implements OnInit {
 
   // Dialog operations
   openCreateDialog() {
-    this.selectedRoleId = undefined;
-    this.roleDialogVisible = true;
+    this.roleFormDialogService.openCreateRoleDialog().subscribe((success) => {
+      if (success) {
+        this.loadRoles();
+      }
+    });
   }
 
   openEditDialog(roleId: string) {
-    this.selectedRoleId = roleId;
-    this.roleDialogVisible = true;
-  }
-
-  onRoleSaved() {
-    this.loadRoles();
-    this.roleDialogVisible = false;
+    this.roleFormDialogService.openEditRoleDialog(roleId).subscribe((success) => {
+      if (success) {
+        this.loadRoles();
+      }
+    });
   }
 
   deleteRole(role: IdentityRoleDto) {

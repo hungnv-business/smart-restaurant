@@ -29,14 +29,14 @@ export class FormFooterActionsComponent {
   @Input() disabled = false;
   @Input() loading = false;
 
-  @Output() save = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() formSave = new EventEmitter<void>();
+  @Output() formCancel = new EventEmitter<void>();
 
   onSave(): void {
-    this.save.emit();
+    this.formSave.emit();
   }
 
   onCancel(): void {
-    this.cancel.emit();
+    this.formCancel.emit();
   }
 }

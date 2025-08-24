@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { takeUntil, catchError } from 'rxjs/operators';
-import { forkJoin, EMPTY } from 'rxjs';
+import { forkJoin, EMPTY, Observable } from 'rxjs';
 
 // PrimeNG imports
 import { InputTextModule } from 'primeng/inputtext';
@@ -17,7 +17,7 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 import { TableService } from '../../../../proxy/table-management/tables/table.service';
 import { GlobalService } from '../../../../proxy/common/global.service';
-import { CreateTableDto, UpdateTableDto } from '../../../../proxy/table-management/tables/dto/models';
+import { CreateTableDto, UpdateTableDto, TableDto } from '../../../../proxy/table-management/tables/dto/models';
 import { TableStatus } from '../../../../proxy/table-status.enum';
 import { TableFormDialogData } from './table-form-dialog.service';
 import { IntLookupItemDto } from '@proxy/common/dto';
@@ -44,16 +44,15 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
   currentTableId?: string;
   tableForm!: FormGroup;
   tableStatusOptions: IntLookupItemDto[] = [];
-  isEditMode = false;
 
   private tableService = inject(TableService);
   private globalService = inject(GlobalService);
 
-  constructor(
-    private ref: DynamicDialogRef,
-    private config: DynamicDialogConfig<TableFormDialogData>,
-    private fb: FormBuilder
-  ) {
+  private ref = inject(DynamicDialogRef);
+  private config = inject(DynamicDialogConfig<TableFormDialogData>);
+  private fb = inject(FormBuilder);
+
+  constructor() {
     super();
   }
 
@@ -66,31 +65,38 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
     // Initialize dialog data first
     if (this.config.data) {
       this.sectionId = this.config.data.sectionId;
-      this.isEditMode = this.config.data.isEditMode;
-      this.currentTableId = this.config.data.id;
+      this.currentTableId = this.config.data.tableId;
     }
 
     // Build observables based on mode
-    const observables: any = {
+    const observables: {
+      statuses: Observable<IntLookupItemDto[]>;
+      tableData?: Observable<TableDto>;
+      nextDisplayOrder?: Observable<number>;
+    } = {
       statuses: this.globalService.getTableStatuses()
     };
 
     // Add specific observables based on mode
-    if (this.isEditMode && this.currentTableId) {
+    if (this.currentTableId) {
       observables.tableData = this.tableService.get(this.currentTableId);
-    } else if (!this.isEditMode && this.sectionId) {
+    } else if (!this.currentTableId && this.sectionId) {
       observables.nextDisplayOrder = this.tableService.getNextDisplayOrder(this.sectionId);
     }
 
     forkJoin(observables)
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
-        next: (results: any) => {
+        next: (results: {
+          statuses: IntLookupItemDto[];
+          tableData?: TableDto;
+          nextDisplayOrder?: number;
+        }) => {
           // Map table statuses  
           this.tableStatusOptions = results.statuses;
 
           // Handle table data for edit mode
-          if (this.isEditMode && results.tableData) {
+          if (this.currentTableId && results.tableData) {
             this.sectionId = results.tableData.layoutSectionId;
             this.tableForm.patchValue({
               tableNumber: results.tableData.tableNumber,
@@ -100,7 +106,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
             });
           } 
           // Handle display order for create mode
-          else if (!this.isEditMode && results.nextDisplayOrder) {
+          else if (!this.currentTableId && results.nextDisplayOrder) {
             this.tableForm.patchValue({
               displayOrder: results.nextDisplayOrder
             });
@@ -115,7 +121,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
   private buildForm(): void {
     this.tableForm = this.fb.group({
       tableNumber: ['', [Validators.required, Validators.maxLength(50)]],
-      displayOrder: [0, [Validators.required, Validators.min(0)]],
+      displayOrder: [1, [Validators.required, Validators.min(1)]],
       status: [TableStatus.Available, [Validators.required]],
       isActive: [true]
     });
@@ -131,14 +137,19 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
     this.loading = true;
     const formValue = this.tableForm.value;
 
-    if (this.isEditMode && this.currentTableId) {
+    if (this.currentTableId) {
       this.updateTable(formValue);
     } else {
       this.createTable(formValue);
     }
   }
 
-  private createTable(formValue: any): void {
+  private createTable(formValue: {
+    tableNumber: string;
+    displayOrder: number;
+    status: TableStatus;
+    isActive: boolean;
+  }): void {
     const createData: CreateTableDto = {
       tableNumber: formValue.tableNumber?.trim(),
       displayOrder: formValue.displayOrder,
@@ -162,7 +173,12 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
     });
   }
 
-  private updateTable(formValue: any): void {
+  private updateTable(formValue: {
+    tableNumber: string;
+    displayOrder: number;
+    status: TableStatus;
+    isActive: boolean;
+  }): void {
     const updateData: UpdateTableDto = {
       tableNumber: formValue.tableNumber?.trim(),
       displayOrder: formValue.displayOrder,

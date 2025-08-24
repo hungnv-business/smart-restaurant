@@ -121,7 +121,7 @@ describe('LayoutSectionListComponent', () => {
 
     // Assert
     expect(component.selectedSection).toBeNull();
-    expect(component.isEditMode).toBeFalse();
+    expect(component.sectionId).toBeFalse();
     expect(component.displayDialog).toBeTrue();
   });
 
@@ -134,7 +134,7 @@ describe('LayoutSectionListComponent', () => {
 
     // Assert
     expect(component.selectedSection).toEqual({ ...sectionToEdit });
-    expect(component.isEditMode).toBeTrue();
+    expect(component.sectionId).toBeTrue();
     expect(component.displayDialog).toBeTrue();
   });
 
@@ -227,7 +227,7 @@ describe('LayoutSectionListComponent', () => {
     // Arrange
     component.displayDialog = true;
     component.selectedSection = mockLayoutSections[0];
-    component.isEditMode = true;
+    component.sectionId = true;
 
     // Act
     component.onDialogHide();
@@ -235,7 +235,7 @@ describe('LayoutSectionListComponent', () => {
     // Assert
     expect(component.displayDialog).toBeFalse();
     expect(component.selectedSection).toBeNull();
-    expect(component.isEditMode).toBeFalse();
+    expect(component.sectionId).toBeFalse();
   });
 
   it('should reload sections after save', () => {

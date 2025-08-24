@@ -24,7 +24,8 @@
       "Bash(rg:*)",
       "Bash(dotnet ef migrations add:*)",
       "Bash(dotnet test:*)",
-      "Bash(npx ng test:*)"
+      "Bash(npx ng test:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

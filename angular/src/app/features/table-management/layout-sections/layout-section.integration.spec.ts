@@ -91,11 +91,11 @@ describe('Layout Section Management Integration', () => {
       // Simulate opening new dialog
       listComponent.openNew();
       expect(listComponent.displayDialog).toBe(true);
-      expect(listComponent.isEditMode).toBe(false);
+      expect(listComponent.sectionId).toBe(false);
 
       // Setup form component for new section
       formComponent.section = listComponent.selectedSection;
-      formComponent.isEditMode = listComponent.isEditMode;
+      formComponent.sectionId = listComponent.sectionId;
       formFixture.detectChanges();
 
       // Arrange - Mock create operation
@@ -151,12 +151,12 @@ describe('Layout Section Management Integration', () => {
       // Simulate opening edit dialog
       listComponent.editSection(sectionToEdit);
       expect(listComponent.displayDialog).toBe(true);
-      expect(listComponent.isEditMode).toBe(true);
+      expect(listComponent.sectionId).toBe(true);
       expect(listComponent.selectedSection).toEqual({ ...sectionToEdit });
 
       // Setup form component for editing
       formComponent.section = listComponent.selectedSection;
-      formComponent.isEditMode = listComponent.isEditMode;
+      formComponent.sectionId = listComponent.sectionId;
       formFixture.detectChanges();
 
       // Verify form is populated with existing data
@@ -328,20 +328,20 @@ describe('Layout Section Management Integration', () => {
       listComponent.openNew();
       expect(listComponent.displayDialog).toBe(true);
       expect(listComponent.selectedSection).toBeNull();
-      expect(listComponent.isEditMode).toBe(false);
+      expect(listComponent.sectionId).toBe(false);
 
       // Close dialog
       listComponent.onDialogHide();
       expect(listComponent.displayDialog).toBe(false);
       expect(listComponent.selectedSection).toBeNull();
-      expect(listComponent.isEditMode).toBe(false);
+      expect(listComponent.sectionId).toBe(false);
 
       // Open edit dialog
       const sectionToEdit = mockLayoutSections[0];
       listComponent.editSection(sectionToEdit);
       expect(listComponent.displayDialog).toBe(true);
       expect(listComponent.selectedSection).toEqual({ ...sectionToEdit });
-      expect(listComponent.isEditMode).toBe(true);
+      expect(listComponent.sectionId).toBe(true);
     });
 
     it('should handle form cancellation properly', () => {

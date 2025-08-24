@@ -121,7 +121,11 @@ export abstract class ComponentBase implements OnDestroy {
    * Handle API errors with user-friendly messages in Vietnamese
    */
   protected handleApiError(
-    error: any,
+    error: {
+      error?: { error?: { message?: string } };
+      status?: number;
+      message?: string;
+    },
     defaultMessage: string = 'Có lỗi xảy ra. Vui lòng thử lại.'
   ): void {
     console.error('API Error:', error);

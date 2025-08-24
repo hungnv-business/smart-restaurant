@@ -1,12 +1,4 @@
-<p-dialog 
-    [(visible)]="visible"
-    [modal]="true"
-    [style]="{ width: '500px' }"
-    [header]="isEditMode ? 'Sửa vai trò' : 'Thêm vai trò mới'"
-    (onHide)="cancel()"
->
-    <ng-template #content>
-        <div *ngIf="!loading; else loadingTemplate">
+<div *ngIf="!loading; else loadingTemplate">
         <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
             <div class="flex flex-col gap-6 w-full">
                 <!-- Role Name -->
@@ -72,34 +64,32 @@
                 </div>
             </div>
 
-        </form>
-        </div>
+    </form>
+</div>
 
-        <ng-template #loadingTemplate>
-            <div class="flex flex-col items-center justify-center p-8 gap-4">
-                <p-progressSpinner 
-                    styleClass="w-16 h-16" 
-                    strokeWidth="4"
-                    animationDuration=".5s"
-                />
-                <p class="text-gray-600 text-sm m-0">Đang tải...</p>
-            </div>
-        </ng-template>
-    </ng-template>
+<ng-template #loadingTemplate>
+    <div class="flex flex-col items-center justify-center p-8 gap-4">
+        <p-progressSpinner 
+            styleClass="w-16 h-16" 
+            strokeWidth="4"
+            animationDuration=".5s"
+        />
+        <p class="text-gray-600 text-sm m-0">Đang tải...</p>
+    </div>
+</ng-template>
 
-    <ng-template #footer>
-        <p-button 
-            label="Lưu" 
-            icon="pi pi-check"
-            [disabled]="roleForm.invalid || loading"
-            [loading]="loading"
-            (click)="onSubmit()"
-        />
-        <p-button 
-            label="Hủy" 
-            icon="pi pi-times" 
-            severity="secondary"
-            (click)="cancel()"
-        />
-    </ng-template>
-</p-dialog>
+<div class="flex gap-2 justify-end pt-4 border-t border-gray-200 mt-6">
+    <p-button 
+        label="Lưu" 
+        icon="pi pi-check"
+        [disabled]="roleForm.invalid || loading"
+        [loading]="loading"
+        (click)="onSubmit()"
+    />
+    <p-button 
+        label="Hủy" 
+        icon="pi pi-times" 
+        severity="secondary"
+        (click)="cancel()"
+    />
+</div>

@@ -1,16 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
   FormGroup,
   Validators,
-  AbstractControl,
-  ValidationErrors,
 } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputSwitch } from 'primeng/inputswitch';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
@@ -20,6 +19,7 @@ import {
   CreateLayoutSectionDto,
   UpdateLayoutSectionDto,
 } from '../../../../proxy/table-management/layout-sections/dto/models';
+import { LayoutSectionFormDialogData } from './layout-section-form-dialog.service';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -38,13 +38,10 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./layout-section-form.component.scss'],
 })
 export class LayoutSectionFormComponent extends ComponentBase implements OnInit {
-  @Input() section: LayoutSectionDto | null = null;
-  @Input() isEditMode = false;
-  @Output() saved = new EventEmitter<void>();
-  @Output() cancelled = new EventEmitter<void>();
-
   sectionForm!: FormGroup;
   loading = false;
+  section: LayoutSectionDto | null = null;
+  sectionId?: string;
 
   // Vietnamese restaurant section name suggestions
   sectionNameSuggestions = [
@@ -76,15 +73,20 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
   ];
 
   private layoutSectionService = inject(LayoutSectionService);
+  private fb = inject(FormBuilder);
+  private dialogRef = inject(DynamicDialogRef);
+  private config = inject(DynamicDialogConfig);
 
-  constructor(private fb: FormBuilder) {
+  constructor() {
     super();
+    const data = this.config.data as LayoutSectionFormDialogData;
+    this.sectionId = data?.sectionId;
   }
 
   ngOnInit(): void {
     this.buildForm();
-    if (this.section && this.isEditMode) {
-      this.populateForm();
+    if (this.sectionId) {
+      this.loadSection(this.sectionId);
     } else {
       // For new sections, get the next display order
       this.loadNextDisplayOrder();
@@ -98,6 +100,25 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       displayOrder: [1, [Validators.required, Validators.min(1), Validators.max(999)]],
       isActive: [true],
     });
+  }
+
+  private loadSection(sectionId: string): void {
+    this.loading = true;
+    
+    this.layoutSectionService.get(sectionId)
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe({
+        next: (section) => {
+          this.section = section;
+          this.populateForm();
+          this.loading = false;
+        },
+        error: (error) => {
+          this.loading = false;
+          this.handleApiError(error, 'Không thể tải thông tin khu vực');
+          this.dialogRef.close(false);
+        }
+      });
   }
 
   private populateForm(): void {
@@ -135,14 +156,14 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     this.loading = true;
     const formValue = this.sectionForm.value;
 
-    if (this.isEditMode && this.section?.id) {
+    if (this.sectionId) {
       this.updateSection(formValue);
     } else {
       this.createSection(formValue);
     }
   }
 
-  private createSection(formValue: any): void {
+  private createSection(formValue: { sectionName: string; description?: string; displayOrder: number; isActive: boolean }): void {
     const createDto: CreateLayoutSectionDto = {
       sectionName: formValue.sectionName?.trim(),
       description: formValue.description?.trim() || undefined,
@@ -160,7 +181,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
             'Tạo mới thành công',
             `Khu vực "${response.sectionName}" đã được tạo thành công`
           );
-          this.saved.emit();
+          this.dialogRef.close(true);
         },
         error: error => {
           this.loading = false;
@@ -169,7 +190,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
-  private updateSection(formValue: any): void {
+  private updateSection(formValue: { sectionName: string; description?: string; displayOrder: number; isActive: boolean }): void {
     const updateDto: UpdateLayoutSectionDto = {
       sectionName: formValue.sectionName?.trim(),
       description: formValue.description?.trim() || undefined,
@@ -178,7 +199,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     };
 
     this.layoutSectionService
-      .update(this.section!.id!, updateDto)
+      .update(this.sectionId!, updateDto)
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
         next: response => {
@@ -187,7 +208,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
             'Cập nhật thành công',
             `Thông tin khu vực "${response.sectionName}" đã được cập nhật`
           );
-          this.saved.emit();
+          this.dialogRef.close(true);
         },
         error: error => {
           this.loading = false;
@@ -197,7 +218,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
   }
 
   onCancel(): void {
-    this.cancelled.emit();
+    this.dialogRef.close(false);
   }
 
   onSectionNameSuggestionClick(suggestion: string): void {

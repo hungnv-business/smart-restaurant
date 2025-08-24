@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   ActivatedRouteSnapshot, CanActivate, CanActivateChild,
   Router, RouterStateSnapshot, UrlTree, CanMatch, Route, UrlSegment
@@ -10,12 +10,10 @@ import { filter, map, switchMap, take } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantGuard implements CanActivate, CanActivateChild, CanMatch {
-  constructor(
-    private readonly oauth: OAuthService,
-    private readonly router: Router,
-    private readonly perms: PermissionService,
-    private readonly config: ConfigStateService
-  ) {}
+  private readonly oauth = inject(OAuthService);
+  private readonly router = inject(Router);
+  private readonly perms = inject(PermissionService);
+  private readonly config = inject(ConfigStateService);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     return this.check(state.url, route.data?.['permission']);

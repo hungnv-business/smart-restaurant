@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MessageService } from 'primeng/api';
 
 /**
@@ -9,8 +9,7 @@ import { MessageService } from 'primeng/api';
   providedIn: 'root'
 })
 export class ToastService {
-
-  constructor(private messageService: MessageService) {}
+  private messageService = inject(MessageService);
 
   /**
    * Show success message

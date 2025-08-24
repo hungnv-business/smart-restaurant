@@ -347,7 +347,7 @@ describe('Administration Module Integration Tests', () => {
     it('should handle role editing workflow', async () => {
       // Setup for edit mode
       roleFormComponent.roleId = 'role-id';
-      roleFormComponent.isEditMode = true;
+      roleFormComponent.roleId = 'role-id';
       
       roleFormComponent.roleForm.patchValue({
         name: 'UpdatedRole',

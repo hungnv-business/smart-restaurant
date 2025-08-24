@@ -2,7 +2,6 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withInMemoryScrolling, withEnabledBlockingInitialNavigation } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { appRoutes } from './app.routes';
 import { provideAbpCore, withOptions } from '@abp/ng.core';
 import { registerLocale, storeLocaleData } from '@abp/ng.core/locale';

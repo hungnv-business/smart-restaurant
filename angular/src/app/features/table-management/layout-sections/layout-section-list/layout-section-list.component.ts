@@ -5,14 +5,14 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ToolbarModule } from 'primeng/toolbar';
-import { DialogModule } from 'primeng/dialog';
+import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService } from 'primeng/api';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ComponentBase } from '../../../../shared/base/component-base';
-import { LayoutSectionFormComponent } from '../layout-section-form/layout-section-form.component';
+import { LayoutSectionFormDialogService } from '../layout-section-form/layout-section-form-dialog.service';
 import { LayoutSectionService } from '../../../../proxy/table-management/layout-sections/layout-section.service';
 import { LayoutSectionDto, UpdateLayoutSectionDto } from '../../../../proxy/table-management/layout-sections/dto/models';
 import { takeUntil } from 'rxjs/operators';
@@ -28,11 +28,10 @@ import { forkJoin } from 'rxjs';
     ButtonModule,
     InputSwitchModule,
     ToolbarModule,
-    DialogModule,
+    DynamicDialogModule,
     ConfirmDialogModule,
     ToastModule,
-    DragDropModule,
-    LayoutSectionFormComponent
+    DragDropModule
   ],
   providers: [ConfirmationService],
   templateUrl: './layout-section-list.component.html',
@@ -41,12 +40,10 @@ import { forkJoin } from 'rxjs';
 export class LayoutSectionListComponent extends ComponentBase implements OnInit {
   layoutSections: LayoutSectionDto[] = [];
   loading = false;
-  displayDialog = false;
-  selectedSection: LayoutSectionDto | null = null;
-  isEditMode = false;
 
   private confirmationService = inject(ConfirmationService);
   private layoutSectionService = inject(LayoutSectionService);
+  private layoutSectionFormDialogService = inject(LayoutSectionFormDialogService);
 
   constructor() {
     super();
@@ -74,15 +71,19 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
   }
 
   openNew(): void {
-    this.selectedSection = null;
-    this.isEditMode = false;
-    this.displayDialog = true;
+    this.layoutSectionFormDialogService.openCreateSectionDialog().subscribe((success) => {
+      if (success) {
+        this.loadLayoutSections();
+      }
+    });
   }
 
   editSection(section: LayoutSectionDto): void {
-    this.selectedSection = { ...section };
-    this.isEditMode = true;
-    this.displayDialog = true;
+    this.layoutSectionFormDialogService.openEditSectionDialog(section.id!).subscribe((success) => {
+      if (success) {
+        this.loadLayoutSections();
+      }
+    });
   }
 
   deleteSection(section: LayoutSectionDto): void {
@@ -157,16 +158,6 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       });
   }
 
-  onDialogHide(): void {
-    this.displayDialog = false;
-    this.selectedSection = null;
-    this.isEditMode = false;
-  }
-
-  onSectionSaved(): void {
-    this.displayDialog = false;
-    this.loadLayoutSections();
-  }
 
   moveUp(section: LayoutSectionDto): void {
     const currentIndex = this.layoutSections.findIndex(s => s.id === section.id);

@@ -75,7 +75,7 @@ describe('LayoutSectionFormComponent', () => {
   it('should populate form when editing existing section', () => {
     // Arrange
     component.section = mockSection;
-    component.isEditMode = true;
+    component.sectionId = true;
 
     // Act
     fixture.detectChanges();
@@ -201,7 +201,7 @@ describe('LayoutSectionFormComponent', () => {
     spyOn(component.saved, 'emit');
 
     component.section = mockSection;
-    component.isEditMode = true;
+    component.sectionId = true;
     fixture.detectChanges();
     
     // Set form values
@@ -258,7 +258,7 @@ describe('LayoutSectionFormComponent', () => {
     spyOn(component as any, 'handleApiError');
 
     component.section = mockSection;
-    component.isEditMode = true;
+    component.sectionId = true;
     fixture.detectChanges();
     
     component.sectionForm.patchValue({
