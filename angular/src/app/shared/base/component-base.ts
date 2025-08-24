@@ -6,10 +6,6 @@ import { PermissionService } from '@abp/ng.core';
 
 @Directive()
 export abstract class ComponentBase implements OnDestroy {
-  private destroy$ = new Subject<void>();
-  protected toastService = inject(ToastService);
-  protected permissionService = inject(PermissionService);
-
   pageSize = 10;
   rowsPerPageOptions = [10, 20, 30, 50, 100];
   showCurrentPageReport = false;
@@ -25,13 +21,19 @@ export abstract class ComponentBase implements OnDestroy {
     Customer: 'Khách hàng',
   };
 
+  protected toastService = inject(ToastService);
+  protected permissionService = inject(PermissionService);
+
+  private destroy$ = new Subject<void>();
+
+  constructor() {}
+
   /**
    * Observable to handle component destruction and unsubscribe from observables
    */
   protected get destroyed$() {
     return this.destroy$.asObservable();
   }
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

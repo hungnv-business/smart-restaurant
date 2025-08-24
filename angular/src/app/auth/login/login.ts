@@ -131,6 +131,15 @@ export class LoginComponent extends ComponentBase implements OnInit {
         this.loginForm = this.createForm();
     }
 
+    // Getter methods for form controls using ComponentBase
+    get emailControl(): FormControl {
+        return this.getFormControl(this.loginForm, 'email');
+    }
+    
+    get passwordControl(): FormControl {
+        return this.getFormControl(this.loginForm, 'password');
+    }
+
     ngOnInit() {
         // Get return URL from route parameters or default to '/'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
@@ -139,23 +148,6 @@ export class LoginComponent extends ComponentBase implements OnInit {
         if (this.authService.isAuthenticated) {
             this.router.navigate([this.returnUrl]);
         }
-    }
-    
-    private createForm(): FormGroup {
-        return this.fb.group({
-            email: ['', [Validators.required]],
-            password: ['', [Validators.required, Validators.minLength(3)]],
-            remember: [false]
-        });
-    }
-    
-    // Getter methods for form controls using ComponentBase
-    get emailControl(): FormControl {
-        return this.getFormControl(this.loginForm, 'email');
-    }
-    
-    get passwordControl(): FormControl {
-        return this.getFormControl(this.loginForm, 'password');
     }
 
     onLogin() {
@@ -186,6 +178,14 @@ export class LoginComponent extends ComponentBase implements OnInit {
                     this.showError("Tài khoản hoặc mật khẩu không chính xác")
                 }
             }
+        });
+    }
+    
+    private createForm(): FormGroup {
+        return this.fb.group({
+            email: ['', [Validators.required]],
+            password: ['', [Validators.required, Validators.minLength(3)]],
+            remember: [false]
         });
     }
 

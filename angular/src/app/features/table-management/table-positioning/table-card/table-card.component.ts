@@ -39,12 +39,12 @@ export class TableCardComponent extends ComponentBase {
   @Output() tableUpdated = new EventEmitter<void>();
   @Output() tableDeleted = new EventEmitter<void>();
 
+  // Expose TableStatus enum to template
+  readonly tableStatus = TableStatus;
+
   private tableService = inject(TableService);
   private tableFormDialogService = inject(TableFormDialogService);
   private confirmationService = inject(ConfirmationService);
-
-  // Expose TableStatus enum to template
-  readonly tableStatus = TableStatus;
 
   constructor() {
     super();

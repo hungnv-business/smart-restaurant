@@ -61,6 +61,29 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
     this.loadInitialData();
   }
 
+  onSubmit(): void {
+    if (!this.validateForm(this.tableForm)) {
+      return;
+    }
+
+    this.loading = true;
+    const formValue = this.tableForm.value;
+
+    if (this.currentTableId) {
+      this.updateTable(formValue);
+    } else {
+      this.createTable(formValue);
+    }
+  }
+
+  onCancel(): void {
+    this.ref.close({ success: false });
+  }
+
+  onClose(): void {
+    this.onCancel();
+  }
+
   private loadInitialData(): void {
     // Initialize dialog data first
     if (this.config.data) {
@@ -127,23 +150,6 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
     });
   }
 
-
-
-  onSubmit(): void {
-    if (!this.validateForm(this.tableForm)) {
-      return;
-    }
-
-    this.loading = true;
-    const formValue = this.tableForm.value;
-
-    if (this.currentTableId) {
-      this.updateTable(formValue);
-    } else {
-      this.createTable(formValue);
-    }
-  }
-
   private createTable(formValue: {
     tableNumber: string;
     displayOrder: number;
@@ -200,13 +206,5 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       
       this.ref.close({ success: true });
     });
-  }
-
-  onCancel(): void {
-    this.ref.close({ success: false });
-  }
-
-  onClose(): void {
-    this.onCancel();
   }
 }

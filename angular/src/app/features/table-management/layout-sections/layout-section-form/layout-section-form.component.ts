@@ -93,6 +93,30 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     }
   }
 
+  onSubmit(): void {
+    if (!this.validateForm(this.sectionForm)) {
+      return;
+    }
+
+    this.loading = true;
+    const formValue = this.sectionForm.value;
+
+    if (this.sectionId) {
+      this.updateSection(formValue);
+    } else {
+      this.createSection(formValue);
+    }
+  }
+
+  onCancel(): void {
+    this.dialogRef.close(false);
+  }
+
+  onSectionNameSuggestionClick(suggestion: string): void {
+    this.sectionForm.patchValue({ sectionName: suggestion });
+    this.sectionForm.get('sectionName')?.markAsTouched();
+  }
+
   private buildForm(): void {
     this.sectionForm = this.fb.group({
       sectionName: ['', [Validators.required, Validators.maxLength(128)]],
@@ -148,21 +172,6 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
-  onSubmit(): void {
-    if (!this.validateForm(this.sectionForm)) {
-      return;
-    }
-
-    this.loading = true;
-    const formValue = this.sectionForm.value;
-
-    if (this.sectionId) {
-      this.updateSection(formValue);
-    } else {
-      this.createSection(formValue);
-    }
-  }
-
   private createSection(formValue: { sectionName: string; description?: string; displayOrder: number; isActive: boolean }): void {
     const createDto: CreateLayoutSectionDto = {
       sectionName: formValue.sectionName?.trim(),
@@ -215,14 +224,5 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
           this.handleApiError(error, 'Không thể cập nhật thông tin khu vực');
         },
       });
-  }
-
-  onCancel(): void {
-    this.dialogRef.close(false);
-  }
-
-  onSectionNameSuggestionClick(suggestion: string): void {
-    this.sectionForm.patchValue({ sectionName: suggestion });
-    this.sectionForm.get('sectionName')?.markAsTouched();
   }
 }

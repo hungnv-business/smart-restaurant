@@ -141,14 +141,6 @@ export class ForbiddenComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadCurrentUserRole() {
-    const currentUser = this.configState.getOne('currentUser');
-    if (currentUser?.roles?.length > 0) {
-      // Get the first/primary role
-      this.currentUserRole = currentUser.roles[0];
-    }
-  }
-
   getVietnamesePermissionName(permission: string): string {
     const permissionMap: { [key: string]: string } = {
       'SmartRestaurant.Settings': 'Quản lý cài đặt',
@@ -186,5 +178,13 @@ export class ForbiddenComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/auth/login']);
     });
+  }
+
+  private loadCurrentUserRole() {
+    const currentUser = this.configState.getOne('currentUser');
+    if (currentUser?.roles?.length > 0) {
+      // Get the first/primary role
+      this.currentUserRole = currentUser.roles[0];
+    }
   }
 }
