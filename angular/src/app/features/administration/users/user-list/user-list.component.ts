@@ -66,7 +66,7 @@ export class UserListComponent extends ComponentBase implements OnInit {
 
   // Dialog operations
   openCreateDialog() {
-    this.userFormDialogService.openCreateUserDialog().subscribe((success) => {
+    this.userFormDialogService.openCreateUserDialog().subscribe(success => {
       if (success) {
         this.loadUsers();
       }
@@ -74,7 +74,7 @@ export class UserListComponent extends ComponentBase implements OnInit {
   }
 
   openEditDialog(userId: string) {
-    this.userFormDialogService.openEditUserDialog(userId).subscribe((success) => {
+    this.userFormDialogService.openEditUserDialog(userId).subscribe(success => {
       if (success) {
         this.loadUsers();
       }
@@ -194,7 +194,7 @@ export class UserListComponent extends ComponentBase implements OnInit {
     if (!this.selectedUsers?.length) return;
 
     const deleteRequests = this.selectedUsers.map(user =>
-      this.identityUserService.delete(user.id!)
+      this.identityUserService.delete(user.id!),
     );
 
     forkJoin(deleteRequests).subscribe({
@@ -203,7 +203,7 @@ export class UserListComponent extends ComponentBase implements OnInit {
         this.selectedUsers = [];
         this.showSuccess('Thành công', `Đã xóa ${deleteRequests.length} người dùng`);
       },
-      error: (error) => {
+      error: error => {
         this.handleApiError(error, 'Có lỗi xảy ra khi xóa người dùng');
         this.loadUsers(); // Reload to refresh the list
       },

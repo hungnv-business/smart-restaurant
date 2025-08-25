@@ -18,44 +18,44 @@ describe('PermissionTreeService', () => {
             displayName: 'User Management',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Users.Create',
             displayName: 'Create User',
             parentName: 'UserManagement.Users',
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Users.Update',
             displayName: 'Update User',
             parentName: 'UserManagement.Users',
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Users.Delete',
             displayName: 'Delete User',
             parentName: 'UserManagement.Users',
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Roles',
             displayName: 'Role Management',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Roles.Create',
             displayName: 'Create Role',
             parentName: 'UserManagement.Roles',
             isGranted: false,
-            allowedProviders: []
-          }
-        ]
+            allowedProviders: [],
+          },
+        ],
       },
       {
         name: 'FeatureManagement',
@@ -66,9 +66,9 @@ describe('PermissionTreeService', () => {
             displayName: 'Manage Features',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
-          }
-        ]
+            allowedProviders: [],
+          },
+        ],
       },
       {
         name: 'SettingManagement',
@@ -79,9 +79,9 @@ describe('PermissionTreeService', () => {
             displayName: 'Manage Settings',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
-          }
-        ]
+            allowedProviders: [],
+          },
+        ],
       },
       {
         name: 'Restaurant',
@@ -92,25 +92,25 @@ describe('PermissionTreeService', () => {
             displayName: 'Menu Items',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'Restaurant.MenuItems.View',
             displayName: 'View Menu Items',
             parentName: 'Restaurant.MenuItems',
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'Restaurant.MenuItems.Create',
             displayName: 'Create Menu Items',
             parentName: 'Restaurant.MenuItems',
             isGranted: false,
-            allowedProviders: []
-          }
-        ]
-      }
-    ]
+            allowedProviders: [],
+          },
+        ],
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -135,7 +135,7 @@ describe('PermissionTreeService', () => {
 
     it('should filter out excluded groups', () => {
       const result = service.buildPermissionTree(mockPermissionData);
-      
+
       const groupNames = result.map(group => group.data);
       expect(groupNames).not.toContain('FeatureManagement');
       expect(groupNames).not.toContain('SettingManagement');
@@ -146,7 +146,7 @@ describe('PermissionTreeService', () => {
 
     it('should create group nodes with correct structure', () => {
       const result = service.buildPermissionTree(mockPermissionData);
-      
+
       const userManagementGroup = result.find(group => group.data === 'UserManagement');
       expect(userManagementGroup).toBeDefined();
       expect(userManagementGroup!.label).toBe('User Management');
@@ -157,16 +157,20 @@ describe('PermissionTreeService', () => {
 
     it('should build hierarchical structure correctly', () => {
       const result = service.buildPermissionTree(mockPermissionData);
-      
+
       const userManagementGroup = result.find(group => group.data === 'UserManagement');
       expect(userManagementGroup!.children!.length).toBe(2); // Users and Roles
 
-      const usersNode = userManagementGroup!.children!.find(child => child.key === 'UserManagement.Users');
+      const usersNode = userManagementGroup!.children!.find(
+        child => child.key === 'UserManagement.Users',
+      );
       expect(usersNode).toBeDefined();
       expect(usersNode!.children!.length).toBe(3); // Create, Update, Delete
       expect(usersNode!.leaf).toBe(false);
 
-      const createUserNode = usersNode!.children!.find(child => child.key === 'UserManagement.Users.Create');
+      const createUserNode = usersNode!.children!.find(
+        child => child.key === 'UserManagement.Users.Create',
+      );
       expect(createUserNode).toBeDefined();
       expect(createUserNode!.leaf).toBe(true);
       expect(createUserNode!.children).toBeUndefined();
@@ -174,24 +178,28 @@ describe('PermissionTreeService', () => {
 
     it('should handle permissions with null parent as root level', () => {
       const result = service.buildPermissionTree(mockPermissionData);
-      
+
       const userManagementGroup = result.find(group => group.data === 'UserManagement');
       const rootLevelPermissions = userManagementGroup!.children!.map(child => child.key);
-      
+
       expect(rootLevelPermissions).toContain('UserManagement.Users');
       expect(rootLevelPermissions).toContain('UserManagement.Roles');
     });
 
     it('should set leaf property correctly', () => {
       const result = service.buildPermissionTree(mockPermissionData);
-      
+
       const userManagementGroup = result.find(group => group.data === 'UserManagement');
-      const usersNode = userManagementGroup!.children!.find(child => child.key === 'UserManagement.Users');
-      const createUserNode = usersNode!.children!.find(child => child.key === 'UserManagement.Users.Create');
-      
+      const usersNode = userManagementGroup!.children!.find(
+        child => child.key === 'UserManagement.Users',
+      );
+      const createUserNode = usersNode!.children!.find(
+        child => child.key === 'UserManagement.Users.Create',
+      );
+
       // Parent nodes should not be leaf
       expect(usersNode!.leaf).toBe(false);
-      
+
       // Child nodes should be leaf
       expect(createUserNode!.leaf).toBe(true);
     });
@@ -209,15 +217,15 @@ describe('PermissionTreeService', () => {
                 displayName: 'Single Permission',
                 parentName: null,
                 isGranted: false,
-                allowedProviders: []
-              }
-            ]
-          }
-        ]
+                allowedProviders: [],
+              },
+            ],
+          },
+        ],
       };
 
       const result = service.buildPermissionTree(singlePermissionData);
-      
+
       expect(result.length).toBe(1);
       const group = result[0];
       expect(group.children!.length).toBe(1);
@@ -237,33 +245,33 @@ describe('PermissionTreeService', () => {
                 displayName: 'Level 1',
                 parentName: null,
                 isGranted: false,
-                allowedProviders: []
+                allowedProviders: [],
               },
               {
                 name: 'Level2',
                 displayName: 'Level 2',
                 parentName: 'Level1',
                 isGranted: false,
-                allowedProviders: []
+                allowedProviders: [],
               },
               {
                 name: 'Level3',
                 displayName: 'Level 3',
                 parentName: 'Level2',
                 isGranted: false,
-                allowedProviders: []
-              }
-            ]
-          }
-        ]
+                allowedProviders: [],
+              },
+            ],
+          },
+        ],
       };
 
       const result = service.buildPermissionTree(deepNestingData);
-      
+
       const level1 = result[0].children![0];
       const level2 = level1.children![0];
       const level3 = level2.children![0];
-      
+
       expect(level1.key).toBe('Level1');
       expect(level1.leaf).toBe(false);
       expect(level2.key).toBe('Level2');
@@ -275,16 +283,16 @@ describe('PermissionTreeService', () => {
 
   describe('updateParentStates', () => {
     let permissionTreeNodes: TreeNode[];
-    
+
     beforeEach(() => {
       permissionTreeNodes = service.buildPermissionTree(mockPermissionData);
     });
 
     it('should handle empty selected nodes', () => {
       const result = service.updateParentStates(permissionTreeNodes, []);
-      
+
       expect(result).toEqual([]);
-      
+
       // Check that no nodes have partial state
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
@@ -295,10 +303,10 @@ describe('PermissionTreeService', () => {
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
       const createNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Create');
-      
+
       const selectedNodes = [createNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       expect(usersNode!.partialSelected).toBe(true);
       expect(result).not.toContain(usersNode);
     });
@@ -309,10 +317,10 @@ describe('PermissionTreeService', () => {
       const createNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Create');
       const updateNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Update');
       const deleteNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Delete');
-      
+
       const selectedNodes = [createNode!, updateNode!, deleteNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       expect(result).toContain(usersNode);
       expect(usersNode!.partialSelected).toBeFalsy();
     });
@@ -321,16 +329,20 @@ describe('PermissionTreeService', () => {
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
       const rolesNode = userGroup!.children!.find(c => c.key === 'UserManagement.Roles');
-      const createUserNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Create');
-      const createRoleNode = rolesNode!.children!.find(c => c.key === 'UserManagement.Roles.Create');
-      
+      const createUserNode = usersNode!.children!.find(
+        c => c.key === 'UserManagement.Users.Create',
+      );
+      const createRoleNode = rolesNode!.children!.find(
+        c => c.key === 'UserManagement.Roles.Create',
+      );
+
       const selectedNodes = [createUserNode!, createRoleNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       // Both parent nodes should be partially selected
       expect(usersNode!.partialSelected).toBe(true);
       expect(rolesNode!.partialSelected).toBe(true);
-      
+
       // Neither parent should be in selected nodes
       expect(result).not.toContain(usersNode);
       expect(result).not.toContain(rolesNode);
@@ -339,11 +351,11 @@ describe('PermissionTreeService', () => {
     it('should remove parent from selection when no children selected', () => {
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
-      
+
       // Start with parent selected
       const selectedNodes = [usersNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       expect(result).not.toContain(usersNode);
       expect(usersNode!.partialSelected).toBeFalsy();
     });
@@ -352,20 +364,28 @@ describe('PermissionTreeService', () => {
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
       const rolesNode = userGroup!.children!.find(c => c.key === 'UserManagement.Roles');
-      
+
       // Select all users permissions but only some roles permissions
-      const createUserNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Create');
-      const updateUserNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Update');
-      const deleteUserNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Delete');
-      const createRoleNode = rolesNode!.children!.find(c => c.key === 'UserManagement.Roles.Create');
-      
+      const createUserNode = usersNode!.children!.find(
+        c => c.key === 'UserManagement.Users.Create',
+      );
+      const updateUserNode = usersNode!.children!.find(
+        c => c.key === 'UserManagement.Users.Update',
+      );
+      const deleteUserNode = usersNode!.children!.find(
+        c => c.key === 'UserManagement.Users.Delete',
+      );
+      const createRoleNode = rolesNode!.children!.find(
+        c => c.key === 'UserManagement.Roles.Create',
+      );
+
       const selectedNodes = [createUserNode!, updateUserNode!, deleteUserNode!, createRoleNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       // Users node should be fully selected (all children selected)
       expect(result).toContain(usersNode);
       expect(usersNode!.partialSelected).toBeFalsy();
-      
+
       // Roles node should be partially selected (some children selected)
       expect(result).not.toContain(rolesNode);
       expect(rolesNode!.partialSelected).toBe(true);
@@ -375,10 +395,10 @@ describe('PermissionTreeService', () => {
       const userGroup = permissionTreeNodes.find(g => g.key === 'UserManagement');
       const usersNode = userGroup!.children!.find(c => c.key === 'UserManagement.Users');
       const createNode = usersNode!.children!.find(c => c.key === 'UserManagement.Users.Create');
-      
+
       const selectedNodes = [createNode!];
       const result = service.updateParentStates(permissionTreeNodes, selectedNodes);
-      
+
       expect(result).toContain(createNode);
     });
   });
@@ -390,7 +410,7 @@ describe('PermissionTreeService', () => {
         label: 'Test',
         key: 'test',
         children: [],
-        leaf: false
+        leaf: false,
       };
 
       // Access private method through bracket notation for testing
@@ -404,14 +424,14 @@ describe('PermissionTreeService', () => {
       const childNode: TreeNode = {
         label: 'Child',
         key: 'child',
-        leaf: true
+        leaf: true,
       };
 
       const testNode: TreeNode = {
         label: 'Test',
         key: 'test',
         children: [childNode],
-        leaf: false
+        leaf: false,
       };
 
       (service as any).cleanEmptyChildren(testNode);
@@ -425,7 +445,7 @@ describe('PermissionTreeService', () => {
       const testNode: TreeNode = {
         label: 'Test',
         key: 'test',
-        leaf: false
+        leaf: false,
       };
 
       (service as any).cleanEmptyChildren(testNode);
@@ -438,18 +458,18 @@ describe('PermissionTreeService', () => {
     it('should handle complete workflow from build to update', () => {
       // Build the tree
       const treeNodes = service.buildPermissionTree(mockPermissionData);
-      
+
       // Select some nodes
       const userGroup = treeNodes.find(g => g.key === 'UserManagement');
-      const createUserNode = userGroup!.children!
-        .find(c => c.key === 'UserManagement.Users')!
+      const createUserNode = userGroup!
+        .children!.find(c => c.key === 'UserManagement.Users')!
         .children!.find(c => c.key === 'UserManagement.Users.Create');
-      
+
       const selectedNodes = [createUserNode!];
-      
+
       // Update parent states
       const result = service.updateParentStates(treeNodes, selectedNodes);
-      
+
       // Verify the complete workflow
       expect(result).toContain(createUserNode);
       expect(treeNodes).toBeDefined();
@@ -463,13 +483,13 @@ describe('PermissionTreeService', () => {
           {
             name: 'EmptyGroup',
             displayName: 'Empty Group',
-            permissions: []
-          }
-        ]
+            permissions: [],
+          },
+        ],
       };
 
       const result = service.buildPermissionTree(emptyGroupData);
-      
+
       expect(result.length).toBe(1);
       expect(result[0].children!.length).toBe(0);
     });
@@ -487,15 +507,15 @@ describe('PermissionTreeService', () => {
                 displayName: 'Orphaned Child',
                 parentName: 'OrphanGroup.NonExistentParent', // Parent doesn't exist
                 isGranted: false,
-                allowedProviders: []
-              }
-            ]
-          }
-        ]
+                allowedProviders: [],
+              },
+            ],
+          },
+        ],
       };
 
       const result = service.buildPermissionTree(orphanedPermissionData);
-      
+
       // Orphaned permission should not appear in the tree
       expect(result[0].children!.length).toBe(0);
     });

@@ -17,7 +17,11 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 import { TableService } from '../../../../proxy/table-management/tables/table.service';
 import { GlobalService } from '../../../../proxy/common/global.service';
-import { CreateTableDto, UpdateTableDto, TableDto } from '../../../../proxy/table-management/tables/dto/models';
+import {
+  CreateTableDto,
+  UpdateTableDto,
+  TableDto,
+} from '../../../../proxy/table-management/tables/dto/models';
 import { TableStatus } from '../../../../proxy/table-status.enum';
 import { TableFormDialogData } from './table-form-dialog.service';
 import { IntLookupItemDto } from '@proxy/common/dto';
@@ -33,10 +37,10 @@ import { IntLookupItemDto } from '@proxy/common/dto';
     ButtonModule,
     InputNumber,
     ValidationErrorComponent,
-    FormFooterActionsComponent
+    FormFooterActionsComponent,
   ],
   templateUrl: './table-form-dialog.component.html',
-  styleUrls: ['./table-form-dialog.component.scss']
+  styleUrls: ['./table-form-dialog.component.scss'],
 })
 export class TableFormDialogComponent extends ComponentBase implements OnInit {
   loading = false;
@@ -97,7 +101,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       tableData?: Observable<TableDto>;
       nextDisplayOrder?: Observable<number>;
     } = {
-      statuses: this.globalService.getTableStatuses()
+      statuses: this.globalService.getTableStatuses(),
     };
 
     // Add specific observables based on mode
@@ -115,7 +119,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
           tableData?: TableDto;
           nextDisplayOrder?: number;
         }) => {
-          // Map table statuses  
+          // Map table statuses
           this.tableStatusOptions = results.statuses;
 
           // Handle table data for edit mode
@@ -125,19 +129,19 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
               tableNumber: results.tableData.tableNumber,
               displayOrder: results.tableData.displayOrder,
               status: results.tableData.status,
-              isActive: results.tableData.isActive
+              isActive: results.tableData.isActive,
             });
-          } 
+          }
           // Handle display order for create mode
           else if (!this.currentTableId && results.nextDisplayOrder) {
             this.tableForm.patchValue({
-              displayOrder: results.nextDisplayOrder
+              displayOrder: results.nextDisplayOrder,
             });
           }
         },
-        error: (error) => {
+        error: error => {
           this.handleApiError(error, 'Có lỗi xảy ra khi tải dữ liệu form');
-        }
+        },
       });
   }
 
@@ -146,7 +150,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       tableNumber: ['', [Validators.required, Validators.maxLength(50)]],
       displayOrder: [1, [Validators.required, Validators.min(1)]],
       status: [TableStatus.Available, [Validators.required]],
-      isActive: [true]
+      isActive: [true],
     });
   }
 
@@ -161,22 +165,25 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       displayOrder: formValue.displayOrder,
       status: formValue.status,
       isActive: formValue.isActive,
-      layoutSectionId: this.sectionId
+      layoutSectionId: this.sectionId,
     };
 
-    this.tableService.create(createData).pipe(
-      takeUntil(this.destroyed$),
-      catchError(error => {
-        this.handleApiError(error, 'Có lỗi xảy ra khi tạo bàn');
+    this.tableService
+      .create(createData)
+      .pipe(
+        takeUntil(this.destroyed$),
+        catchError(error => {
+          this.handleApiError(error, 'Có lỗi xảy ra khi tạo bàn');
+          this.loading = false;
+          return EMPTY;
+        }),
+      )
+      .subscribe(() => {
         this.loading = false;
-        return EMPTY;
-      })
-    ).subscribe(() => {
-      this.loading = false;
-      this.showSuccess('Thành công', 'Đã thêm bàn mới thành công');
-      
-      this.ref.close({ success: true });
-    });
+        this.showSuccess('Thành công', 'Đã thêm bàn mới thành công');
+
+        this.ref.close({ success: true });
+      });
   }
 
   private updateTable(formValue: {
@@ -190,21 +197,24 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       displayOrder: formValue.displayOrder,
       status: formValue.status,
       isActive: formValue.isActive,
-      layoutSectionId: this.sectionId
+      layoutSectionId: this.sectionId,
     };
 
-    this.tableService.update(this.currentTableId!, updateData).pipe(
-      takeUntil(this.destroyed$),
-      catchError(error => {
-        this.handleApiError(error, 'Có lỗi xảy ra khi cập nhật bàn');
+    this.tableService
+      .update(this.currentTableId!, updateData)
+      .pipe(
+        takeUntil(this.destroyed$),
+        catchError(error => {
+          this.handleApiError(error, 'Có lỗi xảy ra khi cập nhật bàn');
+          this.loading = false;
+          return EMPTY;
+        }),
+      )
+      .subscribe(() => {
         this.loading = false;
-        return EMPTY;
-      })
-    ).subscribe(() => {
-      this.loading = false;
-      this.showSuccess('Thành công', 'Cập nhật thông tin bàn thành công');
-      
-      this.ref.close({ success: true });
-    });
+        this.showSuccess('Thành công', 'Cập nhật thông tin bàn thành công');
+
+        this.ref.close({ success: true });
+      });
   }
 }

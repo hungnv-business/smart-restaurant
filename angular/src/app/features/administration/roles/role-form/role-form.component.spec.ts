@@ -5,7 +5,11 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { RoleFormComponent } from './role-form.component';
 import { IdentityRoleService, IdentityRoleDto } from '@abp/ng.identity/proxy';
-import { PermissionsService, GetPermissionListResultDto, UpdatePermissionsDto } from '@abp/ng.permission-management/proxy';
+import {
+  PermissionsService,
+  GetPermissionListResultDto,
+  UpdatePermissionsDto,
+} from '@abp/ng.permission-management/proxy';
 import { PermissionTreeService } from '../../services/permission-tree.service';
 import { MessageService } from 'primeng/api';
 import { PermissionService } from '@abp/ng.core';
@@ -27,7 +31,7 @@ describe('RoleFormComponent', () => {
     isPublic: true,
     isStatic: false,
     concurrencyStamp: 'stamp',
-    extraProperties: {}
+    extraProperties: {},
   };
 
   const mockPermissionList: GetPermissionListResultDto = {
@@ -42,25 +46,25 @@ describe('RoleFormComponent', () => {
             displayName: 'User Management',
             parentName: null,
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Users.Create',
             displayName: 'Create User',
             parentName: 'UserManagement.Users',
             isGranted: false,
-            allowedProviders: []
+            allowedProviders: [],
           },
           {
             name: 'UserManagement.Users.Update',
             displayName: 'Update User',
             parentName: 'UserManagement.Users',
             isGranted: false,
-            allowedProviders: []
-          }
-        ]
-      }
-    ]
+            allowedProviders: [],
+          },
+        ],
+      },
+    ],
   };
 
   const mockPermissionTree: TreeNode[] = [
@@ -77,57 +81,54 @@ describe('RoleFormComponent', () => {
             {
               label: 'Create User',
               key: 'UserManagement.Users.Create',
-              leaf: true
+              leaf: true,
             },
             {
               label: 'Update User',
               key: 'UserManagement.Users.Update',
-              leaf: true
-            }
-          ]
-        }
-      ]
-    }
+              leaf: true,
+            },
+          ],
+        },
+      ],
+    },
   ];
 
   beforeEach(async () => {
     const identityRoleServiceSpy = jasmine.createSpyObj('IdentityRoleService', [
       'get',
       'create',
-      'update'
+      'update',
     ]);
-    const permissionsServiceSpy = jasmine.createSpyObj('PermissionsService', [
-      'get',
-      'update'
-    ]);
+    const permissionsServiceSpy = jasmine.createSpyObj('PermissionsService', ['get', 'update']);
     const permissionTreeServiceSpy = jasmine.createSpyObj('PermissionTreeService', [
       'buildPermissionTree',
-      'updateParentStates'
+      'updateParentStates',
     ]);
     const messageServiceSpy = jasmine.createSpyObj('MessageService', ['add']);
     const permissionServiceSpy = jasmine.createSpyObj('PermissionService', ['getGrantedPolicy']);
 
     await TestBed.configureTestingModule({
-      imports: [
-        RoleFormComponent,
-        ReactiveFormsModule,
-        NoopAnimationsModule
-      ],
+      imports: [RoleFormComponent, ReactiveFormsModule, NoopAnimationsModule],
       providers: [
         FormBuilder,
         { provide: IdentityRoleService, useValue: identityRoleServiceSpy },
         { provide: PermissionsService, useValue: permissionsServiceSpy },
         { provide: PermissionTreeService, useValue: permissionTreeServiceSpy },
         { provide: MessageService, useValue: messageServiceSpy },
-        { provide: PermissionService, useValue: permissionServiceSpy }
-      ]
+        { provide: PermissionService, useValue: permissionServiceSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RoleFormComponent);
     component = fixture.componentInstance;
-    identityRoleService = TestBed.inject(IdentityRoleService) as jasmine.SpyObj<IdentityRoleService>;
+    identityRoleService = TestBed.inject(
+      IdentityRoleService,
+    ) as jasmine.SpyObj<IdentityRoleService>;
     permissionsService = TestBed.inject(PermissionsService) as jasmine.SpyObj<PermissionsService>;
-    permissionTreeService = TestBed.inject(PermissionTreeService) as jasmine.SpyObj<PermissionTreeService>;
+    permissionTreeService = TestBed.inject(
+      PermissionTreeService,
+    ) as jasmine.SpyObj<PermissionTreeService>;
     messageService = TestBed.inject(MessageService) as jasmine.SpyObj<MessageService>;
     permissionService = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
   });
@@ -168,9 +169,9 @@ describe('RoleFormComponent', () => {
 
     it('should call loadPermissions on ngOnInit', () => {
       spyOn(component, 'loadPermissions');
-      
+
       component.ngOnInit();
-      
+
       expect(component.loadPermissions).toHaveBeenCalled();
     });
   });
@@ -191,7 +192,7 @@ describe('RoleFormComponent', () => {
 
     it('should initialize form in create mode', () => {
       component.ngOnInit();
-      
+
       expect(component.roleId).toBeUndefined();
       expect(component.roleForm.get('name')?.enabled).toBe(true);
     });
@@ -205,7 +206,7 @@ describe('RoleFormComponent', () => {
 
     it('should load role when roleId exists', () => {
       component.ngOnInit();
-      
+
       expect(component.roleId).toBe('role-id');
       expect(component.loadRole).toHaveBeenCalledWith('role-id');
     });
@@ -214,7 +215,7 @@ describe('RoleFormComponent', () => {
   describe('Permission Loading', () => {
     it('should load available permissions successfully', async () => {
       await component.loadPermissions();
-      
+
       expect(permissionsService.get).toHaveBeenCalledWith('R', '');
       expect(component.availablePermissions).toEqual(mockPermissionList);
       expect(permissionTreeService.buildPermissionTree).toHaveBeenCalledWith(mockPermissionList);
@@ -222,19 +223,21 @@ describe('RoleFormComponent', () => {
     });
 
     it('should handle permission loading error', async () => {
-      permissionsService.get.and.returnValue(throwError(() => new Error('Permission loading failed')));
+      permissionsService.get.and.returnValue(
+        throwError(() => new Error('Permission loading failed')),
+      );
       spyOn(console, 'error');
-      
+
       await component.loadPermissions();
-      
+
       expect(console.error).toHaveBeenCalledWith('Error loading permissions:', jasmine.any(Error));
     });
 
     it('should not build tree when no permissions available', async () => {
       permissionsService.get.and.returnValue(of(null as any));
-      
+
       await component.loadPermissions();
-      
+
       expect(permissionTreeService.buildPermissionTree).not.toHaveBeenCalled();
     });
   });
@@ -242,9 +245,9 @@ describe('RoleFormComponent', () => {
   describe('Role Loading', () => {
     it('should load role successfully', async () => {
       spyOn(component, 'loadRolePermissions').and.returnValue(Promise.resolve());
-      
+
       await component.loadRole('role-id');
-      
+
       expect(identityRoleService.get).toHaveBeenCalledWith('role-id');
       expect(component.roleForm.get('name')?.value).toBe(mockRole.name);
       expect(component.roleForm.get('isDefault')?.value).toBe(mockRole.isDefault);
@@ -254,9 +257,9 @@ describe('RoleFormComponent', () => {
 
     it('should disable name field when loading role', async () => {
       spyOn(component, 'loadRolePermissions').and.returnValue(Promise.resolve());
-      
+
       await component.loadRole('role-id');
-      
+
       expect(component.roleForm.get('name')?.disabled).toBe(true);
     });
 
@@ -264,9 +267,9 @@ describe('RoleFormComponent', () => {
       const error = new Error('Role loading failed');
       identityRoleService.get.and.returnValue(throwError(() => error));
       spyOn(console, 'error');
-      
+
       await component.loadRole('role-id');
-      
+
       expect(component.loading).toBe(false);
     });
   });
@@ -276,7 +279,7 @@ describe('RoleFormComponent', () => {
       component.roleForm.patchValue({
         name: 'TestRole',
         isDefault: false,
-        isPublic: true
+        isPublic: true,
       });
       spyOn(component, 'validateForm').and.returnValue(true);
     });
@@ -284,26 +287,26 @@ describe('RoleFormComponent', () => {
     it('should not submit if form is invalid', async () => {
       // Make form invalid
       component.roleForm.patchValue({ name: '' });
-      
+
       await component.onSubmit();
-      
+
       expect(identityRoleService.create).not.toHaveBeenCalled();
       expect(identityRoleService.update).not.toHaveBeenCalled();
     });
 
     it('should create role when no roleId', async () => {
       component.roleId = undefined;
-      
+
       await component.onSubmit();
-      
+
       expect(identityRoleService.create).toHaveBeenCalled();
     });
 
     it('should update role when roleId exists', async () => {
       component.roleId = 'role-id';
-      
+
       await component.onSubmit();
-      
+
       expect(identityRoleService.update).toHaveBeenCalled();
     });
   });
@@ -311,18 +314,18 @@ describe('RoleFormComponent', () => {
   describe('Role Creation and Update', () => {
     it('should handle successful role creation', async () => {
       component.roleId = undefined;
-      
+
       await component.onSubmit();
-      
+
       expect(identityRoleService.create).toHaveBeenCalled();
       expect(permissionsService.update).toHaveBeenCalled();
     });
 
     it('should handle successful role update', async () => {
       component.roleId = 'role-id';
-      
+
       await component.onSubmit();
-      
+
       expect(identityRoleService.update).toHaveBeenCalled();
       expect(permissionsService.update).toHaveBeenCalled();
     });
@@ -331,9 +334,9 @@ describe('RoleFormComponent', () => {
       const error = new Error('Creation failed');
       identityRoleService.create.and.returnValue(throwError(() => error));
       spyOn(console, 'error');
-      
+
       await component.onSubmit();
-      
+
       expect(component.loading).toBe(false);
     });
   });
@@ -343,24 +346,24 @@ describe('RoleFormComponent', () => {
       component.availablePermissions = mockPermissionList;
       component.selectedTreeNodes = [
         { key: 'UserManagement.Users', label: 'User Management' },
-        { key: 'UserManagement.Users.Create', label: 'Create User' }
+        { key: 'UserManagement.Users.Create', label: 'Create User' },
       ];
     });
 
     it('should update role permissions successfully', async () => {
       await component.updateRolePermissions('TestRole');
-      
+
       expect(permissionsService.update).toHaveBeenCalledWith('R', 'TestRole', {
-        permissions: jasmine.any(Array)
+        permissions: jasmine.any(Array),
       });
     });
 
     it('should correctly map selected permissions', async () => {
       await component.updateRolePermissions('TestRole');
-      
+
       const updateCall = permissionsService.update.calls.mostRecent();
       const updateDto = updateCall.args[2];
-      
+
       expect(updateDto.permissions).toBeDefined();
       expect(Array.isArray(updateDto.permissions)).toBe(true);
     });
@@ -368,7 +371,7 @@ describe('RoleFormComponent', () => {
     it('should handle permission update error', async () => {
       const error = new Error('Permission update failed');
       permissionsService.update.and.returnValue(throwError(() => error));
-      
+
       try {
         await component.updateRolePermissions('TestRole');
         fail('Should have thrown error');
@@ -379,9 +382,9 @@ describe('RoleFormComponent', () => {
 
     it('should skip update when no permissions available', async () => {
       component.availablePermissions = null;
-      
+
       await component.updateRolePermissions('TestRole');
-      
+
       expect(permissionsService.update).not.toHaveBeenCalled();
     });
   });
@@ -395,7 +398,7 @@ describe('RoleFormComponent', () => {
 
     it('should manage loading state properly', () => {
       expect(component.loading).toBe(false);
-      
+
       // Loading should be managed during async operations
       expect(typeof component.loading).toBe('boolean');
     });

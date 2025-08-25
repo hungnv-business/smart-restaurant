@@ -11,7 +11,6 @@ export interface TableFormDialogData {
   title?: string;
 }
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -61,8 +60,6 @@ export class TableFormDialogService {
     };
 
     const ref: DynamicDialogRef = this.dialogService.open(TableFormDialogComponent, config);
-    return ref.onClose.pipe(
-      map(result => result?.success || false)
-    );
+    return ref.onClose.pipe(map(result => result?.success || false));
   }
 }

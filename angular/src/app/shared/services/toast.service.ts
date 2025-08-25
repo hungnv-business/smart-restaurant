@@ -6,7 +6,7 @@ import { MessageService } from 'primeng/api';
  * Centralized service for showing toast messages throughout the application
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ToastService {
   private messageService = inject(MessageService);
@@ -19,7 +19,7 @@ export class ToastService {
       severity: 'success',
       summary,
       detail,
-      life: 3000
+      life: 3000,
     });
   }
 
@@ -31,7 +31,7 @@ export class ToastService {
       severity: 'error',
       summary,
       detail,
-      life: 5000
+      life: 5000,
     });
   }
 
@@ -43,7 +43,7 @@ export class ToastService {
       severity: 'warn',
       summary,
       detail,
-      life: 4000
+      life: 4000,
     });
   }
 
@@ -55,7 +55,7 @@ export class ToastService {
       severity: 'info',
       summary,
       detail,
-      life: 3000
+      life: 3000,
     });
   }
 

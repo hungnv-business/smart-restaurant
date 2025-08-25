@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VietnameseFormatterService {
-
   /**
    * Format Vietnamese currency (VND)
    */
   formatCurrency(amount: number): string {
     if (amount == null || isNaN(amount)) return '0₫';
-    
+
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   }
 
@@ -23,7 +22,7 @@ export class VietnameseFormatterService {
    */
   formatNumber(num: number): string {
     if (num == null || isNaN(num)) return '0';
-    
+
     return new Intl.NumberFormat('vi-VN').format(num);
   }
 
@@ -32,7 +31,7 @@ export class VietnameseFormatterService {
    */
   formatDate(date: Date | string | null, includeTime = false): string {
     if (!date) return 'N/A';
-    
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (isNaN(dateObj.getTime())) return 'N/A';
 
@@ -40,7 +39,7 @@ export class VietnameseFormatterService {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      timeZone: 'Asia/Ho_Chi_Minh'
+      timeZone: 'Asia/Ho_Chi_Minh',
     };
 
     if (includeTime) {
@@ -57,7 +56,7 @@ export class VietnameseFormatterService {
    */
   formatTime(date: Date | string | null): string {
     if (!date) return 'N/A';
-    
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (isNaN(dateObj.getTime())) return 'N/A';
 
@@ -65,7 +64,7 @@ export class VietnameseFormatterService {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: 'Asia/Ho_Chi_Minh'
+      timeZone: 'Asia/Ho_Chi_Minh',
     }).format(dateObj);
   }
 
@@ -74,10 +73,10 @@ export class VietnameseFormatterService {
    */
   formatPhoneNumber(phone: string | null): string {
     if (!phone) return 'N/A';
-    
+
     // Remove all non-digits
     const cleaned = phone.replace(/\D/g, '');
-    
+
     // Vietnamese phone number patterns
     if (cleaned.startsWith('84')) {
       // International format +84
@@ -89,7 +88,7 @@ export class VietnameseFormatterService {
       // Domestic format 0xxx xxx xxx
       return `${cleaned.substring(0, 4)} ${cleaned.substring(4, 7)} ${cleaned.substring(7)}`;
     }
-    
+
     return phone; // Return original if can't format
   }
 
@@ -98,9 +97,9 @@ export class VietnameseFormatterService {
    */
   isValidVietnamesePhone(phone: string): boolean {
     if (!phone) return false;
-    
+
     const cleaned = phone.replace(/\D/g, '');
-    
+
     // Vietnamese mobile patterns
     const mobilePatterns = [
       /^(84|0)(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])\d{7}$/,
@@ -109,7 +108,7 @@ export class VietnameseFormatterService {
       // MobiFone: 070, 076-079, 089, 090, 093
       // And other networks...
     ];
-    
+
     return mobilePatterns.some(pattern => pattern.test(cleaned));
   }
 
@@ -118,18 +117,18 @@ export class VietnameseFormatterService {
    */
   formatEmployeeId(id: string | number): string {
     if (!id) return '';
-    
+
     const numStr = id.toString();
     if (numStr.startsWith('NV')) {
       return numStr;
     }
-    
+
     // Ensure 3-digit padding: NV001, NV002, etc.
     const num = parseInt(numStr, 10);
     if (!isNaN(num)) {
       return `NV${num.toString().padStart(3, '0')}`;
     }
-    
+
     return numStr;
   }
 
@@ -144,7 +143,7 @@ export class VietnameseFormatterService {
         return parseInt(numPart, 10);
       })
       .filter(num => !isNaN(num));
-    
+
     const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
     return this.formatEmployeeId(maxNumber + 1);
   }
@@ -154,7 +153,7 @@ export class VietnameseFormatterService {
    */
   formatRelativeTime(date: Date | string | null): string {
     if (!date) return 'N/A';
-    
+
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (isNaN(dateObj.getTime())) return 'N/A';
 
@@ -168,7 +167,7 @@ export class VietnameseFormatterService {
     if (diffMinutes < 60) return `${diffMinutes} phút trước`;
     if (diffHours < 24) return `${diffHours} giờ trước`;
     if (diffDays < 7) return `${diffDays} ngày trước`;
-    
+
     return this.formatDate(dateObj);
   }
 
@@ -177,7 +176,7 @@ export class VietnameseFormatterService {
    */
   capitalizeVietnamese(text: string): string {
     if (!text) return '';
-    
+
     return text
       .toLowerCase()
       .split(' ')

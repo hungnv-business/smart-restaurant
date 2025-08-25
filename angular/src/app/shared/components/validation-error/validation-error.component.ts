@@ -13,7 +13,7 @@ import { AbstractControl, FormControl } from '@angular/forms';
         {{ getErrorMessage() }}
       </small>
     }
-  `
+  `,
 })
 export class ValidationErrorComponent {
   @Input() control!: AbstractControl | FormControl | null;
@@ -29,7 +29,7 @@ export class ValidationErrorComponent {
     }
 
     const errors = this.control.errors;
-    
+
     // Default Vietnamese error messages
     if (errors['required']) {
       return `${this.fieldName} là bắt buộc`;

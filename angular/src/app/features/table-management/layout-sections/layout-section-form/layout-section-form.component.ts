@@ -1,11 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputSwitch } from 'primeng/inputswitch';
@@ -128,20 +123,21 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
 
   private loadSection(sectionId: string): void {
     this.loading = true;
-    
-    this.layoutSectionService.get(sectionId)
+
+    this.layoutSectionService
+      .get(sectionId)
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
-        next: (section) => {
+        next: section => {
           this.section = section;
           this.populateForm();
           this.loading = false;
         },
-        error: (error) => {
+        error: error => {
           this.loading = false;
           this.handleApiError(error, 'Không thể tải thông tin khu vực');
           this.dialogRef.close(false);
-        }
+        },
       });
   }
 
@@ -172,7 +168,12 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
-  private createSection(formValue: { sectionName: string; description?: string; displayOrder: number; isActive: boolean }): void {
+  private createSection(formValue: {
+    sectionName: string;
+    description?: string;
+    displayOrder: number;
+    isActive: boolean;
+  }): void {
     const createDto: CreateLayoutSectionDto = {
       sectionName: formValue.sectionName?.trim(),
       description: formValue.description?.trim() || undefined,
@@ -188,7 +189,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
           this.loading = false;
           this.showSuccess(
             'Tạo mới thành công',
-            `Khu vực "${response.sectionName}" đã được tạo thành công`
+            `Khu vực "${response.sectionName}" đã được tạo thành công`,
           );
           this.dialogRef.close(true);
         },
@@ -199,7 +200,12 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
-  private updateSection(formValue: { sectionName: string; description?: string; displayOrder: number; isActive: boolean }): void {
+  private updateSection(formValue: {
+    sectionName: string;
+    description?: string;
+    displayOrder: number;
+    isActive: boolean;
+  }): void {
     const updateDto: UpdateLayoutSectionDto = {
       sectionName: formValue.sectionName?.trim(),
       description: formValue.description?.trim() || undefined,
@@ -215,7 +221,7 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
           this.loading = false;
           this.showSuccess(
             'Cập nhật thành công',
-            `Thông tin khu vực "${response.sectionName}" đã được cập nhật`
+            `Thông tin khu vực "${response.sectionName}" đã được cập nhật`,
           );
           this.dialogRef.close(true);
         },

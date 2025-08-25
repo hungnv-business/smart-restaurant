@@ -29,9 +29,7 @@ import {
 } from '../../../../proxy/table-management/tables/dto/models';
 import { LayoutSectionDto } from '../../../../proxy/table-management/layout-sections/dto/models';
 import { IntLookupItemDto } from '@proxy/common/dto';
-import {
-  TableFormDialogService,
-} from '../table-form-dialog/table-form-dialog.service';
+import { TableFormDialogService } from '../table-form-dialog/table-form-dialog.service';
 import { TableCardComponent } from '../table-card/table-card.component';
 
 @Component({
@@ -65,7 +63,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
   private tableService = inject(TableService);
   private tableFormDialogService = inject(TableFormDialogService);
   private globalService = inject(GlobalService);
-  
+
   constructor() {
     super();
   }
@@ -79,42 +77,42 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
 
     forkJoin({
       sectionsWithTables: this.tableService.getAllSectionsWithTables(),
-      tableStatuses: this.globalService.getTableStatuses()
-    }).pipe(
-      takeUntil(this.destroyed$)
-    ).subscribe({
-      next: ({ sectionsWithTables, tableStatuses }) => {
-        this.loading = false;
+      tableStatuses: this.globalService.getTableStatuses(),
+    })
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe({
+        next: ({ sectionsWithTables, tableStatuses }) => {
+          this.loading = false;
 
-        // Set table status options
-        this.tableStatusOptions = tableStatuses || [];
+          // Set table status options
+          this.tableStatusOptions = tableStatuses || [];
 
-        // Clear current data
-        this.layoutSections = [];
-        this.sectionTables = {};
+          // Clear current data
+          this.layoutSections = [];
+          this.sectionTables = {};
 
-        // Process sections with tables
-        sectionsWithTables?.forEach(sectionData => {
-          if (sectionData.id) {
-            // Create LayoutSectionDto from SectionWithTablesDto
-            const layoutSection: LayoutSectionDto = {
-              id: sectionData.id,
-              sectionName: sectionData.sectionName || '',
-              description: sectionData.description,
-              displayOrder: sectionData.displayOrder,
-              isActive: sectionData.isActive,
-            };
+          // Process sections with tables
+          sectionsWithTables?.forEach(sectionData => {
+            if (sectionData.id) {
+              // Create LayoutSectionDto from SectionWithTablesDto
+              const layoutSection: LayoutSectionDto = {
+                id: sectionData.id,
+                sectionName: sectionData.sectionName || '',
+                description: sectionData.description,
+                displayOrder: sectionData.displayOrder,
+                isActive: sectionData.isActive,
+              };
 
-            this.layoutSections.push(layoutSection);
-            this.sectionTables[sectionData.id] = sectionData.tables || [];
-          }
-        });
-      },
-      error: (error) => {
-        this.loading = false;
-        this.handleApiError(error, 'Có lỗi xảy ra khi tải dữ liệu');
-      }
-    });
+              this.layoutSections.push(layoutSection);
+              this.sectionTables[sectionData.id] = sectionData.tables || [];
+            }
+          });
+        },
+        error: error => {
+          this.loading = false;
+          this.handleApiError(error, 'Có lỗi xảy ra khi tải dữ liệu');
+        },
+      });
   }
 
   onTableDrop(event: CdkDragDrop<TableDto[]>): void {
@@ -135,7 +133,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
             this.handleApiError(error, 'Có lỗi xảy ra khi cập nhật thứ tự bàn');
             this.loadData();
             return EMPTY;
-          })
+          }),
         )
         .subscribe(() => {
           this.loadData();
@@ -146,7 +144,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
-        event.currentIndex
+        event.currentIndex,
       );
 
       const draggedTable = event.item.data as TableDto;
@@ -163,7 +161,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
             this.handleApiError(error, 'Có lỗi xảy ra khi chuyển bàn sang khu vực khác');
             this.loadData();
             return EMPTY;
-          })
+          }),
         )
         .subscribe(() => {
           this.loadData();

@@ -3,14 +3,14 @@
     <div class="card h-lg-100 w-100 overflow-hidden">
       <div class="card-body">
         <div class="starting-content">
-          @if(!hasLoggedIn){
-          <h3>Welcome</h3>
-          <p class="lead text-muted mb-2">
-            {{ '::LongWelcomeMessage' | abpLocalization }}
-          </p>
-          <a (click)="login()" class="px-4 btn btn-primary mb-4" role="button"
-            ><i class="fa fa-sign-in"></i> {{ 'AbpAccount::Login' | abpLocalization }}</a
-          >
+          @if (!hasLoggedIn) {
+            <h3>Welcome</h3>
+            <p class="lead text-muted mb-2">
+              {{ '::LongWelcomeMessage' | abpLocalization }}
+            </p>
+            <a (click)="login()" class="px-4 btn btn-primary mb-4" role="button"
+              ><i class="fa fa-sign-in"></i> {{ 'AbpAccount::Login' | abpLocalization }}</a
+            >
           }
 
           <h3>Getting Started</h3>
@@ -22,8 +22,8 @@
                   description:
                     'Learn how to create and run a new web application using the application startup template.',
                   href: 'https://abp.io/docs/latest/get-started',
-                  label: 'Getting Started'
-                }
+                  label: 'Getting Started',
+                },
               }
             "
           ></ng-container>
@@ -37,8 +37,8 @@
                   description:
                     'Learn how to build an ABP based web application named Acme.BookStore.',
                   href: 'https://abp.io/docs/latest/tutorials/book-store/part-01?UI=NG&DB=EF',
-                  label: 'Explore Tutorial'
-                }
+                  label: 'Explore Tutorial',
+                },
               }
             "
           ></ng-container>
@@ -71,8 +71,8 @@
               card: 'card overflow-hidden',
               imgClass: '',
               imgSrc: 'assets/images/getting-started/img-support.png',
-              logo: 'abp-support abp-logo mb-2'
-            }
+              logo: 'abp-support abp-logo mb-2',
+            },
           }
         "
       ></ng-container>
@@ -88,8 +88,8 @@
               card: 'card h-md-100 overflow-hidden',
               imgClass: 'margin-bottom: -24px',
               imgSrc: 'assets/images/getting-started/img-blog.png',
-              logo: 'abp-blog abp-logo mb-2'
-            }
+              logo: 'abp-blog abp-logo mb-2',
+            },
           }
         "
       ></ng-container>
@@ -163,8 +163,8 @@
               title: 'FAQ',
               link: 'https://abp.io/faq',
             },
-          ]
-        }
+          ],
+        },
       }
     "
   ></ng-container>
@@ -213,34 +213,34 @@
             {
               title: 'X.com',
               icon: 'logo-x me-2',
-              link: 'https://twitter.com/abpframework'
+              link: 'https://twitter.com/abpframework',
             },
             {
               iconType: 'image',
               icon: 'assets/images/getting-started/discord.svg',
               title: 'Discord',
-              link: 'https://abp.io/community/discord'
+              link: 'https://abp.io/community/discord',
             },
             {
               iconType: 'image',
               icon: 'assets/images/getting-started/stack-overflow.svg',
               title: 'Stack Overflow',
-              link: 'https://stackoverflow.com/questions/tagged/abp'
+              link: 'https://stackoverflow.com/questions/tagged/abp',
             },
             {
               iconType: 'image',
               icon: 'assets/images/getting-started/youtube.svg',
               title: 'YouTube',
-              link: 'https://www.youtube.com/@Volosoft'
+              link: 'https://www.youtube.com/@Volosoft',
             },
             {
               iconType: 'image',
               icon: 'assets/images/getting-started/instagram.svg',
               title: 'Instagram',
-              link: 'https://www.instagram.com/abpframework/'
-            }
-          ]
-        }
+              link: 'https://www.instagram.com/abpframework/',
+            },
+          ],
+        },
       }
     "
   ></ng-container>
@@ -274,31 +274,31 @@
         <div class="table-responsive">
           <table class="table mb-0">
             <tbody>
-              @for(item of context.items; track $index; let last = $last){
-              <tr>
-                <td class="ps-0 d-flex" [class.border-bottom-0]="last">
-                  @if(item.icon){
-                  <div
-                    [ngClass]="item.iconClass"
-                    [style]="item.style ? 'width: 20px; height: 20px' : ''"
-                  >
-                    @if(item.iconType === 'image'){
-                    <img [src]="item.icon" class="me-2" />
-                    }@else if(item.iconType === 'icon'){
-                    <i [class]="item.icon"></i>
-                    }@else{
-                    <div [class]="item.icon"></div>
+              @for (item of context.items; track $index; let last = $last) {
+                <tr>
+                  <td class="ps-0 d-flex" [class.border-bottom-0]="last">
+                    @if (item.icon) {
+                      <div
+                        [ngClass]="item.iconClass"
+                        [style]="item.style ? 'width: 20px; height: 20px' : ''"
+                      >
+                        @if (item.iconType === 'image') {
+                          <img [src]="item.icon" class="me-2" />
+                        } @else if (item.iconType === 'icon') {
+                          <i [class]="item.icon"></i>
+                        } @else {
+                          <div [class]="item.icon"></div>
+                        }
+                      </div>
                     }
-                  </div>
-                  }
-                  <div>{{ item.title }}</div>
-                </td>
-                <td class="text-end pe-0 opacity-25" [class.border-bottom-0]="last">
-                  <a [href]="item.link" target="_blank">
-                    <i class="bi bi-box-arrow-up-right text-dark"></i>
-                  </a>
-                </td>
-              </tr>
+                    <div>{{ item.title }}</div>
+                  </td>
+                  <td class="text-end pe-0 opacity-25" [class.border-bottom-0]="last">
+                    <a [href]="item.link" target="_blank">
+                      <i class="bi bi-box-arrow-up-right text-dark"></i>
+                    </a>
+                  </td>
+                </tr>
               }
             </tbody>
           </table>

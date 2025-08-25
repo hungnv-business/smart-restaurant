@@ -74,10 +74,10 @@
     <ng-template #body let-role>
       <tr>
         <td class="w-12 min-w-12">
-          <p-tableCheckbox 
-            [value]="role" 
+          <p-tableCheckbox
+            [value]="role"
             *abpPermission="PERMISSIONS.ROLES.DELETE"
-            [disabled]="role.isStatic" 
+            [disabled]="role.isStatic"
           />
         </td>
         <td class="min-w-48">{{ role.name }}</td>

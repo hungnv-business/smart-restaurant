@@ -14,7 +14,10 @@ import { ConfirmationService } from 'primeng/api';
 // Application imports
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { TableService } from '../../../../proxy/table-management/tables/table.service';
-import { TableDto, ToggleActiveStatusDto } from '../../../../proxy/table-management/tables/dto/models';
+import {
+  TableDto,
+  ToggleActiveStatusDto,
+} from '../../../../proxy/table-management/tables/dto/models';
 import { TableStatus } from '../../../../proxy/table-status.enum';
 import { TableFormDialogService } from '../table-form-dialog/table-form-dialog.service';
 import { IntLookupItemDto } from '@proxy/common/dto';
@@ -22,16 +25,9 @@ import { IntLookupItemDto } from '@proxy/common/dto';
 @Component({
   selector: 'app-table-card',
   standalone: true,
-  imports: [
-    CommonModule,
-    CdkDrag,
-    CardModule,
-    ButtonModule,
-    TooltipModule,
-    BadgeModule
-  ],
+  imports: [CommonModule, CdkDrag, CardModule, ButtonModule, TooltipModule, BadgeModule],
   templateUrl: './table-card.component.html',
-  styleUrls: ['./table-card.component.scss']
+  styleUrls: ['./table-card.component.scss'],
 })
 export class TableCardComponent extends ComponentBase {
   @Input() table!: TableDto;
@@ -70,23 +66,23 @@ export class TableCardComponent extends ComponentBase {
     }
   }
 
-
   onEditClick(): void {
-    this.tableFormDialogService.openEditTableDialog(this.table.id).pipe(
-      takeUntil(this.destroyed$)
-    ).subscribe(success => {
-      if (success) {
-        this.tableUpdated.emit();
-      }
-    });
+    this.tableFormDialogService
+      .openEditTableDialog(this.table.id)
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe(success => {
+        if (success) {
+          this.tableUpdated.emit();
+        }
+      });
   }
 
   onToggleActiveClick(): void {
     const newStatus = !this.table.isActive;
-    const message = newStatus 
+    const message = newStatus
       ? `Bạn có muốn hiển thị bàn "${this.table.tableNumber}"?`
       : `Bạn có muốn ẩn bàn "${this.table.tableNumber}"?`;
-      
+
     this.confirmationService.confirm({
       message: message,
       header: 'Xác nhận thay đổi',
@@ -95,7 +91,7 @@ export class TableCardComponent extends ComponentBase {
       rejectLabel: 'Hủy',
       accept: () => {
         this.toggleActiveStatus(newStatus);
-      }
+      },
     });
   }
 
@@ -108,37 +104,42 @@ export class TableCardComponent extends ComponentBase {
       rejectLabel: 'Hủy',
       accept: () => {
         this.deleteTable(this.table.id!);
-      }
+      },
     });
   }
-
 
   toggleActiveStatus(isActive: boolean): void {
     const input: ToggleActiveStatusDto = { isActive };
-    
-    this.tableService.toggleActiveStatus(this.table.id!, input).pipe(
-      takeUntil(this.destroyed$),
-      catchError(error => {
-        this.handleApiError(error, 'Có lỗi xảy ra khi thay đổi trạng thái bàn');
-        return EMPTY;
-      })
-    ).subscribe(() => {
-      const message = isActive ? 'Đã hiển thị bàn' : 'Đã ẩn bàn';
-      this.showSuccess('Thành công', message);
-      this.tableUpdated.emit();
-    });
+
+    this.tableService
+      .toggleActiveStatus(this.table.id!, input)
+      .pipe(
+        takeUntil(this.destroyed$),
+        catchError(error => {
+          this.handleApiError(error, 'Có lỗi xảy ra khi thay đổi trạng thái bàn');
+          return EMPTY;
+        }),
+      )
+      .subscribe(() => {
+        const message = isActive ? 'Đã hiển thị bàn' : 'Đã ẩn bàn';
+        this.showSuccess('Thành công', message);
+        this.tableUpdated.emit();
+      });
   }
 
   deleteTable(tableId: string): void {
-    this.tableService.delete(tableId).pipe(
-      takeUntil(this.destroyed$),
-      catchError(error => {
-        this.handleApiError(error, 'Có lỗi xảy ra khi xóa bàn');
-        return EMPTY;
-      })
-    ).subscribe(() => {
-      this.showSuccess('Thành công', 'Xóa bàn thành công');
-      this.tableDeleted.emit();
-    });
+    this.tableService
+      .delete(tableId)
+      .pipe(
+        takeUntil(this.destroyed$),
+        catchError(error => {
+          this.handleApiError(error, 'Có lỗi xảy ra khi xóa bàn');
+          return EMPTY;
+        }),
+      )
+      .subscribe(() => {
+        this.showSuccess('Thành công', 'Xóa bàn thành công');
+        this.tableDeleted.emit();
+      });
   }
 }

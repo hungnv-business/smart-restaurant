@@ -14,9 +14,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 // Shared Components
 import { ValidationErrorComponent } from './components/validation-error/validation-error.component';
 
-const SHARED_COMPONENTS = [
-  ValidationErrorComponent
-];
+const SHARED_COMPONENTS = [ValidationErrorComponent];
 
 const PRIMENG_MODULES = [
   InputTextModule,
@@ -24,7 +22,7 @@ const PRIMENG_MODULES = [
   CheckboxModule,
   ButtonModule,
   ToastModule,
-  ProgressSpinnerModule
+  ProgressSpinnerModule,
 ];
 
 @NgModule({
@@ -34,7 +32,7 @@ const PRIMENG_MODULES = [
     FormsModule,
     RouterModule,
     ...PRIMENG_MODULES,
-    ...SHARED_COMPONENTS
+    ...SHARED_COMPONENTS,
   ],
   declarations: [],
   exports: [
@@ -43,7 +41,7 @@ const PRIMENG_MODULES = [
     FormsModule,
     RouterModule,
     ...PRIMENG_MODULES,
-    ...SHARED_COMPONENTS
-  ]
+    ...SHARED_COMPONENTS,
+  ],
 })
-export class SharedModule { }
+export class SharedModule {}

@@ -35,7 +35,7 @@ export const PERMISSIONS = {
     // Tables (parent permission)
     TABLES: {
       DEFAULT: 'SmartRestaurant.Tables',
-      
+
       // Layout Sections
       LAYOUT_SECTION: {
         DEFAULT: 'SmartRestaurant.LayoutSection',
@@ -43,7 +43,7 @@ export const PERMISSIONS = {
         EDIT: 'SmartRestaurant.LayoutSection.Edit',
         DELETE: 'SmartRestaurant.LayoutSection.Delete',
       },
-      
+
       // Tables
       TABLE: {
         DEFAULT: 'SmartRestaurant.Table',
@@ -97,7 +97,7 @@ export const PERMISSIONS = {
 } as const;
 
 // Type helper for IntelliSense
-export type PermissionKey = 
-  | typeof PERMISSIONS.USERS[keyof typeof PERMISSIONS.USERS]
-  | typeof PERMISSIONS.ROLES[keyof typeof PERMISSIONS.ROLES]  
-  | typeof PERMISSIONS.RESTAURANT[keyof typeof PERMISSIONS.RESTAURANT];
+export type PermissionKey =
+  | (typeof PERMISSIONS.USERS)[keyof typeof PERMISSIONS.USERS]
+  | (typeof PERMISSIONS.ROLES)[keyof typeof PERMISSIONS.ROLES]
+  | (typeof PERMISSIONS.RESTAURANT)[keyof typeof PERMISSIONS.RESTAURANT];

@@ -28,7 +28,7 @@ describe('LayoutSectionListComponent', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: '2',
@@ -42,32 +42,34 @@ describe('LayoutSectionListComponent', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
-    }
+      deletionTime: null,
+    },
   ];
 
   beforeEach(async () => {
     const layoutSectionServiceSpy = jasmine.createSpyObj('LayoutSectionService', [
-      'getList', 'delete', 'update'
+      'getList',
+      'delete',
+      'update',
     ]);
     const confirmationServiceSpy = jasmine.createSpyObj('ConfirmationService', ['confirm']);
 
     await TestBed.configureTestingModule({
-      imports: [
-        LayoutSectionListComponent,
-        NoopAnimationsModule,
-        DragDropModule
-      ],
+      imports: [LayoutSectionListComponent, NoopAnimationsModule, DragDropModule],
       providers: [
         { provide: LayoutSectionService, useValue: layoutSectionServiceSpy },
-        { provide: ConfirmationService, useValue: confirmationServiceSpy }
-      ]
+        { provide: ConfirmationService, useValue: confirmationServiceSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LayoutSectionListComponent);
     component = fixture.componentInstance;
-    mockLayoutSectionService = TestBed.inject(LayoutSectionService) as jasmine.SpyObj<LayoutSectionService>;
-    mockConfirmationService = TestBed.inject(ConfirmationService) as jasmine.SpyObj<ConfirmationService>;
+    mockLayoutSectionService = TestBed.inject(
+      LayoutSectionService,
+    ) as jasmine.SpyObj<LayoutSectionService>;
+    mockConfirmationService = TestBed.inject(
+      ConfirmationService,
+    ) as jasmine.SpyObj<ConfirmationService>;
 
     // Setup default mock returns
     mockLayoutSectionService.getList.and.returnValue(of(mockLayoutSections));
@@ -110,8 +112,8 @@ describe('LayoutSectionListComponent', () => {
     // Assert
     expect(component.loading).toBeFalse();
     expect((component as any).handleApiError).toHaveBeenCalledWith(
-      errorResponse, 
-      'Không thể tải danh sách khu vực bố cục'
+      errorResponse,
+      'Không thể tải danh sách khu vực bố cục',
     );
   });
 
@@ -150,8 +152,8 @@ describe('LayoutSectionListComponent', () => {
       jasmine.objectContaining({
         message: `Bạn có chắc chắn muốn xóa khu vực "${sectionToDelete.sectionName}"?\n\nLưu ý: Việc xóa khu vực có thể ảnh hưởng đến các bàn ăn đã được gán vào khu vực này.`,
         header: 'Xác nhận Xóa Khu vực',
-        icon: 'pi pi-exclamation-triangle'
-      })
+        icon: 'pi pi-exclamation-triangle',
+      }),
     );
   });
 
@@ -174,7 +176,7 @@ describe('LayoutSectionListComponent', () => {
     expect(component.layoutSections).not.toContain(sectionToDelete);
     expect((component as any).showSuccess).toHaveBeenCalledWith(
       'Đã xóa thành công',
-      `Khu vực "${sectionToDelete.sectionName}" đã được xóa khỏi hệ thống`
+      `Khu vực "${sectionToDelete.sectionName}" đã được xóa khỏi hệ thống`,
     );
   });
 
@@ -183,7 +185,7 @@ describe('LayoutSectionListComponent', () => {
     const section = { ...mockLayoutSections[0] };
     const originalStatus = section.isActive;
     const updatedSection = { ...section, isActive: !originalStatus };
-    
+
     mockLayoutSectionService.update.and.returnValue(of(updatedSection));
     spyOn(component as any, 'showSuccess');
 
@@ -197,8 +199,8 @@ describe('LayoutSectionListComponent', () => {
         sectionName: section.sectionName,
         description: section.description,
         displayOrder: section.displayOrder,
-        isActive: !originalStatus
-      })
+        isActive: !originalStatus,
+      }),
     );
     expect(section.isActive).toBe(!originalStatus);
     expect((component as any).showSuccess).toHaveBeenCalled();
@@ -208,7 +210,7 @@ describe('LayoutSectionListComponent', () => {
     // Arrange
     const section = { ...mockLayoutSections[0] };
     const originalStatus = section.isActive;
-    
+
     mockLayoutSectionService.update.and.returnValue(throwError(() => ({ error: 'Update failed' })));
     spyOn(component as any, 'handleApiError');
 
@@ -219,7 +221,7 @@ describe('LayoutSectionListComponent', () => {
     expect(section.isActive).toBe(originalStatus); // Should revert
     expect((component as any).handleApiError).toHaveBeenCalledWith(
       { error: 'Update failed' },
-      'Không thể thay đổi trạng thái khu vực'
+      'Không thể thay đổi trạng thái khu vực',
     );
   });
 
@@ -265,8 +267,8 @@ describe('LayoutSectionListComponent', () => {
         lastModifierId: null,
         isDeleted: false,
         deleterId: null,
-        deletionTime: null
-      }
+        deletionTime: null,
+      },
     ];
 
     mockLayoutSectionService.getList.and.returnValue(of(vietnameseSections));

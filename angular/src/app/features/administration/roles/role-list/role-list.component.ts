@@ -43,7 +43,7 @@ import { RoleFormDialogService } from '../role-form/role-form-dialog.service';
 export class RoleListComponent extends ComponentBase implements OnInit {
   // Permissions constants
   readonly PERMISSIONS = PERMISSIONS;
-  
+
   // Table configuration
   filterFields: string[] = ['name'];
 
@@ -66,7 +66,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
 
   // Dialog operations
   openCreateDialog() {
-    this.roleFormDialogService.openCreateRoleDialog().subscribe((success) => {
+    this.roleFormDialogService.openCreateRoleDialog().subscribe(success => {
       if (success) {
         this.loadRoles();
       }
@@ -74,7 +74,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   }
 
   openEditDialog(roleId: string) {
-    this.roleFormDialogService.openEditRoleDialog(roleId).subscribe((success) => {
+    this.roleFormDialogService.openEditRoleDialog(roleId).subscribe(success => {
       if (success) {
         this.loadRoles();
       }
@@ -108,10 +108,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
 
     if (staticRoles.length > 0) {
       const staticRoleNames = staticRoles.map(role => role.name).join(', ');
-      this.showWarning(
-        'Không thể xóa', 
-        `Không thể xóa các vai trò hệ thống: ${staticRoleNames}`
-      );
+      this.showWarning('Không thể xóa', `Không thể xóa các vai trò hệ thống: ${staticRoleNames}`);
     }
 
     if (deletableRoles.length === 0) {
@@ -147,10 +144,10 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     };
 
     this.identityRoleService.getList(input).subscribe({
-      next: (result) => {
+      next: result => {
         this.roles.set(result.items || []);
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading roles:', error);
         this.roles.set([]);
       },
@@ -163,7 +160,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
         this.loadRoles();
         this.showSuccess('Thành công', 'Đã xóa vai trò');
       },
-      error: (error) => {
+      error: error => {
         this.handleApiError(error, 'Không thể xóa vai trò');
       },
     });
@@ -172,9 +169,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
   private performDeleteSelectedRoles(rolesToDelete: IdentityRoleDto[]) {
     if (!rolesToDelete?.length) return;
 
-    const deleteRequests = rolesToDelete.map(role =>
-      this.identityRoleService.delete(role.id!)
-    );
+    const deleteRequests = rolesToDelete.map(role => this.identityRoleService.delete(role.id!));
 
     forkJoin(deleteRequests).subscribe({
       next: () => {
@@ -182,7 +177,7 @@ export class RoleListComponent extends ComponentBase implements OnInit {
         this.selectedRoles = [];
         this.showSuccess('Thành công', `Đã xóa ${rolesToDelete.length} vai trò`);
       },
-      error: (error) => {
+      error: error => {
         this.handleApiError(error, 'Có lỗi xảy ra khi xóa vai trò');
         this.loadRoles(); // Reload to refresh the list
       },

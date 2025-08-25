@@ -128,7 +128,7 @@ export abstract class ComponentBase implements OnDestroy {
       status?: number;
       message?: string;
     },
-    defaultMessage: string = 'Có lỗi xảy ra. Vui lòng thử lại.'
+    defaultMessage: string = 'Có lỗi xảy ra. Vui lòng thử lại.',
   ): void {
     console.error('API Error:', error);
 
@@ -159,7 +159,7 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected validateForm(
     form: FormGroup,
-    errorMessage: string = 'Vui lòng điền đầy đủ thông tin bắt buộc'
+    errorMessage: string = 'Vui lòng điền đầy đủ thông tin bắt buộc',
   ): boolean {
     if (form.invalid) {
       this.markFormGroupTouched(form);

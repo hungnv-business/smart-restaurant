@@ -58,8 +58,6 @@ export class LayoutSectionFormDialogService {
     };
 
     const ref: DynamicDialogRef = this.dialogService.open(LayoutSectionFormComponent, config);
-    return ref.onClose.pipe(
-      map(result => result || false)
-    );
+    return ref.onClose.pipe(map(result => result || false));
   }
 }

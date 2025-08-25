@@ -14,9 +14,7 @@
           class="w-full"
           [class.p-invalid]="isFieldInvalid(tableForm, 'tableNumber')"
         />
-        <app-validation-error 
-          [control]="tableForm.get('tableNumber')"
-          fieldName="Số bàn">
+        <app-validation-error [control]="tableForm.get('tableNumber')" fieldName="Số bàn">
         </app-validation-error>
       </div>
 
@@ -33,11 +31,10 @@
           placeholder="Chọn trạng thái"
           class="w-full"
           [class.p-invalid]="isFieldInvalid(tableForm, 'status')"
-          appendTo="body">
+          appendTo="body"
+        >
         </p-dropdown>
-        <app-validation-error 
-          [control]="tableForm.get('status')"
-          fieldName="Trạng thái">
+        <app-validation-error [control]="tableForm.get('status')" fieldName="Trạng thái">
         </app-validation-error>
       </div>
 
@@ -55,15 +52,12 @@
           incrementButtonIcon="pi pi-plus"
           decrementButtonIcon="pi pi-minus"
           [class.p-invalid]="isFieldInvalid(tableForm, 'displayOrder')"
-          class="w-full">
+          class="w-full"
+        >
         </p-inputNumber>
-        <app-validation-error 
-          [control]="tableForm.get('displayOrder')"
-          fieldName="Thứ tự hiển thị">
+        <app-validation-error [control]="tableForm.get('displayOrder')" fieldName="Thứ tự hiển thị">
         </app-validation-error>
-        <small class="text-gray-500 text-xs mt-1 block">
-          Thứ tự hiển thị bàn trong khu vực
-        </small>
+        <small class="text-gray-500 text-xs mt-1 block"> Thứ tự hiển thị bàn trong khu vực </small>
       </div>
     </div>
 
@@ -72,7 +66,8 @@
       [disabled]="tableForm.invalid"
       [loading]="loading"
       (formSave)="onSubmit()"
-      (formCancel)="onCancel()">
+      (formCancel)="onCancel()"
+    >
     </app-form-footer-actions>
   </div>
 </form>

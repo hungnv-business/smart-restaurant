@@ -1,7 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  ActivatedRouteSnapshot, CanActivate, CanActivateChild,
-  Router, RouterStateSnapshot, UrlTree, CanMatch, Route, UrlSegment
+  ActivatedRouteSnapshot,
+  CanActivate,
+  CanActivateChild,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+  CanMatch,
+  Route,
+  UrlSegment,
 } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { PermissionService, ConfigStateService } from '@abp/ng.core';
@@ -32,7 +39,7 @@ export class RestaurantGuard implements CanActivate, CanActivateChild, CanMatch 
     // Chờ đến khi Application Configuration đã có grantedPolicies
     return this.config.getOne$('auth').pipe(
       filter(auth => !!auth && !!auth.grantedPolicies),
-      take(1)
+      take(1),
     );
   }
 
@@ -49,8 +56,10 @@ export class RestaurantGuard implements CanActivate, CanActivateChild, CanMatch 
     return this.waitPoliciesReady$().pipe(
       switchMap(() => this.perms.getGrantedPolicy$(required).pipe(take(1))),
       map(granted =>
-        granted ? true : this.router.createUrlTree(['/error/403'], { queryParams: { returnUrl: url } })
-      )
+        granted
+          ? true
+          : this.router.createUrlTree(['/error/403'], { queryParams: { returnUrl: url } }),
+      ),
     );
   }
 }

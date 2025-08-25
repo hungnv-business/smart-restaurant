@@ -19,7 +19,7 @@ describe('TableFormDialogComponent', () => {
     { label: 'Có sẵn', value: TableStatus.Available },
     { label: 'Đang sử dụng', value: TableStatus.Occupied },
     { label: 'Đã đặt trước', value: TableStatus.Reserved },
-    { label: 'Đang dọn dẹp', value: TableStatus.Cleaning }
+    { label: 'Đang dọn dẹp', value: TableStatus.Cleaning },
   ];
 
   const mockNewTable: CreateTableDto = {
@@ -27,7 +27,7 @@ describe('TableFormDialogComponent', () => {
     displayOrder: 1,
     status: TableStatus.Available,
     isActive: true,
-    layoutSectionId: 'section1'
+    layoutSectionId: 'section1',
   };
 
   beforeEach(async () => {
@@ -39,18 +39,18 @@ describe('TableFormDialogComponent', () => {
         DialogModule,
         InputTextModule,
         DropdownModule,
-        ButtonModule
-      ]
+        ButtonModule,
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableFormDialogComponent);
     component = fixture.componentInstance;
-    
+
     // Set up component inputs
     component.tableStatusOptions = mockTableStatusOptions;
     component.newTable = { ...mockNewTable };
     component.selectedSectionId = 'section1';
-    
+
     fixture.detectChanges();
   });
 
@@ -76,9 +76,9 @@ describe('TableFormDialogComponent', () => {
 
   it('should emit visibleChange when dialog visibility changes', () => {
     spyOn(component.visibleChange, 'emit');
-    
+
     component.dialogVisible = true;
-    
+
     expect(component.visibleChange.emit).toHaveBeenCalledWith(true);
   });
 
@@ -111,7 +111,9 @@ describe('TableFormDialogComponent', () => {
       component.newTable.tableNumber = '';
       fixture.detectChanges();
 
-      const createButton = fixture.debugElement.nativeElement.querySelector('p-button[label="Tạo Bàn"] button');
+      const createButton = fixture.debugElement.nativeElement.querySelector(
+        'p-button[label="Tạo Bàn"] button',
+      );
       expect(createButton.disabled).toBe(true);
     });
 
@@ -119,7 +121,9 @@ describe('TableFormDialogComponent', () => {
       component.newTable.tableNumber = 'B01';
       fixture.detectChanges();
 
-      const createButton = fixture.debugElement.nativeElement.querySelector('p-button[label="Tạo Bàn"] button');
+      const createButton = fixture.debugElement.nativeElement.querySelector(
+        'p-button[label="Tạo Bàn"] button',
+      );
       expect(createButton.disabled).toBe(false);
     });
   });
@@ -156,7 +160,9 @@ describe('TableFormDialogComponent', () => {
       component.visible = true;
       fixture.detectChanges();
 
-      const cancelButton = fixture.debugElement.nativeElement.querySelector('p-button[label="Hủy"] button');
+      const cancelButton = fixture.debugElement.nativeElement.querySelector(
+        'p-button[label="Hủy"] button',
+      );
       cancelButton.click();
 
       expect(component.closeDialog.emit).toHaveBeenCalled();
@@ -169,7 +175,9 @@ describe('TableFormDialogComponent', () => {
       component.newTable.tableNumber = 'B01';
       fixture.detectChanges();
 
-      const createButton = fixture.debugElement.nativeElement.querySelector('p-button[label="Tạo Bàn"]');
+      const createButton = fixture.debugElement.nativeElement.querySelector(
+        'p-button[label="Tạo Bàn"]',
+      );
       expect(createButton.getAttribute('ng-reflect-loading')).toBe('true');
     });
 
@@ -178,7 +186,9 @@ describe('TableFormDialogComponent', () => {
       component.newTable.tableNumber = 'B01';
       fixture.detectChanges();
 
-      const createButton = fixture.debugElement.nativeElement.querySelector('p-button[label="Tạo Bàn"]');
+      const createButton = fixture.debugElement.nativeElement.querySelector(
+        'p-button[label="Tạo Bàn"]',
+      );
       expect(createButton.getAttribute('ng-reflect-loading')).toBe('false');
     });
   });
@@ -199,7 +209,9 @@ describe('TableFormDialogComponent', () => {
       component.visible = true;
       fixture.detectChanges();
 
-      const requiredIndicator = fixture.debugElement.nativeElement.querySelector('label[for="tableNumber"] .text-red-500');
+      const requiredIndicator = fixture.debugElement.nativeElement.querySelector(
+        'label[for="tableNumber"] .text-red-500',
+      );
       expect(requiredIndicator).toBeTruthy();
       expect(requiredIndicator.textContent.trim()).toBe('*');
     });
@@ -236,9 +248,11 @@ describe('TableFormDialogComponent', () => {
       component.visible = true;
       fixture.detectChanges();
 
-      const tableNumberLabel = fixture.debugElement.nativeElement.querySelector('label[for="tableNumber"]');
+      const tableNumberLabel = fixture.debugElement.nativeElement.querySelector(
+        'label[for="tableNumber"]',
+      );
       const tableNumberInput = fixture.debugElement.nativeElement.querySelector('#tableNumber');
-      
+
       expect(tableNumberLabel).toBeTruthy();
       expect(tableNumberInput).toBeTruthy();
       expect(tableNumberLabel.getAttribute('for')).toBe(tableNumberInput.getAttribute('id'));

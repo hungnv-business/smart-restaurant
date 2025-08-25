@@ -23,15 +23,15 @@ describe('TableLayoutKanbanComponent', () => {
       sectionName: 'Khu vực 1',
       description: 'Mô tả khu vực 1',
       displayOrder: 1,
-      isActive: true
+      isActive: true,
     },
     {
-      id: 'section2', 
+      id: 'section2',
       sectionName: 'Khu vực 2',
       description: 'Mô tả khu vực 2',
       displayOrder: 2,
-      isActive: true
-    }
+      isActive: true,
+    },
   ];
 
   const mockTables: TableDto[] = [
@@ -42,16 +42,16 @@ describe('TableLayoutKanbanComponent', () => {
       status: TableStatus.Available,
       isActive: true,
       layoutSectionId: 'section1',
-      layoutSectionName: 'Khu vực 1'
+      layoutSectionName: 'Khu vực 1',
     },
     {
       id: 'table2',
-      tableNumber: 'B02', 
+      tableNumber: 'B02',
       displayOrder: 2,
       status: TableStatus.Occupied,
       isActive: true,
       layoutSectionId: 'section1',
-      layoutSectionName: 'Khu vực 1'
+      layoutSectionName: 'Khu vực 1',
     },
     {
       id: 'table3',
@@ -60,15 +60,15 @@ describe('TableLayoutKanbanComponent', () => {
       status: TableStatus.Reserved,
       isActive: true,
       layoutSectionId: 'section2',
-      layoutSectionName: 'Khu vực 2'
-    }
+      layoutSectionName: 'Khu vực 2',
+    },
   ];
 
   beforeEach(async () => {
     const tableServiceSpy = jasmine.createSpyObj('TableService', [
       'getAllTablesOrdered',
       'assignToSection',
-      'updateDisplayOrder'
+      'updateDisplayOrder',
     ]);
     const layoutSectionServiceSpy = jasmine.createSpyObj('LayoutSectionService', ['getList']);
     const messageServiceSpy = jasmine.createSpyObj('MessageService', ['add']);
@@ -78,14 +78,16 @@ describe('TableLayoutKanbanComponent', () => {
       providers: [
         { provide: TableService, useValue: tableServiceSpy },
         { provide: LayoutSectionService, useValue: layoutSectionServiceSpy },
-        { provide: MessageService, useValue: messageServiceSpy }
-      ]
+        { provide: MessageService, useValue: messageServiceSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableLayoutKanbanComponent);
     component = fixture.componentInstance;
     mockTableService = TestBed.inject(TableService) as jasmine.SpyObj<TableService>;
-    mockLayoutSectionService = TestBed.inject(LayoutSectionService) as jasmine.SpyObj<LayoutSectionService>;
+    mockLayoutSectionService = TestBed.inject(
+      LayoutSectionService,
+    ) as jasmine.SpyObj<LayoutSectionService>;
     mockMessageService = TestBed.inject(MessageService) as jasmine.SpyObj<MessageService>;
 
     // Setup default service mocks
@@ -131,22 +133,21 @@ describe('TableLayoutKanbanComponent', () => {
       container: { data: component.sectionTables['section1'], id: 'section1' },
       previousIndex: 0,
       currentIndex: 1,
-      item: { data: mockTables[0] }
+      item: { data: mockTables[0] },
     } as any as CdkDragDrop<TableDto[]>;
 
     // Act
     await component.onTableDrop(mockEvent);
 
     // Assert
-    expect(mockTableService.updateDisplayOrder).toHaveBeenCalledWith(
-      mockTables[0].id!,
-      { displayOrder: 1 }
-    );
+    expect(mockTableService.updateDisplayOrder).toHaveBeenCalledWith(mockTables[0].id!, {
+      displayOrder: 1,
+    });
     expect(mockMessageService.add).toHaveBeenCalledWith({
       severity: 'success',
       summary: 'Success',
       detail: 'Table order updated successfully',
-      life: 3000
+      life: 3000,
     });
   });
 
@@ -160,22 +161,21 @@ describe('TableLayoutKanbanComponent', () => {
       container: { data: component.sectionTables['section2'], id: 'section2' },
       previousIndex: 0,
       currentIndex: 0,
-      item: { data: mockTables[0] }
+      item: { data: mockTables[0] },
     } as any as CdkDragDrop<TableDto[]>;
 
     // Act
     await component.onTableDrop(mockEvent);
 
     // Assert
-    expect(mockTableService.assignToSection).toHaveBeenCalledWith(
-      mockTables[0].id!,
-      { layoutSectionId: 'section2' }
-    );
+    expect(mockTableService.assignToSection).toHaveBeenCalledWith(mockTables[0].id!, {
+      layoutSectionId: 'section2',
+    });
     expect(mockMessageService.add).toHaveBeenCalledWith({
       severity: 'success',
       summary: 'Success',
       detail: 'Table moved to different section successfully',
-      life: 3000
+      life: 3000,
     });
   });
 
@@ -213,14 +213,16 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'error',
       summary: 'Error',
       detail: 'Failed to load data',
-      life: 5000
+      life: 5000,
     });
   });
 
   it('should handle error during table assignment', async () => {
     // Arrange
     await component.ngOnInit();
-    mockTableService.assignToSection.and.returnValue(throwError(() => new Error('Assignment failed')));
+    mockTableService.assignToSection.and.returnValue(
+      throwError(() => new Error('Assignment failed')),
+    );
     mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables)); // For revert
 
     const mockEvent = {
@@ -228,7 +230,7 @@ describe('TableLayoutKanbanComponent', () => {
       container: { data: component.sectionTables['section2'], id: 'section2' },
       previousIndex: 0,
       currentIndex: 0,
-      item: { data: mockTables[0] }
+      item: { data: mockTables[0] },
     } as any as CdkDragDrop<TableDto[]>;
 
     // Act
@@ -239,7 +241,7 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'error',
       summary: 'Error',
       detail: 'Failed to move table to different section',
-      life: 5000
+      life: 5000,
     });
     expect(mockTableService.getAllTablesOrdered).toHaveBeenCalled(); // Should revert
   });
@@ -316,7 +318,7 @@ describe('TableLayoutKanbanComponent', () => {
       displayOrder: 0,
       status: TableStatus.Available,
       isActive: true,
-      layoutSectionId: 'section1'
+      layoutSectionId: 'section1',
     };
 
     const newTable: TableDto = {
@@ -326,7 +328,7 @@ describe('TableLayoutKanbanComponent', () => {
       status: TableStatus.Available,
       isActive: true,
       layoutSectionId: 'section1',
-      layoutSectionName: 'Khu vực 1'
+      layoutSectionName: 'Khu vực 1',
     };
 
     mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables));
@@ -343,7 +345,7 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'success',
       summary: 'Success',
       detail: 'Đã thêm bàn mới thành công',
-      life: 3000
+      life: 3000,
     });
     expect(component.closeCreateDialog).toHaveBeenCalled();
   });
@@ -355,7 +357,7 @@ describe('TableLayoutKanbanComponent', () => {
       displayOrder: 0,
       status: TableStatus.Available,
       isActive: true,
-      layoutSectionId: 'section1'
+      layoutSectionId: 'section1',
     };
 
     mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables));
@@ -369,7 +371,7 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'warn',
       summary: 'Cảnh báo',
       detail: 'Số bàn này đã tồn tại. Vui lòng chọn số bàn khác.',
-      life: 3000
+      life: 3000,
     });
   });
 
@@ -386,7 +388,7 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'warn',
       summary: 'Cảnh báo',
       detail: 'Vui lòng nhập đầy đủ thông tin bắt buộc',
-      life: 3000
+      life: 3000,
     });
   });
 
@@ -397,7 +399,7 @@ describe('TableLayoutKanbanComponent', () => {
       displayOrder: 0,
       status: TableStatus.Available,
       isActive: true,
-      layoutSectionId: 'section1'
+      layoutSectionId: 'section1',
     };
 
     mockTableService.getAllTablesOrdered.and.returnValue(of([]));
@@ -411,7 +413,7 @@ describe('TableLayoutKanbanComponent', () => {
       severity: 'error',
       summary: 'Lỗi',
       detail: 'Có lỗi xảy ra khi thêm bàn mới',
-      life: 5000
+      life: 5000,
     });
   });
 
@@ -435,7 +437,7 @@ describe('TableLayoutKanbanComponent', () => {
         container: { data: [], id: 'nonexistent-section' },
         previousIndex: 0,
         currentIndex: 0,
-        item: { data: mockTables[0] }
+        item: { data: mockTables[0] },
       } as any;
 
       // Act & Assert - should not assign to nonexistent section
@@ -455,7 +457,7 @@ describe('TableLayoutKanbanComponent', () => {
         container: { data: component.sectionTables['section2'], id: 'section2' },
         previousIndex: 1,
         currentIndex: 0,
-        item: { data: occupiedTable }
+        item: { data: occupiedTable },
       } as any;
 
       // Act
@@ -465,8 +467,8 @@ describe('TableLayoutKanbanComponent', () => {
       expect(mockTableService.assignToSection).toHaveBeenCalledWith(
         occupiedTable.id!,
         jasmine.objectContaining({
-          layoutSectionId: 'section2'
-        })
+          layoutSectionId: 'section2',
+        }),
       );
       // Status should remain Occupied after assignment
       expect(occupiedTable.status).toBe(TableStatus.Occupied);
@@ -478,7 +480,7 @@ describe('TableLayoutKanbanComponent', () => {
         TableStatus.Available,
         TableStatus.Occupied,
         TableStatus.Reserved,
-        TableStatus.Cleaning
+        TableStatus.Cleaning,
       ];
 
       statusValues.forEach(status => {
@@ -495,7 +497,7 @@ describe('TableLayoutKanbanComponent', () => {
         displayOrder: 1,
         status: TableStatus.Available,
         isActive: true,
-        layoutSectionId: 'section1'
+        layoutSectionId: 'section1',
       };
 
       // Act & Assert - should accept valid status
@@ -513,14 +515,14 @@ describe('TableLayoutKanbanComponent', () => {
       const mixedStatusTables: TableDto[] = [
         { ...mockTables[0], status: TableStatus.Available },
         { ...mockTables[1], status: TableStatus.Occupied },
-        { 
+        {
           id: 'table4',
           tableNumber: 'B04',
           displayOrder: 3,
           status: TableStatus.Reserved,
           isActive: true,
           layoutSectionId: 'section1',
-          layoutSectionName: 'Khu vực 1'
+          layoutSectionName: 'Khu vực 1',
         },
         {
           id: 'table5',
@@ -529,8 +531,8 @@ describe('TableLayoutKanbanComponent', () => {
           status: TableStatus.Cleaning,
           isActive: true,
           layoutSectionId: 'section1',
-          layoutSectionName: 'Khu vực 1'
-        }
+          layoutSectionName: 'Khu vực 1',
+        },
       ];
 
       mockTableService.getAllTablesOrdered.and.returnValue(of(mixedStatusTables));
@@ -538,7 +540,7 @@ describe('TableLayoutKanbanComponent', () => {
 
       // Act & Assert - should group all tables regardless of status
       expect(component.sectionTables['section1'].length).toBe(4);
-      
+
       // Verify each status is handled correctly
       const sectionTables = component.sectionTables['section1'];
       expect(sectionTables.some(t => t.status === TableStatus.Available)).toBe(true);
@@ -552,12 +554,12 @@ describe('TableLayoutKanbanComponent', () => {
       await component.ngOnInit();
       const tableToMove = mockTables[0]; // Currently at position 0 in section1
       mockTableService.assignToSection.and.returnValue(of(void 0));
-      
+
       // Mock updated tables after move (table should appear at end of target section)
       const updatedTables = [
         mockTables[1], // Remains in section1
         mockTables[2], // Remains in section2
-        { ...tableToMove, layoutSectionId: 'section2', displayOrder: 2 } // Moved to section2
+        { ...tableToMove, layoutSectionId: 'section2', displayOrder: 2 }, // Moved to section2
       ];
       mockTableService.getAllTablesOrdered.and.returnValue(of(updatedTables));
 
@@ -566,7 +568,7 @@ describe('TableLayoutKanbanComponent', () => {
         container: { data: component.sectionTables['section2'], id: 'section2' },
         previousIndex: 0,
         currentIndex: 1, // Insert at end of section2
-        item: { data: tableToMove }
+        item: { data: tableToMove },
       } as any;
 
       // Act
@@ -576,8 +578,8 @@ describe('TableLayoutKanbanComponent', () => {
       expect(mockTableService.assignToSection).toHaveBeenCalledWith(
         tableToMove.id!,
         jasmine.objectContaining({
-          layoutSectionId: 'section2'
-        })
+          layoutSectionId: 'section2',
+        }),
       );
       // Should reload data to get updated display orders
       expect(mockTableService.getAllTablesOrdered).toHaveBeenCalled();
@@ -599,15 +601,17 @@ describe('TableLayoutKanbanComponent', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
-        }
+          deletionTime: null,
+        },
       ];
-      
+
       mockLayoutSectionService.getList.and.returnValue(of(inactiveSections));
       await component.ngOnInit();
 
       // Act & Assert - inactive section should not be available for assignment
-      expect(component.layoutSections.some(s => s.id === 'inactive-section' && !s.isActive)).toBe(true);
+      expect(component.layoutSections.some(s => s.id === 'inactive-section' && !s.isActive)).toBe(
+        true,
+      );
       expect(component.sectionTables['inactive-section']).toBeUndefined();
     });
 
@@ -618,7 +622,7 @@ describe('TableLayoutKanbanComponent', () => {
         displayOrder: 1,
         status: TableStatus.Available,
         isActive: true,
-        layoutSectionId: 'section2'
+        layoutSectionId: 'section2',
       };
 
       component.newTable = duplicateTable;
@@ -633,7 +637,7 @@ describe('TableLayoutKanbanComponent', () => {
         severity: 'warn',
         summary: 'Cảnh báo',
         detail: 'Số bàn này đã tồn tại. Vui lòng chọn số bàn khác.',
-        life: 3000
+        life: 3000,
       });
     });
 
@@ -641,7 +645,7 @@ describe('TableLayoutKanbanComponent', () => {
       // Arrange
       await component.ngOnInit();
       const reservedTable = { ...mockTables[0], status: TableStatus.Reserved };
-      
+
       // Mock the table being moved while maintaining its reserved status
       mockTableService.updateDisplayOrder.and.returnValue(of(void 0));
 
@@ -650,7 +654,7 @@ describe('TableLayoutKanbanComponent', () => {
         container: { data: component.sectionTables['section1'], id: 'section1' },
         previousIndex: 0,
         currentIndex: 1,
-        item: { data: reservedTable }
+        item: { data: reservedTable },
       } as any;
 
       // Act
@@ -660,8 +664,8 @@ describe('TableLayoutKanbanComponent', () => {
       expect(mockTableService.updateDisplayOrder).toHaveBeenCalledWith(
         reservedTable.id!,
         jasmine.objectContaining({
-          displayOrder: 1
-        })
+          displayOrder: 1,
+        }),
       );
       expect(reservedTable.status).toBe(TableStatus.Reserved);
     });

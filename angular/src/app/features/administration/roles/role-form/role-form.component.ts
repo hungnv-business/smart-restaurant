@@ -1,10 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -15,7 +10,11 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { firstValueFrom } from 'rxjs';
 
 import { IdentityRoleService } from '@abp/ng.identity/proxy';
-import { IdentityRoleCreateDto, IdentityRoleUpdateDto, IdentityRoleDto } from '@abp/ng.identity/proxy';
+import {
+  IdentityRoleCreateDto,
+  IdentityRoleUpdateDto,
+  IdentityRoleDto,
+} from '@abp/ng.identity/proxy';
 import { PermissionsService } from '@abp/ng.permission-management/proxy';
 import { RoleFormDialogData } from './role-form-dialog.service';
 import {
@@ -197,7 +196,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
       this.availablePermissions = await firstValueFrom(this.permissionsService.get('R', ''));
       if (this.availablePermissions) {
         this.permissionTreeNodes = this.permissionTreeService.buildPermissionTree(
-          this.availablePermissions
+          this.availablePermissions,
         );
       }
     } catch (error) {
@@ -227,7 +226,7 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
       // Set partialSelected state for parent nodes using service
       this.selectedTreeNodes = this.permissionTreeService.updateParentStates(
         this.permissionTreeNodes,
-        this.selectedTreeNodes
+        this.selectedTreeNodes,
       );
     } catch (error) {
       console.error('Error loading role permissions:', error);
@@ -288,5 +287,4 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
       throw error;
     }
   }
-
 }

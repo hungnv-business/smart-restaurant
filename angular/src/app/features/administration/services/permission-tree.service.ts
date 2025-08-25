@@ -3,10 +3,9 @@ import { TreeNode } from 'primeng/api';
 import { GetPermissionListResultDto } from '@abp/ng.permission-management/proxy';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PermissionTreeService {
-
   /**
    * Build hierarchical permission tree from ABP permissions using parentName
    */
@@ -15,8 +14,8 @@ export class PermissionTreeService {
 
     // Filter out unwanted groups
     const excludedGroups = ['FeatureManagement', 'SettingManagement', 'AbpTenantManagement'];
-    const filteredGroups = availablePermissions.groups.filter(group => 
-      !excludedGroups.includes(group.name)
+    const filteredGroups = availablePermissions.groups.filter(
+      group => !excludedGroups.includes(group.name),
     );
 
     return filteredGroups.map((group: any) => {
@@ -25,12 +24,12 @@ export class PermissionTreeService {
         data: group.name,
         key: group.name,
         expanded: true,
-        children: []
+        children: [],
       };
 
       // Build hierarchical tree using parentName relationships
       this.buildHierarchy(groupNode, group.permissions);
-      
+
       return groupNode;
     });
   }
@@ -40,7 +39,7 @@ export class PermissionTreeService {
    */
   private buildHierarchy(groupNode: TreeNode, permissions: any[]) {
     const permissionMap = new Map<string, TreeNode>();
-    
+
     // Create all permission nodes first
     permissions.forEach(permission => {
       const node: TreeNode = {
@@ -49,16 +48,16 @@ export class PermissionTreeService {
         key: permission.name,
         expanded: true,
         leaf: true, // Initially all are leaf nodes
-        children: []
+        children: [],
       };
       permissionMap.set(permission.name, node);
     });
-    
+
     // Build hierarchy based on parentName
     permissions.forEach(permission => {
       const currentNode = permissionMap.get(permission.name);
       if (!currentNode) return;
-      
+
       if (permission.parentName === null) {
         // Root level permission - add directly to group
         if (!groupNode.children) groupNode.children = [];
@@ -73,11 +72,11 @@ export class PermissionTreeService {
         }
       }
     });
-    
+
     // Clean up nodes that have empty children arrays
     this.cleanEmptyChildren(groupNode);
   }
-  
+
   /**
    * Remove empty children arrays and set leaf property correctly
    */
@@ -85,7 +84,7 @@ export class PermissionTreeService {
     if (node.children) {
       // First clean children recursively
       node.children.forEach(child => this.cleanEmptyChildren(child));
-      
+
       // If children array is empty, remove it and mark as leaf
       if (node.children.length === 0) {
         delete node.children;
@@ -103,18 +102,21 @@ export class PermissionTreeService {
    */
   updateParentStates(permissionTreeNodes: TreeNode[], selectedTreeNodes: TreeNode[]): TreeNode[] {
     const updatedSelection = [...selectedTreeNodes];
-    
+
     permissionTreeNodes.forEach(groupNode => {
       this.updateNodePartialState(groupNode, updatedSelection);
     });
-    
+
     return updatedSelection;
   }
 
   /**
    * Recursively update node partial state and manage selection
    */
-  private updateNodePartialState(node: TreeNode, selectedTreeNodes: TreeNode[]): { selected: number, total: number } {
+  private updateNodePartialState(
+    node: TreeNode,
+    selectedTreeNodes: TreeNode[],
+  ): { selected: number; total: number } {
     if (!node.children || node.children.length === 0) {
       // Leaf node - check if it's selected
       const isSelected = selectedTreeNodes.some(selected => selected.key === node.key);

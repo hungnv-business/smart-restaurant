@@ -22,7 +22,7 @@ export const appRoutes: Routes = [
             canMatch: [RestaurantGuard],
             loadChildren: () =>
               import('./features/administration/administration.routes').then(
-                m => m.ADMINISTRATION_ROUTES
+                m => m.ADMINISTRATION_ROUTES,
               ),
             data: {
               breadcrumb: 'Quản trị hệ thống',
@@ -32,11 +32,11 @@ export const appRoutes: Routes = [
             path: 'table-management',
             loadChildren: () =>
               import('./features/table-management/table-management.routes').then(
-                m => m.TABLE_MANAGEMENT_ROUTES
+                m => m.TABLE_MANAGEMENT_ROUTES,
               ),
             data: {
               breadcrumb: 'Quản lý Bàn',
-              permission: PERMISSIONS.RESTAURANT.TABLES.DEFAULT
+              permission: PERMISSIONS.RESTAURANT.TABLES.DEFAULT,
             },
           },
           // Future restaurant features - will be implemented in later stories

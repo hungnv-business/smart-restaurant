@@ -5,7 +5,11 @@ import { of, throwError } from 'rxjs';
 
 import { LayoutSectionFormComponent } from './layout-section-form.component';
 import { LayoutSectionService } from '../../../../proxy/table-management/layout-sections/layout-section.service';
-import { LayoutSectionDto, CreateLayoutSectionDto, UpdateLayoutSectionDto } from '../../../../proxy/table-management/layout-sections/dto/models';
+import {
+  LayoutSectionDto,
+  CreateLayoutSectionDto,
+  UpdateLayoutSectionDto,
+} from '../../../../proxy/table-management/layout-sections/dto/models';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 
@@ -26,12 +30,14 @@ describe('LayoutSectionFormComponent', () => {
     lastModifierId: null,
     isDeleted: false,
     deleterId: null,
-    deletionTime: null
+    deletionTime: null,
   };
 
   beforeEach(async () => {
     const layoutSectionServiceSpy = jasmine.createSpyObj('LayoutSectionService', [
-      'create', 'update', 'getNextDisplayOrder'
+      'create',
+      'update',
+      'getNextDisplayOrder',
     ]);
 
     await TestBed.configureTestingModule({
@@ -40,16 +46,16 @@ describe('LayoutSectionFormComponent', () => {
         ReactiveFormsModule,
         NoopAnimationsModule,
         ValidationErrorComponent,
-        FormFooterActionsComponent
+        FormFooterActionsComponent,
       ],
-      providers: [
-        { provide: LayoutSectionService, useValue: layoutSectionServiceSpy }
-      ]
+      providers: [{ provide: LayoutSectionService, useValue: layoutSectionServiceSpy }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LayoutSectionFormComponent);
     component = fixture.componentInstance;
-    mockLayoutSectionService = TestBed.inject(LayoutSectionService) as jasmine.SpyObj<LayoutSectionService>;
+    mockLayoutSectionService = TestBed.inject(
+      LayoutSectionService,
+    ) as jasmine.SpyObj<LayoutSectionService>;
 
     // Setup default mock returns
     mockLayoutSectionService.getNextDisplayOrder.and.returnValue(of(1));
@@ -155,16 +161,16 @@ describe('LayoutSectionFormComponent', () => {
       sectionName: 'Khu VIP',
       description: 'Khu vực VIP cao cấp',
       displayOrder: 2,
-      isActive: true
+      isActive: true,
     };
-    
+
     const createdSection: LayoutSectionDto = { ...mockSection, ...createDto, id: '2' };
     mockLayoutSectionService.create.and.returnValue(of(createdSection));
     spyOn(component as any, 'showSuccess');
     spyOn(component.saved, 'emit');
 
     fixture.detectChanges();
-    
+
     // Set form values
     component.sectionForm.patchValue(createDto);
 
@@ -172,15 +178,17 @@ describe('LayoutSectionFormComponent', () => {
     component.onSubmit();
 
     // Assert
-    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-      sectionName: 'Khu VIP',
-      description: 'Khu vực VIP cao cấp',
-      displayOrder: 2,
-      isActive: true
-    }));
+    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        sectionName: 'Khu VIP',
+        description: 'Khu vực VIP cao cấp',
+        displayOrder: 2,
+        isActive: true,
+      }),
+    );
     expect((component as any).showSuccess).toHaveBeenCalledWith(
       'Tạo mới thành công',
-      'Khu vực "Khu VIP" đã được tạo thành công'
+      'Khu vực "Khu VIP" đã được tạo thành công',
     );
     expect(component.saved.emit).toHaveBeenCalled();
     expect(component.loading).toBe(false);
@@ -192,9 +200,9 @@ describe('LayoutSectionFormComponent', () => {
       sectionName: 'Dãy 1 - Cập nhật',
       description: 'Mô tả mới',
       displayOrder: 3,
-      isActive: false
+      isActive: false,
     };
-    
+
     const updatedSection: LayoutSectionDto = { ...mockSection, ...updateDto };
     mockLayoutSectionService.update.and.returnValue(of(updatedSection));
     spyOn(component as any, 'showSuccess');
@@ -203,7 +211,7 @@ describe('LayoutSectionFormComponent', () => {
     component.section = mockSection;
     component.sectionId = true;
     fixture.detectChanges();
-    
+
     // Set form values
     component.sectionForm.patchValue(updateDto);
 
@@ -217,12 +225,12 @@ describe('LayoutSectionFormComponent', () => {
         sectionName: 'Dãy 1 - Cập nhật',
         description: 'Mô tả mới',
         displayOrder: 3,
-        isActive: false
-      })
+        isActive: false,
+      }),
     );
     expect((component as any).showSuccess).toHaveBeenCalledWith(
       'Cập nhật thành công',
-      'Thông tin khu vực "Dãy 1 - Cập nhật" đã được cập nhật'
+      'Thông tin khu vực "Dãy 1 - Cập nhật" đã được cập nhật',
     );
     expect(component.saved.emit).toHaveBeenCalled();
   });
@@ -237,7 +245,7 @@ describe('LayoutSectionFormComponent', () => {
     component.sectionForm.patchValue({
       sectionName: 'Test Section',
       displayOrder: 1,
-      isActive: true
+      isActive: true,
     });
 
     // Act
@@ -246,7 +254,7 @@ describe('LayoutSectionFormComponent', () => {
     // Assert
     expect((component as any).handleApiError).toHaveBeenCalledWith(
       errorResponse,
-      'Không thể tạo khu vực mới'
+      'Không thể tạo khu vực mới',
     );
     expect(component.loading).toBe(false);
   });
@@ -260,11 +268,11 @@ describe('LayoutSectionFormComponent', () => {
     component.section = mockSection;
     component.sectionId = true;
     fixture.detectChanges();
-    
+
     component.sectionForm.patchValue({
       sectionName: 'Updated Section',
       displayOrder: 2,
-      isActive: false
+      isActive: false,
     });
 
     // Act
@@ -273,7 +281,7 @@ describe('LayoutSectionFormComponent', () => {
     // Assert
     expect((component as any).handleApiError).toHaveBeenCalledWith(
       errorResponse,
-      'Không thể cập nhật thông tin khu vực'
+      'Không thể cập nhật thông tin khu vực',
     );
     expect(component.loading).toBe(false);
   });
@@ -330,24 +338,26 @@ describe('LayoutSectionFormComponent', () => {
       sectionName: 'Test Section',
       description: '',
       displayOrder: 1,
-      isActive: true
+      isActive: true,
     };
-    
+
     mockLayoutSectionService.create.and.returnValue(of({ ...mockSection, ...createDto }));
     fixture.detectChanges();
-    
+
     component.sectionForm.patchValue(createDto);
 
     // Act
     component.onSubmit();
 
     // Assert
-    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-      sectionName: 'Test Section',
-      description: undefined, // Empty string should be converted to undefined
-      displayOrder: 1,
-      isActive: true
-    }));
+    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        sectionName: 'Test Section',
+        description: undefined, // Empty string should be converted to undefined
+        displayOrder: 1,
+        isActive: true,
+      }),
+    );
   });
 
   it('should trim whitespace from input values', () => {
@@ -356,23 +366,25 @@ describe('LayoutSectionFormComponent', () => {
       sectionName: '  Dãy 1  ',
       description: '  Mô tả có khoảng trắng  ',
       displayOrder: 1,
-      isActive: true
+      isActive: true,
     };
-    
+
     mockLayoutSectionService.create.and.returnValue(of(mockSection));
     fixture.detectChanges();
-    
+
     component.sectionForm.patchValue(createDto);
 
     // Act
     component.onSubmit();
 
     // Assert
-    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-      sectionName: 'Dãy 1',
-      description: 'Mô tả có khoảng trắng',
-      displayOrder: 1,
-      isActive: true
-    }));
+    expect(mockLayoutSectionService.create).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        sectionName: 'Dãy 1',
+        description: 'Mô tả có khoảng trắng',
+        displayOrder: 1,
+        isActive: true,
+      }),
+    );
   });
 });

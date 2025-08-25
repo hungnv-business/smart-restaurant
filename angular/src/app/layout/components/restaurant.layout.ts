@@ -81,7 +81,7 @@ export class RestaurantLayoutComponent implements OnInit, OnDestroy {
   constructor(
     public layoutService: LayoutService,
     public renderer: Renderer2,
-    public router: Router
+    public router: Router,
   ) {
     this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
       if (!this.menuOutsideClickListener) {

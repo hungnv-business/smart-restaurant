@@ -34,7 +34,8 @@
     "clean": "npm run clean:backend && npm run clean:frontend && npm run clean:mobile",
     "clean:backend": "cd aspnet-core && dotnet clean SmartRestaurant.sln",
     "clean:frontend": "cd angular && rm -rf node_modules dist .angular && npm install",
-    "clean:mobile": "cd flutter_mobile && flutter clean && flutter pub get"
+    "clean:mobile": "cd flutter_mobile && flutter clean && flutter pub get",
+    "prepare": "husky"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

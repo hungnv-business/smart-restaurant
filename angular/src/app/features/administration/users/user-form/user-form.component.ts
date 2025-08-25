@@ -7,7 +7,11 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { forkJoin } from 'rxjs';
 
 import { IdentityUserService } from '@abp/ng.identity/proxy';
-import { IdentityUserCreateDto, IdentityUserUpdateDto, IdentityUserDto } from '@abp/ng.identity/proxy';
+import {
+  IdentityUserCreateDto,
+  IdentityUserUpdateDto,
+  IdentityUserDto,
+} from '@abp/ng.identity/proxy';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { UserFormDialogData } from './user-form-dialog.service';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
@@ -71,11 +75,11 @@ export class UserFormComponent extends ComponentBase implements OnInit {
 
   loadUser(id: string) {
     this.loading = true;
-    
+
     // Load user info and roles in parallel
     forkJoin({
       user: this.identityUserService.get(id),
-      userRoles: this.identityUserService.getRoles(id)
+      userRoles: this.identityUserService.getRoles(id),
     }).subscribe({
       next: ({ user, userRoles }) => {
         this.user = user;
@@ -94,10 +98,10 @@ export class UserFormComponent extends ComponentBase implements OnInit {
 
         this.loading = false;
       },
-      error: (error) => {
+      error: error => {
         this.handleApiError(error, 'Không thể tải thông tin người dùng');
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -194,11 +198,10 @@ export class UserFormComponent extends ComponentBase implements OnInit {
     });
     this.userForm.markAsUntouched();
     this.userForm.markAsPristine();
-    
+
     // Enable username field for create mode
     this.userForm.get('userName')?.enable();
-    
+
     this.loading = false;
   }
-
 }

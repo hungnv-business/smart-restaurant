@@ -1,4 +1,9 @@
-import type { ExtensibleEntityDto, ExtensibleFullAuditedEntityDto, ExtensibleObject, ExtensiblePagedAndSortedResultRequestDto } from '@abp/ng.core';
+import type {
+  ExtensibleEntityDto,
+  ExtensibleFullAuditedEntityDto,
+  ExtensibleObject,
+  ExtensiblePagedAndSortedResultRequestDto,
+} from '@abp/ng.core';
 
 export interface GetIdentityRolesInput extends ExtensiblePagedAndSortedResultRequestDto {
   filter?: string;
@@ -8,8 +13,7 @@ export interface GetIdentityUsersInput extends ExtensiblePagedAndSortedResultReq
   filter?: string;
 }
 
-export interface IdentityRoleCreateDto extends IdentityRoleCreateOrUpdateDtoBase {
-}
+export interface IdentityRoleCreateDto extends IdentityRoleCreateOrUpdateDtoBase {}
 
 export interface IdentityRoleCreateOrUpdateDtoBase extends ExtensibleObject {
   name: string;

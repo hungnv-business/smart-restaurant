@@ -14,7 +14,10 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { LayoutSectionFormDialogService } from '../layout-section-form/layout-section-form-dialog.service';
 import { LayoutSectionService } from '../../../../proxy/table-management/layout-sections/layout-section.service';
-import { LayoutSectionDto, UpdateLayoutSectionDto } from '../../../../proxy/table-management/layout-sections/dto/models';
+import {
+  LayoutSectionDto,
+  UpdateLayoutSectionDto,
+} from '../../../../proxy/table-management/layout-sections/dto/models';
 import { takeUntil } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 
@@ -31,11 +34,11 @@ import { forkJoin } from 'rxjs';
     DynamicDialogModule,
     ConfirmDialogModule,
     ToastModule,
-    DragDropModule
+    DragDropModule,
   ],
   providers: [ConfirmationService],
   templateUrl: './layout-section-list.component.html',
-  styleUrls: ['./layout-section-list.component.scss']
+  styleUrls: ['./layout-section-list.component.scss'],
 })
 export class LayoutSectionListComponent extends ComponentBase implements OnInit {
   layoutSections: LayoutSectionDto[] = [];
@@ -55,23 +58,24 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
 
   loadLayoutSections(): void {
     this.loading = true;
-    
-    this.layoutSectionService.getList()
-    .pipe(takeUntil(this.destroyed$))
-    .subscribe({
-      next: (sections) => {
-        this.layoutSections = sections || [];
-        this.loading = false;
-      },
-      error: (error) => {
-        this.loading = false;
-        this.handleApiError(error, 'Không thể tải danh sách khu vực bố cục');
-      }
-    });
+
+    this.layoutSectionService
+      .getList()
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe({
+        next: sections => {
+          this.layoutSections = sections || [];
+          this.loading = false;
+        },
+        error: error => {
+          this.loading = false;
+          this.handleApiError(error, 'Không thể tải danh sách khu vực bố cục');
+        },
+      });
   }
 
   openNew(): void {
-    this.layoutSectionFormDialogService.openCreateSectionDialog().subscribe((success) => {
+    this.layoutSectionFormDialogService.openCreateSectionDialog().subscribe(success => {
       if (success) {
         this.loadLayoutSections();
       }
@@ -79,7 +83,7 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
   }
 
   editSection(section: LayoutSectionDto): void {
-    this.layoutSectionFormDialogService.openEditSectionDialog(section.id!).subscribe((success) => {
+    this.layoutSectionFormDialogService.openEditSectionDialog(section.id!).subscribe(success => {
       if (success) {
         this.loadLayoutSections();
       }
@@ -98,28 +102,26 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       acceptButtonStyleClass: 'p-button-danger p-button-sm',
       rejectButtonStyleClass: 'p-button-text p-button-sm',
       accept: () => {
-        this.layoutSectionService.delete(section.id!)
+        this.layoutSectionService
+          .delete(section.id!)
           .pipe(takeUntil(this.destroyed$))
           .subscribe({
             next: () => {
               this.layoutSections = this.layoutSections.filter(s => s.id !== section.id);
               this.showSuccess(
                 'Đã xóa thành công',
-                `Khu vực "${section.sectionName}" đã được xóa khỏi hệ thống`
+                `Khu vực "${section.sectionName}" đã được xóa khỏi hệ thống`,
               );
             },
-            error: (error) => {
+            error: error => {
               this.handleApiError(error, 'Không thể xóa khu vực này');
-            }
+            },
           });
       },
       reject: () => {
         // Optional: Show cancel message
-        this.showInfo(
-          'Đã hủy',
-          'Không có thay đổi nào được thực hiện'
-        );
-      }
+        this.showInfo('Đã hủy', 'Không có thay đổi nào được thực hiện');
+      },
     });
   }
 
@@ -129,35 +131,35 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       sectionName: section.sectionName!,
       description: section.description,
       displayOrder: section.displayOrder,
-      isActive: !section.isActive
+      isActive: !section.isActive,
     };
 
-    this.layoutSectionService.update(section.id!, updateDto)
+    this.layoutSectionService
+      .update(section.id!, updateDto)
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
-        next: (updatedSection) => {
+        next: updatedSection => {
           section.isActive = updatedSection.isActive;
-          
+
           if (section.isActive) {
             this.showSuccess(
               'Đã kích hoạt',
-              `Khu vực "${section.sectionName}" hiện có thể được sử dụng để bố trí bàn ăn`
+              `Khu vực "${section.sectionName}" hiện có thể được sử dụng để bố trí bàn ăn`,
             );
           } else {
             this.showWarning(
               'Đã vô hiệu hóa',
-              `Khu vực "${section.sectionName}" tạm thời không khả dụng cho việc bố trí bàn ăn`
+              `Khu vực "${section.sectionName}" tạm thời không khả dụng cho việc bố trí bàn ăn`,
             );
           }
         },
-        error: (error) => {
+        error: error => {
           // Revert on error
           section.isActive = previousState;
           this.handleApiError(error, 'Không thể thay đổi trạng thái khu vực');
-        }
+        },
       });
   }
-
 
   moveUp(section: LayoutSectionDto): void {
     const currentIndex = this.layoutSections.findIndex(s => s.id === section.id);
@@ -166,7 +168,7 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       const temp = this.layoutSections[currentIndex];
       this.layoutSections[currentIndex] = this.layoutSections[currentIndex - 1];
       this.layoutSections[currentIndex - 1] = temp;
-      
+
       // Update display order and save to backend
       this.updateDisplayOrderAfterMove();
     }
@@ -179,7 +181,7 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       const temp = this.layoutSections[currentIndex];
       this.layoutSections[currentIndex] = this.layoutSections[currentIndex + 1];
       this.layoutSections[currentIndex + 1] = temp;
-      
+
       // Update display order and save to backend
       this.updateDisplayOrderAfterMove();
     }
@@ -189,7 +191,7 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
   onSectionDrop(event: CdkDragDrop<LayoutSectionDto[]>): void {
     if (event.previousIndex !== event.currentIndex) {
       moveItemInArray(this.layoutSections, event.previousIndex, event.currentIndex);
-      
+
       // Update display order for all affected items and save to backend
       this.updateDisplayOrderAfterDrop();
     }
@@ -216,7 +218,7 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
         sectionName: section.sectionName!,
         description: section.description,
         displayOrder: index + 1,
-        isActive: section.isActive
+        isActive: section.isActive,
       };
       return this.layoutSectionService.update(section.id!, updateDto);
     });
@@ -225,16 +227,13 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
         next: () => {
-          this.showSuccess(
-            'Đã thay đổi thứ tự',
-            'Thứ tự các khu vực đã được cập nhật thành công'
-          );
+          this.showSuccess('Đã thay đổi thứ tự', 'Thứ tự các khu vực đã được cập nhật thành công');
         },
-        error: (error) => {
+        error: error => {
           this.handleApiError(error, 'Không thể cập nhật thứ tự khu vực');
           // Reload to get correct order from server
           this.loadLayoutSections();
-        }
+        },
       });
   }
 }

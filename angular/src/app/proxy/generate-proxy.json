@@ -1,8 +1,5 @@
 {
-  "generated": [
-    "app",
-    "identity"
-  ],
+  "generated": ["app", "identity"],
   "modules": {
     "abp": {
       "rootPath": "abp",
@@ -5285,18 +5282,8 @@
     "SmartRestaurant.TableStatus": {
       "baseType": "System.Enum",
       "isEnum": true,
-      "enumNames": [
-        "Available",
-        "Occupied",
-        "Reserved",
-        "Cleaning"
-      ],
-      "enumValues": [
-        0,
-        1,
-        2,
-        3
-      ],
+      "enumNames": ["Available", "Occupied", "Reserved", "Cleaning"],
+      "enumValues": [0, 1, 2, 3],
       "genericArguments": null,
       "properties": null
     },
@@ -5754,13 +5741,7 @@
         "LockedOut",
         "RequiresTwoFactor"
       ],
-      "enumValues": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
+      "enumValues": [1, 2, 3, 4, 5],
       "genericArguments": null,
       "properties": null
     },
@@ -5814,9 +5795,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "LastModificationTime",
@@ -5849,9 +5828,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "CreationTime",
@@ -5892,9 +5869,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TKey"
-      ],
+      "genericArguments": ["TKey"],
       "properties": [
         {
           "name": "Id",
@@ -5915,9 +5890,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "LastModificationTime",
@@ -5950,9 +5923,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "CreationTime",
@@ -5993,9 +5964,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TKey"
-      ],
+      "genericArguments": ["TKey"],
       "properties": [
         {
           "name": "Id",
@@ -6016,9 +5985,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "IsDeleted",
@@ -6126,9 +6093,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "TPrimaryKey"
-      ],
+      "genericArguments": ["TPrimaryKey"],
       "properties": [
         {
           "name": "IsDeleted",
@@ -6194,9 +6159,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "T"
-      ],
+      "genericArguments": ["T"],
       "properties": [
         {
           "name": "Items",
@@ -6238,9 +6201,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "T"
-      ],
+      "genericArguments": ["T"],
       "properties": [
         {
           "name": "TotalCount",
@@ -9970,9 +9931,7 @@
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
-      "genericArguments": [
-        "T"
-      ],
+      "genericArguments": ["T"],
       "properties": [
         {
           "name": "Name",

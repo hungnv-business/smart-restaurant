@@ -18,8 +18,8 @@ class TestComponent extends ComponentBase {
       phone: ['', [Validators.maxLength(15)]],
       nested: this.fb.group({
         field1: ['', Validators.required],
-        field2: ['']
-      })
+        field2: [''],
+      }),
     });
   }
 
@@ -108,24 +108,22 @@ describe('ComponentBase', () => {
       'showSuccess',
       'showError',
       'showWarning',
-      'showInfo'
+      'showInfo',
     ]);
-    const permissionServiceSpy = jasmine.createSpyObj('PermissionService', [
-      'getGrantedPolicy'
-    ]);
+    const permissionServiceSpy = jasmine.createSpyObj('PermissionService', ['getGrantedPolicy']);
 
     await TestBed.configureTestingModule({
       providers: [
         FormBuilder,
         { provide: ToastService, useValue: toastServiceSpy },
-        { provide: PermissionService, useValue: permissionServiceSpy }
-      ]
+        { provide: PermissionService, useValue: permissionServiceSpy },
+      ],
     }).compileComponents();
 
     formBuilder = TestBed.inject(FormBuilder);
     toastService = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
     permissionService = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
-    
+
     component = new TestComponent(formBuilder);
   });
 
@@ -149,7 +147,7 @@ describe('ComponentBase', () => {
         Waiter: 'Nhân viên phục vụ',
         Kitchen: 'Nhân viên bếp',
         Cashier: 'Thu ngân',
-        Customer: 'Khách hàng'
+        Customer: 'Khách hàng',
       });
     });
 
@@ -163,13 +161,13 @@ describe('ComponentBase', () => {
     it('should complete destroy subject on ngOnDestroy', () => {
       const destroyed$ = component.getDestroyedObservable();
       let completed = false;
-      
+
       destroyed$.subscribe({
-        complete: () => completed = true
+        complete: () => (completed = true),
       });
-      
+
       component.ngOnDestroy();
-      
+
       expect(completed).toBe(true);
     });
   });
@@ -179,40 +177,40 @@ describe('ComponentBase', () => {
       component.testForm.patchValue({
         name: '',
         email: 'invalid-email',
-        phone: ''
+        phone: '',
       });
     });
 
     it('should detect invalid fields correctly', () => {
       component.testForm.get('name')?.markAsTouched();
-      
+
       expect(component.testIsFieldInvalid('name')).toBe(true);
       expect(component.testIsFieldInvalid('email')).toBe(false); // not touched yet
     });
 
     it('should detect invalid fields when dirty', () => {
       component.testForm.get('email')?.markAsDirty();
-      
+
       expect(component.testIsFieldInvalid('email')).toBe(true);
     });
 
     it('should return false for valid fields', () => {
       component.testForm.patchValue({ name: 'Valid Name' });
       component.testForm.get('name')?.markAsTouched();
-      
+
       expect(component.testIsFieldInvalid('name')).toBe(false);
     });
 
     it('should return FormControl for given field name', () => {
       const control = component.testGetFormControl('name');
-      
+
       expect(control).toBeInstanceOf(FormControl);
       expect(control.value).toBe(component.testForm.get('name')?.value);
     });
 
     it('should mark all form controls as touched', () => {
       component.testMarkFormGroupTouched();
-      
+
       expect(component.testForm.get('name')?.touched).toBe(true);
       expect(component.testForm.get('email')?.touched).toBe(true);
       expect(component.testForm.get('phone')?.touched).toBe(true);
@@ -222,11 +220,11 @@ describe('ComponentBase', () => {
 
     it('should validate form and return false for invalid form', () => {
       const result = component.testValidateForm();
-      
+
       expect(result).toBe(false);
       expect(toastService.showWarning).toHaveBeenCalledWith(
         'Thông tin chưa đầy đủ',
-        'Vui lòng điền đầy đủ thông tin bắt buộc'
+        'Vui lòng điền đầy đủ thông tin bắt buộc',
       );
     });
 
@@ -235,25 +233,22 @@ describe('ComponentBase', () => {
         name: 'Valid Name',
         email: 'valid@email.com',
         nested: {
-          field1: 'Valid Field'
-        }
+          field1: 'Valid Field',
+        },
       });
-      
+
       const result = component.testValidateForm();
-      
+
       expect(result).toBe(true);
       expect(toastService.showWarning).not.toHaveBeenCalled();
     });
 
     it('should validate form with custom error message', () => {
       const customMessage = 'Custom validation message';
-      
+
       component.testValidateForm(customMessage);
-      
-      expect(toastService.showWarning).toHaveBeenCalledWith(
-        'Thông tin chưa đầy đủ',
-        customMessage
-      );
+
+      expect(toastService.showWarning).toHaveBeenCalledWith('Thông tin chưa đầy đủ', customMessage);
     });
   });
 
@@ -262,7 +257,7 @@ describe('ComponentBase', () => {
       component.testForm.patchValue({
         name: '',
         email: 'invalid-email',
-        phone: '12345678901234567890' // too long
+        phone: '12345678901234567890', // too long
       });
       component.testMarkFormGroupTouched();
     });
@@ -291,9 +286,9 @@ describe('ComponentBase', () => {
     it('should return empty string for valid field', () => {
       component.testForm.patchValue({
         name: 'Valid Name',
-        email: 'valid@email.com'
+        email: 'valid@email.com',
       });
-      
+
       const message = component.testGetFieldErrorMessage('name', 'Tên');
       expect(message).toBe('');
     });
@@ -301,14 +296,14 @@ describe('ComponentBase', () => {
     it('should return generic error message for unknown error', () => {
       // Add custom validator that returns custom error
       component.testForm.get('name')?.setErrors({ customError: true });
-      
+
       const message = component.testGetFieldErrorMessage('name', 'Tên');
       expect(message).toBe('Tên không hợp lệ');
     });
 
     it('should handle pattern error', () => {
       component.testForm.get('name')?.setErrors({ pattern: true });
-      
+
       const message = component.testGetFieldErrorMessage('name', 'Tên');
       expect(message).toBe('Tên không đúng định dạng');
     });
@@ -318,14 +313,14 @@ describe('ComponentBase', () => {
     beforeEach(() => {
       component.testForm.patchValue({
         name: 'Test Name',
-        email: 'test@email.com'
+        email: 'test@email.com',
       });
       component.testMarkFormGroupTouched();
     });
 
     it('should reset form', () => {
       component.testResetForm();
-      
+
       expect(component.testForm.get('name')?.value).toBeNull();
       expect(component.testForm.get('email')?.value).toBeNull();
       expect(component.testForm.get('name')?.untouched).toBe(true);
@@ -334,7 +329,7 @@ describe('ComponentBase', () => {
 
     it('should clear form errors', () => {
       component.testClearFormErrors();
-      
+
       expect(component.testForm.get('name')?.untouched).toBe(true);
       expect(component.testForm.get('email')?.untouched).toBe(true);
       expect(component.testForm.get('name')?.pristine).toBe(true);
@@ -347,25 +342,25 @@ describe('ComponentBase', () => {
   describe('Toast Messages', () => {
     it('should show success message', () => {
       component.testShowSuccess('Success', 'Detail message');
-      
+
       expect(toastService.showSuccess).toHaveBeenCalledWith('Success', 'Detail message');
     });
 
     it('should show error message', () => {
       component.testShowError('Error', 'Error detail');
-      
+
       expect(toastService.showError).toHaveBeenCalledWith('Error', 'Error detail');
     });
 
     it('should show warning message', () => {
       component.testShowWarning('Warning', 'Warning detail');
-      
+
       expect(toastService.showWarning).toHaveBeenCalledWith('Warning', 'Warning detail');
     });
 
     it('should show info message', () => {
       component.testShowInfo('Info', 'Info detail');
-      
+
       expect(toastService.showInfo).toHaveBeenCalledWith('Info', 'Info detail');
     });
 
@@ -374,7 +369,7 @@ describe('ComponentBase', () => {
       component.testShowError('Error');
       component.testShowWarning('Warning');
       component.testShowInfo('Info');
-      
+
       expect(toastService.showSuccess).toHaveBeenCalledWith('Success', undefined);
       expect(toastService.showError).toHaveBeenCalledWith('Error', undefined);
       expect(toastService.showWarning).toHaveBeenCalledWith('Warning', undefined);
@@ -391,104 +386,104 @@ describe('ComponentBase', () => {
       const error = {
         error: {
           error: {
-            message: 'Specific error message'
-          }
-        }
+            message: 'Specific error message',
+          },
+        },
       };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(console.error).toHaveBeenCalledWith('API Error:', error);
-      expect(toastService.showError).toHaveBeenCalledWith('Có lỗi xảy ra', 'Specific error message');
+      expect(toastService.showError).toHaveBeenCalledWith(
+        'Có lỗi xảy ra',
+        'Specific error message',
+      );
     });
 
     it('should handle 400 Bad Request error', () => {
       const error = { status: 400 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.'
+        'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.',
       );
     });
 
     it('should handle 401 Unauthorized error', () => {
       const error = { status: 401 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+        'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
       );
     });
 
     it('should handle 403 Forbidden error', () => {
       const error = { status: 403 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Bạn không có quyền thực hiện thao tác này.'
+        'Bạn không có quyền thực hiện thao tác này.',
       );
     });
 
     it('should handle 404 Not Found error', () => {
       const error = { status: 404 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Không tìm thấy dữ liệu yêu cầu.'
+        'Không tìm thấy dữ liệu yêu cầu.',
       );
     });
 
     it('should handle 500 Internal Server Error', () => {
       const error = { status: 500 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Lỗi máy chủ. Vui lòng liên hệ quản trị viên.'
+        'Lỗi máy chủ. Vui lòng liên hệ quản trị viên.',
       );
     });
 
     it('should handle network error (status 0)', () => {
       const error = { status: 0 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.'
+        'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.',
       );
     });
 
     it('should use default message for unknown errors', () => {
       const error = { status: 999 };
-      
+
       component.testHandleApiError(error);
-      
+
       expect(toastService.showError).toHaveBeenCalledWith(
         'Có lỗi xảy ra',
-        'Có lỗi xảy ra. Vui lòng thử lại.'
+        'Có lỗi xảy ra. Vui lòng thử lại.',
       );
     });
 
     it('should use custom default message', () => {
       const error = { status: 999 };
       const customMessage = 'Custom error message';
-      
+
       component.testHandleApiError(error, customMessage);
-      
-      expect(toastService.showError).toHaveBeenCalledWith(
-        'Có lỗi xảy ra',
-        customMessage
-      );
+
+      expect(toastService.showError).toHaveBeenCalledWith('Có lỗi xảy ra', customMessage);
     });
   });
 
@@ -529,16 +524,18 @@ describe('ComponentBase', () => {
 
     it('should check single permission', () => {
       permissionService.getGrantedPolicy.and.returnValue(true);
-      
+
       const result = component.testHasPermission('UserManagement.Users.Create');
-      
+
       expect(result).toBe(true);
-      expect(permissionService.getGrantedPolicy).toHaveBeenCalledWith('UserManagement.Users.Create');
+      expect(permissionService.getGrantedPolicy).toHaveBeenCalledWith(
+        'UserManagement.Users.Create',
+      );
     });
 
     it('should return false for denied permission', () => {
       const result = component.testHasPermission('UserManagement.Users.Create');
-      
+
       expect(result).toBe(false);
     });
 
@@ -546,26 +543,26 @@ describe('ComponentBase', () => {
       permissionService.getGrantedPolicy.and.callFake((permission: string) => {
         return permission === 'UserManagement.Users.Update';
       });
-      
+
       const permissions = ['UserManagement.Users.Create', 'UserManagement.Users.Update'];
       const result = component.testHasAnyPermission(permissions);
-      
+
       expect(result).toBe(true);
     });
 
     it('should return false when user has none of the permissions', () => {
       const permissions = ['UserManagement.Users.Create', 'UserManagement.Users.Update'];
       const result = component.testHasAnyPermission(permissions);
-      
+
       expect(result).toBe(false);
     });
 
     it('should check if user has all permissions', () => {
       permissionService.getGrantedPolicy.and.returnValue(true);
-      
+
       const permissions = ['UserManagement.Users.Create', 'UserManagement.Users.Update'];
       const result = component.testHasAllPermissions(permissions);
-      
+
       expect(result).toBe(true);
     });
 
@@ -573,10 +570,10 @@ describe('ComponentBase', () => {
       permissionService.getGrantedPolicy.and.callFake((permission: string) => {
         return permission === 'UserManagement.Users.Create';
       });
-      
+
       const permissions = ['UserManagement.Users.Create', 'UserManagement.Users.Update'];
       const result = component.testHasAllPermissions(permissions);
-      
+
       expect(result).toBe(false);
     });
 

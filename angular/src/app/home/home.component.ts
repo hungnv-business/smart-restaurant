@@ -15,13 +15,15 @@ import { Component } from '@angular/core';
       </div>
     </div>
   `,
-  styles: [`
-    .container {
-      max-width: 800px;
-    }
-    .card {
-      margin-top: 20px;
-    }
-  `]
+  styles: [
+    `
+      .container {
+        max-width: 800px;
+      }
+      .card {
+        margin-top: 20px;
+      }
+    `,
+  ],
 })
 export class HomeComponent {}

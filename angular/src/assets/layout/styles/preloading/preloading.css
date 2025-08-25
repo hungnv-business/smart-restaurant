@@ -1,4 +1,4 @@
-body{
+body {
   margin: 0;
 }
 
@@ -8,7 +8,7 @@ body{
   height: 100%;
   overflow: hidden;
   min-height: 100vh;
-  background: #343A40;
+  background: #343a40;
 }
 
 .loader {

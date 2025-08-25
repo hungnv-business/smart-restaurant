@@ -7,7 +7,12 @@ import { of, throwError } from 'rxjs';
 import { TableLayoutKanbanComponent } from './table-layout-kanban/table-layout-kanban.component';
 import { TableService } from '../../../proxy/table-management/tables/table.service';
 import { LayoutSectionService } from '../../../proxy/table-management/layout-sections/layout-section.service';
-import { TableDto, CreateTableDto, UpdateTableDto, AssignTableToSectionDto } from '../../../proxy/table-management/tables/dto/models';
+import {
+  TableDto,
+  CreateTableDto,
+  UpdateTableDto,
+  AssignTableToSectionDto,
+} from '../../../proxy/table-management/tables/dto/models';
 import { LayoutSectionDto } from '../../../proxy/table-management/layout-sections/dto/models';
 import { TableStatus } from '../../../proxy/table-status.enum';
 
@@ -31,7 +36,7 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: 'section2',
@@ -45,7 +50,7 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: 'section3',
@@ -59,8 +64,8 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
-    }
+      deletionTime: null,
+    },
   ];
 
   const mockTables: TableDto[] = [
@@ -78,7 +83,7 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: 'table2',
@@ -94,7 +99,7 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: 'table3',
@@ -110,8 +115,8 @@ describe('Table Positioning Integration Tests', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
-    }
+      deletionTime: null,
+    },
   ];
 
   beforeEach(async () => {
@@ -121,7 +126,7 @@ describe('Table Positioning Integration Tests', () => {
       'updateDisplayOrder',
       'create',
       'update',
-      'delete'
+      'delete',
     ]);
     const layoutSectionServiceSpy = jasmine.createSpyObj('LayoutSectionService', ['getList']);
     const messageServiceSpy = jasmine.createSpyObj('MessageService', ['add']);
@@ -131,14 +136,16 @@ describe('Table Positioning Integration Tests', () => {
       providers: [
         { provide: TableService, useValue: tableServiceSpy },
         { provide: LayoutSectionService, useValue: layoutSectionServiceSpy },
-        { provide: MessageService, useValue: messageServiceSpy }
-      ]
+        { provide: MessageService, useValue: messageServiceSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TableLayoutKanbanComponent);
     component = fixture.componentInstance;
     mockTableService = TestBed.inject(TableService) as jasmine.SpyObj<TableService>;
-    mockLayoutSectionService = TestBed.inject(LayoutSectionService) as jasmine.SpyObj<LayoutSectionService>;
+    mockLayoutSectionService = TestBed.inject(
+      LayoutSectionService,
+    ) as jasmine.SpyObj<LayoutSectionService>;
     mockMessageService = TestBed.inject(MessageService) as jasmine.SpyObj<MessageService>;
 
     // Setup default service mocks
@@ -152,7 +159,7 @@ describe('Table Positioning Integration Tests', () => {
       await component.ngOnInit();
       const sourceTable = mockTables[0]; // B01 from section1
       const targetSectionId = 'section2';
-      
+
       mockTableService.assignToSection.and.returnValue(of(void 0));
       mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables));
 
@@ -161,7 +168,7 @@ describe('Table Positioning Integration Tests', () => {
         container: { data: component.sectionTables['section2'], id: targetSectionId },
         previousIndex: 0,
         currentIndex: 0,
-        item: { data: sourceTable }
+        item: { data: sourceTable },
       } as any as CdkDragDrop<TableDto[]>;
 
       // Act
@@ -171,14 +178,14 @@ describe('Table Positioning Integration Tests', () => {
       expect(mockTableService.assignToSection).toHaveBeenCalledWith(
         sourceTable.id!,
         jasmine.objectContaining({
-          layoutSectionId: targetSectionId
-        } as AssignTableToSectionDto)
+          layoutSectionId: targetSectionId,
+        } as AssignTableToSectionDto),
       );
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
         detail: 'Table moved to different section successfully',
-        life: 3000
+        life: 3000,
       });
     });
 
@@ -187,7 +194,7 @@ describe('Table Positioning Integration Tests', () => {
       await component.ngOnInit();
       const sourceTable = mockTables[0];
       const targetSectionId = 'invalid-section';
-      
+
       const validationError = new Error('Validation failed: Section does not exist');
       mockTableService.assignToSection.and.returnValue(throwError(() => validationError));
       mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables));
@@ -197,7 +204,7 @@ describe('Table Positioning Integration Tests', () => {
         container: { data: [], id: targetSectionId },
         previousIndex: 0,
         currentIndex: 0,
-        item: { data: sourceTable }
+        item: { data: sourceTable },
       } as any as CdkDragDrop<TableDto[]>;
 
       // Act
@@ -207,14 +214,14 @@ describe('Table Positioning Integration Tests', () => {
       expect(mockTableService.assignToSection).toHaveBeenCalledWith(
         sourceTable.id!,
         jasmine.objectContaining({
-          layoutSectionId: targetSectionId
-        })
+          layoutSectionId: targetSectionId,
+        }),
       );
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Error',
         detail: 'Failed to move table to different section',
-        life: 5000
+        life: 5000,
       });
       // Should revert changes by reloading data
       expect(mockTableService.getAllTablesOrdered).toHaveBeenCalled();
@@ -225,7 +232,7 @@ describe('Table Positioning Integration Tests', () => {
       await component.ngOnInit();
       const tableToMove = mockTables[0];
       const newDisplayOrder = 2;
-      
+
       mockTableService.updateDisplayOrder.and.returnValue(of(void 0));
 
       const mockDragEvent = {
@@ -233,7 +240,7 @@ describe('Table Positioning Integration Tests', () => {
         container: { data: component.sectionTables['section1'], id: 'section1' },
         previousIndex: 0,
         currentIndex: 1,
-        item: { data: tableToMove }
+        item: { data: tableToMove },
       } as any as CdkDragDrop<TableDto[]>;
 
       // Act
@@ -243,14 +250,14 @@ describe('Table Positioning Integration Tests', () => {
       expect(mockTableService.updateDisplayOrder).toHaveBeenCalledWith(
         tableToMove.id!,
         jasmine.objectContaining({
-          displayOrder: newDisplayOrder
-        } as UpdateTableDto)
+          displayOrder: newDisplayOrder,
+        } as UpdateTableDto),
       );
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
         detail: 'Table order updated successfully',
-        life: 3000
+        life: 3000,
       });
     });
   });
@@ -260,13 +267,13 @@ describe('Table Positioning Integration Tests', () => {
       // Arrange
       await component.ngOnInit();
       component.selectedSectionId = 'section1';
-      
+
       const newTableData: CreateTableDto = {
         tableNumber: 'B03',
         displayOrder: 3,
         status: TableStatus.Available,
         isActive: true,
-        layoutSectionId: 'section1'
+        layoutSectionId: 'section1',
       };
 
       const createdTable: TableDto = {
@@ -279,7 +286,7 @@ describe('Table Positioning Integration Tests', () => {
         lastModifierId: null,
         isDeleted: false,
         deleterId: null,
-        deletionTime: null
+        deletionTime: null,
       };
 
       component.newTable = newTableData;
@@ -296,7 +303,7 @@ describe('Table Positioning Integration Tests', () => {
         severity: 'success',
         summary: 'Success',
         detail: 'Đã thêm bàn mới thành công',
-        life: 3000
+        life: 3000,
       });
       expect(component.showCreateDialog).toBe(false);
     });
@@ -305,9 +312,9 @@ describe('Table Positioning Integration Tests', () => {
       // Arrange
       await component.ngOnInit();
       component.selectedSectionId = 'section3';
-      
+
       const vietnameseTableNumbers = ['VIP01', 'V01', 'Bàn-01', 'Phòng-A1'];
-      
+
       for (const tableNumber of vietnameseTableNumbers) {
         // Setup new table data
         component.newTable = {
@@ -315,7 +322,7 @@ describe('Table Positioning Integration Tests', () => {
           displayOrder: 1,
           status: TableStatus.Available,
           isActive: true,
-          layoutSectionId: 'section3'
+          layoutSectionId: 'section3',
         };
 
         const createdTable: TableDto = {
@@ -328,7 +335,7 @@ describe('Table Positioning Integration Tests', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
+          deletionTime: null,
         };
 
         mockTableService.getAllTablesOrdered.and.returnValue(of([])); // No duplicates
@@ -338,9 +345,11 @@ describe('Table Positioning Integration Tests', () => {
         await component.createTable();
 
         // Assert
-        expect(mockTableService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-          tableNumber: tableNumber
-        }));
+        expect(mockTableService.create).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            tableNumber: tableNumber,
+          }),
+        );
         expect(component.isTableNumberValid()).toBe(true);
       }
     });
@@ -354,7 +363,7 @@ describe('Table Positioning Integration Tests', () => {
         displayOrder: 3,
         status: TableStatus.Available,
         isActive: true,
-        layoutSectionId: 'section1'
+        layoutSectionId: 'section1',
       };
 
       mockTableService.getAllTablesOrdered.and.returnValue(of(mockTables));
@@ -368,7 +377,7 @@ describe('Table Positioning Integration Tests', () => {
         severity: 'warn',
         summary: 'Cảnh báo',
         detail: 'Số bàn này đã tồn tại. Vui lòng chọn số bàn khác.',
-        life: 3000
+        life: 3000,
       });
     });
   });
@@ -389,7 +398,7 @@ describe('Table Positioning Integration Tests', () => {
 
     it('should apply correct CSS classes based on table status', () => {
       const testTable = { ...mockTables[0] };
-      
+
       testTable.status = TableStatus.Available;
       expect(component.getTableCardClass(testTable)).toBe('table-card available');
 
@@ -407,28 +416,32 @@ describe('Table Positioning Integration Tests', () => {
   describe('Data Loading and Error Handling Integration', () => {
     it('should handle ABP service loading errors gracefully', async () => {
       // Test layout section service error
-      mockLayoutSectionService.getList.and.returnValue(throwError(() => new Error('Network error')));
-      
+      mockLayoutSectionService.getList.and.returnValue(
+        throwError(() => new Error('Network error')),
+      );
+
       await component.loadData();
-      
+
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Error',
         detail: 'Failed to load data',
-        life: 5000
+        life: 5000,
       });
 
       // Test table service error
       mockLayoutSectionService.getList.and.returnValue(of(mockLayoutSections));
-      mockTableService.getAllTablesOrdered.and.returnValue(throwError(() => new Error('Database error')));
-      
+      mockTableService.getAllTablesOrdered.and.returnValue(
+        throwError(() => new Error('Database error')),
+      );
+
       await component.loadData();
-      
+
       expect(mockMessageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Error',
         detail: 'Failed to load data',
-        life: 5000
+        life: 5000,
       });
     });
 
@@ -462,7 +475,7 @@ describe('Table Positioning Integration Tests', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
+          deletionTime: null,
         },
         {
           id: 'section-garden',
@@ -476,8 +489,8 @@ describe('Table Positioning Integration Tests', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
-        }
+          deletionTime: null,
+        },
       ];
 
       const vietnameseTables: TableDto[] = [
@@ -495,7 +508,7 @@ describe('Table Positioning Integration Tests', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
+          deletionTime: null,
         },
         {
           id: 'table-garden1',
@@ -511,8 +524,8 @@ describe('Table Positioning Integration Tests', () => {
           lastModifierId: null,
           isDeleted: false,
           deleterId: null,
-          deletionTime: null
-        }
+          deletionTime: null,
+        },
       ];
 
       mockLayoutSectionService.getList.and.returnValue(of(vietnameseSections));
@@ -533,7 +546,7 @@ describe('Table Positioning Integration Tests', () => {
         container: { data: component.sectionTables['section-garden'], id: 'section-garden' },
         previousIndex: 0,
         currentIndex: 0,
-        item: { data: vietnameseTables[0] }
+        item: { data: vietnameseTables[0] },
       } as any as CdkDragDrop<TableDto[]>;
 
       await component.onTableDrop(mockDragEvent);
@@ -541,8 +554,8 @@ describe('Table Positioning Integration Tests', () => {
       expect(mockTableService.assignToSection).toHaveBeenCalledWith(
         'table-vip1',
         jasmine.objectContaining({
-          layoutSectionId: 'section-garden'
-        })
+          layoutSectionId: 'section-garden',
+        }),
       );
     });
   });

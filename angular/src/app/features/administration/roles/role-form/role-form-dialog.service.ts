@@ -58,8 +58,6 @@ export class RoleFormDialogService {
     };
 
     const ref: DynamicDialogRef = this.dialogService.open(RoleFormComponent, config);
-    return ref.onClose.pipe(
-      map(result => result || false)
-    );
+    return ref.onClose.pipe(map(result => result || false));
   }
 }

@@ -58,8 +58,6 @@ export class UserFormDialogService {
     };
 
     const ref: DynamicDialogRef = this.dialogService.open(UserFormComponent, config);
-    return ref.onClose.pipe(
-      map(result => result || false)
-    );
+    return ref.onClose.pipe(map(result => result || false));
   }
 }

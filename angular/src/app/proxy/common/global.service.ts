@@ -7,14 +7,15 @@ import { Injectable } from '@angular/core';
 })
 export class GlobalService {
   apiName = 'Default';
-  
 
   getTableStatuses = (config?: Partial<Rest.Config>) =>
-    this.restService.request<any, IntLookupItemDto[]>({
-      method: 'GET',
-      url: '/api/app/global/table-statuses',
-    },
-    { apiName: this.apiName,...config });
+    this.restService.request<any, IntLookupItemDto[]>(
+      {
+        method: 'GET',
+        url: '/api/app/global/table-statuses',
+      },
+      { apiName: this.apiName, ...config },
+    );
 
   constructor(private restService: RestService) {}
 }

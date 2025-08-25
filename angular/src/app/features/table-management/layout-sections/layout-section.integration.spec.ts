@@ -7,7 +7,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutSectionListComponent } from './layout-section-list/layout-section-list.component';
 import { LayoutSectionFormComponent } from './layout-section-form/layout-section-form.component';
 import { LayoutSectionService } from '../../../proxy/table-management/layout-sections/layout-section.service';
-import { LayoutSectionDto, CreateLayoutSectionDto, UpdateLayoutSectionDto } from '../../../proxy/table-management/layout-sections/dto/models';
+import {
+  LayoutSectionDto,
+  CreateLayoutSectionDto,
+  UpdateLayoutSectionDto,
+} from '../../../proxy/table-management/layout-sections/dto/models';
 
 describe('Layout Section Management Integration', () => {
   let listComponent: LayoutSectionListComponent;
@@ -30,7 +34,7 @@ describe('Layout Section Management Integration', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
+      deletionTime: null,
     },
     {
       id: '2',
@@ -44,13 +48,17 @@ describe('Layout Section Management Integration', () => {
       lastModifierId: null,
       isDeleted: false,
       deleterId: null,
-      deletionTime: null
-    }
+      deletionTime: null,
+    },
   ];
 
   beforeEach(async () => {
     const layoutSectionServiceSpy = jasmine.createSpyObj('LayoutSectionService', [
-      'getList', 'create', 'update', 'delete', 'getNextDisplayOrder'
+      'getList',
+      'create',
+      'update',
+      'delete',
+      'getNextDisplayOrder',
     ]);
     const confirmationServiceSpy = jasmine.createSpyObj('ConfirmationService', ['confirm']);
 
@@ -59,16 +67,20 @@ describe('Layout Section Management Integration', () => {
         LayoutSectionListComponent,
         LayoutSectionFormComponent,
         NoopAnimationsModule,
-        DragDropModule
+        DragDropModule,
       ],
       providers: [
         { provide: LayoutSectionService, useValue: layoutSectionServiceSpy },
-        { provide: ConfirmationService, useValue: confirmationServiceSpy }
-      ]
+        { provide: ConfirmationService, useValue: confirmationServiceSpy },
+      ],
     }).compileComponents();
 
-    mockLayoutSectionService = TestBed.inject(LayoutSectionService) as jasmine.SpyObj<LayoutSectionService>;
-    mockConfirmationService = TestBed.inject(ConfirmationService) as jasmine.SpyObj<ConfirmationService>;
+    mockLayoutSectionService = TestBed.inject(
+      LayoutSectionService,
+    ) as jasmine.SpyObj<LayoutSectionService>;
+    mockConfirmationService = TestBed.inject(
+      ConfirmationService,
+    ) as jasmine.SpyObj<ConfirmationService>;
 
     // Setup default mock returns
     mockLayoutSectionService.getList.and.returnValue(of(mockLayoutSections));
@@ -111,7 +123,7 @@ describe('Layout Section Management Integration', () => {
         lastModifierId: null,
         isDeleted: false,
         deleterId: null,
-        deletionTime: null
+        deletionTime: null,
       };
 
       mockLayoutSectionService.create.and.returnValue(of(newSection));
@@ -122,19 +134,21 @@ describe('Layout Section Management Integration', () => {
         sectionName: 'Sân vườn',
         description: 'Khu vực ngoài trời',
         displayOrder: 3,
-        isActive: true
+        isActive: true,
       });
 
       spyOn(formComponent.saved, 'emit').and.callThrough();
       formComponent.onSubmit();
 
       // Assert
-      expect(mockLayoutSectionService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-        sectionName: 'Sân vườn',
-        description: 'Khu vực ngoài trời',
-        displayOrder: 3,
-        isActive: true
-      }));
+      expect(mockLayoutSectionService.create).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          sectionName: 'Sân vườn',
+          description: 'Khu vực ngoài trời',
+          displayOrder: 3,
+          isActive: true,
+        }),
+      );
       expect(formComponent.saved.emit).toHaveBeenCalled();
 
       // Simulate saving completed
@@ -167,7 +181,7 @@ describe('Layout Section Management Integration', () => {
       const updatedSection: LayoutSectionDto = {
         ...sectionToEdit,
         sectionName: 'Dãy 1 - Cập nhật',
-        description: 'Khu vực dãy đầu tiên - đã cập nhật'
+        description: 'Khu vực dãy đầu tiên - đã cập nhật',
       };
 
       mockLayoutSectionService.update.and.returnValue(of(updatedSection));
@@ -175,7 +189,7 @@ describe('Layout Section Management Integration', () => {
       // Act - Modify and submit form
       formComponent.sectionForm.patchValue({
         sectionName: 'Dãy 1 - Cập nhật',
-        description: 'Khu vực dãy đầu tiên - đã cập nhật'
+        description: 'Khu vực dãy đầu tiên - đã cập nhật',
       });
 
       spyOn(formComponent.saved, 'emit').and.callThrough();
@@ -186,8 +200,8 @@ describe('Layout Section Management Integration', () => {
         sectionToEdit.id!,
         jasmine.objectContaining({
           sectionName: 'Dãy 1 - Cập nhật',
-          description: 'Khu vực dãy đầu tiên - đã cập nhật'
-        })
+          description: 'Khu vực dãy đầu tiên - đã cập nhật',
+        }),
       );
       expect(formComponent.saved.emit).toHaveBeenCalled();
     });
@@ -212,9 +226,11 @@ describe('Layout Section Management Integration', () => {
       // Assert
       expect(mockConfirmationService.confirm).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          message: jasmine.stringMatching(new RegExp(`Bạn có chắc chắn muốn xóa khu vực "${sectionToDelete.sectionName}"`)),
-          header: 'Xác nhận Xóa Khu vực'
-        })
+          message: jasmine.stringMatching(
+            new RegExp(`Bạn có chắc chắn muốn xóa khu vực "${sectionToDelete.sectionName}"`),
+          ),
+          header: 'Xác nhận Xóa Khu vực',
+        }),
       );
       expect(mockLayoutSectionService.delete).toHaveBeenCalledWith(sectionToDelete.id!);
       expect(listComponent.layoutSections).not.toContain(sectionToDelete);
@@ -227,7 +243,7 @@ describe('Layout Section Management Integration', () => {
         sectionName: 'Khu Vực Tiếng Việt',
         description: 'Mô tả có dấu tiếng Việt: àáâãèéêìíòóôõùúýđ',
         displayOrder: 1,
-        isActive: true
+        isActive: true,
       };
 
       // Setup form component
@@ -247,7 +263,7 @@ describe('Layout Section Management Integration', () => {
         lastModifierId: null,
         isDeleted: false,
         deleterId: null,
-        deletionTime: null
+        deletionTime: null,
       };
 
       mockLayoutSectionService.create.and.returnValue(of(vietnameseSection));
@@ -256,10 +272,12 @@ describe('Layout Section Management Integration', () => {
       formComponent.onSubmit();
 
       // Assert
-      expect(mockLayoutSectionService.create).toHaveBeenCalledWith(jasmine.objectContaining({
-        sectionName: 'Khu Vực Tiếng Việt',
-        description: 'Mô tả có dấu tiếng Việt: àáâãèéêìíòóôõùúýđ'
-      }));
+      expect(mockLayoutSectionService.create).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          sectionName: 'Khu Vực Tiếng Việt',
+          description: 'Mô tả có dấu tiếng Việt: àáâãèéêìíòóôõùúýđ',
+        }),
+      );
     });
 
     it('should validate Vietnamese suggestion patterns', () => {
@@ -267,13 +285,19 @@ describe('Layout Section Management Integration', () => {
 
       // Test common Vietnamese restaurant section names
       const vietnameseSuggestions = [
-        'Dãy 1', 'Dãy 2', 'Khu VIP', 'Phòng riêng',
-        'Sân vườn', 'Tầng 1', 'Khu gia đình', 'Quầy bar'
+        'Dãy 1',
+        'Dãy 2',
+        'Khu VIP',
+        'Phòng riêng',
+        'Sân vườn',
+        'Tầng 1',
+        'Khu gia đình',
+        'Quầy bar',
       ];
 
       vietnameseSuggestions.forEach(suggestion => {
         expect(formComponent.sectionNameSuggestions).toContain(suggestion);
-        
+
         // Test applying suggestion
         formComponent.onSectionNameSuggestionClick(suggestion);
         expect(formComponent.sectionForm.get('sectionName')?.value).toBe(suggestion);
@@ -306,7 +330,7 @@ describe('Layout Section Management Integration', () => {
         isPointerOverContainer: true,
         distance: { x: 0, y: 0 },
         dropPoint: { x: 0, y: 0 },
-        event: {} as any
+        event: {} as any,
       };
 
       mockLayoutSectionService.update.and.returnValue(of(mockLayoutSections[0]));
