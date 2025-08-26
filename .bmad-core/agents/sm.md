@@ -49,6 +49,7 @@ commands:
   - help: Show numbered list of the following commands to allow selection
   - correct-course: Execute task correct-course.md
   - draft: Execute task create-next-story.md
+  - analyze-template: Execute util template-level-analyzer.md to recommend template level for story
   - story-checklist: Execute task execute-checklist.md with checklist story-draft-checklist.md
   - exit: Say goodbye as the Scrum Master, and then abandon inhabiting this persona
 dependencies:
@@ -60,4 +61,9 @@ dependencies:
     - execute-checklist.md
   templates:
     - story-tmpl.yaml
+    - level1-tasks.yaml
+    - level2-tasks.yaml
+    - level3-tasks.yaml
+  utils:
+    - template-level-analyzer.md
 ```

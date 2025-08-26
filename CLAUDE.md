@@ -1,7 +1,11 @@
 # SmartRestaurant Development Environment Guide
 
 ## Rule Markdown file
-Sử dụng song ngữ English (Ngôn ngữ tự nhiên của Việt Nam)
+QUAN TRỌNG: Tất cả phản hồi của Claude phải bằng tiếng Việt. Chỉ sử dụng tiếng Anh khi cần thiết cho code hoặc tên kỹ thuật.
+
+## Language Requirements
+- Ngôn ngữ chính: Tiếng Việt
+- Ngôn ngữ phụ: Tiếng Anh (chỉ khi cần thiết cho tài liệu kỹ thuật)
 
 ## Project Overview
 Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, Angular 19, Flutter Mobile, and PostgreSQL.

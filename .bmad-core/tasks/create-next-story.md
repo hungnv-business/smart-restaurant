@@ -35,6 +35,17 @@ To identify the next logical story based on project progress and epic definition
   - Challenges encountered and lessons learned
 - Extract relevant insights that inform the current story's preparation
 
+### 2.5. Analyze Template Level Requirements
+
+- Load and execute template-level-analyzer.md utility
+- Analyze story requirements using the template decision matrix:
+  - **Entity Complexity**: Simple properties vs business logic vs complex workflows
+  - **UI Complexity**: Basic forms vs multi-step vs interactive features
+  - **Technical Requirements**: Standard CRUD vs business services vs real-time systems
+- Recommend appropriate template level (Level 1, 2, or 3)
+- Document analysis results and reasoning for template level selection
+- Load corresponding task template: level1-tasks.yaml, level2-tasks.yaml, or level3-tasks.yaml
+
 ### 3. Gather Architecture Context
 
 #### 3.1 Determine Architecture Reading Strategy
@@ -90,10 +101,18 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
   - Every technical detail MUST include its source reference: `[Source: architecture/{filename}.md#{section}]`
   - If information for a category is not found in the architecture docs, explicitly state: "No specific guidance found in architecture docs"
 - **`Tasks / Subtasks` section:**
-  - Generate detailed, sequential list of technical tasks based ONLY on: Epic Requirements, Story AC, Reviewed Architecture Information
-  - Each task must reference relevant architecture documentation
+  - Use the selected template level (from Step 2.5) to generate appropriate tasks
+  - Load and apply the corresponding task template (level1-tasks.yaml, level2-tasks.yaml, or level3-tasks.yaml)
+  - Replace template variables with story-specific values:
+    - `{{EntityName}}` → PascalCase entity name
+    - `{{entityName}}` → camelCase entity name  
+    - `{{entity-display-name}}` → Vietnamese display name
+    - `{{module}}` → Module/feature folder name
+  - Generate detailed, sequential list of technical tasks based on: Epic Requirements, Story AC, Template Tasks, Architecture Information
+  - Each task must reference relevant architecture documentation and template guidance
   - Include unit testing as explicit subtasks based on the Testing Strategy
   - Link tasks to ACs where applicable (e.g., `Task 1 (AC: 1, 3)`)
+  - Add estimated story points range based on template level
 - Add notes on project structure alignment or discrepancies found in Step 4
 
 ### 6. Story Draft Completion and Review
@@ -106,7 +125,10 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
 - Provide summary to user including:
   - Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`
   - Status: Draft
+  - **Template Level Used**: Level X (with reasoning)
+  - **Estimated Story Points**: X-Y points (based on template level)
   - Key technical components included from architecture docs
+  - Template references included for developer guidance
   - Any deviations or conflicts noted between epic and architecture
   - Checklist Results
-  - Next steps: For Complex stories, suggest the user carefully review the story draft and also optionally have the PO run the task `.bmad-core/tasks/validate-next-story`
+  - Next steps: For Complex stories (Level 2/3), suggest the user carefully review the story draft and also optionally have the PO run the task `.bmad-core/tasks/validate-next-story`

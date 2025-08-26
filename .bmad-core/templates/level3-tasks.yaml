@@ -1,0 +1,168 @@
+template:
+  id: level3-tasks-template
+  name: Level 3 Task Template (Interactive/Real-time)
+  description: Task breakdown template for complex interactive systems with real-time features
+  target_audience: BMAD Scrum Master Agent
+  story_points_range: "55-80 points"
+
+variables:
+  - EntityName: "PascalCase entity name (e.g., Table)"
+  - entityName: "camelCase entity name (e.g., table)"
+  - entity-display-name: "Vietnamese display name (e.g., bàn ăn)"
+  - module: "Module folder name (e.g., table-management)"
+  - epic-num: "Current epic number"
+  - story-num: "Current story number"
+
+tasks:
+  backend:
+    - task: "Design Complex Domain Architecture"
+      subtasks:
+        - "Create aggregate roots and domain entities with complex relationships"
+        - "Design domain events for real-time notifications and system integration"
+        - "Implement complex business rules with validation and constraint checking"
+        - "Add caching strategies for performance-critical operations"
+        - "Design event sourcing or CQRS patterns if needed for complex scenarios"
+
+    - task: "Implement Advanced Application Services"
+      subtasks:
+        - "Create feature-rich application services with multiple operation methods"
+        - "Add batch operation methods for bulk data processing"
+        - "Implement advanced search, filtering, and sorting capabilities"
+        - "Add export/import functionality with data transformation"
+        - "Create specialized query services for performance optimization"
+
+    - task: "Setup Real-time Infrastructure"
+      subtasks:
+        - "Configure SignalR hubs for real-time communication"
+        - "Implement real-time event broadcasting with pub/sub patterns"
+        - "Add connection management and user group handling"
+        - "Create real-time authorization and security policies"
+        - "Add connection monitoring and fallback mechanisms"
+
+    - task: "Add Performance Optimization and Caching"
+      subtasks:
+        - "Implement distributed caching with Redis for frequently accessed data"
+        - "Add background job processing with Hangfire or similar"
+        - "Configure database optimization with proper indexing strategies"
+        - "Add monitoring and metrics collection for performance tracking"
+        - "Implement data pagination and lazy loading for large datasets"
+
+    - task: "Create Advanced API Architecture"
+      subtasks:
+        - "Implement GraphQL endpoints for flexible data querying"
+        - "Add WebSocket endpoints for real-time bidirectional communication"
+        - "Create batch API endpoints for bulk operations"
+        - "Implement API rate limiting and throttling"
+        - "Add comprehensive API documentation and testing endpoints"
+
+  frontend:
+    - task: "Setup Advanced UI Infrastructure"
+      subtasks:
+        - "Configure Angular CDK for drag & drop functionality"
+        - "Setup SignalR client connection with automatic reconnection"
+        - "Implement advanced state management using Angular signals and effects"
+        - "Add performance monitoring and optimization tools"
+        - "Configure lazy loading and code splitting strategies"
+
+    - task: "Build Interactive Components and Features"
+      subtasks:
+        - "Create drag & drop kanban board with CDK DragDrop module"
+        - "Implement visual editors/builders with canvas manipulation"
+        - "Add interactive dashboards with real-time charts and graphs"
+        - "Create customizable layouts with user preference storage"
+        - "Implement advanced data visualization with D3.js or Chart.js"
+
+    - task: "Implement Advanced UX and Interaction Patterns"
+      subtasks:
+        - "Add context menus and keyboard shortcuts for power users"
+        - "Implement advanced keyboard navigation and accessibility features"
+        - "Create multi-select operations with bulk actions"
+        - "Add undo/redo functionality for complex operations"
+        - "Implement progressive disclosure and adaptive UI patterns"
+
+    - task: "Add Real-time Features and Collaboration"
+      subtasks:
+        - "Implement live data synchronization with conflict resolution"
+        - "Add collaborative editing features with real-time cursors"
+        - "Create real-time notifications with toast and alert systems"
+        - "Add connection status indicators and offline mode support"
+        - "Implement presence indicators showing active users"
+
+    - task: "Performance Optimization and Advanced Features"
+      subtasks:
+        - "Implement virtual scrolling for large data sets"
+        - "Add lazy loading strategies for components and data"
+        - "Optimize change detection with OnPush strategy and signals"
+        - "Add performance monitoring and user experience metrics"
+        - "Implement progressive web app features (PWA) if applicable"
+
+  testing:
+    - task: "Advanced Testing Strategy Implementation"
+      subtasks:
+        - "Create unit tests for complex business logic and domain services"
+        - "Write integration tests for real-time features and SignalR hubs"
+        - "Add E2E tests for complete user workflows and interactions"
+        - "Implement performance testing and load testing scenarios"
+        - "Create accessibility testing and cross-browser compatibility tests"
+
+    - task: "Real-time and Interactive Feature Testing"
+      subtasks:
+        - "Test drag & drop functionality across different browsers"
+        - "Verify real-time synchronization and conflict resolution"
+        - "Test connection handling and offline/online scenarios"
+        - "Create automated tests for complex user interactions"
+
+  infrastructure:
+    - task: "Advanced Infrastructure and DevOps"
+      subtasks:
+        - "Setup Redis cluster for distributed caching and session management"
+        - "Configure load balancing for SignalR sticky sessions"
+        - "Add monitoring and alerting for real-time connection health"
+        - "Setup CDN for static assets and performance optimization"
+        - "Configure auto-scaling policies for high-traffic scenarios"
+
+    - task: "Security and Compliance"
+      subtasks:
+        - "Implement advanced authentication for real-time connections"
+        - "Add rate limiting and DDoS protection for interactive endpoints"
+        - "Create audit trails for complex user operations"
+        - "Add data encryption for sensitive real-time communications"
+
+  documentation:
+    - task: "Comprehensive Technical Documentation"
+      subtasks:
+        - "Document real-time architecture and SignalR implementation"
+        - "Create user guides for complex interactive features"
+        - "Document performance optimization strategies and monitoring"
+        - "Add troubleshooting guides for real-time and interactive issues"
+
+    - task: "Production Deployment and Monitoring"
+      subtasks:
+        - "Deploy with production Redis and SignalR configuration"
+        - "Configure monitoring dashboards for real-time metrics"
+        - "Setup automated alerts for performance and availability"
+        - "Create deployment procedures for zero-downtime updates"
+
+acceptance_criteria_mapping:
+  - ac_number: 1
+    tasks: ["Design Complex Domain Architecture", "Setup Advanced UI Infrastructure"]
+  - ac_number: 2
+    tasks: ["Setup Real-time Infrastructure", "Add Real-time Features and Collaboration"]
+  - ac_number: 3
+    tasks: ["Build Interactive Components and Features", "Implement Advanced UX and Interaction Patterns"]
+  - ac_number: 4
+    tasks: ["Add Performance Optimization and Caching", "Performance Optimization and Advanced Features"]
+
+template_references:
+  backend: "templates/backend-template-level3.md"
+  frontend: "templates/frontend-template-level3.md"
+  planning_guide: "templates/story-planning-guide.md"
+
+usage_notes:
+  - "This template is for complex systems requiring real-time updates, advanced interactions, and high performance"
+  - "Requires careful architecture planning and performance considerations"
+  - "Focus on Angular CDK, SignalR integration, and advanced UX patterns"
+  - "Include comprehensive testing strategies for complex features"
+  - "Consider scalability and infrastructure requirements early"
+  - "Plan for extensive monitoring and observability implementation"
+  - "Ensure proper error handling and fallback mechanisms for real-time features"

@@ -1,0 +1,124 @@
+template:
+  id: level1-tasks-template
+  name: Level 1 Task Template (Simple CRUD)
+  description: Task breakdown template for simple CRUD entities using ICrudAppService pattern
+  target_audience: BMAD Scrum Master Agent
+  story_points_range: "20-30 points"
+
+variables:
+  - EntityName: "PascalCase entity name (e.g., MenuCategory)"
+  - entityName: "camelCase entity name (e.g., menuCategory)"
+  - entity-display-name: "Vietnamese display name (e.g., danh mục thực đơn)"
+  - module: "Module folder name (e.g., menu-management)"
+  - epic-num: "Current epic number"
+  - story-num: "Current story number"
+
+tasks:
+  backend:
+    - task: "Create {{EntityName}} Domain Entity"
+      subtasks:
+        - "Define {{EntityName}} entity with basic properties (Name, Description, DisplayOrder, IsActive)"
+        - "Add {{EntityName}} entity to SmartRestaurantDbContext"
+        - "Create database migration for {{EntityName}} entity"
+        - "Configure entity relationships in EntityFrameworkCore layer"
+
+    - task: "Implement {{EntityName}} Application Layer"
+      subtasks:
+        - "Create {{EntityName}}AppService inheriting from ICrudAppService"
+        - "Define Create{{EntityName}}Dto and Update{{EntityName}}Dto"
+        - "Add AutoMapper profiles for {{EntityName}} DTOs"
+        - "Implement GetNextDisplayOrder method for ordering"
+
+    - task: "Configure {{EntityName}} API Endpoints"
+      subtasks:
+        - "Auto-generated REST endpoints via ICrudAppService"
+        - "Configure API permissions and authorization policies"
+        - "Add API documentation and Swagger annotations"
+        - "Test API endpoints using Swagger UI"
+
+    - task: "Create {{EntityName}} Integration Tests"
+      subtasks:
+        - "Write CRUD operation tests using ABP test framework"
+        - "Test entity validation rules and constraints"
+        - "Test authorization and permission requirements"
+        - "Verify database operations and migrations"
+
+  frontend:
+    - task: "Generate Angular Service Proxies"
+      subtasks:
+        - "Run 'abp generate-proxy -t ng -u https://localhost:44346' command"
+        - "Verify generated {{EntityName}}Service and DTOs"
+        - "Test proxy service methods in browser console"
+
+    - task: "Create {{EntityName}} List Component"
+      subtasks:
+        - "Generate component: angular/src/app/features/{{module}}/{{entityName}}-list/"
+        - "Implement PrimeNG p-table with columns for entity properties"
+        - "Add search functionality with global filtering"
+        - "Add CRUD action buttons (Create, Edit, Delete) with icons"
+        - "Implement confirmation dialog for delete operations"
+
+    - task: "Create {{EntityName}} Form Component"
+      subtasks:
+        - "Generate component: angular/src/app/features/{{module}}/{{entityName}}-form/"
+        - "Build reactive form with FormBuilder and validation"
+        - "Add form fields for all entity properties with Vietnamese labels"
+        - "Implement form submission logic for create and update"
+        - "Add loading states and error handling"
+
+    - task: "Implement {{EntityName}} Dialog Service"
+      subtasks:
+        - "Create {{EntityName}}FormDialogService for dialog management"
+        - "Implement openCreateDialog() method"
+        - "Implement openEditDialog(id) method with data loading"
+        - "Configure dialog responsive breakpoints"
+        - "Handle dialog result callbacks and data refresh"
+
+    - task: "Add Route Configuration"
+      subtasks:
+        - "Define routes in {{entityName}}s.routes.ts"
+        - "Add lazy-loaded route to main routing module"
+        - "Configure breadcrumb navigation with Vietnamese text"
+        - "Add route guards if authorization required"
+
+    - task: "Create Frontend Integration Tests"
+      subtasks:
+        - "Write component rendering tests with TestBed"
+        - "Test user interactions (click, form input, search)"
+        - "Mock service dependencies and test API calls"
+        - "Test error handling and loading states"
+
+  documentation:
+    - task: "Update Documentation"
+      subtasks:
+        - "Document entity properties and validation rules"
+        - "Add API endpoint documentation"
+        - "Document UI component usage and features"
+        - "Update project README with new functionality"
+
+    - task: "Deploy to Development Environment"
+      subtasks:
+        - "Run database migrations on dev environment"
+        - "Deploy backend API changes"
+        - "Deploy frontend changes"
+        - "Verify end-to-end functionality in dev environment"
+
+acceptance_criteria_mapping:
+  - ac_number: 1
+    tasks: ["Create {{EntityName}} Domain Entity", "Create {{EntityName}} List Component"]
+  - ac_number: 2
+    tasks: ["Create {{EntityName}} Form Component", "Implement {{EntityName}} Dialog Service"]
+  - ac_number: 3
+    tasks: ["Configure {{EntityName}} API Endpoints", "Add Route Configuration"]
+
+template_references:
+  backend: "templates/backend-template-level1.md"
+  frontend: "templates/frontend-template-level1.md"
+  planning_guide: "templates/story-planning-guide.md"
+
+usage_notes:
+  - "This template is for simple master data entities that only need basic CRUD operations"
+  - "Use ICrudAppService pattern to minimize boilerplate code"
+  - "Focus on PrimeNG Table + Dialog Form UI pattern"
+  - "Ensure all Vietnamese labels and messages are included"
+  - "Follow ABP framework conventions for consistent code structure"

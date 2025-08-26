@@ -1,0 +1,155 @@
+template:
+  id: level2-tasks-template
+  name: Level 2 Task Template (Business Logic)
+  description: Task breakdown template for entities with business workflows and multi-step processes
+  target_audience: BMAD Scrum Master Agent
+  story_points_range: "35-50 points"
+
+variables:
+  - EntityName: "PascalCase entity name (e.g., Order)"
+  - entityName: "camelCase entity name (e.g., order)"
+  - entity-display-name: "Vietnamese display name (e.g., đơn hàng)"
+  - module: "Module folder name (e.g., orders)"
+  - epic-num: "Current epic number"
+  - story-num: "Current story number"
+
+tasks:
+  backend:
+    - task: "Design {{EntityName}} Domain Model with Business Logic"
+      subtasks:
+        - "Define {{EntityName}} entity with status, workflow, and calculation properties"
+        - "Create related entities and configure Entity Framework relationships"
+        - "Add business rule validations and constraints"
+        - "Implement domain events for status changes and workflow transitions"
+        - "Add audit fields and soft delete if required"
+
+    - task: "Create {{EntityName}} Domain Service"
+      subtasks:
+        - "Implement {{EntityName}}DomainService with business logic methods"
+        - "Add status transition validation and workflow rules"
+        - "Create calculation methods (totals, fees, discounts, etc.)"
+        - "Implement domain event handlers for business processes"
+        - "Add business rule enforcement and validation"
+
+    - task: "Implement {{EntityName}} Application Service"
+      subtasks:
+        - "Create {{EntityName}}AppService using IApplicationService (not ICrudAppService)"
+        - "Implement custom CRUD methods with business logic integration"
+        - "Add workflow management methods (Submit, Approve, Cancel, etc.)"
+        - "Create specialized DTOs for different business scenarios"
+        - "Add transaction management and error handling"
+
+    - task: "Add Database Configuration and Performance"
+      subtasks:
+        - "Configure complex entity relationships in DbContext"
+        - "Add database migrations for all related entities"
+        - "Configure database indexes for performance optimization"
+        - "Add database triggers if needed for business rules"
+
+    - task: "Create Custom API Controllers and Endpoints"
+      subtasks:
+        - "Implement custom controller inheriting from AbpController"
+        - "Add CRUD endpoints with business logic integration"
+        - "Create workflow transition endpoints (Confirm, Cancel, etc.)"
+        - "Add specialized query endpoints for reporting and dashboards"
+        - "Configure authorization policies for different operations"
+
+    - task: "Implement Business Logic Testing"
+      subtasks:
+        - "Write domain service unit tests for all business rules"
+        - "Test workflow transitions and status validations"
+        - "Create integration tests for complete business processes"
+        - "Test calculation methods and business rule enforcement"
+
+  frontend:
+    - task: "Create Multi-step Workflow Component"
+      subtasks:
+        - "Generate main component: angular/src/app/features/{{module}}/{{entityName}}-management/"
+        - "Implement PrimeNG p-steps for multi-step workflow UI"
+        - "Create step navigation logic with validation"
+        - "Add progress tracking with visual indicators"
+        - "Implement step completion validation and business rules"
+
+    - task: "Build Business Logic Forms and Validation"
+      subtasks:
+        - "Create multi-step form components for each workflow step"
+        - "Implement reactive forms with conditional validation rules"
+        - "Add business rule validation with server-side verification"
+        - "Create form field dependencies and dynamic enabling/disabling"
+        - "Add specialized input components for business data types"
+
+    - task: "Add Status Management and Tracking UI"
+      subtasks:
+        - "Create status badge components with Vietnamese labels"
+        - "Implement status transition buttons with confirmation dialogs"
+        - "Add status history timeline using PrimeNG timeline component"
+        - "Create status-specific action menus and contextual buttons"
+        - "Add visual indicators for workflow progress"
+
+    - task: "Implement Dashboard and Summary Views"
+      subtasks:
+        - "Create summary statistics components with key metrics"
+        - "Add filtering by status, date range, and business criteria"
+        - "Implement reporting views with charts and data visualization"
+        - "Create export functionality for business reports"
+        - "Add real-time updates for critical business metrics"
+
+    - task: "Add Advanced UI Features"
+      subtasks:
+        - "Implement conditional UI elements based on business rules"
+        - "Add business-specific validation messages and error handling"
+        - "Create specialized components for complex business data entry"
+        - "Add confirmation workflows for critical business operations"
+
+  testing:
+    - task: "Business Logic Integration Testing"
+      subtasks:
+        - "Test complete business workflows end-to-end"
+        - "Verify business rule enforcement across UI and API"
+        - "Test error scenarios and business validation failures"
+        - "Create test data scenarios for different business cases"
+
+    - task: "Frontend Workflow Testing"
+      subtasks:
+        - "Test multi-step workflow navigation and validation"
+        - "Verify status transitions and business rule enforcement"
+        - "Test conditional UI behavior based on business state"
+        - "Create E2E tests for complete business processes"
+
+  documentation:
+    - task: "Business Logic Documentation"
+      subtasks:
+        - "Document business rules, workflows, and validation logic"
+        - "Create API documentation for business endpoints"
+        - "Document UI workflow steps and business processes"
+        - "Add troubleshooting guide for business logic issues"
+
+    - task: "Deploy with Business Configuration"
+      subtasks:
+        - "Deploy database migrations with business data"
+        - "Configure business rule parameters in environment"
+        - "Deploy API and UI changes to staging environment"
+        - "Test business workflows in production-like environment"
+
+acceptance_criteria_mapping:
+  - ac_number: 1
+    tasks: ["Design {{EntityName}} Domain Model with Business Logic", "Create Multi-step Workflow Component"]
+  - ac_number: 2
+    tasks: ["Create {{EntityName}} Domain Service", "Build Business Logic Forms and Validation"]
+  - ac_number: 3
+    tasks: ["Implement {{EntityName}} Application Service", "Add Status Management and Tracking UI"]
+  - ac_number: 4
+    tasks: ["Create Custom API Controllers and Endpoints", "Implement Dashboard and Summary Views"]
+
+template_references:
+  backend: "templates/backend-template-level2.md"
+  frontend: "templates/frontend-template-level2.md"
+  planning_guide: "templates/story-planning-guide.md"
+
+usage_notes:
+  - "This template is for entities with business workflows, status management, and multi-step processes"
+  - "Use custom IApplicationService instead of ICrudAppService for business logic flexibility"
+  - "Focus on PrimeNG stepper and status tracking components for UI"
+  - "Ensure business rules are enforced both in domain layer and UI validation"
+  - "Include comprehensive testing for business logic and workflow scenarios"
+  - "Consider performance implications of complex business operations"

@@ -25,7 +25,10 @@
       "Bash(dotnet ef migrations add:*)",
       "Bash(dotnet test:*)",
       "Bash(npx ng test:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:abp.io)",
+      "Bash(dotnet run:*)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []
