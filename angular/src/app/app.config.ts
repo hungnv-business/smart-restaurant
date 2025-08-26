@@ -114,6 +114,5 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     DialogService,
     ConfirmationService,
-    // Logo configuration handled by Poseidon layout system
   ],
 };

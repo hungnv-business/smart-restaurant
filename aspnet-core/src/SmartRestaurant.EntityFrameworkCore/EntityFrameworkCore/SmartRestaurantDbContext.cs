@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartRestaurant.Entities.Tables;
+using SmartRestaurant.Entities.MenuManagement;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -30,6 +31,9 @@ public class SmartRestaurantDbContext :
     // Table Management
     public DbSet<LayoutSection> LayoutSections { get; set; }
     public DbSet<Table> Tables { get; set; }
+    
+    // Menu Management
+    public DbSet<MenuCategory> MenuCategories { get; set; }
 
     #region Entities from the modules
 
@@ -116,6 +120,23 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.LayoutSectionId);
             b.HasIndex(x => new { x.LayoutSectionId, x.DisplayOrder });
             b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+        });
+        
+        // Configure MenuCategory entity
+        builder.Entity<MenuCategory>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "MenuCategories", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Description).HasMaxLength(512);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            b.Property(x => x.IsEnabled).IsRequired();
+            b.Property(x => x.ImageUrl).HasMaxLength(2048);
+            
+            b.HasIndex(x => x.DisplayOrder);
+            b.HasIndex(x => new { x.IsEnabled, x.DisplayOrder });
+            b.HasIndex(x => x.Name);
         });
     }
 }

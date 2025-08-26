@@ -46,9 +46,15 @@ export const appRoutes: Routes = [
             data: { permission: PERMISSIONS.RESTAURANT.ORDERS },
           },
           {
-            path: 'menu',
-            redirectTo: 'dashboard', // Placeholder - will be implemented in story for menu
-            data: { permission: PERMISSIONS.RESTAURANT.MENU.DEFAULT },
+            path: 'menu-management',
+            loadChildren: () =>
+              import('./features/menu-management/menu-management.routes').then(
+                m => m.menuManagementRoutes,
+              ),
+            data: {
+              breadcrumb: 'Quản lý Menu',
+              permission: PERMISSIONS.RESTAURANT.MENU.DEFAULT,
+            },
           },
           {
             path: 'kitchen',

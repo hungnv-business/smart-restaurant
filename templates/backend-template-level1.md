@@ -462,8 +462,10 @@ public class {EntityName}AppService :
     [Authorize(SmartRestaurantPermissions.{ModuleName}.{EntityName}s.Default)]
     public virtual async Task<int> GetNextDisplayOrderAsync()
     {
-        var entities = await Repository.GetListAsync();
-        var maxOrder = entities.Any() ? entities.Max(x => x.DisplayOrder) : 0;
+        var maxOrder = await Repository.GetQueryableAsync()
+            .Select(x => x.DisplayOrder)
+            .DefaultIfEmpty(0)
+            .MaxAsync();
         return maxOrder + 1;
     }
 

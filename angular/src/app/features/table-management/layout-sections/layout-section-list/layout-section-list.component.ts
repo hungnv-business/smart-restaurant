@@ -8,7 +8,6 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmationService } from 'primeng/api';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ComponentBase } from '../../../../shared/base/component-base';
@@ -36,7 +35,7 @@ import { forkJoin } from 'rxjs';
     ToastModule,
     DragDropModule,
   ],
-  providers: [ConfirmationService],
+  providers: [],
   templateUrl: './layout-section-list.component.html',
   styleUrls: ['./layout-section-list.component.scss'],
 })
@@ -44,7 +43,6 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
   layoutSections: LayoutSectionDto[] = [];
   loading = false;
 
-  private confirmationService = inject(ConfirmationService);
   private layoutSectionService = inject(LayoutSectionService);
   private layoutSectionFormDialogService = inject(LayoutSectionFormDialogService);
 

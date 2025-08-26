@@ -28,7 +28,12 @@ export const PERMISSIONS = {
     // Menu
     MENU: {
       DEFAULT: 'SmartRestaurant.Menu',
-      CATEGORIES: 'SmartRestaurant.Menu.Categories',
+      CATEGORIES: {
+        DEFAULT: 'SmartRestaurant.MenuCategories',
+        CREATE: 'SmartRestaurant.MenuCategories.Create',
+        EDIT: 'SmartRestaurant.MenuCategories.Edit',
+        DELETE: 'SmartRestaurant.MenuCategories.Delete',
+      },
       ITEMS: 'SmartRestaurant.Menu.Items',
     },
 

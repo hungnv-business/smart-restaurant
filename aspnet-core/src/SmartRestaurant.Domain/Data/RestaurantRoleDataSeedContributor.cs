@@ -45,7 +45,7 @@ public class RestaurantRoleDataSeedContributor : IDataSeedContributor, ITransien
         {
             SmartRestaurantPermissions.Dashboard.Default,
             SmartRestaurantPermissions.Menu.Default,
-            SmartRestaurantPermissions.Menu.Categories,
+            SmartRestaurantPermissions.Menu.Categories.Default,
             SmartRestaurantPermissions.Menu.Items,
             SmartRestaurantPermissions.Inventory.Default,
             SmartRestaurantPermissions.Customers.Default,

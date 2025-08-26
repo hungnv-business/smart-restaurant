@@ -3,6 +3,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { PermissionService } from '@abp/ng.core';
+import { ConfirmationService } from 'primeng/api';
 
 @Directive()
 export abstract class ComponentBase implements OnDestroy {
@@ -23,6 +24,7 @@ export abstract class ComponentBase implements OnDestroy {
 
   protected toastService = inject(ToastService);
   protected permissionService = inject(PermissionService);
+  protected confirmationService = inject(ConfirmationService);
 
   private destroy$ = new Subject<void>();
 
@@ -239,5 +241,74 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected hasAllPermissions(permissions: string[]): boolean {
     return permissions.every(permission => this.hasPermission(permission));
+  }
+
+  // ==================== CRUD Success Messages ====================
+
+  /**
+   * Show success message for create operation
+   */
+  protected showCreateSuccess(entityName: string = 'bản ghi'): void {
+    this.showSuccess('Thành công', `Đã tạo ${entityName} mới`);
+  }
+
+  /**
+   * Show success message for update operation
+   */
+  protected showUpdateSuccess(entityName: string = 'bản ghi'): void {
+    this.showSuccess('Thành công', `Đã cập nhật ${entityName}`);
+  }
+
+  /**
+   * Show success message for delete operation
+   */
+  protected showDeleteSuccess(entityName: string = 'bản ghi'): void {
+    this.showSuccess('Thành công', `Đã xóa ${entityName}`);
+  }
+
+  /**
+   * Show success message for bulk delete operation
+   */
+  protected showBulkDeleteSuccess(count: number, entityName: string = 'bản ghi'): void {
+    this.showSuccess('Thành công', `Đã xóa ${count} ${entityName}`);
+  }
+
+  /**
+   * Show success message for generic save operation
+   */
+  protected showSaveSuccess(entityName: string = 'bản ghi'): void {
+    this.showSuccess('Thành công', `Đã lưu ${entityName}`);
+  }
+
+  // ==================== CONFIRMATION DIALOGS ====================
+
+  /**
+   * Show confirmation dialog for deleting a single item
+   */
+  protected confirmDelete(itemName: string, onConfirm: () => void): void {
+    this.confirmationService.confirm({
+      message: `Bạn có chắc chắn muốn xóa "${itemName}"?`,
+      header: 'Xác nhận',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xóa',
+      rejectLabel: 'Hủy',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: onConfirm,
+    });
+  }
+
+  /**
+   * Show confirmation dialog for bulk delete operation
+   */
+  protected confirmBulkDelete(onConfirm: () => void): void {
+    this.confirmationService.confirm({
+      message: 'Bạn có chắc chắn muốn xóa các mục đã chọn không?',
+      header: 'Xác nhận',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xóa',
+      rejectLabel: 'Hủy',
+      rejectButtonStyleClass: 'p-button-secondary',
+      accept: onConfirm,
+    });
   }
 }

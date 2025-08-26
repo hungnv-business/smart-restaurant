@@ -1,5 +1,4 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { ConfirmationService } from 'primeng/api';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { Table, TableModule } from 'primeng/table';
 import { forkJoin } from 'rxjs';
@@ -38,7 +37,7 @@ import { RoleFormDialogService } from '../role-form/role-form-dialog.service';
     PermissionDirective,
   ],
   templateUrl: './role-list.component.html',
-  providers: [ConfirmationService],
+  providers: [],
 })
 export class RoleListComponent extends ComponentBase implements OnInit {
   // Permissions constants
@@ -53,7 +52,6 @@ export class RoleListComponent extends ComponentBase implements OnInit {
 
   // Injected services
   private identityRoleService = inject(IdentityRoleService);
-  private confirmationService = inject(ConfirmationService);
   private roleFormDialogService = inject(RoleFormDialogService);
 
   constructor() {

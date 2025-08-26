@@ -19,7 +19,15 @@ public static class SmartRestaurantPermissions
     public static class Menu
     {
         public const string Default = GroupName + ".Menu";
-        public const string Categories = Default + ".Categories";
+
+        public static class Categories
+        {
+            public const string Default = GroupName + ".MenuCategories";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
+
         public const string Items = Default + ".Items";
     }
 

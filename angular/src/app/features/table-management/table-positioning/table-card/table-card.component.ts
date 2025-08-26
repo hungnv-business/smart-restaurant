@@ -9,7 +9,6 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
-import { ConfirmationService } from 'primeng/api';
 
 // Application imports
 import { ComponentBase } from '../../../../shared/base/component-base';
@@ -40,7 +39,6 @@ export class TableCardComponent extends ComponentBase {
 
   private tableService = inject(TableService);
   private tableFormDialogService = inject(TableFormDialogService);
-  private confirmationService = inject(ConfirmationService);
 
   constructor() {
     super();

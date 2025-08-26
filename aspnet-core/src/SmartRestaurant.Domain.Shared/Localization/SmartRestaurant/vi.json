@@ -45,6 +45,8 @@
     "Permission:Payroll.Salary": "Tính lương",
     
     "Permission:Delivery": "Mang về & Giao hàng",
-    "Permission:Delivery.Takeaway": "Đơn mang về"
+    "Permission:Delivery.Takeaway": "Đơn mang về",
+    
+    "SmartRestaurant:MenuCategory:0001": "Tên danh mục món ăn '{CategoryName}' đã tồn tại trong hệ thống"
   }
 }

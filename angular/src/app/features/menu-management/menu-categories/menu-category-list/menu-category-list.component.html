@@ -1,0 +1,143 @@
+<div class="card">
+  <p-toolbar styleClass="mb-12">
+    <ng-template #start>
+      @if (hasPermission(permissions.create)) {
+        <p-button
+          label="Thêm danh mục"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openFormDialog()"
+        />
+      }
+      @if (hasPermission(permissions.delete)) {
+        <p-button
+          label="Xóa"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [disabled]="!selectedCategories || selectedCategories.length === 0"
+          (onClick)="deleteSelectedCategories()"
+        />
+      }
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="categories()"
+    [loading]="loading"
+    [rows]="pageSize"
+    [paginator]="paginator"
+    [globalFilterFields]="filterFields"
+    styleClass="w-full"
+    [rowHover]="rowHover"
+    dataKey="id"
+    [(selection)]="selectedCategories"
+    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} danh mục"
+    [showCurrentPageReport]="showCurrentPageReport"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <h5 class="m-0">Quản lý danh mục món ăn</h5>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            (input)="onGlobalFilter(dt, $event)"
+            placeholder="Tìm kiếm..."
+          />
+        </p-iconfield>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th class="min-w-12">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th class="min-w-48" pSortableColumn="name">
+          <span class="flex items-center gap-2">Tên danh mục <p-sortIcon field="name" /></span>
+        </th>
+        <th class="min-w-20">Ảnh</th>
+        <th class="min-w-20" pSortableColumn="displayOrder">
+          <span class="flex items-center gap-2">Thứ tự <p-sortIcon field="displayOrder" /></span>
+        </th>
+        <th class="min-w-24" pSortableColumn="isEnabled">
+          <span class="flex items-center gap-2">Trạng thái <p-sortIcon field="isEnabled" /></span>
+        </th>
+        <th class="min-w-32">Mô tả</th>
+        <th class="min-w-20"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-category>
+      <tr>
+        <td class="min-w-12">
+          <p-tableCheckbox [value]="category" />
+        </td>
+        <td class="min-w-48 font-medium">{{ category.name }}</td>
+        <td class="min-w-20">
+          @if (category.imageUrl) {
+            <img
+              [src]="category.imageUrl"
+              [alt]="category.name"
+              class="w-10 h-10 object-cover rounded-lg border border-gray-200"
+              loading="lazy"
+              (error)="$event.target.src = 'assets/images/no-image.png'"
+            />
+          } @else {
+            <div
+              class="w-10 h-10 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center"
+            >
+              <i class="pi pi-image text-gray-400 text-sm"></i>
+            </div>
+          }
+        </td>
+        <td class="min-w-20 text-center">
+          <span
+            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+          >
+            {{ category.displayOrder }}
+          </span>
+        </td>
+        <td class="min-w-24">
+          <p-tag
+            [value]="category.isEnabled ? 'Kích hoạt' : 'Vô hiệu'"
+            [severity]="category.isEnabled ? 'success' : 'secondary'"
+          />
+        </td>
+        <td class="min-w-32 text-gray-600">
+          <span class="line-clamp-2">{{ category.description || '-' }}</span>
+        </td>
+        <td class="min-w-20">
+          <div class="flex gap-2 justify-end">
+            @if (hasPermission(permissions.edit)) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="openFormDialog(category.id!)"
+                pTooltip="Sửa"
+              />
+            }
+            @if (hasPermission(permissions.delete)) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="deleteCategory(category)"
+                pTooltip="Xóa"
+              />
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmdialog />
