@@ -14,4 +14,26 @@ public static class SmartRestaurantDomainErrorCodes
         /// </summary>
         public const string NameAlreadyExists = "SmartRestaurant:MenuCategory:0001";
     }
+
+    /// <summary>
+    /// Mã lỗi liên quan đến quản lý danh mục nguyên liệu
+    /// </summary>
+    public static class IngredientCategories
+    {
+        /// <summary>
+        /// Tên danh mục nguyên liệu đã tồn tại trong hệ thống
+        /// </summary>
+        public const string NameAlreadyExists = "SmartRestaurant:IngredientCategory:0001";
+    }
+
+    /// <summary>
+    /// Mã lỗi liên quan đến quản lý đơn vị
+    /// </summary>
+    public static class Units
+    {
+        /// <summary>
+        /// Tên đơn vị đã tồn tại trong hệ thống
+        /// </summary>
+        public const string NameAlreadyExists = "SmartRestaurant:Unit:0001";
+    }
 }

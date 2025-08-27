@@ -82,6 +82,22 @@ public static class SmartRestaurantPermissions
     public static class Inventory
     {
         public const string Default = GroupName + ".Inventory";
+        
+        public static class Categories
+        {
+            public const string Default = GroupName + ".InventoryCategories";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
+        
+        public static class Ingredients
+        {
+            public const string Default = GroupName + ".Ingredients";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
     }
 
     public static class Customers
@@ -99,6 +115,14 @@ public static class SmartRestaurantPermissions
     {
         public const string Default = GroupName + ".Delivery";
         public const string Takeaway = Default + ".Takeaway";
+    }
+
+    public static class Units
+    {
+        public const string Default = GroupName + ".Units";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
     }
 
     public static string[] GetAll()

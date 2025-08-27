@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-
+using SmartRestaurant.Entities.Common;
+using SmartRestaurant.Common.Units.Dto;
 namespace SmartRestaurant;
 
 public class SmartRestaurantApplicationAutoMapperProfile : Profile
@@ -11,5 +12,7 @@ public class SmartRestaurantApplicationAutoMapperProfile : Profile
         
         // Table Management mappings are defined in separate profile files
         // Example: LayoutSectionAutoMapperProfile.cs
+
+        CreateMap<Unit, UnitDto>();
     }
 }

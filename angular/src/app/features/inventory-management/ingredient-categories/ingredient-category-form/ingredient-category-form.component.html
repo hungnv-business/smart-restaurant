@@ -1,0 +1,81 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="flex flex-col gap-4 w-full">
+    <!-- Name -->
+    <div class="flex flex-col gap-2">
+      <label for="name" class="block font-semibold text-sm required">Tên danh mục</label>
+      <input
+        type="text"
+        pInputText
+        id="name"
+        formControlName="name"
+        placeholder="Nhập tên danh mục nguyên liệu"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid(form, 'name')"
+        autofocus
+      />
+      <app-validation-error [control]="getFormControl(form, 'name')" fieldName="Tên danh mục" />
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label for="description" class="block font-semibold text-sm">Mô tả</label>
+      <textarea
+        pTextarea
+        id="description"
+        formControlName="description"
+        placeholder="Nhập mô tả danh mục nguyên liệu"
+        rows="3"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid(form, 'description')"
+      ></textarea>
+      <app-validation-error [control]="getFormControl(form, 'description')" fieldName="Mô tả" />
+    </div>
+
+    <!-- Display Order -->
+    <div class="flex flex-col gap-2">
+      <label for="displayOrder" class="block font-semibold text-sm required">Thứ tự hiển thị</label>
+      <p-inputnumber
+        inputId="displayOrder"
+        formControlName="displayOrder"
+        [min]="1"
+        [max]="999"
+        [showButtons]="true"
+        buttonLayout="horizontal"
+        incrementButtonIcon="pi pi-plus"
+        decrementButtonIcon="pi pi-minus"
+        [class.p-invalid]="isFieldInvalid(form, 'displayOrder')"
+        class="w-full"
+      />
+      <app-validation-error
+        [control]="getFormControl(form, 'displayOrder')"
+        fieldName="Thứ tự hiển thị"
+      />
+    </div>
+
+    <!-- Active Status -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p-checkbox 
+          inputId="isActive" 
+          formControlName="isActive" 
+          [binary]="true" 
+          class="cursor-pointer"
+        />
+        <label for="isActive" class="cursor-pointer font-medium select-none">
+          Kích hoạt danh mục
+        </label>
+      </div>
+      <small class="text-gray-600 text-sm -mt-2">
+        Danh mục được kích hoạt sẽ hiển thị trong hệ thống quản lý kho
+      </small>
+    </div>
+  </div>
+</form>
+
+<app-form-footer-actions
+  [disabled]="form.invalid"
+  [loading]="loading"
+  (formSave)="onSubmit()"
+  (formCancel)="onCancel()"
+>
+</app-form-footer-actions>

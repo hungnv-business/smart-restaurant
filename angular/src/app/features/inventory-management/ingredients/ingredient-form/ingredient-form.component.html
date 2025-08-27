@@ -1,0 +1,101 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="flex flex-col gap-4 w-full">
+    <!-- Category & Name -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="categoryId" class="block font-semibold text-sm required">Danh mục</label>
+        <p-dropdown
+          id="categoryId"
+          formControlName="categoryId"
+          [options]="categories"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Chọn danh mục"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'categoryId')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'categoryId')" fieldName="Danh mục" />
+      </div>
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="name" class="block font-semibold text-sm required">Tên nguyên liệu</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          formControlName="name"
+          placeholder="Nhập tên nguyên liệu"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'name')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'name')" fieldName="Tên nguyên liệu" />
+      </div>
+    </div>
+
+    <!-- Unit & Cost -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="unit" class="block font-semibold text-sm required">Đơn vị</label>
+        <p-dropdown
+          id="unit"
+          formControlName="unitId"
+          [options]="units"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Chọn đơn vị"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'unitId')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'unitId')" fieldName="Đơn vị" />
+      </div>
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="costPerUnit" class="block font-semibold text-sm">Giá/đơn vị (VND)</label>
+        <p-inputnumber
+          inputId="costPerUnit"
+          formControlName="costPerUnit"
+          mode="currency"
+          currency="VND"
+          locale="vi-VN"
+          [min]="0"
+          class="w-full"
+        />
+        <small class="text-gray-600">Để trống nếu chưa có giá</small>
+      </div>
+    </div>
+
+    <!-- Supplier Info -->
+    <div class="flex flex-col gap-2">
+      <label for="supplierInfo" class="block font-semibold text-sm">Thông tin nhà cung cấp</label>
+      <input
+        type="text"
+        pInputText
+        id="supplierInfo"
+        formControlName="supplierInfo"
+        placeholder="Nhập thông tin nhà cung cấp"
+        class="w-full"
+      />
+    </div>
+
+    <!-- Active Status -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p-checkbox 
+          inputId="isActive" 
+          formControlName="isActive" 
+          [binary]="true" 
+          class="cursor-pointer"
+        />
+        <label for="isActive" class="cursor-pointer font-medium select-none">
+          Kích hoạt nguyên liệu
+        </label>
+      </div>
+    </div>
+  </div>
+</form>
+
+<app-form-footer-actions
+  [disabled]="form.invalid"
+  [loading]="loading"
+  (formSave)="onSubmit()"
+  (formCancel)="onCancel()"
+>
+</app-form-footer-actions>

@@ -1,0 +1,144 @@
+<div class="card">
+  <p-toolbar styleClass="mb-12">
+    <ng-template #start>
+      @if (hasPermission(permissions.create)) {
+        <p-button
+          label="Thêm nguyên liệu"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openFormDialog()"
+        />
+      }
+      @if (hasPermission(permissions.delete)) {
+        <p-button
+          label="Xóa"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [disabled]="!selectedIngredients || selectedIngredients.length === 0"
+          (onClick)="deleteSelectedIngredients()"
+        />
+      }
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="ingredients()"
+    [loading]="loading"
+    [rows]="pageSize"
+    [paginator]="paginator"
+    [globalFilterFields]="filterFields"
+    styleClass="w-full"
+    [rowHover]="rowHover"
+    dataKey="id"
+    [(selection)]="selectedIngredients"
+    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} nguyên liệu"
+    [showCurrentPageReport]="showCurrentPageReport"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <h5 class="m-0">Quản lý nguyên liệu</h5>
+
+        <div class="flex gap-4">
+          <p-iconfield>
+            <p-dropdown
+              id="categoryFilter"
+              [options]="categories()"
+              (onChange)="onCategoryFilter(dt, $event.value)"
+              optionLabel="displayName"
+              optionValue="id"
+              placeholder="Chọn danh mục"
+              [showClear]="true"
+              class="w-64"
+            />
+          </p-iconfield>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              (input)="onGlobalFilter(dt, $event)"
+              placeholder="Tìm kiếm..."
+            />
+          </p-iconfield>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th class="min-w-12">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th class="min-w-48" pSortableColumn="name">
+          <span class="flex items-center gap-2">Tên nguyên liệu <p-sortIcon field="name" /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="categoryName">
+          <span class="flex items-center gap-2">Danh mục <p-sortIcon field="categoryName" /></span>
+        </th>
+        <th class="min-w-20" pSortableColumn="unit">
+          <span class="flex items-center gap-2">Đơn vị <p-sortIcon field="unit" /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="costPerUnit">
+          <span class="flex items-center gap-2">Giá/đơn vị <p-sortIcon field="costPerUnit" /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="supplierInfo">
+          <span class="flex items-center gap-2">Nhà cung cấp <p-sortIcon field="supplierInfo" /></span>
+        </th>
+        <th class="min-w-24" pSortableColumn="isActive">
+          <span class="flex items-center gap-2">Trạng thái <p-sortIcon field="isActive" /></span>
+        </th>
+        <th class="min-w-20"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-ingredient>
+      <tr>
+        <td class="min-w-12">
+          <p-tableCheckbox [value]="ingredient" />
+        </td>
+        <td class="min-w-48 font-medium">{{ ingredient.name }}</td>
+        <td class="min-w-32">{{ ingredient.categoryName || '-' }}</td>
+        <td class="min-w-20">{{ ingredient.unitName }}</td>
+        <td class="min-w-32">{{ ingredient.costPerUnit | vndCurrency }}</td>
+        <td class="min-w-32 text-gray-600">
+          <span class="line-clamp-1">{{ ingredient.supplierInfo || '-' }}</span>
+        </td>
+        <td class="min-w-24">
+          <p-tag
+            [value]="ingredient.isActive ? 'Hoạt động' : 'Không hoạt động'"
+            [severity]="ingredient.isActive ? 'success' : 'secondary'"
+          />
+        </td>
+        <td class="min-w-20">
+          <div class="flex gap-2 justify-end">
+            @if (hasPermission(permissions.edit)) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="openFormDialog(ingredient.id!)"
+                pTooltip="Sửa"
+              />
+            }
+            @if (hasPermission(permissions.delete)) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="deleteIngredient(ingredient)"
+                pTooltip="Xóa"
+              />
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmdialog />

@@ -82,7 +82,21 @@ export const PERMISSIONS = {
     },
 
     // Inventory
-    INVENTORY: 'SmartRestaurant.Inventory',
+    INVENTORY: {
+      DEFAULT: 'SmartRestaurant.Inventory',
+      CATEGORIES: {
+        DEFAULT: 'SmartRestaurant.InventoryCategories',
+        CREATE: 'SmartRestaurant.InventoryCategories.Create',
+        EDIT: 'SmartRestaurant.InventoryCategories.Edit',
+        DELETE: 'SmartRestaurant.InventoryCategories.Delete',
+      },
+      INGREDIENTS: {
+        DEFAULT: 'SmartRestaurant.Ingredients',
+        CREATE: 'SmartRestaurant.Ingredients.Create',
+        EDIT: 'SmartRestaurant.Ingredients.Edit',
+        DELETE: 'SmartRestaurant.Ingredients.Delete',
+      },
+    },
 
     // Customers
     CUSTOMERS: 'SmartRestaurant.Customers',

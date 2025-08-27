@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SmartRestaurant.Common.Dto;
+using SmartRestaurant.Common.Units.Dto;
 using Volo.Abp.Application.Services;
 
 namespace SmartRestaurant.Common
@@ -12,5 +13,11 @@ namespace SmartRestaurant.Common
     {
         /// <summary>Lấy danh sách tất cả trạng thái của bàn</summary>
         Task<List<IntLookupItemDto>> GetTableStatusesAsync();
+
+        /// <summary>Lấy danh sách tất cả đơn vị active cho dropdown</summary>
+        Task<List<UnitDto>> GetUnitsAsync();
+        
+        /// <summary>Lấy danh sách tất cả danh mục nguyên liệu active cho dropdown</summary>
+        Task<List<GuidLookupItemDto>> GetCategoriesAsync();
     }
 }

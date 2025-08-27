@@ -28,7 +28,9 @@
       "Bash(find:*)",
       "WebFetch(domain:abp.io)",
       "Bash(dotnet run:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(npm run lint:*)",
+      "Bash(/dev/null)"
     ],
     "deny": [],
     "ask": []

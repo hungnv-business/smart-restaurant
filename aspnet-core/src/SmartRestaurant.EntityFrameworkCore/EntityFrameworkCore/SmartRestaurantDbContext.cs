@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartRestaurant.Entities.Tables;
 using SmartRestaurant.Entities.MenuManagement;
+using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.Entities.Common;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -34,6 +36,13 @@ public class SmartRestaurantDbContext :
     
     // Menu Management
     public DbSet<MenuCategory> MenuCategories { get; set; }
+    
+    // Inventory Management
+    public DbSet<IngredientCategory> IngredientCategories { get; set; }
+    public DbSet<Ingredient> Ingredients { get; set; }
+    
+    // Common
+    public DbSet<Unit> Units { get; set; }
 
     #region Entities from the modules
 
@@ -137,6 +146,67 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.DisplayOrder);
             b.HasIndex(x => new { x.IsEnabled, x.DisplayOrder });
             b.HasIndex(x => x.Name);
+        });
+        
+        // Configure IngredientCategory entity
+        builder.Entity<IngredientCategory>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "IngredientCategories", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Description).HasMaxLength(512);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasIndex(x => x.DisplayOrder);
+            b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+            b.HasIndex(x => x.Name);
+        });
+        
+        // Configure Ingredient entity
+        builder.Entity<Ingredient>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Ingredients", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.CategoryId).IsRequired();
+            b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Description).HasMaxLength(512);
+            b.Property(x => x.UnitId).IsRequired();
+            b.Property(x => x.CostPerUnit).HasColumnType("decimal(18,2)");
+            b.Property(x => x.SupplierInfo).HasMaxLength(512);
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasOne(x => x.Category)
+                .WithMany(x => x.Ingredients)
+                .HasForeignKey(x => x.CategoryId)
+                .IsRequired();
+                
+            b.HasOne(x => x.Unit)
+                .WithMany()
+                .HasForeignKey(x => x.UnitId)
+                .IsRequired();
+                
+            b.HasIndex(x => x.CategoryId);
+            b.HasIndex(x => x.UnitId);
+            b.HasIndex(x => new { x.CategoryId, x.IsActive });
+            b.HasIndex(x => x.Name);
+        });
+        
+        // Configure Unit entity
+        builder.Entity<Unit>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Units", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.Name).IsRequired().HasMaxLength(64);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasIndex(x => x.DisplayOrder);
+            b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+            b.HasIndex(x => x.Name).IsUnique();
         });
     }
 }

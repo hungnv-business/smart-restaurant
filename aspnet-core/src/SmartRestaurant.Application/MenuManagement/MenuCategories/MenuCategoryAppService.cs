@@ -47,10 +47,8 @@ public class MenuCategoryAppService :
     [Authorize(SmartRestaurantPermissions.Menu.Categories.Default)]
     public virtual async Task<int> GetNextDisplayOrderAsync()
     {
-        var maxOrder = await Repository.GetQueryableAsync()
-            .Select(x => x.DisplayOrder)
-            .DefaultIfEmpty(0)
-            .MaxAsync();
+        var categories = await Repository.GetListAsync();
+        var maxOrder = categories.Any() ? categories.Max(x => x.DisplayOrder) : 0;
         return maxOrder + 1;
     }
 

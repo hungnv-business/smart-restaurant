@@ -57,6 +57,17 @@ export const appRoutes: Routes = [
             },
           },
           {
+            path: 'inventory-management',
+            loadChildren: () =>
+              import('./features/inventory-management/inventory-management.routes').then(
+                m => m.INVENTORY_MANAGEMENT_ROUTES,
+              ),
+            data: {
+              breadcrumb: 'Quản lý Kho',
+              permission: PERMISSIONS.RESTAURANT.INVENTORY.DEFAULT,
+            },
+          },
+          {
             path: 'kitchen',
             redirectTo: 'dashboard', // Placeholder - will be implemented in story for kitchen
             data: { permission: PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT },

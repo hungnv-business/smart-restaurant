@@ -1,7 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using SmartRestaurant.Common.Dto;
+using SmartRestaurant.Common.Units.Dto;
+using SmartRestaurant.Entities.Common;
+using SmartRestaurant.Entities.InventoryManagement;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.Common
 {
@@ -10,9 +15,15 @@ namespace SmartRestaurant.Common
     /// </summary>
     public class GlobalAppService : ApplicationService, IGlobalAppService
     {
-        public GlobalAppService()
+        private readonly IRepository<Unit> _unitRepository;
+        private readonly IRepository<IngredientCategory> _ingredientCategoryRepository;
+
+        public GlobalAppService(
+            IRepository<Unit> unitRepository,
+            IRepository<IngredientCategory> ingredientCategoryRepository)
         {
-            
+            _unitRepository = unitRepository;
+            _ingredientCategoryRepository = ingredientCategoryRepository;
         }
 
         public Task<List<IntLookupItemDto>> GetTableStatusesAsync()
@@ -26,6 +37,36 @@ namespace SmartRestaurant.Common
             };
 
             return Task.FromResult(tableStatuses);
+        }
+
+        /// <summary>
+        /// Lấy tất cả units active để sử dụng trong dropdowns
+        /// Master data cố định, không cần authorization
+        /// </summary>
+        /// <returns>Danh sách units active được sắp xếp theo DisplayOrder</returns>
+        public async Task<List<UnitDto>> GetUnitsAsync()
+        {
+            var units = await _unitRepository.GetListAsync(u => u.IsActive);
+            var orderedUnits = units.OrderBy(u => u.DisplayOrder).ToList();
+            
+            return ObjectMapper.Map<List<Unit>, List<UnitDto>>(orderedUnits);
+        }
+
+        /// <summary>
+        /// Lấy tất cả ingredient categories active để sử dụng trong dropdowns
+        /// Master data cho filter, không cần authorization
+        /// </summary>
+        /// <returns>Danh sách ingredient categories active được sắp xếp theo DisplayOrder</returns>
+        public async Task<List<GuidLookupItemDto>> GetCategoriesAsync()
+        {
+            var categories = await _ingredientCategoryRepository.GetListAsync(c => c.IsActive);
+            var orderedCategories = categories.OrderBy(c => c.DisplayOrder).ToList();
+            
+            return orderedCategories.Select(c => new GuidLookupItemDto
+            {
+                Id = c.Id,
+                DisplayName = c.Name
+            }).ToList();
         }
     }
 }

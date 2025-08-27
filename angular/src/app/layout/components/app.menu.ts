@@ -103,6 +103,27 @@ export class AppMenu extends ComponentBase implements OnInit {
         ],
       },
 
+      // Inventory Management
+      {
+        label: 'Quản lý kho',
+        icon: 'pi pi-fw pi-box',
+        visible: this.hasPermission(PERMISSIONS.RESTAURANT.INVENTORY.DEFAULT),
+        items: [
+          {
+            label: 'Danh mục nguyên liệu',
+            icon: 'pi pi-fw pi-tags',
+            routerLink: ['/inventory-management/ingredient-categories'],
+            visible: this.hasPermission(PERMISSIONS.RESTAURANT.INVENTORY.CATEGORIES.DEFAULT),
+          },
+          {
+            label: 'Nguyên liệu',
+            icon: 'pi pi-fw pi-shopping-bag',
+            routerLink: ['/inventory-management/ingredients'],
+            visible: this.hasPermission(PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.DEFAULT),
+          },
+        ],
+      },
+
       // Kitchen & Service
       {
         label: 'Bếp & Phục vụ',
