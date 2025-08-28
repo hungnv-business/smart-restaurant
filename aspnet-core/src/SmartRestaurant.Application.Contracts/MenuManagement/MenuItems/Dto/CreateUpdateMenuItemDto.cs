@@ -1,0 +1,26 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace SmartRestaurant.MenuManagement.MenuItems.Dto
+{
+    public class CreateUpdateMenuItemDto
+    {
+        [Required]
+        [MaxLength(200)]
+        public string Name { get; set; } = string.Empty;
+        
+        [MaxLength(1000)]
+        public string? Description { get; set; }
+        
+        [Required]
+        public decimal Price { get; set; }
+        
+        public bool IsAvailable { get; set; } = true;
+        
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
+        
+        [Required]
+        public Guid CategoryId { get; set; }
+    }
+}

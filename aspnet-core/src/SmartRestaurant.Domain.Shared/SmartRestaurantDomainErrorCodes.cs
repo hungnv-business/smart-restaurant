@@ -13,6 +13,27 @@ public static class SmartRestaurantDomainErrorCodes
         /// Tên danh mục món ăn đã tồn tại trong hệ thống
         /// </summary>
         public const string NameAlreadyExists = "SmartRestaurant:MenuCategory:0001";
+
+        /// <summary>
+        /// Không thể xóa danh mục món ăn vì còn chứa món ăn
+        /// </summary>
+        public const string CannotDeleteCategoryWithMenuItems = "SmartRestaurant:MenuCategory:0002";
+    }
+
+    /// <summary>
+    /// Mã lỗi liên quan đến quản lý món ăn
+    /// </summary>
+    public static class MenuItems
+    {
+        /// <summary>
+        /// Danh mục món ăn không tồn tại trong hệ thống
+        /// </summary>
+        public const string CategoryNotFound = "SmartRestaurant:MenuItem:0001";
+
+        /// <summary>
+        /// Tên món ăn đã tồn tại trong cùng danh mục
+        /// </summary>
+        public const string NameAlreadyExistsInCategory = "SmartRestaurant:MenuItem:0002";
     }
 
     /// <summary>

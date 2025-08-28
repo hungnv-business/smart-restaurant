@@ -17,6 +17,10 @@
     "Permission:Menu.Categories.Edit": "Sửa danh mục món ăn", 
     "Permission:Menu.Categories.Delete": "Xóa danh mục món ăn",
     "Permission:Menu.Items": "Món ăn",
+    "Permission:Menu.Items.Create": "Tạo món ăn",
+    "Permission:Menu.Items.Edit": "Sửa món ăn",
+    "Permission:Menu.Items.Delete": "Xóa món ăn",
+    "Permission:Menu.Items.UpdateAvailability": "Cập nhật trạng thái món ăn",
     
     "Permission:Tables": "Quản lý bàn ăn",
     "Permission:Tables.LayoutSection": "Khu vực bố cục",
@@ -59,6 +63,9 @@
     "Permission:Delivery.Takeaway": "Đơn mang về",
     
     "SmartRestaurant:MenuCategory:0001": "Tên danh mục món ăn '{CategoryName}' đã tồn tại trong hệ thống",
+    "SmartRestaurant:MenuCategory:0002": "Không thể xóa danh mục '{CategoryName}' vì còn chứa món ăn. Vui lòng xóa tất cả món ăn trong danh mục trước.",
+    "SmartRestaurant:MenuItem:0001": "Danh mục món ăn không tồn tại trong hệ thống",
+    "SmartRestaurant:MenuItem:0002": "Tên món ăn '{Name}' đã tồn tại trong danh mục này",
     "SmartRestaurant:IngredientCategory:0001": "Tên danh mục nguyên liệu '{CategoryName}' đã tồn tại trong hệ thống",
     "SmartRestaurant:Unit:0001": "Tên đơn vị '{UnitName}' đã tồn tại trong hệ thống"
   }

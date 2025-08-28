@@ -6,22 +6,22 @@ export const INVENTORY_MANAGEMENT_ROUTES: Routes = [
   {
     path: '',
     redirectTo: 'ingredient-categories',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'ingredient-categories',
     component: IngredientCategoryListComponent,
-    data: { 
+    data: {
       title: 'Danh mục nguyên liệu',
-      breadcrumb: 'Danh mục nguyên liệu'
-    }
+      breadcrumb: 'Danh mục nguyên liệu',
+    },
   },
   {
     path: 'ingredients',
     component: IngredientListComponent,
-    data: { 
+    data: {
       title: 'Nguyên liệu',
-      breadcrumb: 'Nguyên liệu'
-    }
-  }
+      breadcrumb: 'Nguyên liệu',
+    },
+  },
 ];

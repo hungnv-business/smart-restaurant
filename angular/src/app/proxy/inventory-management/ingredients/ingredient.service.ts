@@ -35,14 +35,6 @@ export class IngredientService {
     { apiName: this.apiName,...config });
   
 
-  getAvailableUnits = (config?: Partial<Rest.Config>) =>
-    this.restService.request<any, string[]>({
-      method: 'GET',
-      url: '/api/app/ingredient/available-units',
-    },
-    { apiName: this.apiName,...config });
-  
-
   getIngredientsByCategory = (categoryId: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, IngredientDto[]>({
       method: 'GET',

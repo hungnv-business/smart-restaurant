@@ -64,7 +64,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   ngOnInit() {
     this.loadCategories();
     this.loadUnits();
-    
+
     const data = this.config.data;
     if (data) {
       this.isEdit = !!data.ingredientId;
@@ -104,25 +104,25 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
       maxResultCount: 1000,
       sorting: 'displayOrder',
     };
-    
+
     this.ingredientCategoryService.getList(request).subscribe({
-      next: (result) => {
+      next: result => {
         this.categories = result?.items?.filter(c => c.isActive) || [];
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading categories:', error);
-      }
+      },
     });
   }
 
   private loadUnits() {
     this.globalService.getUnits().subscribe({
-      next: (units) => {
+      next: units => {
         this.units = units || [];
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading units:', error);
-      }
+      },
     });
   }
 
@@ -132,7 +132,9 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
         ? this.ingredientService.update(this.ingredient.id, dto)
         : this.ingredientService.create(dto);
 
-    const errorMessage = this.isEdit ? 'Không thể cập nhật nguyên liệu' : 'Không thể tạo nguyên liệu';
+    const errorMessage = this.isEdit
+      ? 'Không thể cập nhật nguyên liệu'
+      : 'Không thể tạo nguyên liệu';
 
     operation
       .pipe(

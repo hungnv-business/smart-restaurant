@@ -25,7 +25,12 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
         menuCategoriesPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Edit, L("Permission:Menu.Categories.Edit"));
         menuCategoriesPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Delete, L("Permission:Menu.Categories.Delete"));
         
-        menuPermission.AddChild(SmartRestaurantPermissions.Menu.Items, L("Permission:Menu.Items"));
+        // Menu Items permissions
+        var menuItemsPermission = menuPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Default, L("Permission:Menu.Items"));
+        menuItemsPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Create, L("Permission:Menu.Items.Create"));
+        menuItemsPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Edit, L("Permission:Menu.Items.Edit"));
+        menuItemsPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Delete, L("Permission:Menu.Items.Delete"));
+        menuItemsPermission.AddChild(SmartRestaurantPermissions.Menu.Items.UpdateAvailability, L("Permission:Menu.Items.UpdateAvailability"));
 
         // Table Management permissions
         var tablesPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Tables.Default, L("Permission:Tables"));

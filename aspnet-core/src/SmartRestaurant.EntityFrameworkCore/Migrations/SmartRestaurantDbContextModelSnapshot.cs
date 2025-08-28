@@ -281,6 +281,79 @@ namespace SmartRestaurant.Migrations
                     b.ToTable("AppMenuCategories", (string)null);
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.MenuManagement.MenuItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<Guid?>("MenuCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("MenuCategoryId");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("CategoryId", "IsAvailable");
+
+                    b.ToTable("AppMenuItems", (string)null);
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.Tables.LayoutSection", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2198,6 +2271,21 @@ namespace SmartRestaurant.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.MenuManagement.MenuItem", b =>
+                {
+                    b.HasOne("SmartRestaurant.Entities.MenuManagement.MenuCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartRestaurant.Entities.MenuManagement.MenuCategory", null)
+                        .WithMany("MenuItems")
+                        .HasForeignKey("MenuCategoryId");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.Tables.Table", b =>
                 {
                     b.HasOne("SmartRestaurant.Entities.Tables.LayoutSection", "LayoutSection")
@@ -2352,6 +2440,11 @@ namespace SmartRestaurant.Migrations
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.IngredientCategory", b =>
                 {
                     b.Navigation("Ingredients");
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Entities.MenuManagement.MenuCategory", b =>
+                {
+                    b.Navigation("MenuItems");
                 });
 
             modelBuilder.Entity("SmartRestaurant.Entities.Tables.LayoutSection", b =>

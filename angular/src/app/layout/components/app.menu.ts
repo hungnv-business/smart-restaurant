@@ -76,8 +76,8 @@ export class AppMenu extends ComponentBase implements OnInit {
           {
             label: 'Món ăn',
             icon: 'pi pi-fw pi-star',
-            routerLink: ['/menu/items'],
-            visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU.ITEMS),
+            routerLink: ['/menu-management/menu-items'],
+            visible: this.hasPermission(PERMISSIONS.RESTAURANT.MENU.ITEMS.DEFAULT),
           },
         ],
       },

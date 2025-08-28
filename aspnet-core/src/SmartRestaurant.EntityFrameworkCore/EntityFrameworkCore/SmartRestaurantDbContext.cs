@@ -36,6 +36,7 @@ public class SmartRestaurantDbContext :
     
     // Menu Management
     public DbSet<MenuCategory> MenuCategories { get; set; }
+    public DbSet<MenuItem> MenuItems { get; set; }
     
     // Inventory Management
     public DbSet<IngredientCategory> IngredientCategories { get; set; }
@@ -145,6 +146,29 @@ public class SmartRestaurantDbContext :
             
             b.HasIndex(x => x.DisplayOrder);
             b.HasIndex(x => new { x.IsEnabled, x.DisplayOrder });
+            b.HasIndex(x => x.Name);
+        });
+        
+        // Configure MenuItem entity
+        builder.Entity<MenuItem>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "MenuItems", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            b.Property(x => x.Description).HasMaxLength(1000);
+            b.Property(x => x.Price).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.IsAvailable).IsRequired();
+            b.Property(x => x.ImageUrl).HasMaxLength(500);
+            b.Property(x => x.CategoryId).IsRequired();
+            
+            b.HasOne(x => x.Category)
+                .WithMany()
+                .HasForeignKey(x => x.CategoryId)
+                .IsRequired();
+                
+            b.HasIndex(x => x.CategoryId);
+            b.HasIndex(x => new { x.CategoryId, x.IsAvailable });
             b.HasIndex(x => x.Name);
         });
         

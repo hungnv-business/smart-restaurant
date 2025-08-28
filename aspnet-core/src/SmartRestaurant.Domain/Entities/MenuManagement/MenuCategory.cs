@@ -48,8 +48,10 @@ namespace SmartRestaurant.Entities.MenuManagement
 
 
         // Navigation properties
-        // TODO: Add MenuItem navigation property in Story 3.2
-        // public virtual ICollection<MenuItem> MenuItems { get; set; }
+        /// <summary>
+        /// Danh sách món ăn trong danh mục này
+        /// </summary>
+        public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
         // Constructor cho EF Core
         protected MenuCategory()

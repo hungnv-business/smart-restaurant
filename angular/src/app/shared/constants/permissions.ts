@@ -34,7 +34,13 @@ export const PERMISSIONS = {
         EDIT: 'SmartRestaurant.MenuCategories.Edit',
         DELETE: 'SmartRestaurant.MenuCategories.Delete',
       },
-      ITEMS: 'SmartRestaurant.Menu.Items',
+      ITEMS: {
+        DEFAULT: 'SmartRestaurant.Menu.Items',
+        CREATE: 'SmartRestaurant.Menu.Items.Create',
+        EDIT: 'SmartRestaurant.Menu.Items.Edit',
+        DELETE: 'SmartRestaurant.Menu.Items.Delete',
+        UPDATE_AVAILABILITY: 'SmartRestaurant.Menu.Items.UpdateAvailability',
+      },
     },
 
     // Tables (parent permission)

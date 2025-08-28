@@ -1,0 +1,114 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="flex flex-col gap-4 w-full">
+    <!-- Category & Name -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="categoryId" class="block font-semibold text-sm required">Danh mục</label>
+        <p-dropdown
+          id="categoryId"
+          formControlName="categoryId"
+          [options]="getCategoryOptions()"
+          placeholder="Chọn danh mục"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'categoryId')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'categoryId')" fieldName="Danh mục" />
+      </div>
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="name" class="block font-semibold text-sm required">Tên món ăn</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          formControlName="name"
+          placeholder="Nhập tên món ăn"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'name')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'name')" fieldName="Tên món ăn" />
+      </div>
+    </div>
+
+    <!-- Price & Image URL -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="price" class="block font-semibold text-sm required">Giá (VND)</label>
+        <p-inputnumber
+          inputId="price"
+          formControlName="price"
+          mode="currency"
+          currency="VND"
+          locale="vi-VN"
+          [min]="0"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'price')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'price')" fieldName="Giá" />
+      </div>
+      <div class="flex flex-col gap-2 flex-1">
+        <label for="imageUrl" class="block font-semibold text-sm">URL hình ảnh</label>
+        <input
+          type="url"
+          pInputText
+          id="imageUrl"
+          formControlName="imageUrl"
+          placeholder="https://example.com/image.jpg"
+          class="w-full"
+          [class.p-invalid]="isFieldInvalid(form, 'imageUrl')"
+        />
+        <app-validation-error [control]="getFormControl(form, 'imageUrl')" fieldName="URL hình ảnh" />
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label for="description" class="block font-semibold text-sm">Mô tả</label>
+      <textarea
+        pTextarea
+        id="description"
+        formControlName="description"
+        placeholder="Nhập mô tả món ăn"
+        rows="3"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid(form, 'description')"
+      ></textarea>
+      <app-validation-error [control]="getFormControl(form, 'description')" fieldName="Mô tả" />
+    </div>
+
+    <!-- Image Preview -->
+    <div class="flex flex-col gap-2" *ngIf="form.get('imageUrl')?.value">
+      <label class="block font-semibold text-sm">Xem trước hình ảnh</label>
+      <div class="flex justify-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <img 
+          [src]="form.get('imageUrl')?.value" 
+          [alt]="form.get('name')?.value"
+          class="max-w-48 max-h-32 object-cover rounded-lg shadow-sm"
+          (error)="$event.target.src='/assets/layout/images/no-image.png'"
+        />
+      </div>
+    </div>
+
+    <!-- Available Status -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p-checkbox 
+          inputId="isAvailable" 
+          formControlName="isAvailable" 
+          [binary]="true" 
+          class="cursor-pointer"
+        />
+        <label for="isAvailable" class="cursor-pointer font-medium select-none">
+          {{ form.get('isAvailable')?.value ? 'Có sẵn' : 'Hết hàng' }}
+        </label>
+      </div>
+    </div>
+  </div>
+</form>
+
+<app-form-footer-actions
+  [disabled]="form.invalid"
+  [loading]="loading"
+  (formSave)="onSubmit()"
+  (formCancel)="onCancel()"
+>
+</app-form-footer-actions>

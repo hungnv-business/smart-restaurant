@@ -7,7 +7,7 @@
 **Goal:** Design and implement flexible table layout management system supporting different seating arrangements, table status tracking, and reservation capabilities (Thiết kế và triển khai hệ thống quản lý bố cục bàn linh hoạt hỗ trợ các cách sắp xếp chỗ ngồi khác nhau, theo dõi trạng thái bàn và khả năng đặt bàn).
 
 ## Epic 3: Menu Management System (Quản lý Menu)
-**Goal:** Implement two-level menu management with category and individual dish control, seasonal enable/disable functionality, pricing, and Vietnamese-only interface (Triển khai quản lý menu hai cấp với điều khiển danh mục và món ăn riêng lẻ, chức năng bật/tắt theo mùa, định giá và giao diện chỉ tiếng Việt).
+**Goal:** Implement two-level menu management with category and individual dish control supporting one-to-many relationships, seasonal enable/disable functionality, basic dish information management, and Vietnamese-only interface (Triển khai quản lý menu hai cấp với điều khiển danh mục và món ăn riêng lẻ hỗ trợ mối quan hệ một-nhiều, chức năng bật/tắt theo mùa, quản lý thông tin món ăn cơ bản và giao diện chỉ tiếng Việt).
 
 ## Epic 4: Inventory Management (Quản lý Kho)
 **Goal:** Create inventory tracking system with automatic deduction based on ingredient mapping, stock level monitoring, and supplier management (Tạo hệ thống theo dõi kho với tự động trừ kho dựa trên ánh xạ nguyên liệu, giám sát mức tồn kho và quản lý nhà cung cấp).

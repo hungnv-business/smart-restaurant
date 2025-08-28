@@ -311,4 +311,20 @@ export abstract class ComponentBase implements OnDestroy {
       accept: onConfirm,
     });
   }
+
+  // ==================== IMAGE UTILITIES ====================
+
+  /**
+   * Get default image URL if provided URL is null/empty
+   */
+  protected getImageUrl(imageUrl?: string | null, defaultImage: string = '/assets/layout/images/empty.jpg'): string {
+    return imageUrl && imageUrl.trim() ? imageUrl : defaultImage;
+  }
+
+  /**
+   * Check if image URL is valid (not null/empty/whitespace)
+   */
+  protected hasValidImage(imageUrl?: string | null): boolean {
+    return !!(imageUrl && imageUrl.trim());
+  }
 }

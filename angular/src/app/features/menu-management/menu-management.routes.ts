@@ -18,4 +18,13 @@ export const menuManagementRoutes: Routes = [
       permission: PERMISSIONS.RESTAURANT.MENU.CATEGORIES.DEFAULT,
     },
   },
+  {
+    path: 'menu-items',
+    loadChildren: () => import('./menu-items/menu-items.routes').then(m => m.MENU_ITEMS_ROUTES),
+    canActivate: [RestaurantGuard],
+    data: {
+      breadcrumb: 'Món ăn',
+      permission: PERMISSIONS.RESTAURANT.MENU.ITEMS.DEFAULT,
+    },
+  },
 ];

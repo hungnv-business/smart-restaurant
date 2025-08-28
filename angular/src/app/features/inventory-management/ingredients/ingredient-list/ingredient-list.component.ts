@@ -124,7 +124,6 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
     });
   }
 
-
   // Load danh sách categories
   private async loadCategories() {
     try {
@@ -139,7 +138,7 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
   private loadIngredients() {
     this.loading = true;
 
-    let request: PagedAndSortedResultRequestDto = {
+    const request: PagedAndSortedResultRequestDto = {
       maxResultCount: 1000,
       skipCount: 0,
       sorting: 'name',

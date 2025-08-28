@@ -29,9 +29,15 @@ public class MenuCategoryAppService :
         CreateUpdateMenuCategoryDto>,         // Create/Update Input DTO
     IMenuCategoryAppService
 {
-    public MenuCategoryAppService(IRepository<MenuCategory, Guid> repository)
+    private readonly IRepository<MenuItem, Guid> _menuItemRepository;
+
+    public MenuCategoryAppService(
+        IRepository<MenuCategory, Guid> repository,
+        IRepository<MenuItem, Guid> menuItemRepository)
         : base(repository)
     {
+        _menuItemRepository = menuItemRepository;
+        
         // Cấu hình permissions cho từng operation
         GetPolicyName = SmartRestaurantPermissions.Menu.Categories.Default;
         GetListPolicyName = SmartRestaurantPermissions.Menu.Categories.Default;
@@ -89,6 +95,15 @@ public class MenuCategoryAppService :
     }
 
     /// <summary>
+    /// Override DeleteAsync để kiểm tra món ăn trước khi xóa
+    /// </summary>
+    public override async Task DeleteAsync(Guid id)
+    {
+        await ValidateCanDeleteAsync(id);
+        await base.DeleteAsync(id);
+    }
+
+    /// <summary>
     /// Custom method: Xóa nhiều danh mục cùng lúc - không có sẵn trong CrudAppService
     /// </summary>
     [Authorize(SmartRestaurantPermissions.Menu.Categories.Delete)]
@@ -97,6 +112,12 @@ public class MenuCategoryAppService :
         if (ids == null || !ids.Any())
         {
             return;
+        }
+
+        // Kiểm tra tất cả danh mục trước khi xóa
+        foreach (var id in ids)
+        {
+            await ValidateCanDeleteAsync(id);
         }
 
         var categoriesToDelete = await Repository.GetListAsync(x => ids.Contains(x.Id));
@@ -126,6 +147,20 @@ public class MenuCategoryAppService :
         if (duplicateCategory != null)
         {
             throw new MenuCategoryNameAlreadyExistsException(name);
+        }
+    }
+
+    /// <summary>
+    /// Private helper: Kiểm tra có thể xóa danh mục không (không có món ăn)
+    /// </summary>
+    private async Task ValidateCanDeleteAsync(Guid categoryId)
+    {
+        var hasMenuItems = await _menuItemRepository.AnyAsync(x => x.CategoryId == categoryId);
+
+        if (hasMenuItems)
+        {
+            var category = await Repository.GetAsync(categoryId);
+            throw new MenuCategoryCannotDeleteWithMenuItemsException(category.Name);
         }
     }
 }

@@ -28,7 +28,14 @@ public static class SmartRestaurantPermissions
             public const string Delete = Default + ".Delete";
         }
 
-        public const string Items = Default + ".Items";
+        public static class Items
+        {
+            public const string Default = GroupName + ".Menu.Items";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+            public const string UpdateAvailability = Default + ".UpdateAvailability";
+        }
     }
 
     public static class Tables

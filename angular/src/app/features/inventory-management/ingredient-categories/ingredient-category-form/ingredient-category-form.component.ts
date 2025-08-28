@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { Textarea } from 'primeng/inputtextarea';
 import { InputNumber } from 'primeng/inputnumber';
 import { Checkbox } from 'primeng/checkbox';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -105,7 +104,9 @@ export class IngredientCategoryFormComponent extends ComponentBase implements On
         ? this.ingredientCategoryService.update(this.category.id, dto)
         : this.ingredientCategoryService.create(dto);
 
-    const errorMessage = this.isEdit ? 'Không thể cập nhật danh mục nguyên liệu' : 'Không thể tạo danh mục nguyên liệu';
+    const errorMessage = this.isEdit
+      ? 'Không thể cập nhật danh mục nguyên liệu'
+      : 'Không thể tạo danh mục nguyên liệu';
 
     operation
       .pipe(

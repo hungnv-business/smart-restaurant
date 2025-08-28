@@ -1,0 +1,23 @@
+// Menu Item Form styles
+.required {
+  &::after {
+    content: ' *';
+    color: #ef4444;
+  }
+}
+
+// Image preview styles
+img {
+  transition: transform 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// Form layout responsive adjustments
+@media (max-width: 640px) {
+  .flex-col.sm\\:flex-row {
+    flex-direction: column;
+  }
+}

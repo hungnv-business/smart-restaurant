@@ -46,7 +46,7 @@ public class RestaurantRoleDataSeedContributor : IDataSeedContributor, ITransien
             SmartRestaurantPermissions.Dashboard.Default,
             SmartRestaurantPermissions.Menu.Default,
             SmartRestaurantPermissions.Menu.Categories.Default,
-            SmartRestaurantPermissions.Menu.Items,
+            SmartRestaurantPermissions.Menu.Items.Default,
             SmartRestaurantPermissions.Inventory.Default,
             SmartRestaurantPermissions.Customers.Default,
             SmartRestaurantPermissions.Payroll.Default,
@@ -68,11 +68,13 @@ public class RestaurantRoleDataSeedContributor : IDataSeedContributor, ITransien
             SmartRestaurantPermissions.Menu.Default
         });
 
-        // Kitchen Role
+        // Kitchen Role - có thể cập nhật trạng thái món ăn khi hết nguyên liệu
         await CreateRoleIfNotExistsAsync("Kitchen", new[]
         {
             SmartRestaurantPermissions.Kitchen.Default,
-            SmartRestaurantPermissions.Kitchen.UpdateStatus
+            SmartRestaurantPermissions.Kitchen.UpdateStatus,
+            SmartRestaurantPermissions.Menu.Items.Default,
+            SmartRestaurantPermissions.Menu.Items.UpdateAvailability
         });
 
         // Cashier Role

@@ -1,0 +1,166 @@
+<div class="card">
+  <p-toolbar styleClass="mb-12">
+    <ng-template #start>
+      @if (hasPermission(permissions.create)) {
+        <p-button
+          label="Thêm món ăn"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openFormDialog()"
+        />
+      }
+      @if (hasPermission(permissions.delete)) {
+        <p-button
+          label="Xóa"
+          icon="pi pi-trash"
+          severity="danger"
+          [outlined]="true"
+          [disabled]="!selectedMenuItems || selectedMenuItems.length === 0"
+          (onClick)="deleteSelectedMenuItems()"
+        />
+      }
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="menuItems()"
+    [loading]="loading"
+    [rows]="pageSize"
+    [paginator]="paginator"
+    [globalFilterFields]="filterFields"
+    styleClass="w-full"
+    [rowHover]="rowHover"
+    dataKey="id"
+    [(selection)]="selectedMenuItems"
+    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} món ăn"
+    [showCurrentPageReport]="showCurrentPageReport"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <h5 class="m-0">Quản lý món ăn</h5>
+
+        <div class="flex gap-4">
+          <p-iconfield>
+            <p-dropdown
+              id="categoryFilter"
+              [options]="categories()"
+              (onChange)="onCategoryFilter(dt, $event.value)"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Chọn danh mục"
+              [showClear]="true"
+              class="w-64"
+            />
+          </p-iconfield>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              (input)="onGlobalFilter(dt, $event)"
+              placeholder="Tìm kiếm..."
+            />
+          </p-iconfield>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th class="min-w-12">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th class="min-w-20">Hình ảnh</th>
+        <th class="min-w-48" pSortableColumn="name">
+          <span class="flex items-center gap-2">Tên món ăn <p-sortIcon field="name" /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="categoryId">
+          <span class="flex items-center gap-2">Danh mục <p-sortIcon field="categoryId" /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="price">
+          <span class="flex items-center gap-2">Giá <p-sortIcon field="price" /></span>
+        </th>
+        <th class="min-w-40" pSortableColumn="description">
+          <span class="flex items-center gap-2">Mô tả <p-sortIcon field="description" /></span>
+        </th>
+        <th class="min-w-24" pSortableColumn="isAvailable">
+          <span class="flex items-center gap-2">Trạng thái <p-sortIcon field="isAvailable" /></span>
+        </th>
+        <th class="min-w-20"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-menuItem>
+      <tr>
+        <td class="min-w-12">
+          <p-tableCheckbox [value]="menuItem" />
+        </td>
+        <td class="min-w-20">
+          <div class="flex justify-center">
+            <p-image 
+              [src]="getImageUrl(menuItem.imageUrl)"
+              alt="{{ menuItem.name }}"
+              width="60"
+              [preview]="true"
+              styleClass="border-round shadow-2"
+            />
+          </div>
+        </td>
+        <td class="min-w-48 font-medium">{{ menuItem.name }}</td>
+        <td class="min-w-32">{{ getCategoryName(menuItem.categoryId) }}</td>
+        <td class="min-w-32 font-semibold text-primary">{{ formatPrice(menuItem.price) }}</td>
+        <td class="min-w-40 text-gray-600">
+          <span class="line-clamp-2" [title]="menuItem.description">
+            {{ menuItem.description ? (menuItem.description.length > 50 ? (menuItem.description | slice:0:50) + '...' : menuItem.description) : 'Chưa có mô tả' }}
+          </span>
+        </td>
+        <td class="min-w-24">
+          @if (hasPermission(permissions.updateAvailability)) {
+            <p-button
+              [label]="getAvailabilityLabel(menuItem.isAvailable)"
+              [severity]="getAvailabilitySeverity(menuItem.isAvailable)"
+              [outlined]="true"
+              size="small"
+              (click)="toggleAvailability(menuItem)"
+              pTooltip="Click để thay đổi trạng thái"
+              tooltipPosition="top"
+            />
+          } @else {
+            <p-tag
+              [value]="getAvailabilityLabel(menuItem.isAvailable)"
+              [severity]="getAvailabilitySeverity(menuItem.isAvailable)"
+            />
+          }
+        </td>
+        <td class="min-w-20">
+          <div class="flex gap-2 justify-end">
+            @if (hasPermission(permissions.edit)) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="openFormDialog(menuItem.id!)"
+                pTooltip="Sửa"
+              />
+            }
+            @if (hasPermission(permissions.delete)) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="deleteMenuItem(menuItem)"
+                pTooltip="Xóa"
+              />
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmdialog />

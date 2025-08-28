@@ -30,7 +30,9 @@
       "Bash(dotnet run:*)",
       "Bash(npm start)",
       "Bash(npm run lint:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(curl:*)",
+      "Bash(abp generate-proxy:*)"
     ],
     "deny": [],
     "ask": []
