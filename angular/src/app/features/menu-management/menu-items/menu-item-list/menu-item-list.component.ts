@@ -129,7 +129,7 @@ export class MenuItemListComponent extends ComponentBase implements OnInit {
   toggleAvailability(menuItem: MenuItemDto) {
     const newStatus = !menuItem.isAvailable;
     const statusText = newStatus ? 'có sẵn' : 'hết hàng';
-    
+
     this.confirmationService.confirm({
       message: `Đánh dấu món "${menuItem.name}" là ${statusText}?`,
       header: 'Xác nhận thay đổi trạng thái',
@@ -241,7 +241,10 @@ export class MenuItemListComponent extends ComponentBase implements OnInit {
       next: () => {
         this.loadMenuItems();
         const statusText = newStatus ? 'có sẵn' : 'hết hàng';
-        this.showSuccess('Thành công', `Đã cập nhật trạng thái món "${menuItem.name}" thành ${statusText}`);
+        this.showSuccess(
+          'Thành công',
+          `Đã cập nhật trạng thái món "${menuItem.name}" thành ${statusText}`,
+        );
       },
       error: error => {
         this.handleApiError(error, 'Không thể cập nhật trạng thái món ăn');

@@ -177,6 +177,28 @@ namespace SmartRestaurant.TableManagement.Tables
             await Repository.UpdateAsync(table);
         }
 
+        [Authorize(SmartRestaurantPermissions.Tables.Table.EditTableOrder)]
+        public async Task UpdateMultipleTablePositionsAsync(List<TablePositionUpdateDto> updates)
+        {
+            if (updates == null || updates.Count == 0)
+                return;
+
+            var tableIds = updates.Select(u => u.TableId).ToList();
+            var tables = await Repository.GetListAsync(t => tableIds.Contains(t.Id));
+
+            foreach (var update in updates)
+            {
+                var table = tables.FirstOrDefault(t => t.Id == update.TableId);
+                if (table != null)
+                {
+                    table.LayoutSectionId = update.LayoutSectionId;
+                    table.DisplayOrder = update.DisplayOrder;
+                }
+            }
+
+            await Repository.UpdateManyAsync(tables);
+        }
+
 
         protected override async Task<IQueryable<Table>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
         {

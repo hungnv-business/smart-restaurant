@@ -13,6 +13,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         public string? Description { get; set; }
         
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Giá phải lớn hơn 0")]
         public decimal Price { get; set; }
         
         public bool IsAvailable { get; set; } = true;

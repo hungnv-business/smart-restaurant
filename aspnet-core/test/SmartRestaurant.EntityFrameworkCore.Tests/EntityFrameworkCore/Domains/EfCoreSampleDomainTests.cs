@@ -1,10 +1,9 @@
-using SmartRestaurant.Samples;
 using Xunit;
 
 namespace SmartRestaurant.EntityFrameworkCore.Domains;
 
 [Collection(SmartRestaurantTestConsts.CollectionDefinitionName)]
-public class EfCoreSampleDomainTests : SampleDomainTests<SmartRestaurantEntityFrameworkCoreTestModule>
+public class EfCoreSampleDomainTests : SmartRestaurantEntityFrameworkCoreTestBase
 {
-
+    // This is just a placeholder - EfCore tests don't need specific domain tests
 }

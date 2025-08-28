@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SmartRestaurant.EntityFrameworkCore;
 using Volo.Abp.Authorization;
 using Volo.Abp.Modularity;
 
@@ -8,7 +9,7 @@ namespace SmartRestaurant;
 
 [DependsOn(
     typeof(SmartRestaurantApplicationModule),
-    typeof(SmartRestaurantDomainTestModule)
+    typeof(SmartRestaurantEntityFrameworkCoreTestModule)
 )]
 public class SmartRestaurantApplicationTestModule : AbpModule
 {

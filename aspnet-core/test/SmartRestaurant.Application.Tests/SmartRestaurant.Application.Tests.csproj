@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SmartRestaurant.Application\SmartRestaurant.Application.csproj" />
-    <ProjectReference Include="..\SmartRestaurant.Domain.Tests\SmartRestaurant.Domain.Tests.csproj" />
+    <ProjectReference Include="..\SmartRestaurant.EntityFrameworkCore.Tests\SmartRestaurant.EntityFrameworkCore.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

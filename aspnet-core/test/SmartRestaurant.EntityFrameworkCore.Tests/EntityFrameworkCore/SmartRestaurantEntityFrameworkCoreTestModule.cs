@@ -15,8 +15,8 @@ using Volo.Abp.Uow;
 namespace SmartRestaurant.EntityFrameworkCore;
 
 [DependsOn(
-    typeof(SmartRestaurantApplicationTestModule),
     typeof(SmartRestaurantEntityFrameworkCoreModule),
+    typeof(SmartRestaurantTestBaseModule),
     typeof(AbpEntityFrameworkCoreSqliteModule)
     )]
 public class SmartRestaurantEntityFrameworkCoreTestModule : AbpModule

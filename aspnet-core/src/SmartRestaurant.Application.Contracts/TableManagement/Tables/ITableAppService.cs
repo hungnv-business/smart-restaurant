@@ -31,5 +31,8 @@ namespace SmartRestaurant.TableManagement.Tables
         
         /// <summary>Lấy display order tiếp theo cho bàn mới trong khu vực</summary>
         Task<int> GetNextDisplayOrderAsync(Guid layoutSectionId);
+        
+        /// <summary>Cập nhật vị trí của nhiều bàn cùng lúc</summary>
+        Task UpdateMultipleTablePositionsAsync(List<TablePositionUpdateDto> updates);
     }
 }

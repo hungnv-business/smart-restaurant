@@ -116,7 +116,7 @@ public class MenuCategoryAppService_Tests : SmartRestaurantApplicationTestBase<S
         // Arrange - Create a menu category first
         var createInput = new CreateUpdateMenuCategoryDto
         {
-            Name = "Tráng miệng",
+            Name = $"Delete Test {Guid.NewGuid().ToString("N")[..8]}", // Unique name
             DisplayOrder = 4,
             IsEnabled = true
         };
@@ -136,24 +136,27 @@ public class MenuCategoryAppService_Tests : SmartRestaurantApplicationTestBase<S
     [Fact]
     public async Task Should_Get_MenuCategory_By_Id()
     {
-        // Arrange
-        var createInput = new CreateUpdateMenuCategoryDto
+        // Arrange & Act - Wrap in UnitOfWork to ensure transaction consistency
+        await WithUnitOfWorkAsync(async () =>
         {
-            Name = "Đồ uống",
-            Description = "Các loại đồ uống",
-            DisplayOrder = 5,
-            IsEnabled = true
-        };
+            var createInput = new CreateUpdateMenuCategoryDto
+            {
+                Name = $"Test Category {Guid.NewGuid().ToString("N")[..8]}", // Unique name
+                Description = "Các loại đồ uống",
+                DisplayOrder = 5,
+                IsEnabled = true
+            };
 
-        var created = await _menuCategoryAppService.CreateAsync(createInput);
+            var created = await _menuCategoryAppService.CreateAsync(createInput);
+            
+            // Act - Get the created category
+            var result = await _menuCategoryAppService.GetAsync(created.Id);
 
-        // Act
-        var result = await _menuCategoryAppService.GetAsync(created.Id);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(created.Id);
-        result.Name.ShouldBe(created.Name);
-        result.Description.ShouldBe(created.Description);
+            // Assert
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(created.Id);
+            result.Name.ShouldBe(created.Name);
+            result.Description.ShouldBe(created.Description);
+        });
     }
 }

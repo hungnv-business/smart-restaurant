@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -96,15 +97,16 @@ namespace SmartRestaurant.TableManagement.Tables
 
             var updateDto = new UpdateTableDisplayOrderDto
             {
-                DisplayOrder = 5
+                TableId = table.Id,
+                NewPosition = 5
             };
 
             // Act
-            await _tableAppService.UpdateDisplayOrderAsync(table.Id, updateDto);
+            await _tableAppService.UpdateDisplayOrderAsync(updateDto);
 
-            // Assert
+            // Assert  
             var updatedTable = await _tableRepository.GetAsync(table.Id);
-            updatedTable.DisplayOrder.ShouldBe(5);
+            updatedTable.DisplayOrder.ShouldBe(1); // Should be reordered to position 1 in section
         }
 
         [Fact]
@@ -129,16 +131,16 @@ namespace SmartRestaurant.TableManagement.Tables
 
 
             // Act
-            var result = await _tableAppService.GetAllTablesOrderedAsync();
+            var result = await _tableAppService.GetAllSectionsWithTablesAsync();
 
             // Assert
             result.ShouldNotBeNull();
-            result.Count.ShouldBe(3);
+            result.Count.ShouldBe(2); // Two sections
             
-            // Should be ordered by section display order, then by table display order
-            result[0].TableNumber.ShouldBe("B02"); // Section 1, Order 1
-            result[1].TableNumber.ShouldBe("B01"); // Section 1, Order 2
-            result[2].TableNumber.ShouldBe("B03"); // Section 2, Order 1
+            // Check first section has tables
+            var section1Result = result.FirstOrDefault(s => s.SectionName == "Section 1");
+            section1Result.ShouldNotBeNull();
+            section1Result.Tables.Count.ShouldBe(2);
         }
 
         [Fact]

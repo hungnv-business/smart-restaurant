@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SmartRestaurant.EntityFrameworkCore\SmartRestaurant.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\SmartRestaurant.Application.Tests\SmartRestaurant.Application.Tests.csproj" />
+    <ProjectReference Include="..\SmartRestaurant.TestBase\SmartRestaurant.TestBase.csproj" />
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="9.3.1" />
   </ItemGroup>
 

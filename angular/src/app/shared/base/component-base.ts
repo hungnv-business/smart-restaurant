@@ -317,7 +317,10 @@ export abstract class ComponentBase implements OnDestroy {
   /**
    * Get default image URL if provided URL is null/empty
    */
-  protected getImageUrl(imageUrl?: string | null, defaultImage: string = '/assets/layout/images/empty.jpg'): string {
+  protected getImageUrl(
+    imageUrl?: string | null,
+    defaultImage: string = '/assets/layout/images/empty.jpg',
+  ): string {
     return imageUrl && imageUrl.trim() ? imageUrl : defaultImage;
   }
 

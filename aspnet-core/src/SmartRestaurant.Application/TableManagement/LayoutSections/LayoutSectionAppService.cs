@@ -71,6 +71,10 @@ namespace SmartRestaurant.TableManagement.LayoutSections
 
         public async Task<int> GetNextDisplayOrderAsync()
         {
+            var hasAny = await _repository.AnyAsync();
+            if (!hasAny)
+                return 1; // First section gets display order 1
+                
             var maxOrder = await _repository.MaxAsync(x => x.DisplayOrder);
             return maxOrder + 1;
         }
