@@ -35,7 +35,10 @@
 1. Real-time stock level display with current quantities by ingredient (Hiển thị mức tồn kho thời gian thực theo từng nguyên liệu)
 2. Configurable minimum stock level alerts and notifications (Cảnh báo và thông báo mức tồn kho tối thiểu có thể cấu hình)
 3. Stock movement history tracking (purchases, usage, adjustments) (Theo dõi lịch sử di chuyển kho - mua, sử dụng, điều chỉnh)
-4. Integration foundation for automatic deduction when menu items are ordered (Nền tảng tích hợp để trừ kho tự động khi đặt món)
+4. **Recipe Management System**: Menu item ingredient configuration for automatic stock deduction (Hệ thống quản lý công thức: cấu hình nguyên liệu món ăn cho trừ kho tự động)
+   - MenuItemIngredient entity linking MenuItem to Ingredient with required quantities
+   - Recipe setup interface for configuring ingredient requirements per menu item
+   - Automatic stock deduction when orders are processed based on recipe configuration
 5. Inventory reports for purchase planning and cost analysis (Báo cáo tồn kho để lập kế hoạch mua hàng và phân tích chi phí)
 
 ---
