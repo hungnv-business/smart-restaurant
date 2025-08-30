@@ -102,6 +102,12 @@ export const PERMISSIONS = {
         EDIT: 'SmartRestaurant.Ingredients.Edit',
         DELETE: 'SmartRestaurant.Ingredients.Delete',
       },
+      PURCHASE_INVOICES: {
+        DEFAULT: 'SmartRestaurant.PurchaseInvoices',
+        CREATE: 'SmartRestaurant.PurchaseInvoices.Create',
+        EDIT: 'SmartRestaurant.PurchaseInvoices.Edit',
+        DELETE: 'SmartRestaurant.PurchaseInvoices.Delete',
+      },
     },
 
     // Customers

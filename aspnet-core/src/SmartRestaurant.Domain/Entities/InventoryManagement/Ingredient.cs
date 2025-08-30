@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using SmartRestaurant.Entities.Common;
+using SmartRestaurant.Exceptions;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SmartRestaurant.Entities.InventoryManagement;
@@ -47,6 +48,12 @@ public class Ingredient : FullAuditedEntity<Guid>
     public string? SupplierInfo { get; set; }
     
     /// <summary>
+    /// Số lượng hiện tại trong kho - không cho phép set trực tiếp
+    /// </summary>
+    [Required]
+    public int CurrentStock { get; private set; } = 0;
+    
+    /// <summary>
     /// Nguyên liệu có đang sử dụng hay không
     /// </summary>
     public bool IsActive { get; set; } = true;
@@ -61,4 +68,56 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// Đơn vị đo lường của nguyên liệu
     /// </summary>
     public virtual Unit Unit { get; set; } = null!;
+
+    /// <summary>
+    /// Cộng thêm vào kho
+    /// </summary>
+    public void AddStock(int quantity)
+    {
+        if (quantity <= 0)
+        {
+            throw new InvalidQuantityException(quantity);
+        }
+
+        CurrentStock += quantity;
+    }
+
+    /// <summary>
+    /// Trừ khỏi kho
+    /// </summary>
+    public void SubtractStock(int quantity)
+    {
+        if (quantity <= 0)
+        {
+            throw new InvalidQuantityException(quantity);
+        }
+
+        if (!CanSubtractStock(quantity))
+        {
+            throw new InsufficientStockException(Name, CurrentStock, quantity);
+        }
+
+        CurrentStock -= quantity;
+    }
+
+    /// <summary>
+    /// Kiểm tra có thể trừ stock không
+    /// </summary>
+    public bool CanSubtractStock(int quantity)
+    {
+        return CurrentStock >= quantity;
+    }
+
+    /// <summary>
+    /// Set stock trực tiếp (chỉ dùng cho migration/seed data)
+    /// </summary>
+    public void SetStock(int stock)
+    {
+        if (stock < 0)
+        {
+            throw new InvalidQuantityException(stock);
+        }
+
+        CurrentStock = stock;
+    }
 }

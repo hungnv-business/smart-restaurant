@@ -1,4 +1,4 @@
-import type { AssignTableToSectionDto, CreateTableDto, SectionWithTablesDto, TableDto, ToggleActiveStatusDto, UpdateTableDisplayOrderDto, UpdateTableDto } from './dto/models';
+import type { AssignTableToSectionDto, CreateTableDto, SectionWithTablesDto, TableDto, TablePositionUpdateDto, ToggleActiveStatusDto, UpdateTableDisplayOrderDto, UpdateTableDto } from './dto/models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -100,6 +100,15 @@ export class TableService {
       method: 'PUT',
       url: '/api/app/table/display-order',
       body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  updateMultipleTablePositions = (updates: TablePositionUpdateDto[], config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'PUT',
+      url: '/api/app/table/multiple-table-positions',
+      body: updates,
     },
     { apiName: this.apiName,...config });
 

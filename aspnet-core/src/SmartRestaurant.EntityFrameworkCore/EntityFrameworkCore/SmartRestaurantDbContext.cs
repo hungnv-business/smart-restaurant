@@ -2,6 +2,7 @@
 using SmartRestaurant.Entities.Tables;
 using SmartRestaurant.Entities.MenuManagement;
 using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.Entities.Inventory;
 using SmartRestaurant.Entities.Common;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -42,8 +43,13 @@ public class SmartRestaurantDbContext :
     public DbSet<IngredientCategory> IngredientCategories { get; set; }
     public DbSet<Ingredient> Ingredients { get; set; }
     
+    // Purchase Invoice Management
+    public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+    public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
+    
     // Common
     public DbSet<Unit> Units { get; set; }
+    public DbSet<DimDate> DimDates { get; set; }
 
     #region Entities from the modules
 
@@ -200,6 +206,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.UnitId).IsRequired();
             b.Property(x => x.CostPerUnit).HasColumnType("decimal(18,2)");
             b.Property(x => x.SupplierInfo).HasMaxLength(512);
+            b.Property(x => x.CurrentStock).IsRequired();
             b.Property(x => x.IsActive).IsRequired();
             
             b.HasOne(x => x.Category)
@@ -231,6 +238,69 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.DisplayOrder);
             b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
             b.HasIndex(x => x.Name).IsUnique();
+        });
+        
+        // Configure DimDate entity
+        builder.Entity<DimDate>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "DimDates", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Date).IsRequired();
+            b.Property(x => x.DateVnFormat).IsRequired().HasMaxLength(10);
+            b.Property(x => x.DateVnShortFormat).IsRequired().HasMaxLength(10);
+            
+            b.HasIndex(x => x.Date).IsUnique();
+        });
+
+        // Configure PurchaseInvoice entity
+        builder.Entity<PurchaseInvoice>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "PurchaseInvoices", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.InvoiceNumber).IsRequired().HasMaxLength(50);
+            b.Property(x => x.InvoiceDateId).IsRequired();
+            b.Property(x => x.TotalAmount).IsRequired();
+            b.Property(x => x.Notes).HasMaxLength(500);
+            
+            b.HasOne(x => x.InvoiceDate)
+                .WithMany()
+                .HasForeignKey(x => x.InvoiceDateId)
+                .IsRequired();
+            
+            b.HasIndex(x => x.InvoiceNumber);
+            b.HasIndex(x => x.InvoiceDateId);
+        });
+        
+        // Configure PurchaseInvoiceItem entity  
+        builder.Entity<PurchaseInvoiceItem>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "PurchaseInvoiceItems", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.PurchaseInvoiceId).IsRequired();
+            b.Property(x => x.IngredientId);
+            b.Property(x => x.IngredientName).IsRequired().HasMaxLength(200);
+            b.Property(x => x.Quantity).IsRequired();
+            b.Property(x => x.UnitId);
+            b.Property(x => x.UnitName).IsRequired().HasMaxLength(50);
+            b.Property(x => x.UnitPrice);
+            b.Property(x => x.TotalPrice).IsRequired();
+            
+            b.HasOne(x => x.PurchaseInvoice)
+                .WithMany(x => x.Items)
+                .HasForeignKey(x => x.PurchaseInvoiceId)
+                .IsRequired();
+
+            b.HasOne(x => x.Ingredient)
+                .WithMany()
+                .HasForeignKey(x => x.IngredientId)
+                .IsRequired(false);
+                
+            b.HasIndex(x => x.PurchaseInvoiceId);
+            b.HasIndex(x => x.IngredientId);
         });
     }
 }

@@ -34,6 +34,12 @@ export interface TableDto extends FullAuditedEntityDto<string> {
   layoutSectionName?: string;
 }
 
+export interface TablePositionUpdateDto {
+  tableId?: string;
+  layoutSectionId?: string;
+  displayOrder: number;
+}
+
 export interface ToggleActiveStatusDto {
   isActive: boolean;
 }

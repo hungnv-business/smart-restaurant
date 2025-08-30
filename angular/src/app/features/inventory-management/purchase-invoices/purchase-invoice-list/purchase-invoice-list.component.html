@@ -1,0 +1,148 @@
+<div class="card">
+  <p-toolbar styleClass="mb-12">
+    <ng-template #start>
+      @if (hasPermission(permissions.create)) {
+        <p-button
+          label="Thêm hóa đơn mua"
+          icon="pi pi-plus"
+          severity="secondary"
+          class="mr-2"
+          (onClick)="openFormDialog()"
+        />
+      }
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    styleClass="w-full"
+    dataKey="id"
+    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} hóa đơn"
+    [value]="purchaseInvoices()"
+    [loading]="loading"
+    [rows]="pageSize"
+    [paginator]="paginator"
+    [totalRecords]="totalRecords"
+    [lazy]="true"
+    [rowHover]="rowHover"
+    [showCurrentPageReport]="showCurrentPageReport"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    (onLazyLoad)="loadPurchaseInvoices($event)"
+  >
+    <ng-template #caption>
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <h5 class="m-0">Quản lý hóa đơn mua</h5>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <p-iconfield class="w-full sm:w-80">
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="searchText"
+              (input)="onFilterChange()"
+              placeholder="Tìm kiếm số hóa đơn, nhà cung cấp..."
+              class="w-full"
+            />
+          </p-iconfield>
+
+          <p-datepicker
+            [(ngModel)]="dateRange"
+            placeholder="Chọn khoảng ngày"
+            dateFormat="dd/mm/yy"
+            [showClear]="true"
+            [iconDisplay]="'input'"
+            [showIcon]="true"
+            selectionMode="range"
+            [readonlyInput]="false"
+            (onSelect)="onDateRangeFilter()"
+            (onClear)="onDateRangeFilter()"
+          />
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th class="min-w-48 lg:min-w-64" pSortableColumn="invoiceNumber">
+          <span class="flex items-center gap-2"
+            >Số hóa đơn <p-sortIcon field="invoiceNumber"
+          /></span>
+        </th>
+        <th class="min-w-44 lg:min-w-48" pSortableColumn="invoiceDate">
+          <span class="flex items-center gap-2"
+            >Ngày hóa đơn <p-sortIcon field="invoiceDate"
+          /></span>
+        </th>
+        <th class="min-w-32" pSortableColumn="totalAmount">
+          <span class="flex items-center gap-2">Tổng tiền <p-sortIcon field="totalAmount" /></span>
+        </th>
+        <th class="min-w-40">Ghi chú</th>
+        <th class="min-w-20"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-invoice>
+      <tr>
+        <td class="min-w-48 lg:min-w-64 font-medium">{{ invoice.invoiceNumber }}</td>
+        <td class="min-w-44 lg:min-w-48">{{ invoice.invoiceDate }}</td>
+        <td class="min-w-32 text-right font-medium">{{ invoice.totalAmount | vndCurrency }}</td>
+        <td class="min-w-40 text-gray-600">
+          <span class="line-clamp-1">{{ invoice.notes || '-' }}</span>
+        </td>
+        <td class="min-w-20">
+          <div class="flex gap-2 justify-end">
+            <p-button
+              icon="pi pi-eye"
+              [rounded]="true"
+              [outlined]="true"
+              severity="info"
+              (click)="openViewDialog(invoice.id!)"
+              pTooltip="Xem chi tiết"
+            />
+            @if (hasPermission(permissions.edit) && invoice.canEdit) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="openFormDialog(invoice.id!)"
+                pTooltip="Sửa"
+              />
+            }
+            @if (hasPermission(permissions.edit) && !invoice.canEdit) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                [disabled]="true"
+                pTooltip="Không thể sửa sau 6 giờ từ lúc tạo"
+              />
+            }
+            @if (hasPermission(permissions.delete) && invoice.canDelete) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="deletePurchaseInvoice(invoice)"
+                pTooltip="Xóa"
+              />
+            }
+            @if (hasPermission(permissions.delete) && !invoice.canDelete) {
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [rounded]="true"
+                [outlined]="true"
+                [disabled]="true"
+                pTooltip="Không thể xóa sau 6 giờ từ lúc tạo"
+              />
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmdialog />

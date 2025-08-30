@@ -57,4 +57,36 @@ public static class SmartRestaurantDomainErrorCodes
         /// </summary>
         public const string NameAlreadyExists = "SmartRestaurant:Unit:0001";
     }
+
+    /// <summary>
+    /// Mã lỗi liên quan đến quản lý nguyên liệu
+    /// </summary>
+    public static class Ingredients
+    {
+        /// <summary>
+        /// Không đủ tồn kho để thực hiện thao tác
+        /// </summary>
+        public const string InsufficientStock = "SmartRestaurant:Ingredient:0001";
+    }
+
+    /// <summary>
+    /// Mã lỗi liên quan đến hóa đơn mua hàng
+    /// </summary>
+    public static class PurchaseInvoices
+    {
+        /// <summary>
+        /// Số lượng không hợp lệ
+        /// </summary>
+        public const string InvalidQuantity = "SmartRestaurant:PurchaseInvoice:0001";
+        
+        /// <summary>
+        /// Tổng tiền không hợp lệ
+        /// </summary>
+        public const string InvalidTotalPrice = "SmartRestaurant:PurchaseInvoice:0002";
+        
+        /// <summary>
+        /// Không thể xóa hóa đơn sau 6 giờ
+        /// </summary>
+        public const string CannotDeleteAfterSixHours = "SmartRestaurant:PurchaseInvoice:0003";
+    }
 }

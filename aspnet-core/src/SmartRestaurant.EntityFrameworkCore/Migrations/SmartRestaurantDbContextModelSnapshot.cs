@@ -24,6 +24,140 @@ namespace SmartRestaurant.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SmartRestaurant.Entities.Common.DimDate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("date");
+
+                    b.Property<string>("DateIsoFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_iso_format");
+
+                    b.Property<string>("DateUkFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_uk_format");
+
+                    b.Property<string>("DateUkShortFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_uk_short_format");
+
+                    b.Property<string>("DateUsFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_us_format");
+
+                    b.Property<string>("DateUsShortFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_us_short_format");
+
+                    b.Property<string>("DateVnFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_vn_format");
+
+                    b.Property<string>("DateVnShortFormat")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("date_vn_short_format");
+
+                    b.Property<bool>("IsHolidayUs")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_holiday_us");
+
+                    b.Property<string>("NameDayAbbreviatedEn")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("name_day_abbreviated_en");
+
+                    b.Property<string>("NameDayEn")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("name_day_en");
+
+                    b.Property<string>("NameMonthAbbreviatedEn")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("name_month_abbreviated_en");
+
+                    b.Property<string>("NameMonthEn")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("name_month_en");
+
+                    b.Property<int>("NumDayInMonth")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_day_in_month");
+
+                    b.Property<int>("NumDayInQuarter")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_day_in_quarter");
+
+                    b.Property<int>("NumDayInWeek")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_day_in_week");
+
+                    b.Property<int>("NumDayInYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_day_in_year");
+
+                    b.Property<int>("NumMonthInQuarter")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_month_in_quarter");
+
+                    b.Property<int>("NumMonthInYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_month_in_year");
+
+                    b.Property<int>("NumQuarterInYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_quarter_in_year");
+
+                    b.Property<int>("NumWeekInMonth")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_week_in_month");
+
+                    b.Property<int>("NumWeekInQuarter")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_week_in_quarter");
+
+                    b.Property<int>("NumWeekInYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_week_in_year");
+
+                    b.Property<int>("NumYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("num_year");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
+
+                    b.ToTable("AppDimDates", (string)null);
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.Common.Unit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -82,6 +216,153 @@ namespace SmartRestaurant.Migrations
                     b.ToTable("AppUnits", (string)null);
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<int>("InvoiceDateId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TotalAmount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceDateId");
+
+                    b.HasIndex("InvoiceNumber");
+
+                    b.ToTable("AppPurchaseInvoices", (string)null);
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoiceItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<Guid?>("IngredientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IngredientName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<Guid>("PurchaseInvoiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SupplierInfo")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UnitName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("UnitPrice")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId");
+
+                    b.HasIndex("PurchaseInvoiceId");
+
+                    b.ToTable("AppPurchaseInvoiceItems", (string)null);
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.Ingredient", b =>
                 {
                     b.Property<Guid>("Id")
@@ -100,6 +381,9 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid?>("CreatorId")
                         .HasColumnType("uuid")
                         .HasColumnName("CreatorId");
+
+                    b.Property<int>("CurrentStock")
+                        .HasColumnType("integer");
 
                     b.Property<Guid?>("DeleterId")
                         .HasColumnType("uuid")
@@ -2252,6 +2536,34 @@ namespace SmartRestaurant.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoice", b =>
+                {
+                    b.HasOne("SmartRestaurant.Entities.Common.DimDate", "InvoiceDate")
+                        .WithMany()
+                        .HasForeignKey("InvoiceDateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InvoiceDate");
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoiceItem", b =>
+                {
+                    b.HasOne("SmartRestaurant.Entities.InventoryManagement.Ingredient", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("IngredientId");
+
+                    b.HasOne("SmartRestaurant.Entities.Inventory.PurchaseInvoice", "PurchaseInvoice")
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseInvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("PurchaseInvoice");
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.Ingredient", b =>
                 {
                     b.HasOne("SmartRestaurant.Entities.InventoryManagement.IngredientCategory", "Category")
@@ -2435,6 +2747,11 @@ namespace SmartRestaurant.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoice", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.IngredientCategory", b =>

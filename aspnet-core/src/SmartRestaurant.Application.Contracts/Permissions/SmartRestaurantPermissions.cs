@@ -105,6 +105,14 @@ public static class SmartRestaurantPermissions
             public const string Edit = Default + ".Edit";
             public const string Delete = Default + ".Delete";
         }
+        
+        public static class PurchaseInvoices
+        {
+            public const string Default = GroupName + ".PurchaseInvoices";
+            public const string Create = Default + ".Create";
+            public const string Edit = Default + ".Edit";
+            public const string Delete = Default + ".Delete";
+        }
     }
 
     public static class Customers

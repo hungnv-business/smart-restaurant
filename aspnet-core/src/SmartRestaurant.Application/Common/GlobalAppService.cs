@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,13 +18,16 @@ namespace SmartRestaurant.Common
     {
         private readonly IRepository<Unit> _unitRepository;
         private readonly IRepository<IngredientCategory> _ingredientCategoryRepository;
+        private readonly IRepository<Ingredient, Guid> _ingredientRepository;
 
         public GlobalAppService(
             IRepository<Unit> unitRepository,
-            IRepository<IngredientCategory> ingredientCategoryRepository)
+            IRepository<IngredientCategory> ingredientCategoryRepository,
+            IRepository<Ingredient, Guid> ingredientRepository)
         {
             _unitRepository = unitRepository;
             _ingredientCategoryRepository = ingredientCategoryRepository;
+            _ingredientRepository = ingredientRepository;
         }
 
         public Task<List<IntLookupItemDto>> GetTableStatusesAsync()
@@ -66,6 +70,22 @@ namespace SmartRestaurant.Common
             {
                 Id = c.Id,
                 DisplayName = c.Name
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Lấy danh sách nguyên liệu theo danh mục cho dropdown
+        /// </summary>
+        public async Task<List<GuidLookupItemDto>> GetIngredientsByCategoryAsync(Guid categoryId)
+        {
+            var ingredients = await _ingredientRepository.GetListAsync(i => 
+                i.CategoryId == categoryId && i.IsActive);
+            var orderedIngredients = ingredients.OrderBy(i => i.Name).ToList();
+            
+            return orderedIngredients.Select(i => new GuidLookupItemDto
+            {
+                Id = i.Id,
+                DisplayName = i.Name
             }).ToList();
         }
     }

@@ -121,6 +121,12 @@ export class AppMenu extends ComponentBase implements OnInit {
             routerLink: ['/inventory-management/ingredients'],
             visible: this.hasPermission(PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.DEFAULT),
           },
+          {
+            label: 'Hóa đơn mua',
+            icon: 'pi pi-fw pi-file-import',
+            routerLink: ['/inventory-management/purchase-invoices'],
+            visible: this.hasPermission(PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.DEFAULT),
+          },
         ],
       },
 

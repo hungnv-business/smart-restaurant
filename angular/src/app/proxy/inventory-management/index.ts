@@ -1,3 +1,4 @@
 import * as IngredientCategories from './ingredient-categories';
 import * as Ingredients from './ingredients';
-export { IngredientCategories, Ingredients };
+import * as PurchaseInvoices from './purchase-invoices';
+export { IngredientCategories, Ingredients, PurchaseInvoices };

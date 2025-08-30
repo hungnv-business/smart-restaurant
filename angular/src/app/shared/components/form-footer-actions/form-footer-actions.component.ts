@@ -8,13 +8,16 @@ import { ButtonModule } from 'primeng/button';
   imports: [CommonModule, ButtonModule],
   template: `
     <div class="flex justify-end gap-2 pt-4">
-      <p-button
-        [label]="'Lưu'"
-        [icon]="'pi pi-check'"
-        [disabled]="disabled || loading"
-        [loading]="loading"
-        (click)="onSave()"
-      />
+      @if (showSave) {
+        <p-button
+          [label]="'Lưu'"
+          [icon]="'pi pi-check'"
+          [disabled]="disabled || loading"
+          [loading]="loading"
+          (click)="onSave()"
+        />
+      }
+
       <p-button
         [label]="'Huỷ'"
         [icon]="'pi pi-times'"
@@ -28,6 +31,7 @@ import { ButtonModule } from 'primeng/button';
 export class FormFooterActionsComponent {
   @Input() disabled = false;
   @Input() loading = false;
+  @Input() showSave = true;
 
   @Output() formSave = new EventEmitter<void>();
   @Output() formCancel = new EventEmitter<void>();

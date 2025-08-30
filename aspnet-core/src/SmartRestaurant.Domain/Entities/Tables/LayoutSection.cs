@@ -34,7 +34,7 @@ namespace SmartRestaurant.Entities.Tables
         public LayoutSection(
             Guid id,
             string sectionName,
-            string description = null,
+            string? description = null,
             int displayOrder = 0,
             bool isActive = true
         ) : base(id)

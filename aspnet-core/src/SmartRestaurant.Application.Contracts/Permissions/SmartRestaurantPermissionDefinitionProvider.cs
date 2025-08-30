@@ -80,6 +80,12 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Create, L("Permission:Inventory.Ingredients.Create"));
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Edit, L("Permission:Inventory.Ingredients.Edit"));
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Delete, L("Permission:Inventory.Ingredients.Delete"));
+        
+        // Purchase Invoices permissions
+        var purchaseInvoicesPermission = inventoryPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default, L("Permission:Inventory.PurchaseInvoices"));
+        purchaseInvoicesPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Create, L("Permission:Inventory.PurchaseInvoices.Create"));
+        purchaseInvoicesPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Edit, L("Permission:Inventory.PurchaseInvoices.Edit"));
+        purchaseInvoicesPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Delete, L("Permission:Inventory.PurchaseInvoices.Delete"));
 
         // Customer permissions
         smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Customers.Default, L("Permission:Customers"));

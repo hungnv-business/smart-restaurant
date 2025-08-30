@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SmartRestaurant.Common.Dto;
 using SmartRestaurant.Common.Units.Dto;
+using SmartRestaurant.InventoryManagement.Ingredients.Dto;
 using Volo.Abp.Application.Services;
 
 namespace SmartRestaurant.Common
@@ -19,5 +21,8 @@ namespace SmartRestaurant.Common
         
         /// <summary>Lấy danh sách tất cả danh mục nguyên liệu active cho dropdown</summary>
         Task<List<GuidLookupItemDto>> GetCategoriesAsync();
+        
+        /// <summary>Lấy danh sách nguyên liệu theo danh mục cho dropdown</summary>
+        Task<List<GuidLookupItemDto>> GetIngredientsByCategoryAsync(Guid categoryId);
     }
 }

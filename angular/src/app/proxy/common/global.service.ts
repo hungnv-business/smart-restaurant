@@ -18,6 +18,14 @@ export class GlobalService {
     { apiName: this.apiName,...config });
   
 
+  getIngredientsByCategory = (categoryId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, GuidLookupItemDto[]>({
+      method: 'GET',
+      url: `/api/app/global/ingredients-by-category/${categoryId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   getTableStatuses = (config?: Partial<Rest.Config>) =>
     this.restService.request<any, IntLookupItemDto[]>({
       method: 'GET',

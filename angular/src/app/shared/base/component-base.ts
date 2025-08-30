@@ -4,13 +4,14 @@ import { Subject } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 import { PermissionService } from '@abp/ng.core';
 import { ConfirmationService } from 'primeng/api';
+import { Table, TableLazyLoadEvent } from 'primeng/table';
 
 @Directive()
 export abstract class ComponentBase implements OnDestroy {
   pageSize = 10;
-  rowsPerPageOptions = [10, 20, 30, 50, 100];
-  showCurrentPageReport = false;
-  paginator = false;
+  rowsPerPageOptions = [3, 10, 20, 30, 50, 100];
+  showCurrentPageReport = true;
+  paginator = true;
   rowHover = true;
   // Common role labels in Vietnamese
   protected readonly ROLE_LABELS = {
@@ -329,5 +330,38 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected hasValidImage(imageUrl?: string | null): boolean {
     return !!(imageUrl && imageUrl.trim());
+  }
+
+  // ==================== PAGINATION UTILITIES ====================
+
+  /**
+   * Tính skipCount từ TableLazyLoadEvent
+   */
+  protected getSkipCount(event?: TableLazyLoadEvent): number {
+    return event?.first || 0;
+  }
+
+  /**
+   * Tính maxResultCount từ TableLazyLoadEvent
+   */
+  protected getMaxResultCount(event?: TableLazyLoadEvent): number {
+    return event?.rows || this.pageSize;
+  }
+
+  /**
+   * Tính sorting từ TableLazyLoadEvent
+   */
+  protected getSorting(event?: TableLazyLoadEvent, defaultSort?: string): string | undefined {
+    if (event?.sortField) {
+      return `${event.sortField} ${event.sortOrder === 1 ? 'asc' : 'desc'}`;
+    }
+    return defaultSort;
+  }
+
+  /**
+   * Reset pagination về trang đầu
+   */
+  protected resetPagination(dt: Table): void {
+    dt.reset();
   }
 }
