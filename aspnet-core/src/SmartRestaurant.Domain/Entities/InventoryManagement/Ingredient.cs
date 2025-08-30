@@ -54,6 +54,11 @@ public class Ingredient : FullAuditedEntity<Guid>
     public int CurrentStock { get; private set; } = 0;
     
     /// <summary>
+    /// Có theo dõi và cập nhật kho hay không
+    /// </summary>
+    public bool IsStockTrackingEnabled { get; set; } = true;
+    
+    /// <summary>
     /// Nguyên liệu có đang sử dụng hay không
     /// </summary>
     public bool IsActive { get; set; } = true;

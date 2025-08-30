@@ -237,14 +237,14 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
 
   private createItemFormGroup(): FormGroup {
     return this.fb.group({
-      ingredientId: [null],
-      ingredientName: ['', [Validators.required, Validators.maxLength(200)]],
+      ingredientId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitId: [null],
       unitName: ['', [Validators.required, Validators.maxLength(50)]],
       unitPrice: [null],
       totalPrice: [null, [Validators.required, Validators.min(0)]],
       supplierInfo: [''],
+      notes: ['', [Validators.maxLength(500)]],
       categoryId: [null]
     });
   }
@@ -270,13 +270,13 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       const itemFormGroup = this.createItemFormGroup();
       itemFormGroup.patchValue({
         ingredientId: item.ingredientId ?? null,
-        ingredientName: item.ingredientName ?? '',
         quantity: item.quantity ?? 1,
         unitId: item.unitId ?? null,
         unitName: item.unitName ?? '',
         unitPrice: item.unitPrice ?? null,
         totalPrice: item.totalPrice ?? 0,
         supplierInfo: item.supplierInfo ?? '',
+        notes: item.notes ?? '',
         categoryId: item.categoryId ?? null,
       });
       this.itemsFormArray.push(itemFormGroup);

@@ -17,15 +17,14 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                 .ForMember(dest => dest.CanEdit, opt => opt.MapFrom(src => src.CanEdit()))
                 .ForMember(dest => dest.InvoiceDate, opt => opt.MapFrom(src => src.InvoiceDate.GetDateFormat()))
                 .ForMember(dest => dest.InvoiceDateId, opt => opt.MapFrom(src => src.InvoiceDateId));
-            
+
             CreateMap<PurchaseInvoiceItem, PurchaseInvoiceItemDto>()
-                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => 
-                    src.IngredientId.HasValue ? src.Ingredient!.CategoryId : (Guid?)null));
-            
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Ingredient.CategoryId));
+
             CreateMap<CreateUpdatePurchaseInvoiceDto, PurchaseInvoice>()
                 .ForMember(dest => dest.Items, opt => opt.Ignore()) // Handle manually in AppService
                 .ForMember(dest => dest.TotalAmount, opt => opt.Ignore()); // Calculated by domain method
-            
+
             // Ingredient lookup mapping
             CreateMap<Ingredient, IngredientLookupDto>()
                 .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit.Name));

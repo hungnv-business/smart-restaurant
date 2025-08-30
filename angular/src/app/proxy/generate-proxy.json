@@ -7403,23 +7403,11 @@
         {
           "name": "IngredientId",
           "jsonName": null,
-          "type": "System.Guid?",
-          "typeSimple": "string?",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "IngredientName",
-          "jsonName": null,
-          "type": "System.String",
+          "type": "System.Guid",
           "typeSimple": "string",
           "isRequired": true,
           "minLength": null,
-          "maxLength": 200,
+          "maxLength": null,
           "minimum": null,
           "maximum": null,
           "regex": null
@@ -7486,6 +7474,18 @@
         },
         {
           "name": "SupplierInfo",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": 500,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Notes",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
@@ -7751,19 +7751,7 @@
         {
           "name": "IngredientId",
           "jsonName": null,
-          "type": "System.Guid?",
-          "typeSimple": "string?",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "IngredientName",
-          "jsonName": null,
-          "type": "System.String",
+          "type": "System.Guid",
           "typeSimple": "string",
           "isRequired": false,
           "minLength": null,
@@ -7834,6 +7822,18 @@
         },
         {
           "name": "SupplierInfo",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Notes",
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",

@@ -5,11 +5,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto
 {
     public class CreateUpdatePurchaseInvoiceItemDto
     {
-        public Guid? IngredientId { get; set; }
-        
         [Required]
-        [MaxLength(200)]
-        public string IngredientName { get; set; } = string.Empty;
+        public Guid IngredientId { get; set; }
         
         [Required]
         public int Quantity { get; set; }
@@ -26,5 +23,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto
         
         [MaxLength(500)]
         public string? SupplierInfo { get; set; }
+        
+        [MaxLength(500)]
+        public string? Notes { get; set; }
     }
 }

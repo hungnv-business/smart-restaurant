@@ -8,14 +8,14 @@ export interface CreateUpdatePurchaseInvoiceDto {
 }
 
 export interface CreateUpdatePurchaseInvoiceItemDto {
-  ingredientId?: string;
-  ingredientName: string;
+  ingredientId: string;
   quantity: number;
   unitId?: string;
   unitName: string;
   unitPrice?: number;
   totalPrice?: number;
   supplierInfo?: string;
+  notes?: string;
 }
 
 export interface GetPurchaseInvoiceListDto extends PagedAndSortedResultRequestDto {
@@ -47,12 +47,12 @@ export interface PurchaseInvoiceDto extends FullAuditedEntityDto<string> {
 export interface PurchaseInvoiceItemDto extends FullAuditedEntityDto<string> {
   purchaseInvoiceId?: string;
   ingredientId?: string;
-  ingredientName?: string;
   quantity: number;
   unitId?: string;
   unitName?: string;
   unitPrice?: number;
   totalPrice: number;
   supplierInfo?: string;
+  notes?: string;
   categoryId?: string;
 }

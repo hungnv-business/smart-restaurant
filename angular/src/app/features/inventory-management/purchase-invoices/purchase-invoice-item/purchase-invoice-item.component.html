@@ -29,10 +29,10 @@
         optionValue="id"
         placeholder="Chọn danh mục..."
         [showClear]="true"
-        [ngModel]="currentCategoryId"
+        formControlName="categoryId"
         (onChange)="onCategoryChange($event.value)"
         class="w-full"
-        *ngIf="!isViewOnly"
+        [readonly]="isViewOnly"
       />
     </div>
 
@@ -40,36 +40,20 @@
     <div class="flex flex-col gap-1">
       <label class="text-xs font-medium text-gray-700 required">Nguyên liệu</label>
       
-      <!-- View mode: hiển thị text -->
-      <input
-        *ngIf="isViewOnly"
-        type="text"
-        pInputText
-        formControlName="ingredientName"
-        class="w-full text-xs"
-        readonly
-      />
-      
-      <!-- Edit mode: editable dropdown -->
+      <!-- Edit/View mode: dropdown ingredient -->
       <p-dropdown
-        *ngIf="!isViewOnly"
-        formControlName="ingredientName"
+        formControlName="ingredientId"
         [options]="ingredients"
         optionLabel="displayName"
-        optionValue="displayName"
-        placeholder="Chọn hoặc nhập tên nguyên liệu..."
+        optionValue="id"
+        placeholder="Chọn nguyên liệu..."
         [showClear]="true"
-        [editable]="true"
-        (onChange)="onIngredientNameChange($event.value)"
+        (onChange)="onIngredientChange($event.value)"
         class="w-full"
+        [readonly]="isViewOnly"
       />
       
-      <!-- Hidden field for ingredientId -->
-      <input
-        type="hidden"
-        formControlName="ingredientId"
-      />
-      <app-validation-error [control]="itemForm.get('ingredientName')" fieldName="Nguyên liệu" />
+      <app-validation-error [control]="itemForm.get('ingredientId')" fieldName="Nguyên liệu" />
     </div>
 
     <!-- Quantity & Unit -->
@@ -149,6 +133,19 @@
         />
         <app-validation-error [control]="itemForm.get('totalPrice')" fieldName="Thành tiền" />
       </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-medium text-gray-700">Ghi chú</label>
+      <input
+        type="text"
+        pInputText
+        formControlName="notes"
+        placeholder="Ghi chú cho mặt hàng này..."
+        class="w-full text-xs"
+        [readonly]="isViewOnly"
+      />
     </div>
   </div>
 </div>

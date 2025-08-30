@@ -41,6 +41,7 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.loadCategories();
+    console.log('PurchaseInvoiceItemComponent ngOnInit - isViewOnly:', this.isViewOnly);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -57,6 +58,7 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
   loadCategories() {
     this.globalService.getCategories().subscribe({
       next: (categories) => {
+        console.log('Loaded categories:', categories);
         this.categories = categories;
       },
       error: (error) => {
@@ -67,7 +69,6 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
 
   onCategoryChange(categoryId: string | null) {
     this.currentCategoryId = categoryId;
-    this.itemForm.patchValue({ categoryId });
     
     if (categoryId) {
       this.loadIngredientsByCategory(categoryId);
@@ -76,12 +77,12 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
       this.ingredients = [];
       this.itemForm.patchValue({
         ingredientId: null,
-        ingredientName: null,
         unitId: null,
         unitName: null,
         unitPrice: null,
         supplierInfo: null,
         totalPrice: null,
+        notes: null,
       });
     }
   }
@@ -101,18 +102,14 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
     this.remove.emit();
   }
 
-  onIngredientNameChange(ingredientName: string | null) {
-    // Tìm ingredient match với tên đã nhập
-    const matchedIngredient = this.ingredients.find(ing => ing.displayName === ingredientName);
-    
-    if (matchedIngredient && matchedIngredient.id) {
+  onIngredientChange(ingredientId: string | null) {
+    if (ingredientId) {
       // Gọi API để lấy thông tin chi tiết và auto-fill
-      this.purchaseInvoiceService.getIngredientLookup(matchedIngredient.id).subscribe({
+      this.purchaseInvoiceService.getIngredientLookup(ingredientId).subscribe({
         next: (ingredientLookup) => {
           if (ingredientLookup) {
             this.itemForm.patchValue({
               ingredientId: ingredientLookup.id,
-              ingredientName: ingredientLookup.name,
               unitId: ingredientLookup.unitId,
               unitName: ingredientLookup.unitName,
               unitPrice: ingredientLookup.costPerUnit,
@@ -128,14 +125,14 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
         }
       });
     } else {
-      // Nếu nhập tự do → clear ID và thông tin auto-fill
+      // Clear thông tin auto-fill
       this.itemForm.patchValue({
-        ingredientId: null,
         unitId: null,
+        unitName: null,
         unitPrice: null,
-        supplierInfo: null
+        supplierInfo: null,
+        totalPrice: null
       });
-      // Không clear unitName - để user tự nhập
     }
   }
 

@@ -207,6 +207,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.CostPerUnit).HasColumnType("decimal(18,2)");
             b.Property(x => x.SupplierInfo).HasMaxLength(512);
             b.Property(x => x.CurrentStock).IsRequired();
+            b.Property(x => x.IsStockTrackingEnabled).IsRequired();
             b.Property(x => x.IsActive).IsRequired();
             
             b.HasOne(x => x.Category)
@@ -281,13 +282,14 @@ public class SmartRestaurantDbContext :
             b.ConfigureByConvention();
             
             b.Property(x => x.PurchaseInvoiceId).IsRequired();
-            b.Property(x => x.IngredientId);
-            b.Property(x => x.IngredientName).IsRequired().HasMaxLength(200);
+            b.Property(x => x.IngredientId).IsRequired();
             b.Property(x => x.Quantity).IsRequired();
             b.Property(x => x.UnitId);
             b.Property(x => x.UnitName).IsRequired().HasMaxLength(50);
             b.Property(x => x.UnitPrice);
             b.Property(x => x.TotalPrice).IsRequired();
+            b.Property(x => x.SupplierInfo).HasMaxLength(500);
+            b.Property(x => x.Notes).HasMaxLength(500);
             
             b.HasOne(x => x.PurchaseInvoice)
                 .WithMany(x => x.Items)

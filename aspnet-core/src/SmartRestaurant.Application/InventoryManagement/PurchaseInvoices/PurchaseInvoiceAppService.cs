@@ -99,10 +99,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             // Trừ stock từ items cũ trước khi update
             foreach (var oldItem in existingEntity.Items.ToList())
             {
-                if (oldItem.IngredientId.HasValue)
-                {
-                    await UpdateIngredientStockAsync(oldItem.IngredientId.Value, -oldItem.Quantity);
-                }
+                await UpdateIngredientStockAsync(oldItem.IngredientId, -oldItem.Quantity);
             }
 
             // Update master properties
@@ -173,22 +170,19 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                 var item = new PurchaseInvoiceItem(
                     GuidGenerator.Create(),
                     invoice.Id,
-                    itemDto.IngredientName,
+                    itemDto.IngredientId,
                     itemDto.Quantity,
                     itemDto.UnitName,
                     itemDto.TotalPrice ?? 0,
-                    itemDto.IngredientId,
                     itemDto.UnitId,
                     itemDto.UnitPrice,
-                    itemDto.SupplierInfo);
+                    itemDto.SupplierInfo,
+                    itemDto.Notes);
 
                 invoice.Items.Add(item);
 
-                // Update CurrentStock for ingredients with ID
-                if (itemDto.IngredientId.HasValue)
-                {
-                    await UpdateIngredientStockAsync(itemDto.IngredientId.Value, itemDto.Quantity);
-                }
+                // Update CurrentStock for ingredients
+                await UpdateIngredientStockAsync(itemDto.IngredientId, itemDto.Quantity);
             }
         }
 
@@ -197,22 +191,18 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         /// </summary>
         private async Task ValidateAndPopulateItemAsync(CreateUpdatePurchaseInvoiceItemDto itemDto)
         {
-            // Auto-populate from Ingredient if selected
-            if (itemDto.IngredientId.HasValue)
+            // Auto-populate from Ingredient (IngredientId is now required)
+            var ingredient = await _ingredientRepository.GetAsync(itemDto.IngredientId);
+
+            // Auto-populate Unit info
+            var unit = await _unitRepository.GetAsync(ingredient.UnitId);
+            itemDto.UnitId = unit.Id;
+            itemDto.UnitName = unit.Name;
+
+            // Auto-populate SupplierInfo if available
+            if (!string.IsNullOrEmpty(ingredient.SupplierInfo))
             {
-                var ingredient = await _ingredientRepository.GetAsync(itemDto.IngredientId.Value);
-                itemDto.IngredientName = ingredient.Name;
-
-                // Auto-populate Unit info
-                var unit = await _unitRepository.GetAsync(ingredient.UnitId);
-                itemDto.UnitId = unit.Id;
-                itemDto.UnitName = unit.Name;
-
-                // Auto-populate SupplierInfo if available
-                if (!string.IsNullOrEmpty(ingredient.SupplierInfo))
-                {
-                    itemDto.SupplierInfo = ingredient.SupplierInfo;
-                }
+                itemDto.SupplierInfo = ingredient.SupplierInfo;
             }
 
             // Auto-calculate TotalPrice if not provided
@@ -223,11 +213,17 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         }
 
         /// <summary>
-        /// Update CurrentStock cho nguyên liệu chính
+        /// Update CurrentStock cho nguyên liệu chính - chỉ apply với nguyên liệu có IsStockTrackingEnabled = true
         /// </summary>
         private async Task UpdateIngredientStockAsync(Guid ingredientId, int quantity)
         {
             var ingredient = await _ingredientRepository.GetAsync(ingredientId);
+
+            // Chỉ cập nhật stock nếu nguyên liệu có bật theo dõi kho
+            if (!ingredient.IsStockTrackingEnabled)
+            {
+                return;
+            }
 
             if (quantity > 0)
             {

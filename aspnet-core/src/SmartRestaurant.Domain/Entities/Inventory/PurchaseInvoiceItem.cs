@@ -16,42 +16,37 @@ namespace SmartRestaurant.Entities.Inventory
         /// </summary>
         [Required]
         public Guid PurchaseInvoiceId { get; set; }
-        
+
         /// <summary>
-        /// ID nguyên liệu (Nullable - chỉ cho nguyên liệu chính)
-        /// </summary>
-        public Guid? IngredientId { get; set; }
-        
-        /// <summary>
-        /// Tên nguyên liệu (auto-fill từ Ingredient hoặc nhập tự do cho vật phẩm nhỏ)
+        /// ID nguyên liệu (Bắt buộc chọn từ Ingredient)
         /// </summary>
         [Required]
-        [MaxLength(200)]
-        public string IngredientName { get; set; } = string.Empty;
-        
+        public Guid IngredientId { get; set; }
+
+
         /// <summary>
         /// Số lượng
         /// </summary>
         [Required]
         public int Quantity { get; set; }
-        
+
         /// <summary>
         /// ID đơn vị (Nullable - chọn từ Unit)
         /// </summary>
         public Guid? UnitId { get; set; }
-        
+
         /// <summary>
         /// Tên đơn vị (auto-fill từ Unit.Name)
         /// </summary>
         [Required]
         [MaxLength(50)]
         public string UnitName { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// Giá đơn vị (Nullable - có thể bỏ trống)
         /// </summary>
         public int? UnitPrice { get; set; }
-        
+
         /// <summary>
         /// Tổng tiền - tự động tính từ Quantity * UnitPrice
         /// </summary>
@@ -65,6 +60,12 @@ namespace SmartRestaurant.Entities.Inventory
         public string? SupplierInfo { get; set; }
 
         /// <summary>
+        /// Ghi chú cho từng item
+        /// </summary>
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        /// <summary>
         /// Navigation property về PurchaseInvoice
         /// </summary>
         public virtual PurchaseInvoice PurchaseInvoice { get; set; } = null!;
@@ -72,7 +73,7 @@ namespace SmartRestaurant.Entities.Inventory
         /// <summary>
         /// Navigation property về Ingredient
         /// </summary>
-        public virtual Ingredient? Ingredient { get; set; }
+        public virtual Ingredient Ingredient { get; set; }
 
         protected PurchaseInvoiceItem()
         {
@@ -81,14 +82,14 @@ namespace SmartRestaurant.Entities.Inventory
         public PurchaseInvoiceItem(
             Guid id,
             Guid purchaseInvoiceId,
-            string ingredientName,
+            Guid ingredientId,
             int quantity,
             string unitName,
             int totalPrice,
-            Guid? ingredientId = null,
             Guid? unitId = null,
             int? unitPrice = null,
-            string? supplierInfo = null) : base(id)
+            string? supplierInfo = null,
+            string? notes = null) : base(id)
         {
             if (quantity <= 0)
             {
@@ -102,13 +103,13 @@ namespace SmartRestaurant.Entities.Inventory
 
             PurchaseInvoiceId = purchaseInvoiceId;
             IngredientId = ingredientId;
-            IngredientName = ingredientName;
             Quantity = quantity;
             UnitId = unitId;
             UnitName = unitName;
             UnitPrice = unitPrice;
             TotalPrice = totalPrice;
             SupplierInfo = supplierInfo;
+            Notes = notes;
         }
     }
 }
