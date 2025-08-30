@@ -10,6 +10,8 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 import { GuidLookupItemDto } from '../../../../proxy/common/dto/models';
 import { GlobalService } from '../../../../proxy/common/global.service';
+import {FluidModule} from 'primeng/fluid';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-purchase-invoice-item',
@@ -23,8 +25,12 @@ import { GlobalService } from '../../../../proxy/common/global.service';
     ButtonModule,
     TooltipModule,
     ValidationErrorComponent,
+    FluidModule,
+        TextareaModule,
+    
   ],
   templateUrl: './purchase-invoice-item.component.html',
+  styleUrl: './purchase-invoice-item.component.scss',
 })
 export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
   @Input({ required: true }) itemForm!: FormGroup;

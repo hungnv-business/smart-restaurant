@@ -1,12 +1,12 @@
-<div class="h-full flex flex-col overflow-hidden">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex-1 flex overflow-hidden">
+<div class="h-full flex flex-col overflow-y-auto md:overflow-hidden">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex-1 flex flex-col md:flex-row md:overflow-hidden">
     <!-- Panel trái: Thông tin cơ bản -->
-    <div class="w-1/4 p-6 h-full flex flex-col overflow-hidden border-r border-gray-200">
+    <div class="w-full md:w-1/4 p-6 flex-shrink-0 md:h-full flex flex-col md:overflow-hidden border-r-0 md:border-r border-b md:border-b-0 border-gray-200">
       <div class="flex flex-col h-full">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Thông tin hóa đơn</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b">Thông tin hóa đơn</h3>
 
         <!-- Số hóa đơn -->
-        <div class="flex flex-col gap-2 mb-4">
+        <div class="flex flex-col gap-1 mb-2">
           <label for="invoiceNumber" class="block font-semibold text-sm required">Số hóa đơn</label>
           <input
             type="text"
@@ -18,12 +18,10 @@
             readonly
           />
           <app-validation-error [control]="form.get('invoiceNumber')" fieldName="Số hóa đơn" />
-          <small class="text-gray-600">Số hiệu duy nhất của hóa đơn</small>
         </div>
 
-
         <!-- Ngày hóa đơn -->
-        <div class="flex flex-col gap-2 mb-4">
+        <div class="flex flex-col gap-1 mb-2">
           <label for="invoiceDate" class="block font-semibold text-sm required">Ngày hóa đơn</label>
           <p-calendar
             id="invoiceDate"
@@ -40,7 +38,7 @@
         </div>
 
         <!-- Ghi chú -->
-        <div class="flex flex-col gap-2 mb-6">
+        <div class="flex flex-col gap-1 mb-6">
           <label for="notes" class="block font-semibold text-sm">Ghi chú</label>
           <textarea
             pInputTextarea
@@ -58,70 +56,76 @@
 
         <!-- Tổng cộng cố định ở dưới -->
         <div class="flex-shrink-0">
-          <div
-            class="p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200"
-            *ngIf="itemsFormArray.length > 0"
-          >
-            <div class="text-center">
-              <div class="text-sm text-gray-600 mb-2">Tổng cộng hóa đơn</div>
-              <div class="text-4xl font-bold text-primary-600 mb-2">
-                {{ getTotalAmount() | vndCurrency }}
+          @if (itemsFormArray.length > 0) {
+            <div class="p-6 bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200">
+              <div class="text-center">
+                <div class="text-sm text-gray-600 mb-2">Tổng cộng hóa đơn</div>
+                <div class="text-4xl font-bold text-primary-600 mb-2">
+                  {{ getTotalAmount() | vndCurrency }}
+                </div>
+                <div class="text-sm text-gray-500">{{ itemsFormArray.length }} mặt hàng</div>
               </div>
-              <div class="text-sm text-gray-500">{{ itemsFormArray.length }} mặt hàng</div>
             </div>
-          </div>
+          }
         </div>
       </div>
     </div>
 
     <!-- Panel phải: Chi tiết mặt hàng -->
-    <div class="flex-1 h-full flex flex-col bg-gray-50 overflow-hidden">
+    <div class="w-full md:flex-1 flex-1 md:h-full flex flex-col bg-gray-50 md:overflow-hidden">
       <!-- Header cố định -->
       <div
-        class="flex-shrink-0 flex justify-between items-center p-4 pb-3 border-b border-gray-300 bg-white"
+        class="flex-shrink-0 sticky top-0 z-10 flex justify-between items-center p-4 pb-3 border-b border-gray-300 bg-white"
       >
         <h3 class="text-lg font-semibold text-gray-900">Chi tiết mặt hàng</h3>
-        <p-button
-          type="button"
-          label="Thêm mặt hàng"
-          icon="pi pi-plus"
-          severity="success"
-          size="small"
-          (onClick)="addItem()"
-          *ngIf="!isViewOnly"
-        />
+        @if (!isViewOnly) {
+          <p-button
+            type="button"
+            label="Thêm mặt hàng"
+            icon="pi pi-plus"
+            severity="success"
+            size="small"
+            (onClick)="addItem()"
+          />
+        }
       </div>
 
       <!-- Nội dung cuộn -->
-      <div class="flex-1 overflow-y-auto p-4" style="max-height: calc(95vh - 200px)">
+      <div class="flex-1 overflow-y-auto p-4 pb-20 md:pb-4" style="max-height: calc(95vh - 200px)">
         <div formArrayName="items">
-          <div class="text-center text-gray-500 py-16" *ngIf="itemsFormArray.length === 0">
-            <i class="pi pi-shopping-cart text-8xl mb-6 text-gray-300"></i>
-            <p class="text-xl font-medium mb-3 text-gray-600">Chưa có mặt hàng nào</p>
-            <p class="text-gray-400">Nhấn "Thêm mặt hàng" để bắt đầu nhập hóa đơn</p>
-          </div>
+          @if (itemsFormArray.length === 0) {
+            <div class="text-center text-gray-500 py-16">
+              <i class="pi pi-shopping-cart text-8xl mb-6 text-gray-300"></i>
+              <p class="text-xl font-medium mb-3 text-gray-600">Chưa có mặt hàng nào</p>
+              <p class="text-gray-400">Nhấn "Thêm mặt hàng" để bắt đầu nhập hóa đơn</p>
+            </div>
+          }
 
           <!-- Grid layout responsive -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div *ngFor="let item of itemsFormArray.controls; let i = index" [formGroupName]="i">
-              <app-purchase-invoice-item
-                [itemForm]="item"
-                [index]="i"
-                [isViewOnly]="isViewOnly"
-                (remove)="removeItem(i)"
-              />
-            </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
+            @for (item of itemsFormArray.controls; track item; let i = $index) {
+              <div [formGroupName]="i">
+                <app-purchase-invoice-item
+                  [itemForm]="item"
+                  [index]="i"
+                  [isViewOnly]="isViewOnly"
+                  (remove)="removeItem(i)"
+                />
+              </div>
+            }
           </div>
         </div>
       </div>
     </div>
   </form>
 
-  <app-form-footer-actions
-    [disabled]="form.invalid"
-    [loading]="loading"
-    [showSave]="!isViewOnly"
-    (formSave)="onSubmit()"
-    (formCancel)="onCancel()"
-  ></app-form-footer-actions>
+  <div class="sticky bottom-0 md:relative bg-white border-t md:border-t-0 z-10">
+    <app-form-footer-actions
+      [disabled]="form.invalid"
+      [loading]="loading"
+      [showSave]="!isViewOnly"
+      (formSave)="onSubmit()"
+      (formCancel)="onCancel()"
+    ></app-form-footer-actions>
+  </div>
 </div>
