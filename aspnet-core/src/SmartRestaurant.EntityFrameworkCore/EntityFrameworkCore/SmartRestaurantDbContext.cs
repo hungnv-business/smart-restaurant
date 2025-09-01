@@ -284,8 +284,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.PurchaseInvoiceId).IsRequired();
             b.Property(x => x.IngredientId).IsRequired();
             b.Property(x => x.Quantity).IsRequired();
-            b.Property(x => x.UnitId);
-            b.Property(x => x.UnitName).IsRequired().HasMaxLength(50);
+            b.Property(x => x.UnitId).IsRequired();
             b.Property(x => x.UnitPrice);
             b.Property(x => x.TotalPrice).IsRequired();
             b.Property(x => x.SupplierInfo).HasMaxLength(500);

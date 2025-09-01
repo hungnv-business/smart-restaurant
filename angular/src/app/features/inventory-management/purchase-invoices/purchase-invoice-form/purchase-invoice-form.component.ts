@@ -19,9 +19,10 @@ import { take, finalize } from 'rxjs';
 import { DateTimeHelper } from '../../../../shared/helpers';
 
 // Import proxy DTOs and services
-import { 
-  CreateUpdatePurchaseInvoiceDto, 
-  PurchaseInvoiceDto} from '../../../../proxy/inventory-management/purchase-invoices/dto';
+import {
+  CreateUpdatePurchaseInvoiceDto,
+  PurchaseInvoiceDto,
+} from '../../../../proxy/inventory-management/purchase-invoices/dto';
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 
@@ -29,7 +30,6 @@ interface IngredientLookupDto {
   id: string;
   name: string;
   unitId: string;
-  unitName: string;
   costPerUnit: number;
   supplierInfo: string;
 }
@@ -105,7 +105,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     const formValue = this.form.value;
     const invoiceDate = new Date(formValue.invoiceDate);
     const invoiceDateId = DateTimeHelper.getDateId(invoiceDate);
-    
+
     const dto: CreateUpdatePurchaseInvoiceDto = {
       invoiceNumber: formValue.invoiceNumber,
       invoiceDateId: invoiceDateId,
@@ -142,13 +142,12 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     }
   }
 
-
   // Tính total price khi thay đổi quantity hoặc unit price
   onQuantityOrPriceChange(index: number) {
     const itemForm = this.itemsFormArray.at(index);
     const quantity = itemForm.get('quantity')?.value || 0;
     const unitPrice = itemForm.get('unitPrice')?.value;
-    
+
     if (quantity && unitPrice) {
       const totalPrice = quantity * unitPrice;
       itemForm.patchValue({ totalPrice });
@@ -164,14 +163,15 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     this.ingredientService.getList(request).subscribe({
       next: result => {
         const ingredients = result?.items?.filter(i => i.isActive) || [];
-        this.ingredients.set(ingredients.map(i => ({
-          id: i.id!,
-          name: i.name!,
-          unitId: i.unitId!,
-          unitName: i.unitName!,
-          costPerUnit: i.costPerUnit || 0,
-          supplierInfo: i.supplierInfo || ''
-        })));
+        this.ingredients.set(
+          ingredients.map(i => ({
+            id: i.id!,
+            name: i.name!,
+            unitId: i.unitId!,
+            costPerUnit: i.costPerUnit || 0,
+            supplierInfo: i.supplierInfo || '',
+          })),
+        );
       },
       error: error => {
         console.error('Error loading ingredients:', error);
@@ -185,8 +185,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       next: result => {
         this.purchaseInvoice = result;
         console.log('Loaded purchase invoice:', result);
-        
-        
+
         this.populateForm(result);
       },
       error: error => {
@@ -196,9 +195,10 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
   }
 
   private savePurchaseInvoice(dto: CreateUpdatePurchaseInvoiceDto) {
-    const operation = this.isEdit && this.purchaseInvoice
-      ? this.purchaseInvoiceService.update(this.purchaseInvoice.id!, dto)
-      : this.purchaseInvoiceService.create(dto);
+    const operation =
+      this.isEdit && this.purchaseInvoice
+        ? this.purchaseInvoiceService.update(this.purchaseInvoice.id!, dto)
+        : this.purchaseInvoiceService.create(dto);
 
     const errorMessage = this.isEdit
       ? 'Không thể cập nhật hóa đơn mua'
@@ -222,7 +222,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       invoiceNumber: [this.generateInvoiceNumber()],
       invoiceDate: [new Date(), [Validators.required]],
       notes: ['', [Validators.maxLength(500)]],
-      items: this.fb.array([])
+      items: this.fb.array([]),
     });
   }
 
@@ -231,7 +231,8 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    const time =
+      String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
     return `HD-${year}${month}${day}-${time}`;
   }
 
@@ -240,18 +241,17 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       ingredientId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitId: [null],
-      unitName: ['', [Validators.required, Validators.maxLength(50)]],
       unitPrice: [null],
       totalPrice: [null, [Validators.required, Validators.min(0)]],
       supplierInfo: [''],
       notes: ['', [Validators.maxLength(500)]],
-      categoryId: [null]
+      categoryId: [null],
     });
   }
 
   private populateForm(purchaseInvoice: PurchaseInvoiceDto) {
     // Convert InvoiceDateId back to Date for form binding
-    const invoiceDate = purchaseInvoice.invoiceDateId 
+    const invoiceDate = purchaseInvoice.invoiceDateId
       ? DateTimeHelper.getDateFromId(purchaseInvoice.invoiceDateId)
       : new Date();
 
@@ -272,7 +272,6 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
         ingredientId: item.ingredientId ?? null,
         quantity: item.quantity ?? 1,
         unitId: item.unitId ?? null,
-        unitName: item.unitName ?? '',
         unitPrice: item.unitPrice ?? null,
         totalPrice: item.totalPrice ?? 0,
         supplierInfo: item.supplierInfo ?? '',
@@ -289,7 +288,6 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
 
     this.form.markAsPristine();
   }
-
 
   private setFormReadonly(formGroup: FormGroup) {
     Object.keys(formGroup.controls).forEach(key => {

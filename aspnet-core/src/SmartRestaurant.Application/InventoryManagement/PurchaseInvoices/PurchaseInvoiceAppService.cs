@@ -172,9 +172,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                     invoice.Id,
                     itemDto.IngredientId,
                     itemDto.Quantity,
-                    itemDto.UnitName,
-                    itemDto.TotalPrice ?? 0,
                     itemDto.UnitId,
+                    itemDto.TotalPrice ?? 0,
                     itemDto.UnitPrice,
                     itemDto.SupplierInfo,
                     itemDto.Notes);
@@ -197,7 +196,6 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             // Auto-populate Unit info
             var unit = await _unitRepository.GetAsync(ingredient.UnitId);
             itemDto.UnitId = unit.Id;
-            itemDto.UnitName = unit.Name;
 
             // Auto-populate SupplierInfo if available
             if (!string.IsNullOrEmpty(ingredient.SupplierInfo))

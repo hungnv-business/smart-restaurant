@@ -2,13 +2,12 @@
  * DateTime Helper for handling DimDate conversions and Vietnamese date formatting
  */
 export class DateTimeHelper {
-  
   /**
    * Chuyển đổi Date thành DimDate ID (format YYYYMMDD)
    */
   static getDateId(date: Date): number {
     if (!date || isNaN(date.getTime())) return 0;
-    
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -20,21 +19,21 @@ export class DateTimeHelper {
    */
   static getDateFromId(dateId: number): Date | null {
     if (!dateId || dateId < 19000101 || dateId > 99991231) return null;
-    
+
     const dateStr = dateId.toString();
     if (dateStr.length !== 8) return null;
-    
+
     const year = parseInt(dateStr.substring(0, 4));
     const month = parseInt(dateStr.substring(4, 6)) - 1; // Month is 0-based
     const day = parseInt(dateStr.substring(6, 8));
-    
+
     const date = new Date(year, month, day);
-    
+
     // Validate the date
     if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
       return null;
     }
-    
+
     return date;
   }
 
@@ -76,19 +75,19 @@ export class DateTimeHelper {
    */
   static getDateRangeFromIds(fromDateId?: number, toDateId?: number): Date[] | null {
     if (!fromDateId && !toDateId) return null;
-    
+
     const dates: Date[] = [];
-    
+
     if (fromDateId) {
       const fromDate = this.getDateFromId(fromDateId);
       if (fromDate) dates.push(fromDate);
     }
-    
+
     if (toDateId) {
       const toDate = this.getDateFromId(toDateId);
       if (toDate) dates.push(toDate);
     }
-    
+
     return dates.length > 0 ? dates : null;
   }
 
@@ -99,7 +98,7 @@ export class DateTimeHelper {
     if (!dateRange || dateRange.length === 0) {
       return {};
     }
-    
+
     return {
       fromDateId: dateRange[0] ? this.getDateId(dateRange[0]) : undefined,
       toDateId: dateRange[1] ? this.getDateId(dateRange[1]) : undefined,
@@ -111,11 +110,13 @@ export class DateTimeHelper {
    */
   static isToday(date: Date): boolean {
     if (!date || isNaN(date.getTime())) return false;
-    
+
     const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   }
 
   /**

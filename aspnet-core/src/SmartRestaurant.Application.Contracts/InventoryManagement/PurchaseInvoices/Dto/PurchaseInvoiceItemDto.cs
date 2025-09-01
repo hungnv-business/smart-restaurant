@@ -8,8 +8,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto
         public Guid PurchaseInvoiceId { get; set; }
         public Guid IngredientId { get; set; }
         public int Quantity { get; set; }
-        public Guid? UnitId { get; set; }
-        public string UnitName { get; set; } = string.Empty;
+        public Guid UnitId { get; set; }
         public int? UnitPrice { get; set; }
         public int TotalPrice { get; set; }
         public string? SupplierInfo { get; set; }

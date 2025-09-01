@@ -1,4 +1,13 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  inject,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,7 +19,7 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 import { GuidLookupItemDto } from '../../../../proxy/common/dto/models';
 import { GlobalService } from '../../../../proxy/common/global.service';
-import {FluidModule} from 'primeng/fluid';
+import { FluidModule } from 'primeng/fluid';
 import { TextareaModule } from 'primeng/textarea';
 
 @Component({
@@ -26,8 +35,7 @@ import { TextareaModule } from 'primeng/textarea';
     TooltipModule,
     ValidationErrorComponent,
     FluidModule,
-        TextareaModule,
-    
+    TextareaModule,
   ],
   templateUrl: './purchase-invoice-item.component.html',
   styleUrl: './purchase-invoice-item.component.scss',
@@ -63,19 +71,19 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
 
   loadCategories() {
     this.globalService.getCategories().subscribe({
-      next: (categories) => {
+      next: categories => {
         console.log('Loaded categories:', categories);
         this.categories = categories;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading categories:', error);
-      }
+      },
     });
   }
 
   onCategoryChange(categoryId: string | null) {
     this.currentCategoryId = categoryId;
-    
+
     if (categoryId) {
       this.loadIngredientsByCategory(categoryId);
     } else {
@@ -84,7 +92,6 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
       this.itemForm.patchValue({
         ingredientId: null,
         unitId: null,
-        unitName: null,
         unitPrice: null,
         supplierInfo: null,
         totalPrice: null,
@@ -95,12 +102,12 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
 
   private loadIngredientsByCategory(categoryId: string) {
     this.globalService.getIngredientsByCategory(categoryId).subscribe({
-      next: (ingredients) => {
+      next: ingredients => {
         this.ingredients = ingredients;
       },
-      error: (error) => {
+      error: error => {
         console.error('Error loading ingredients:', error);
-      }
+      },
     });
   }
 
@@ -112,32 +119,30 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
     if (ingredientId) {
       // Gọi API để lấy thông tin chi tiết và auto-fill
       this.purchaseInvoiceService.getIngredientLookup(ingredientId).subscribe({
-        next: (ingredientLookup) => {
+        next: ingredientLookup => {
           if (ingredientLookup) {
             this.itemForm.patchValue({
               ingredientId: ingredientLookup.id,
               unitId: ingredientLookup.unitId,
-              unitName: ingredientLookup.unitName,
               unitPrice: ingredientLookup.costPerUnit,
-              supplierInfo: ingredientLookup.supplierInfo
+              supplierInfo: ingredientLookup.supplierInfo,
             });
-            
+
             // Tự động tính thành tiền nếu có quantity
             this.onCalculateTotal();
           }
         },
-        error: (error) => {
+        error: error => {
           console.error('Error loading ingredient lookup:', error);
-        }
+        },
       });
     } else {
       // Clear thông tin auto-fill
       this.itemForm.patchValue({
         unitId: null,
-        unitName: null,
         unitPrice: null,
         supplierInfo: null,
-        totalPrice: null
+        totalPrice: null,
       });
     }
   }
@@ -145,7 +150,7 @@ export class PurchaseInvoiceItemComponent implements OnInit, OnChanges {
   onCalculateTotal() {
     const quantity = this.itemForm.get('quantity')?.value || 0;
     const unitPrice = this.itemForm.get('unitPrice')?.value;
-    
+
     if (quantity && unitPrice) {
       const totalPrice = quantity * unitPrice;
       this.itemForm.patchValue({ totalPrice });

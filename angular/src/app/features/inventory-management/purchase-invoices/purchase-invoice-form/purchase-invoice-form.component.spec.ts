@@ -1,6 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { DialogService, DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { PermissionService } from '@abp/ng.core';
+import { CORE_OPTIONS } from '@abp/ng.core';
 import { PurchaseInvoiceFormComponent } from './purchase-invoice-form.component';
 import { ComponentBase } from '../../../../shared/base/component-base';
 
@@ -15,17 +21,23 @@ describe('PurchaseInvoiceFormComponent', () => {
     mockConfig = { data: null };
 
     await TestBed.configureTestingModule({
-      imports: [PurchaseInvoiceFormComponent, ReactiveFormsModule],
+      imports: [PurchaseInvoiceFormComponent, ReactiveFormsModule, NoopAnimationsModule],
       providers: [
         FormBuilder,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        MessageService,
+        ConfirmationService,
+        DialogService,
         { provide: DynamicDialogRef, useValue: mockDialogRef },
         { provide: DynamicDialogConfig, useValue: mockConfig },
+        { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
+        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PurchaseInvoiceFormComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

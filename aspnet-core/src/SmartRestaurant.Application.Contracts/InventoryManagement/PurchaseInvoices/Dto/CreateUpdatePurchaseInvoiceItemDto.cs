@@ -11,11 +11,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto
         [Required]
         public int Quantity { get; set; }
         
-        public Guid? UnitId { get; set; }
-        
         [Required]
-        [MaxLength(50)]
-        public string UnitName { get; set; } = string.Empty;
+        public Guid UnitId { get; set; }
         
         public int? UnitPrice { get; set; }
         

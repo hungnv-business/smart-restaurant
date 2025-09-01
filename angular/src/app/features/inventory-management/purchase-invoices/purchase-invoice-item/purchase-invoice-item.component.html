@@ -79,15 +79,12 @@
               type="text"
               pInputText
               id="unit"
-              formControlName="unitName"
-              placeholder="kg, lít, cái..."
-              [readonly]="isViewOnly || itemForm.get('unitId')?.value"
-              [class.bg-gray-50]="itemForm.get('unitId')?.value"
-              [class.p-invalid]="
-                itemForm.get('unitName')?.invalid && itemForm.get('unitName')?.touched
-              "
+              formControlName="unitId"
+              placeholder="Chọn nguyên liệu trước..."
+              readonly="true"
+              [class.bg-gray-50]="true"
             />
-            <app-validation-error [control]="itemForm.get('unitName')" fieldName="Đơn vị" />
+            <app-validation-error [control]="itemForm.get('unitId')" fieldName="Đơn vị" />
           </div>
         </div>
 

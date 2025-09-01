@@ -83,14 +83,9 @@ export class PurchaseInvoiceListComponent extends ComponentBase implements OnIni
 
   ngOnInit() {
     // Setup debounced search
-    this.searchSubject
-      .pipe(
-        debounceTime(1000),
-        distinctUntilChanged()
-      )
-      .subscribe(() => {
-        this.resetPagination(this.dt);
-      });
+    this.searchSubject.pipe(debounceTime(1000), distinctUntilChanged()).subscribe(() => {
+      this.resetPagination(this.dt);
+    });
   }
 
   // Xử lý tìm kiếm với debounce
@@ -179,5 +174,4 @@ export class PurchaseInvoiceListComponent extends ComponentBase implements OnIni
       },
     });
   }
-
 }

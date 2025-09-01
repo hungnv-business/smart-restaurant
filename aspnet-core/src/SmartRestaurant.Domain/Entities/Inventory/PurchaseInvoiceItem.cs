@@ -31,16 +31,10 @@ namespace SmartRestaurant.Entities.Inventory
         public int Quantity { get; set; }
 
         /// <summary>
-        /// ID đơn vị (Nullable - chọn từ Unit)
-        /// </summary>
-        public Guid? UnitId { get; set; }
-
-        /// <summary>
-        /// Tên đơn vị (auto-fill từ Unit.Name)
+        /// ID đơn vị (Bắt buộc - chọn từ Unit)
         /// </summary>
         [Required]
-        [MaxLength(50)]
-        public string UnitName { get; set; } = string.Empty;
+        public Guid UnitId { get; set; }
 
         /// <summary>
         /// Giá đơn vị (Nullable - có thể bỏ trống)
@@ -84,9 +78,8 @@ namespace SmartRestaurant.Entities.Inventory
             Guid purchaseInvoiceId,
             Guid ingredientId,
             int quantity,
-            string unitName,
+            Guid unitId,
             int totalPrice,
-            Guid? unitId = null,
             int? unitPrice = null,
             string? supplierInfo = null,
             string? notes = null) : base(id)
@@ -105,7 +98,6 @@ namespace SmartRestaurant.Entities.Inventory
             IngredientId = ingredientId;
             Quantity = quantity;
             UnitId = unitId;
-            UnitName = unitName;
             UnitPrice = unitPrice;
             TotalPrice = totalPrice;
             SupplierInfo = supplierInfo;

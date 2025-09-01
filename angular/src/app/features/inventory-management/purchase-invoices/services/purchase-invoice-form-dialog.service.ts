@@ -9,7 +9,7 @@ export interface PurchaseInvoiceFormData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PurchaseInvoiceFormDialogService {
   private dialogService = inject(DialogService);
@@ -26,13 +26,13 @@ export class PurchaseInvoiceFormDialogService {
       maximizable: true,
       breakpoints: {
         '960px': '95vw',
-        '640px': '100vw'
+        '640px': '100vw',
       },
       data: {
         purchaseInvoiceId: null,
-        mode: 'create'
+        mode: 'create',
       } as PurchaseInvoiceFormData,
-      styleClass: 'purchase-invoice-dialog'
+      styleClass: 'purchase-invoice-dialog',
     });
 
     return ref.onClose;
@@ -50,13 +50,13 @@ export class PurchaseInvoiceFormDialogService {
       maximizable: true,
       breakpoints: {
         '960px': '95vw',
-        '640px': '100vw'
+        '640px': '100vw',
       },
       data: {
         purchaseInvoiceId,
-        mode: 'edit'
+        mode: 'edit',
       } as PurchaseInvoiceFormData,
-      styleClass: 'purchase-invoice-dialog'
+      styleClass: 'purchase-invoice-dialog',
     });
 
     return ref.onClose;
@@ -74,13 +74,13 @@ export class PurchaseInvoiceFormDialogService {
       maximizable: true,
       breakpoints: {
         '960px': '95vw',
-        '640px': '100vw'
+        '640px': '100vw',
       },
       data: {
         purchaseInvoiceId,
-        mode: 'view'
+        mode: 'view',
       } as PurchaseInvoiceFormData,
-      styleClass: 'purchase-invoice-dialog purchase-invoice-view-dialog'
+      styleClass: 'purchase-invoice-dialog purchase-invoice-view-dialog',
     });
 
     return ref.onClose;
