@@ -20,6 +20,14 @@ import {
 import { takeUntil } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 
+/**
+ * Component quản lý danh sách khu vực bố cục bàn trong nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách các khu vực (Dãy 1, Khu VIP, Sân vườn...)
+ * - Thêm, sửa, xóa khu vực
+ * - Thay đổi thứ tự hiển thị bằng drag & drop
+ * - Bật/tắt trạng thái kích hoạt
+ */
 @Component({
   selector: 'app-layout-section-list',
   standalone: true,
@@ -40,20 +48,34 @@ import { forkJoin } from 'rxjs';
   styleUrls: ['./layout-section-list.component.scss'],
 })
 export class LayoutSectionListComponent extends ComponentBase implements OnInit {
+  /** Danh sách các khu vực bố cục trong nhà hàng */
   layoutSections: LayoutSectionDto[] = [];
+  /** Trạng thái đang tải dữ liệu */
   loading = false;
 
+  /** Dịch vụ API cho khu vực bố cục */
   private layoutSectionService = inject(LayoutSectionService);
+  /** Dịch vụ mở dialog form */
   private layoutSectionFormDialogService = inject(LayoutSectionFormDialogService);
 
+  /**
+   * Constructor - khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo component - tải danh sách khu vực
+   */
   ngOnInit(): void {
     this.loadLayoutSections();
   }
 
+  /**
+   * Tải danh sách các khu vực bố cục từ API
+   * Hiển thị trạng thái loading trong quá trình tải
+   */
   loadLayoutSections(): void {
     this.loading = true;
 
@@ -72,6 +94,10 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Mở dialog tạo khu vực mới
+   * Tải lại danh sách nếu tạo thành công
+   */
   openNew(): void {
     this.layoutSectionFormDialogService.openCreateSectionDialog().subscribe(success => {
       if (success) {
@@ -80,6 +106,10 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
     });
   }
 
+  /**
+   * Mở dialog chỉnh sửa khu vực
+   * @param section Khu vực cần chỉnh sửa
+   */
   editSection(section: LayoutSectionDto): void {
     this.layoutSectionFormDialogService.openEditSectionDialog(section.id!).subscribe(success => {
       if (success) {
@@ -88,6 +118,11 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
     });
   }
 
+  /**
+   * Xóa khu vực sau khi xác nhận
+   * Hiển thị cảnh báo về ảnh hưởng đến bàn ăn
+   * @param section Khu vực cần xóa
+   */
   deleteSection(section: LayoutSectionDto): void {
     this.confirmationService.confirm({
       message: `Bạn có chắc chắn muốn xóa khu vực "${section.sectionName}"?\n\nLưu ý: Việc xóa khu vực có thể ảnh hưởng đến các bàn ăn đã được gán vào khu vực này.`,

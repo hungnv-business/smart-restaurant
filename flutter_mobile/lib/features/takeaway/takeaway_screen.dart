@@ -2,10 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../shared/constants/vietnamese_constants.dart';
 
+/// Screen quản lý đơn hàng mang về trong ứng dụng nhà hàng mobile
+/// 
+/// Chức năng chính:
+/// - Hiển thị danh sách đơn mang về với trạng thái và thời gian lấy hàng
+/// - Tạo đơn mang về mới với thông tin khách hàng và món ăn
+/// - Chỉnh sửa đơn mang về (trước khi hoàn thành)
+/// - Theo dõi tiến độ chuẩn bị món ăn (đang chuẩn bị, sẵn sàng, hoàn thành)
+/// - Liên hệ với khách hàng khi đơn hàng sẵn sàng
+/// - Tìm kiếm theo số điện thoại và lọc theo trạng thái
+/// 
+/// Quy trình làm việc:
+/// 1. Khách đặt món mang về qua điện thoại/app
+/// 2. Nhân viên tạo đơn trong hệ thống với thời gian lấy hàng
+/// 3. Bếp chuẩn bị món → cập nhật "Sẵn sàng" 
+/// 4. Thông báo khách đến lấy → đánh dấu "Hoàn thành"
+/// 
+/// Mode hoạt động:
+/// - null: Danh sách tất cả đơn mang về
+/// - 'new': Form tạo đơn mang về mới
+/// - 'edit': Chỉnh sửa đơn hàng chưa hoàn thành
+/// - 'detail': Chi tiết đơn mang về
 class TakeawayScreen extends StatefulWidget {
-  final String? mode; // 'new', 'edit', 'detail', or null for list
+  /// Chế độ hoạt động của screen
+  final String? mode;
+  
+  /// ID của đơn hàng mang về
   final String? orderId;
 
+  /// Constructor với tham số tùy chọn
   const TakeawayScreen({
     Key? key, 
     this.mode,

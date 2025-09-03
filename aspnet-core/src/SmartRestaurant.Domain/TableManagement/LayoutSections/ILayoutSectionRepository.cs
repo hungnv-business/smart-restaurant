@@ -6,6 +6,10 @@ using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.TableManagement.LayoutSections
 {
+    /// <summary>
+    /// Repository interface chuyên biệt cho khu vực bố cục bàn ăn
+    /// Mở rộng IRepository cơ bản với các method truy vấn phức tạp
+    /// </summary>
     public interface ILayoutSectionRepository : IRepository<LayoutSection, Guid>
     {
         /// <summary>Lấy tất cả khu vực có sắp xếp theo DisplayOrder</summary>

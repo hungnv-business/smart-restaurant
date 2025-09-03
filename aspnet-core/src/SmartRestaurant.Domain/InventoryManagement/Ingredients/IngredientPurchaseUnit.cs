@@ -41,6 +41,12 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
     public decimal? PurchasePrice { get; set; }
     
     /// <summary>
+    /// Thứ tự hiển thị (để sắp xếp theo thứ tự người dùng thêm vào)
+    /// </summary>
+    [Required]
+    public int DisplayOrder { get; set; }
+    
+    /// <summary>
     /// Trạng thái kích hoạt
     /// </summary>
     [Required]
@@ -67,6 +73,7 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         Guid unitId,
         int conversionRatio,
         bool isBaseUnit,
+        int displayOrder,
         decimal? purchasePrice = null,
         bool isActive = true) : base(id)
     {
@@ -79,6 +86,7 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         UnitId = unitId;
         ConversionRatio = conversionRatio;
         IsBaseUnit = isBaseUnit;
+        DisplayOrder = displayOrder;
         PurchasePrice = purchasePrice;
         IsActive = isActive;
     }

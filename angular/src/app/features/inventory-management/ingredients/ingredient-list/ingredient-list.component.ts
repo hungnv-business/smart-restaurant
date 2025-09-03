@@ -23,6 +23,15 @@ import { PERMISSIONS } from '../../../../shared/constants/permissions';
 import { finalize, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
+/**
+ * Component quản lý danh sách nguyên liệu trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách nguyên liệu với phân trang server-side
+ * - Tìm kiếm theo tên và lọc theo danh mục (Cà chua, Thịt bò, Hành tây...)
+ * - Hiển thị tồn kho với chuyển đổi đa đơn vị (kg -> gram, lít -> ml)
+ * - Thêm, sửa, xóa nguyên liệu
+ * - Kiểm soát quyền truy cập theo role
+ */
 @Component({
   selector: 'app-ingredient-list',
   standalone: true,
@@ -47,76 +56,95 @@ import { Subject } from 'rxjs';
   styleUrls: ['./ingredient-list.component.scss'],
 })
 export class IngredientListComponent extends ComponentBase implements OnInit {
-  // Quyền truy cập
+  /** Quyền truy cập - Kiểm soát hiển thị các nút theo quyền user */
   readonly permissions = {
-    create: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.CREATE,
-    edit: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.EDIT,
-    delete: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.DELETE,
+    create: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.CREATE, // Quyền tạo mới nguyên liệu
+    edit: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.EDIT, // Quyền chỉnh sửa nguyên liệu
+    delete: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.DELETE, // Quyền xóa nguyên liệu
   };
 
-  // Dữ liệu hiển thị
-  ingredients = signal<IngredientDto[]>([]);
-  categories = signal<GuidLookupItemDto[]>([]);
-  loading = false;
-  totalRecords = 0;
+  /** Dữ liệu hiển thị trên bảng */
+  ingredients = signal<IngredientDto[]>([]); // Danh sách nguyên liệu (server-side paging)
+  categories = signal<GuidLookupItemDto[]>([]); // Danh sách danh mục cho dropdown filter
+  loading = false; // Trạng thái loading khi gọi API
+  totalRecords = 0; // Tổng số record cho phân trang
   
-  // Filter parameters
-  searchText = '';
-  selectedCategoryId: string | null = null;
+  /** Tham số bộ lọc */
+  searchText = ''; // Văn bản tìm kiếm
+  selectedCategoryId: string | null = null; // ID danh mục được chọn
   
-  // Debounce search
+  /** Xử lý debounce cho tìm kiếm */
   private searchSubject = new Subject<string>();
   
-  // Stock display unit toggle tracking
-  stockDisplayUnits = new Map<string, { unitId: string; unitName: string; isBaseUnit: boolean }>();
-  ingredientPurchaseUnits = new Map<string, IngredientPurchaseUnitDto[]>();
+  /** Quản lý hiển thị tồn kho theo đa đơn vị */
+  stockDisplayUnits = new Map<string, { unitId: string; unitName: string; isBaseUnit: boolean }>(); // Đơn vị hiển thị hiện tại
+  ingredientPurchaseUnits = new Map<string, IngredientPurchaseUnitDto[]>(); // Các đơn vị mua hàng của từng nguyên liệu
 
-  // Hằng số
+  /** Tên entity dùng trong thông báo */
   private readonly ENTITY_NAME = 'nguyên liệu';
 
+  /** Các service được inject */
   private ingredientService = inject(IngredientService);
   private globalService = inject(GlobalService);
   private ingredientFormDialogService = inject(IngredientFormDialogService);
 
+  /** Tham chiếu đến PrimeNG Table */
   @ViewChild('dt') dt!: Table;
 
+  /**
+   * Constructor - khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo component - tải danh mục và thiết lập debounce search
+   */
   async ngOnInit() {
     await this.loadCategories();
     
-    // Setup debounced search
+    // Thiết lập tìm kiếm debounce để giảm tải API calls
     this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
+      debounceTime(300), // Chờ 300ms sau ký tự cuối
+      distinctUntilChanged() // Chỉ gọi nếu giá trị thay đổi
     ).subscribe(() => {
-      this.resetPagination(this.dt);
+      this.resetPagination(this.dt); // Reset về trang đầu và tải lại
     });
   }
 
-  // Xử lý tìm kiếm với debounce
+  /**
+   * Xử lý thay đổi text tìm kiếm với debounce
+   * Chờ 300ms sau ký tự cuối để giảm tải API calls
+   */
   onFilterChange(): void {
     this.searchSubject.next(this.searchText);
   }
 
-  // Xử lý filter theo category
+  /**
+   * Xử lý filter theo danh mục nguyên liệu
+   * @param categoryId ID danh mục được chọn (hoặc empty để xem tất cả)
+   */
   onCategoryFilter(categoryId: string): void {
     this.selectedCategoryId = categoryId || null;
-    this.resetPagination(this.dt);
+    this.resetPagination(this.dt); // Reset về trang đầu và tải lại
   }
 
-  // Mở dialog form
+  /**
+   * Mở dialog form tạo mới hoặc chỉnh sửa nguyên liệu
+   * @param ingredientId ID nguyên liệu cần sửa (nếu có), undefined để tạo mới
+   */
   openFormDialog(ingredientId?: string) {
+    // Conditional dialog pattern: chọn dialog dựa trên mode
     const dialog$ = ingredientId
       ? this.ingredientFormDialogService.openEditDialog(ingredientId)
       : this.ingredientFormDialogService.openCreateDialog();
 
     dialog$.subscribe(success => {
       if (success) {
-        this.resetPagination(this.dt);
+        this.resetPagination(this.dt); // Tải lại dữ liệu
 
+        // Hiển thị thông báo thành công tương ứng
         if (ingredientId) {
           this.showUpdateSuccess(this.ENTITY_NAME);
         } else {
@@ -127,7 +155,11 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
   }
 
 
-  // Xóa một nguyên liệu
+  /**
+   * Xóa một nguyên liệu sau khi xác nhận
+   * Hiển thị dialog xác nhận trước khi xóa
+   * @param ingredient Nguyên liệu cần xóa
+   */
   deleteIngredient(ingredient: IngredientDto) {
     this.confirmDelete(ingredient.name!, () => {
       this.performDeleteIngredient(ingredient);

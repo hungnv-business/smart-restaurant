@@ -18,6 +18,16 @@ import { IngredientCategoryFormData } from '../services/ingredient-category-form
 import { take, finalize } from 'rxjs';
 import { TextareaModule } from 'primeng/textarea';
 
+/**
+ * Component quản lý form tạo/chỉnh sửa danh mục nguyên liệu trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Tạo mới danh mục nguyên liệu (VD: "Thịt", "Rau củ", "Gia vị")
+ * - Chỉnh sửa thông tin danh mục hiện có
+ * - Quản lý thứ tự hiển thị trong hệ thống kho
+ * - Bật/tắt trạng thái hoạt động
+ * - Validation dữ liệu đầu vào
+ * - Tự động tính toán thứ tự hiển thị tiếp theo
+ */
 @Component({
   selector: 'app-ingredient-category-form',
   standalone: true,
@@ -36,17 +46,26 @@ import { TextareaModule } from 'primeng/textarea';
   styleUrls: ['./ingredient-category-form.component.scss'],
 })
 export class IngredientCategoryFormComponent extends ComponentBase implements OnInit {
+  /** Form quản lý thông tin danh mục nguyên liệu */
   form: FormGroup;
+  /** Trạng thái loading khi thực hiện các thao tác async */
   loading = false;
+  /** Chế độ chỉnh sửa (true) hay tạo mới (false) */
   isEdit = false;
+  /** Thông tin danh mục đang được chỉnh sửa */
   category?: IngredientCategoryDto;
 
+  /** Tham chiếu dialog và cấu hình */
   public ref = inject(DynamicDialogRef);
   public config = inject(DynamicDialogConfig<IngredientCategoryFormData>);
 
+  /** Các service được inject */
   private fb = inject(FormBuilder);
   private ingredientCategoryService = inject(IngredientCategoryService);
 
+  /**
+   * Khởi tạo component và tạo form
+   */
   constructor() {
     super();
     this.form = this.createForm();

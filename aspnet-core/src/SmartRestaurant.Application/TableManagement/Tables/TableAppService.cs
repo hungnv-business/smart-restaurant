@@ -13,6 +13,11 @@ using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.TableManagement.Tables
 {
+    /// <summary>
+    /// Dịch vụ ứng dụng cho quản lý bàn ăn trong nhà hàng
+    /// Cung cấp đầy đủ chức năng CRUD và các thao tác đặc biệt
+    /// Bao gồm: gán bàn vào khu vực, sắp xếp vị trí, thay đổi trạng thái
+    /// </summary>
     [Authorize(SmartRestaurantPermissions.Tables.Table.Default)]
     public class TableAppService : CrudAppService<
         Table,
@@ -22,9 +27,18 @@ namespace SmartRestaurant.TableManagement.Tables
         CreateTableDto,
         UpdateTableDto>, ITableAppService
     {
+        /// <summary>Repository chuyên biệt cho việc truy cập dữ liệu bàn ăn</summary>
         private readonly ITableRepository _tableRepository;
+        /// <summary>Repository cho việc truy cập dữ liệu khu vực bố cục</summary>
         private readonly ILayoutSectionRepository _layoutSectionRepository;
 
+        /// <summary>
+        /// Constructor - khởi tạo dịch vụ quản lý bàn ăn
+        /// Thiết lập các policy phân quyền cho từng thao tác
+        /// </summary>
+        /// <param name="repository">Repository cơ bản từ ABP</param>
+        /// <param name="tableRepository">Repository chuyên biệt cho bàn</param>
+        /// <param name="layoutSectionRepository">Repository cho khu vực bố cục</param>
         public TableAppService(
             IRepository<Table, Guid> repository,
             ITableRepository tableRepository,
@@ -34,6 +48,7 @@ namespace SmartRestaurant.TableManagement.Tables
             _tableRepository = tableRepository;
             _layoutSectionRepository = layoutSectionRepository;
             
+            // Thiết lập các policy phân quyền cho từng thao tác CRUD
             GetPolicyName = SmartRestaurantPermissions.Tables.Table.Default;
             GetListPolicyName = SmartRestaurantPermissions.Tables.Table.Default;
             CreatePolicyName = SmartRestaurantPermissions.Tables.Table.Create;
@@ -41,12 +56,23 @@ namespace SmartRestaurant.TableManagement.Tables
             DeletePolicyName = SmartRestaurantPermissions.Tables.Table.Delete;
         }
 
+        /// <summary>
+        /// Lấy danh sách bàn theo khu vực bố cục
+        /// Sắp xếp theo thứ tự hiển thị trong khu vực
+        /// </summary>
+        /// <param name="layoutSectionId">ID của khu vực bố cục</param>
+        /// <returns>Danh sách bàn trong khu vực được chỉ định</returns>
         public async Task<List<TableDto>> GetTablesBySectionAsync(Guid layoutSectionId)
         {
             var tables = await _tableRepository.GetTablesBySectionAsync(layoutSectionId, true);
             return ObjectMapper.Map<List<Table>, List<TableDto>>(tables);
         }
 
+        /// <summary>
+        /// Lấy tất cả khu vực cùng với danh sách bàn trong từng khu vực
+        /// Dùng cho màn hình kanban board hiển thị toàn bộ layout nhà hàng
+        /// </summary>
+        /// <returns>Danh sách khu vực kèm theo bàn trong từng khu vực</returns>
         public async Task<List<SectionWithTablesDto>> GetAllSectionsWithTablesAsync()
         {
             // Lấy tất cả sections
@@ -95,6 +121,12 @@ namespace SmartRestaurant.TableManagement.Tables
             return result;
         }
 
+        /// <summary>
+        /// Gán bàn vào khu vực bố cục khác
+        /// Có thể chỉ định vị trí cụ thể hoặc để tự động thêm vào cuối
+        /// </summary>
+        /// <param name="id">ID của bàn cần gán</param>
+        /// <param name="input">Thông tin khu vực mới và vị trí</param>
         [Authorize(SmartRestaurantPermissions.Tables.Table.AssignTableToSection)]
         public async Task AssignToSectionAsync(Guid id, AssignTableToSectionDto input)
         {
@@ -134,13 +166,18 @@ namespace SmartRestaurant.TableManagement.Tables
             }
         }
 
+        /// <summary>
+        /// Cập nhật thứ tự hiển thị của bàn trong khu vực
+        /// Hỗ trợ drag & drop trong giao diện kanban
+        /// </summary>
+        /// <param name="input">Thông tin bàn và vị trí mới</param>
         [Authorize(SmartRestaurantPermissions.Tables.Table.EditTableOrder)]
         public async Task UpdateDisplayOrderAsync(UpdateTableDisplayOrderDto input)
         {
             var table = await Repository.GetAsync(input.TableId);
             
             if (!table.LayoutSectionId.HasValue)
-                throw new InvalidOperationException("Bàn chưa được gán vào khu vực nào");
+                throw new TableNotAssignedToSectionException(table.TableNumber);
                 
             var sectionId = table.LayoutSectionId.Value;
             
@@ -169,6 +206,12 @@ namespace SmartRestaurant.TableManagement.Tables
             }
         }
 
+        /// <summary>
+        /// Thay đổi trạng thái kích hoạt của bàn
+        /// Bàn không kích hoạt sẽ không hiển thị trong giao diện đặt bàn
+        /// </summary>
+        /// <param name="id">ID của bàn</param>
+        /// <param name="input">Trạng thái kích hoạt mới</param>
         [Authorize(SmartRestaurantPermissions.Tables.Table.Edit)]
         public async Task ToggleActiveStatusAsync(Guid id, ToggleActiveStatusDto input)
         {
@@ -177,6 +220,11 @@ namespace SmartRestaurant.TableManagement.Tables
             await Repository.UpdateAsync(table);
         }
 
+        /// <summary>
+        /// Cập nhật vị trí của nhiều bàn cùng lúc
+        /// Dùng cho drag & drop nhiều bàn giữa các khu vực
+        /// </summary>
+        /// <param name="updates">Danh sách cập nhật vị trí bàn</param>
         [Authorize(SmartRestaurantPermissions.Tables.Table.EditTableOrder)]
         public async Task UpdateMultipleTablePositionsAsync(List<TablePositionUpdateDto> updates)
         {
@@ -200,6 +248,12 @@ namespace SmartRestaurant.TableManagement.Tables
         }
 
 
+        /// <summary>
+        /// Tạo query đã được lọc và sắp xếp cho danh sách bàn
+        /// Chỉ lấy bàn đang kích hoạt, sắp xếp theo khu vực và thứ tự
+        /// </summary>
+        /// <param name="input">Tham số phân trang và sắp xếp</param>
+        /// <returns>Query đã được lọc và sắp xếp</returns>
         protected override async Task<IQueryable<Table>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
         {
             return (await Repository.GetQueryableAsync())
@@ -209,11 +263,17 @@ namespace SmartRestaurant.TableManagement.Tables
                 .ThenBy(t => t.TableNumber);
         }
 
+        /// <summary>
+        /// Map entity bàn thành DTO cho một bàn cụ thể
+        /// Bổ sung thêm tên khu vực nếu có
+        /// </summary>
+        /// <param name="entity">Entity bàn cần map</param>
+        /// <returns>DTO đã được bổ sung thông tin</returns>
         protected override async Task<TableDto> MapToGetOutputDtoAsync(Table entity)
         {
             var dto = await base.MapToGetOutputDtoAsync(entity);
             
-            // Add layout section name if available
+            // Bổ sung tên khu vực nếu có
             if (entity.LayoutSection != null)
             {
                 dto.LayoutSectionName = entity.LayoutSection.SectionName;
@@ -222,11 +282,17 @@ namespace SmartRestaurant.TableManagement.Tables
             return dto;
         }
 
+        /// <summary>
+        /// Map danh sách entity bàn thành danh sách DTO
+        /// Bổ sung tên khu vực cho từng bàn nếu có
+        /// </summary>
+        /// <param name="entities">Danh sách entity bàn</param>
+        /// <returns>Danh sách DTO đã được bổ sung thông tin</returns>
         protected override Task<List<TableDto>> MapToGetListOutputDtosAsync(List<Table> entities)
         {
             var dtos = ObjectMapper.Map<List<Table>, List<TableDto>>(entities);
             
-            // Set layout section names
+            // Bổ sung tên khu vực cho từng bàn
             for (int i = 0; i < entities.Count; i++)
             {
                 if (entities[i].LayoutSection != null)
@@ -238,6 +304,12 @@ namespace SmartRestaurant.TableManagement.Tables
             return Task.FromResult(dtos);
         }
 
+        /// <summary>
+        /// Lấy số thứ tự hiển thị tiếp theo cho bàn mới trong khu vực
+        /// Đảm bảo bàn mới luôn hiển thị cuối danh sách
+        /// </summary>
+        /// <param name="layoutSectionId">ID khu vực bố cục</param>
+        /// <returns>Số thứ tự tiếp theo</returns>
         public async Task<int> GetNextDisplayOrderAsync(Guid layoutSectionId)
         {
             var maxDisplayOrder = await _tableRepository.GetMaxDisplayOrderInSectionAsync(layoutSectionId);

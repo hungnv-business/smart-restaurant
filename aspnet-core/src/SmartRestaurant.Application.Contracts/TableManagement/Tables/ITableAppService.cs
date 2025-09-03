@@ -7,6 +7,11 @@ using Volo.Abp.Application.Services;
 
 namespace SmartRestaurant.TableManagement.Tables
 {
+    /// <summary>
+    /// Application Service Interface cho quản lý bàn ăn
+    /// Cung cấp các chức năng CRUD cơ bản và các thao tác đặc biệt cho bàn
+    /// Bao gồm: gán bàn vào khu vực, cập nhật vị trí, thay đổi trạng thái
+    /// </summary>
     public interface ITableAppService : ICrudAppService<
         TableDto,
         Guid,

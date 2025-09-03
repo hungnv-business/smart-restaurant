@@ -12,6 +12,7 @@ export interface CreateUpdateIngredientDto {
 }
 
 export interface CreateUpdatePurchaseUnitDto {
+  id: string;
   unitId: string;
   conversionRatio: number;
   isBaseUnit: boolean;

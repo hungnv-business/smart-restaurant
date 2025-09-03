@@ -53,12 +53,22 @@ namespace SmartRestaurant.MenuManagement.MenuCategories
         /// </summary>
         public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
 
-        // Constructor cho EF Core
+        /// <summary>
+        /// Constructor mặc định cho EF Core
+        /// </summary>
         protected MenuCategory()
         {
         }
 
-        // Business constructor với validation - sử dụng trong Application layer
+        /// <summary>
+        /// Constructor với tham số để tạo danh mục món ăn mới
+        /// </summary>
+        /// <param name="id">ID duy nhất của danh mục</param>
+        /// <param name="name">Tên danh mục món ăn</param>
+        /// <param name="description">Mô tả chi tiết danh mục</param>
+        /// <param name="displayOrder">Thứ tự hiển thị</param>
+        /// <param name="isEnabled">Trạng thái kích hoạt</param>
+        /// <param name="imageUrl">URL hình ảnh đại diện</param>
         public MenuCategory(
             Guid id,
             string name,

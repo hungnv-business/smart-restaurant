@@ -3,6 +3,11 @@ using Volo.Abp.Application.Dtos;
 
 namespace SmartRestaurant.TableManagement.LayoutSections.Dto
 {
+    /// <summary>
+    /// DTO chứa thông tin khu vực bố cục bàn ăn
+    /// Dùng để truyền dữ liệu khu vực giữa các tầng ứng dụng
+    /// Bao gồm thông tin audit (tạo, sửa, xóa) từ ABP Framework
+    /// </summary>
     public class LayoutSectionDto : FullAuditedEntityDto<Guid>
     {
         /// <summary>Tên khu vực bố cục (ví dụ: "Dãy 1", "Khu VIP", "Sân vườn")</summary>

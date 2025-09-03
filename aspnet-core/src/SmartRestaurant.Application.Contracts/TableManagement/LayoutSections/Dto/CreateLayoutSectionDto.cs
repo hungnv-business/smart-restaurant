@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SmartRestaurant.TableManagement.LayoutSections.Dto
 {
+    /// <summary>
+    /// DTO dùng để tạo mới khu vực bố cục bàn ăn
+    /// Chứa thông tin cần thiết để khởi tạo khu vực mới trong nhà hàng
+    /// </summary>
     public class CreateLayoutSectionDto
     {
         /// <summary>Tên khu vực bố cục (ví dụ: "Dãy 1", "Khu VIP", "Sân vườn")</summary>

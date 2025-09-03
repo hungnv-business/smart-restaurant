@@ -3,25 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using SmartRestaurant.Common;
 using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.InventoryManagement.Ingredients.Dto;
 using SmartRestaurant.Permissions;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.InventoryManagement.Ingredients;
+
+/// <summary>
+/// Application Service quản lý nguyên liệu trong hệ thống nhà hàng
+/// Xử lý CRUD operations cho nguyên liệu và các đơn vị mua hàng
+/// Bao gồm validation, authorization và business logic
+/// </summary>
 
 [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
 public class IngredientAppService : ApplicationService, IIngredientAppService
 {
     private readonly IIngredientRepository _ingredientRepository;
+    private readonly IRepository<Unit> _unitRepository;
 
-    public IngredientAppService(IIngredientRepository ingredientRepository)
+    /// <summary>
+    /// Khởi tạo IngredientAppService với các dependency cần thiết
+    /// </summary>
+    /// <param name="ingredientRepository">Repository quản lý nguyên liệu</param>
+    /// <param name="unitRepository">Repository quản lý đơn vị đo lường</param>
+    public IngredientAppService(IIngredientRepository ingredientRepository, IRepository<Unit> unitRepository)
     {
         _ingredientRepository = ingredientRepository;
+        _unitRepository = unitRepository;
     }
 
+    /// <summary>
+    /// Lấy danh sách nguyên liệu có phân trang và bộ lọc
+    /// Bao gồm thông tin danh mục, đơn vị và các đơn vị mua hàng
+    /// </summary>
+    /// <param name="input">Tham số tìm kiếm và phân trang</param>
+    /// <returns>Danh sách nguyên liệu đã được phân trang</returns>
     [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
     public virtual async Task<PagedResultDto<IngredientDto>> GetListAsync(GetIngredientListRequestDto input)
     {
@@ -44,20 +65,17 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         foreach (var dto in dtos)
         {
             dto.CanDelete = !await _ingredientRepository.HasDependenciesAsync(dto.Id);
-            
-            // Sắp xếp purchase units: base unit lên đầu, sau đó theo conversion ratio
-            if (dto.PurchaseUnits?.Any() == true)
-            {
-                dto.PurchaseUnits = dto.PurchaseUnits
-                    .OrderByDescending(pu => pu.IsBaseUnit)
-                    .ThenBy(pu => pu.ConversionRatio)
-                    .ToList();
-            }
         }
         
         return new PagedResultDto<IngredientDto>(totalCount, dtos);
     }
 
+    /// <summary>
+    /// Lấy thông tin chi tiết của một nguyên liệu theo ID
+    /// Bao gồm thông tin danh mục, đơn vị và các đơn vị mua hàng
+    /// </summary>
+    /// <param name="id">ID của nguyên liệu cần lấy</param>
+    /// <returns>Thông tin chi tiết nguyên liệu</returns>
     [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
     public virtual async Task<IngredientDto> GetAsync(Guid id)
     {
@@ -76,27 +94,28 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
 
 
 
+    /// <summary>
+    /// Tạo nguyên liệu mới trong hệ thống
+    /// Bao gồm cả các đơn vị mua hàng và tỉ lệ quy đổi
+    /// </summary>
+    /// <param name="input">Thông tin nguyên liệu cần tạo</param>
+    /// <returns>Thông tin nguyên liệu đã được tạo</returns>
     [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Create)]
     public virtual async Task<IngredientDto> CreateAsync(CreateUpdateIngredientDto input)
     {
         var ingredient = ObjectMapper.Map<CreateUpdateIngredientDto, Ingredient>(input);
         
-        if (input.PurchaseUnits?.Count > 0)
-        {
-            var units = input.PurchaseUnits.Select(dto => (
-                unitId: dto.UnitId,
-                conversionRatio: dto.ConversionRatio,
-                isBaseUnit: dto.IsBaseUnit,
-                purchasePrice: dto.PurchasePrice,
-                isActive: dto.IsActive
-            ));
-            ingredient.AddPurchaseUnits(units);
-        }
-        
         var createdIngredient = await _ingredientRepository.InsertAsync(ingredient);
         return ObjectMapper.Map<Ingredient, IngredientDto>(createdIngredient);
     }
 
+    /// <summary>
+    /// Cập nhật thông tin nguyên liệu hiện có
+    /// Bao gồm cả việc cập nhật các đơn vị mua hàng và tỉ lệ quy đổi
+    /// </summary>
+    /// <param name="id">ID của nguyên liệu cần cập nhật</param>
+    /// <param name="input">Thông tin nguyên liệu mới</param>
+    /// <returns>Thông tin nguyên liệu đã được cập nhật</returns>
     [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Edit)]
     public virtual async Task<IngredientDto> UpdateAsync(Guid id, CreateUpdateIngredientDto input)
     {
@@ -118,28 +137,36 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         // Update purchase units using domain methods
         if (input.PurchaseUnits?.Count > 0)
         {
-            // Xóa các units không còn trong input
+            // Load units để lấy tên đơn vị (bao gồm cả units từ input và units hiện tại)
             var inputUnitIds = input.PurchaseUnits.Select(dto => dto.UnitId).ToList();
+            var currentUnitIds = ingredient.PurchaseUnits.Select(pu => pu.UnitId).ToList();
+            var allUnitIds = inputUnitIds.Concat(currentUnitIds).Distinct().ToList();
+            var units = await _unitRepository.GetListAsync(u => allUnitIds.Contains(u.Id));
+            var unitLookup = units.ToDictionary(u => u.Id, u => u.Name);
+            
+            // Xóa các units không còn trong input
             var unitsToRemove = ingredient.PurchaseUnits
                 .Where(pu => !inputUnitIds.Contains(pu.UnitId))
                 .ToList();
             
             foreach (var unitToRemove in unitsToRemove)
             {
-                ingredient.RemovePurchaseUnit(unitToRemove.UnitId);
+                var unitNameToRemove = unitLookup.GetValueOrDefault(unitToRemove.UnitId, "Unknown");
+                ingredient.RemovePurchaseUnit(unitToRemove.UnitId, unitNameToRemove);
             }
             
-            // Thêm/cập nhật units từ input
-            foreach (var unitDto in input.PurchaseUnits)
-            {
-                ingredient.AddPurchaseUnit(
-                    unitId: unitDto.UnitId,
-                    conversionRatio: unitDto.ConversionRatio,
-                    isBaseUnit: unitDto.IsBaseUnit,
-                    purchasePrice: unitDto.PurchasePrice,
-                    isActive: unitDto.IsActive
-                );
-            }
+            // Thêm/cập nhật units từ input với DisplayOrder theo index
+            var unitsToAdd = input.PurchaseUnits.Select(dto => (
+                id: dto.Id,
+                unitId: dto.UnitId,
+                unitName: unitLookup.GetValueOrDefault(dto.UnitId, "Unknown"),
+                conversionRatio: dto.ConversionRatio,
+                isBaseUnit: dto.IsBaseUnit,
+                purchasePrice: dto.PurchasePrice,
+                isActive: dto.IsActive
+            ));
+            
+            ingredient.AddPurchaseUnits(unitsToAdd);
         }
         else
         {
@@ -152,6 +179,11 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         return ObjectMapper.Map<Ingredient, IngredientDto>(ingredient);
     }
 
+    /// <summary>
+    /// Xóa nguyên liệu khỏi hệ thống
+    /// Kiểm tra dependencies trước khi xóa để tránh lỗi tham chiếu
+    /// </summary>
+    /// <param name="id">ID của nguyên liệu cần xóa</param>
     [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Delete)]
     public virtual async Task DeleteAsync(Guid id)
     {

@@ -7,6 +7,11 @@ using Volo.Abp.Application.Services;
 
 namespace SmartRestaurant.InventoryManagement.Ingredients;
 
+/// <summary>
+/// Interface dịch vụ ứng dụng cho quản lý nguyên liệu
+/// Cung cấp đầy đủ chức năng CRUD cho nguyên liệu và đơn vị mua hàng
+/// Hỗ trợ hệ thống đa đơn vị với tỷ lệ quy đổi
+/// </summary>
 public interface IIngredientAppService : IApplicationService
 {
     /// <summary>Lấy danh sách nguyên liệu với phân trang và filter (bao gồm PurchaseUnits)</summary>

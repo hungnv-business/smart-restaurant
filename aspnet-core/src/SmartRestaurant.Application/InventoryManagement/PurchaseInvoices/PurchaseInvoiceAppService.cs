@@ -18,8 +18,9 @@ using System.Linq.Dynamic.Core;
 namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 {
     /// <summary>
-    /// Application Service cho PurchaseInvoice - Level 2 Custom Repository Pattern
-    /// Implement trực tiếp IPurchaseInvoiceAppService với custom repository
+    /// Application Service quản lý hóa đơn mua hàng trong hệ thống nhà hàng
+    /// Xử lý CRUD operations cho hóa đơn mua và các mặt hàng trong hóa đơn
+    /// Bao gồm validation, authorization, business logic và quản lý stock
     /// </summary>
     [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default)]
     public class PurchaseInvoiceAppService : ApplicationService, IPurchaseInvoiceAppService
@@ -29,6 +30,13 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         private readonly IIngredientRepository _ingredientDetailRepository;
         private readonly PurchaseInvoiceManager _purchaseInvoiceManager;
 
+        /// <summary>
+        /// Khởi tạo PurchaseInvoiceAppService với các dependency cần thiết
+        /// </summary>
+        /// <param name="purchaseInvoiceRepository">Repository quản lý hóa đơn mua hàng</param>
+        /// <param name="ingredientRepository">Repository cơ bản cho nguyên liệu</param>
+        /// <param name="ingredientDetailRepository">Repository chi tiết cho nguyên liệu</param>
+        /// <param name="purchaseInvoiceManager">Domain manager xử lý business logic hóa đơn</param>
         public PurchaseInvoiceAppService(
             IPurchaseInvoiceRepository purchaseInvoiceRepository,
             IRepository<Ingredient, Guid> ingredientRepository,
@@ -43,7 +51,10 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Lấy thông tin chi tiết hóa đơn mua theo ID
+        /// Bao gồm thông tin các mặt hàng và chi tiết nguyên liệu
         /// </summary>
+        /// <param name="id">ID của hóa đơn cần lấy</param>
+        /// <returns>Thông tin chi tiết hóa đơn mua</returns>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default)]
         public async Task<PurchaseInvoiceDto> GetAsync(Guid id)
         {
@@ -59,7 +70,10 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Tạo mới hóa đơn mua với các mặt hàng
+        /// Xử lý validation, tính toán tổng tiền và cập nhật stock nguyên liệu
         /// </summary>
+        /// <param name="input">Thông tin hóa đơn và danh sách mặt hàng cần tạo</param>
+        /// <returns>Thông tin hóa đơn đã được tạo</returns>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Create)]
         public async Task<PurchaseInvoiceDto> CreateAsync(CreateUpdatePurchaseInvoiceDto input)
         {
@@ -88,7 +102,11 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Cập nhật hóa đơn mua và các mặt hàng
+        /// Xử lý thay đổi mặt hàng, tính toán lại tổng tiền và điều chỉnh stock
         /// </summary>
+        /// <param name="id">ID của hóa đơn cần cập nhật</param>
+        /// <param name="input">Thông tin hóa đơn và danh sách mặt hàng mới</param>
+        /// <returns>Thông tin hóa đơn đã được cập nhật</returns>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Edit)]
         public async Task<PurchaseInvoiceDto> UpdateAsync(Guid id, CreateUpdatePurchaseInvoiceDto input)
         {
@@ -123,7 +141,10 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Lấy danh sách hóa đơn mua có phân trang và lọc
+        /// Hỗ trợ tìm kiếm theo số hóa đơn, lọc theo khoảng thời gian
         /// </summary>
+        /// <param name="input">Tham số tìm kiếm, phân trang và bộ lọc</param>
+        /// <returns>Danh sách hóa đơn mua đã được phân trang</returns>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default)]
         public async Task<PagedResultDto<PurchaseInvoiceDto>> GetListAsync(GetPurchaseInvoiceListDto input)
         {
@@ -155,7 +176,9 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Xóa hóa đơn mua và xử lý stock nguyên liệu
+        /// Kiểm tra quyền xóa và điều chỉnh stock nguyên liệu về trạng thái trước khi nhập
         /// </summary>
+        /// <param name="id">ID của hóa đơn cần xóa</param>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Delete)]
         public async Task DeleteAsync(Guid id)
         {
@@ -169,8 +192,10 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
         /// <summary>
         /// Lấy thông tin nguyên liệu để sử dụng trong hóa đơn mua
-        /// Bao gồm các đơn vị mua và giá cơ bản
+        /// Bao gồm các đơn vị mua hàng active, giá cơ bản và thông tin nhà cung cấp
         /// </summary>
+        /// <param name="ingredientId">ID của nguyên liệu cần lấy thông tin</param>
+        /// <returns>Thông tin nguyên liệu phù hợp cho việc tạo hóa đơn mua</returns>
         [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
         public async Task<IngredientForPurchaseDto> GetIngredientForPurchaseAsync(Guid ingredientId)
         {
@@ -185,9 +210,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                 CostPerUnit = ingredient.CostPerUnit,
                 SupplierInfo = ingredient.SupplierInfo,
                 PurchaseUnits = ObjectMapper.Map<List<IngredientPurchaseUnit>, List<IngredientPurchaseUnitDto>>(
-                    [.. ingredient.PurchaseUnits.Where(pu => pu.IsActive)
-                        .OrderByDescending(pu => pu.IsBaseUnit)
-                        .ThenBy(pu => pu.ConversionRatio)])
+                    [.. ingredient.PurchaseUnits.Where(pu => pu.IsActive)])
             };
             
             return result;

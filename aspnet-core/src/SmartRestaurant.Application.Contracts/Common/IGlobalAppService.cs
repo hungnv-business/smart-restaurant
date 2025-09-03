@@ -14,15 +14,15 @@ namespace SmartRestaurant.Common
     public interface IGlobalAppService : IApplicationService
     {
         /// <summary>Lấy danh sách tất cả trạng thái của bàn</summary>
-        Task<List<IntLookupItemDto>> GetTableStatusesAsync();
+        Task<List<IntLookupItemDto>> GetTableStatusLookupAsync();
 
         /// <summary>Lấy danh sách tất cả đơn vị active cho dropdown</summary>
-        Task<List<UnitDto>> GetUnitsAsync();
+        Task<List<GuidLookupItemDto>> GetUnitsLookupAsync();
         
         /// <summary>Lấy danh sách tất cả danh mục nguyên liệu active cho dropdown</summary>
-        Task<List<GuidLookupItemDto>> GetCategoriesAsync();
+        Task<List<GuidLookupItemDto>> GetCategoriesLookupAsync();
         
         /// <summary>Lấy danh sách nguyên liệu theo danh mục cho dropdown</summary>
-        Task<List<GuidLookupItemDto>> GetIngredientsByCategoryAsync(Guid categoryId);
+        Task<List<GuidLookupItemDto>> GetIngredientsByCategoryLookupAsync(Guid categoryId);
     }
 }

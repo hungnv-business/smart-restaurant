@@ -7,7 +7,9 @@ using Volo.Abp.Domain.Entities.Auditing;
 namespace SmartRestaurant.MenuManagement.MenuItems
 {
     /// <summary>
-    /// MenuItem entity representing individual dishes in the restaurant menu
+    /// Entity món ăn đại diện cho từng món trong thực đơn nhà hàng
+    /// Mỗi món ăn thuộc về một danh mục và có thể liên kết với nguyên liệu chính
+    /// Hỗ trợ quản lý giá cả, tình trạng có sẵn và hình ảnh
     /// </summary>
     public class MenuItem : FullAuditedEntity<Guid>
     {
@@ -48,10 +50,25 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         /// <summary>Nguyên liệu chính của món ăn</summary>
         public virtual Ingredient PrimaryIngredient { get; set; } = null!;
 
+        /// <summary>
+        /// Constructor mặc định cho EF Core
+        /// </summary>
         protected MenuItem()
         {
         }
 
+        /// <summary>
+        /// Constructor tạo mới món ăn với đầy đủ thông tin
+        /// </summary>
+        /// <param name="id">ID duy nhất của món ăn</param>
+        /// <param name="name">Tên món ăn</param>
+        /// <param name="description">Mô tả chi tiết món ăn</param>
+        /// <param name="price">Giá món ăn (VND)</param>
+        /// <param name="isAvailable">Tình trạng có sẵn</param>
+        /// <param name="imageUrl">URL hình ảnh món ăn</param>
+        /// <param name="categoryId">ID danh mục chứa món ăn</param>
+        /// <param name="primaryIngredientId">ID nguyên liệu chính (tùy chọn)</param>
+        /// <param name="requiredQuantity">Số lượng nguyên liệu cần dùng (tùy chọn)</param>
         public MenuItem(
             Guid id,
             string name,

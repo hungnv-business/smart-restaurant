@@ -2,10 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../shared/constants/vietnamese_constants.dart';
 
+/// Screen quản lý đơn hàng gọi món trong ứng dụng nhà hàng
+/// 
+/// Chức năng chính:
+/// - Hiển thị danh sách đơn hàng với trạng thái và thông tin chi tiết
+/// - Tạo đơn hàng mới với lựa chọn món ăn từ thực đơn
+/// - Chỉnh sửa đơn hàng đã tồn tại (nếu chưa xác nhận)
+/// - Xem chi tiết đơn hàng bao gồm món ăn, giá cả, trạng thái
+/// - Tìm kiếm và lọc đơn hàng theo nhiều tiêu chí
+/// 
+/// Mode hoạt động:
+/// - null: Hiển thị danh sách tất cả đơn hàng
+/// - 'new': Form tạo đơn hàng mới
+/// - 'edit': Form sửa đơn hàng existante
+/// - 'detail': Màn hình chi tiết đơn hàng read-only
 class OrdersScreen extends StatefulWidget {
-  final String? mode; // 'new', 'edit', 'detail', or null for list
+  /// Chế độ hoạt động của screen ('new', 'edit', 'detail', hoặc null cho list)
+  final String? mode;
+  
+  /// ID của đơn hàng (cần thiết cho mode 'edit' và 'detail')
   final String? orderId;
 
+  /// Constructor với các tham số tùy chọn
   const OrdersScreen({
     Key? key, 
     this.mode,
@@ -16,7 +34,12 @@ class OrdersScreen extends StatefulWidget {
   State<OrdersScreen> createState() => _OrdersScreenState();
 }
 
+/// State class cho OrdersScreen với logic quản lý giao diện
 class _OrdersScreenState extends State<OrdersScreen> {
+  /// Xây dựng giao diện chính của screen
+  /// 
+  /// Bao gồm header với title và nút thêm mới (chỉ ở list view)
+  /// Nội dung chính thay đổi theo mode hiện tại
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -24,7 +47,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header section
+          // Phần header với tiêu đề và nút thêm mới
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -36,10 +59,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   color: Colors.grey[800],
                 ),
               ),
-              if (widget.mode == null) // Only show add button on list view
+              if (widget.mode == null) // Chỉ hiện nút thêm ở chế độ danh sách
                 FloatingActionButton(
                   onPressed: () {
-                    // TODO: Navigate to new order screen
+                    // TODO: Điều hướng đến màn hình tạo đơn hàng mới
                   },
                   backgroundColor: Colors.blue[600],
                   child: Icon(Icons.add, color: Colors.white, size: 24.r),
@@ -49,7 +72,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           
           SizedBox(height: 20.h),
 
-          // Content based on mode
+          // Nội dung chính thay đổi theo mode
           Expanded(
             child: _buildContent(),
           ),
@@ -58,6 +81,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
+  /// Lấy tiêu đề phù hợp dựa trên mode hiện tại
+  /// 
+  /// Returns: Chuỗi tiêu đề hiển thị trên header
   String _getTitle() {
     switch (widget.mode) {
       case 'new':
@@ -71,6 +97,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
+  /// Xây dựng nội dung chính dựa trên mode hiện tại
+  /// 
+  /// Returns: Widget phù hợp với từng chế độ hoạt động
   Widget _buildContent() {
     switch (widget.mode) {
       case 'new':
@@ -84,10 +113,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
   }
 
+  /// Xây dựng danh sách tất cả đơn hàng với tính năng tìm kiếm và lọc
+  /// 
+  /// Bao gồm:
+  /// - Thanh tìm kiếm theo mã đơn hàng, bàn, thời gian
+  /// - Nút lọc theo trạng thái, khoảng thời gian
+  /// - Danh sách đơn hàng dạng card với thông tin tóm tắt
   Widget _buildOrdersList() {
     return Column(
       children: [
-        // Search and filter section
+        // Phần tìm kiếm và lọc đơn hàng
         Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
@@ -121,7 +156,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               SizedBox(width: 12.w),
               IconButton(
                 onPressed: () {
-                  // TODO: Implement filter functionality
+                  // TODO: Mở dialog lọc theo trạng thái, thời gian, bàn
                 },
                 icon: Icon(Icons.tune, size: 24.r, color: Colors.blue[600]),
                 style: IconButton.styleFrom(
@@ -137,10 +172,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
         SizedBox(height: 16.h),
 
-        // Orders list
+        // Danh sách các đơn hàng
         Expanded(
           child: ListView.builder(
-            itemCount: 5, // Mock data
+            itemCount: 5, // Dữ liệu mock tạm thời
             itemBuilder: (context, index) => _buildOrderCard(index + 1),
           ),
         ),
@@ -148,6 +183,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
+  /// Xây dựng card hiển thị thông tin tóm tắt một đơn hàng
+  /// 
+  /// [orderNumber]: Số thứ tự đơn hàng để tạo dữ liệu mock
+  /// 
+  /// Hiển thị:
+  /// - Mã đơn hàng và trạng thái (đã xác nhận, đang chế biến, hoàn thành)
+  /// - Thông tin bàn và thời gian đặt
+  /// - Tổng giá trị đơn hàng được format theo VND
+  /// - Nút sửa và xem chi tiết
   Widget _buildOrderCard(int orderNumber) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -178,6 +222,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   color: Colors.grey[800],
                 ),
               ),
+              // Badge trạng thái đơn hàng với màu sắc phân biệt
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -198,6 +243,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           
           SizedBox(height: 8.h),
           
+          // Thông tin bàn và thời gian
           Row(
             children: [
               Icon(Icons.table_restaurant, size: 16.r, color: Colors.grey[600]),
@@ -218,6 +264,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           
           SizedBox(height: 8.h),
           
+          // Tổng tiền và các nút hành động
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -231,15 +278,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               Row(
                 children: [
+                  // Nút sửa đơn hàng (chỉ khi chưa xác nhận)
                   IconButton(
                     onPressed: () {
-                      // TODO: Navigate to edit order
+                      // TODO: Điều hướng đến màn hình sửa đơn hàng
                     },
                     icon: Icon(Icons.edit, size: 20.r, color: Colors.blue[600]),
                   ),
+                  // Nút xem chi tiết đơn hàng
                   IconButton(
                     onPressed: () {
-                      // TODO: Navigate to order detail
+                      // TODO: Điều hướng đến màn hình chi tiết đơn hàng
                     },
                     icon: Icon(Icons.visibility, size: 20.r, color: Colors.green[600]),
                   ),
@@ -252,6 +301,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
+  /// Xây dựng form tạo đơn hàng mới
+  /// 
+  /// Bao gồm:
+  /// - Chọn bàn hoặc khách hàng (cho mang về)
+  /// - Thêm món ăn từ thực đơn với số lượng
+  /// - Ghi chú đặc biệt cho từng món
+  /// - Tính toán tổng tiền tự động
+  /// - Nút lưu và hủy
   Widget _buildNewOrderForm() {
     return SingleChildScrollView(
       child: Container(
@@ -281,7 +338,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             SizedBox(height: 16.h),
             
-            // Form fields will be implemented here
+            // Các trường form sẽ được implement ở đây
+            // Bao gồm: chọn bàn, chọn món, số lượng, ghi chú
             Text(
               'Form tạo đơn hàng mới sẽ được triển khai ở đây',
               style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
@@ -294,7 +352,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Save new order
+                      // TODO: Lưu đơn hàng mới và gửi đến bếp
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[600],
@@ -314,6 +372,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
+                      // Quay lại màn hình trước đó
                       Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
@@ -338,6 +397,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
+  /// Xây dựng form chỉnh sửa đơn hàng đã tồn tại
+  /// 
+  /// Chỉ cho phép sửa những đơn hàng chưa được xác nhận
+  /// Hiển thị thông tin hiện tại và cho phép thay đổi
   Widget _buildEditOrderForm() {
     return Center(
       child: Text(
@@ -347,6 +410,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
     );
   }
 
+  /// Xây dựng màn hình chi tiết đơn hàng (chỉ đọc)
+  /// 
+  /// Hiển thị:
+  /// - Thông tin khách hàng và bàn
+  /// - Danh sách món ăn đã order với giá và số lượng
+  /// - Trạng thái từng món (chờ chế biến, đang làm, hoàn thành)
+  /// - Tổng tiền và phương thức thanh toán
+  /// - Thời gian tạo và cập nhật cuối
   Widget _buildOrderDetail() {
     return Center(
       child: Text(

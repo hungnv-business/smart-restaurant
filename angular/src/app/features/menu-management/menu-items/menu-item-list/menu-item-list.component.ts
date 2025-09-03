@@ -23,6 +23,17 @@ import { ComponentBase } from '../../../../shared/base/component-base';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
 import { finalize } from 'rxjs/operators';
 
+/**
+ * Component quản lý danh sách món ăn trong thực đơn nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách món ăn với hình ảnh và thông tin chi tiết
+ * - Tìm kiếm theo tên món và lọc theo danh mục (Món chính, Đồ uống...)
+ * - Thêm, sửa, xóa món ăn khỏi thực đơn
+ * - Cập nhật trạng thái có sẵn (còn hay hết món)
+ * - Hiển thị giá cả theo định dạng tiền Việt (VND)
+ * - Quản lý hình ảnh món ăn với preview
+ * - Liên kết với nguyên liệu để theo dõi tồn kho
+ */
 @Component({
   selector: 'app-menu-item-list',
   standalone: true,
@@ -47,15 +58,15 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./menu-item-list.component.scss'],
 })
 export class MenuItemListComponent extends ComponentBase implements OnInit {
-  // Quyền truy cập
+  /** Quyền truy cập - Kiểm soát hiển thị các nút theo quyền user */
   readonly permissions = {
-    create: PERMISSIONS.RESTAURANT.MENU.ITEMS.CREATE,
-    edit: PERMISSIONS.RESTAURANT.MENU.ITEMS.EDIT,
-    delete: PERMISSIONS.RESTAURANT.MENU.ITEMS.DELETE,
-    updateAvailability: PERMISSIONS.RESTAURANT.MENU.ITEMS.UPDATE_AVAILABILITY,
+    create: PERMISSIONS.RESTAURANT.MENU.ITEMS.CREATE, // Quyền tạo món ăn mới
+    edit: PERMISSIONS.RESTAURANT.MENU.ITEMS.EDIT, // Quyền chỉnh sửa món ăn
+    delete: PERMISSIONS.RESTAURANT.MENU.ITEMS.DELETE, // Quyền xóa món ăn
+    updateAvailability: PERMISSIONS.RESTAURANT.MENU.ITEMS.UPDATE_AVAILABILITY, // Quyền đánh dấu còn/hết món
   };
 
-  // Cấu hình bảng
+  /** Các field được search khi user nhập tìm kiếm */
   filterFields: string[] = ['name', 'categoryId', 'description'];
 
   // Dữ liệu hiển thị

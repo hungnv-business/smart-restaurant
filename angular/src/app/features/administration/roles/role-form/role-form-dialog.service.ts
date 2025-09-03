@@ -5,15 +5,28 @@ import { map } from 'rxjs/operators';
 
 import { RoleFormComponent } from './role-form.component';
 
+/**
+ * Interface định nghĩa dữ liệu truyền vào dialog form vai trò
+ */
 export interface RoleFormDialogData {
+  /** ID của vai trò (chỉ có khi chỉnh sửa) */
   roleId?: string;
+  /** Tiêu đề hiển thị trên dialog */
   title?: string;
 }
 
+/**
+ * Service quản lý dialog cho form vai trò trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Mở dialog tạo mới vai trò
+ * - Mở dialog chỉnh sửa vai trò existante
+ * - Cấu hình chuẩn cho dialog với các thuộc tính phù hợp
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class RoleFormDialogService {
+  /** Service quản lý dialog của PrimeNG */
   private dialogService = inject(DialogService);
 
   /**

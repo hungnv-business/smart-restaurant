@@ -17,6 +17,16 @@ import {
 import { LayoutSectionFormDialogData } from './layout-section-form-dialog.service';
 import { takeUntil } from 'rxjs/operators';
 
+/**
+ * Component quản lý form tạo/chỉnh sửa khu vực bố cục nhà hàng
+ * Chức năng chính:
+ * - Tạo mới khu vực bố cục với tên tiếng Việt
+ * - Chỉnh sửa thông tin khu vực hiện có
+ * - Quản lý thứ tự hiển thị khu vực
+ * - Gợi ý tên khu vực phổ biến trong nhà hàng Việt Nam
+ * - Validation dữ liệu đầu vào
+ * - Tự động tính toán thứ tự hiển thị tiếp theo
+ */
 @Component({
   selector: 'app-layout-section-form',
   standalone: true,
@@ -33,12 +43,16 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./layout-section-form.component.scss'],
 })
 export class LayoutSectionFormComponent extends ComponentBase implements OnInit {
+  /** Form quản lý thông tin khu vực bố cục */
   sectionForm!: FormGroup;
+  /** Trạng thái loading khi thực hiện các thao tác async */
   loading = false;
+  /** Thông tin chi tiết của khu vực đang chỉnh sửa */
   section: LayoutSectionDto | null = null;
+  /** ID của khu vực đang chỉnh sửa (nếu có) */
   sectionId?: string;
 
-  // Vietnamese restaurant section name suggestions
+  /** Gợi ý tên khu vực phổ biến trong nhà hàng Việt Nam */
   sectionNameSuggestions = [
     'Dãy 1',
     'Dãy 2',
@@ -67,27 +81,37 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     'Phòng họp',
   ];
 
+  /** Các service được inject */
   private layoutSectionService = inject(LayoutSectionService);
   private fb = inject(FormBuilder);
   private dialogRef = inject(DynamicDialogRef);
   private config = inject(DynamicDialogConfig);
 
+  /**
+   * Khởi tạo component với cấu hình dialog
+   */
   constructor() {
     super();
     const data = this.config.data as LayoutSectionFormDialogData;
     this.sectionId = data?.sectionId;
   }
 
+  /**
+   * Khởi tạo dữ liệu khi component được load
+   */
   ngOnInit(): void {
     this.buildForm();
     if (this.sectionId) {
       this.loadSection(this.sectionId);
     } else {
-      // For new sections, get the next display order
+      // Đối với khu vực mới, tự động lấy thứ tự hiển thị tiếp theo
       this.loadNextDisplayOrder();
     }
   }
 
+  /**
+   * Xử lý submit form - tạo mới hoặc cập nhật khu vực
+   */
   onSubmit(): void {
     if (!this.validateForm(this.sectionForm)) {
       return;
@@ -103,15 +127,25 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     }
   }
 
+  /**
+   * Hủy thao tác và đóng dialog
+   */
   onCancel(): void {
     this.dialogRef.close(false);
   }
 
+  /**
+   * Xử lý khi click vào gợi ý tên khu vực
+   * @param suggestion Tên khu vực được gợi ý
+   */
   onSectionNameSuggestionClick(suggestion: string): void {
     this.sectionForm.patchValue({ sectionName: suggestion });
     this.sectionForm.get('sectionName')?.markAsTouched();
   }
 
+  /**
+   * Khởi tạo form với các validation rules
+   */
   private buildForm(): void {
     this.sectionForm = this.fb.group({
       sectionName: ['', [Validators.required, Validators.maxLength(128)]],
@@ -121,6 +155,10 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     });
   }
 
+  /**
+   * Tải thông tin chi tiết của khu vực theo ID
+   * @param sectionId ID của khu vực cần tải
+   */
   private loadSection(sectionId: string): void {
     this.loading = true;
 
@@ -141,6 +179,9 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Điền dữ liệu khu vực vào form
+   */
   private populateForm(): void {
     if (this.section) {
       this.sectionForm.patchValue({
@@ -152,6 +193,9 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
     }
   }
 
+  /**
+   * Tải thứ tự hiển thị tiếp theo cho khu vực mới
+   */
   private loadNextDisplayOrder(): void {
     this.layoutSectionService
       .getNextDisplayOrder()
@@ -168,6 +212,10 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Tạo khu vực mới
+   * @param formValue Dữ liệu từ form
+   */
   private createSection(formValue: {
     sectionName: string;
     description?: string;
@@ -200,6 +248,10 @@ export class LayoutSectionFormComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Cập nhật thông tin khu vực
+   * @param formValue Dữ liệu từ form
+   */
   private updateSection(formValue: {
     sectionName: string;
     description?: string;

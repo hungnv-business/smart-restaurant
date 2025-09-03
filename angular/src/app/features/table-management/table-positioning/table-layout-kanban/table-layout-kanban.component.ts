@@ -32,6 +32,15 @@ import { IntLookupItemDto } from '@proxy/common/dto';
 import { TableFormDialogService } from '../table-form-dialog/table-form-dialog.service';
 import { TableCardComponent } from '../table-card/table-card.component';
 
+/**
+ * Component kanban board để quản lý bố trí bàn ăn theo khu vực
+ * Chức năng chính:
+ * - Hiển thị tất cả khu vực và bàn ăn dưới dạng kanban board
+ * - Hỗ trợ drag & drop để di chuyển bàn giữa các khu vực
+ * - Tạo bàn mới trực tiếp từ khu vực
+ * - Cập nhật thứ tự bàn trong cùng khu vực
+ * - Hiển thị trạng thái bàn (trống, đang sử dụng, đã đặt...)
+ */
 @Component({
   selector: 'app-table-layout-kanban',
   standalone: true,
@@ -51,27 +60,44 @@ import { TableCardComponent } from '../table-card/table-card.component';
   styleUrls: ['./table-layout-kanban.component.scss'],
 })
 export class TableLayoutKanbanComponent extends ComponentBase implements OnInit {
+  /** Danh sách các khu vực bố cục nhà hàng */
   layoutSections: LayoutSectionDto[] = [];
+  /** Danh sách bàn ăn theo từng khu vực (sectionId -> TableDto[]) */
   sectionTables: { [sectionId: string]: TableDto[] } = {};
+  /** Các tùy chọn trạng thái bàn (trống, đang dùng, đã đặt...) */
   tableStatusOptions: IntLookupItemDto[] = [];
+  /** Trạng thái đang tải dữ liệu */
   loading = false;
 
+  /** Trạng thái hiển thị dialog tạo bàn mới */
   showCreateDialog = false;
+  /** Trạng thái đang tạo bàn mới */
   creatingTable = false;
+  /** ID khu vực được chọn để tạo bàn mới */
   selectedSectionId = '';
 
+  /** Các service được inject */
   private tableService = inject(TableService);
   private tableFormDialogService = inject(TableFormDialogService);
   private globalService = inject(GlobalService);
 
+  /**
+   * Khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo dữ liệu khi component được load
+   */
   ngOnInit(): void {
     this.loadData();
   }
 
+  /**
+   * Tải dữ liệu khu vực và bàn ăn từ API
+   */
   loadData(): void {
     this.loading = true;
 
@@ -84,17 +110,17 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
         next: ({ sectionsWithTables, tableStatuses }) => {
           this.loading = false;
 
-          // Set table status options
+          // Thiết lập các tùy chọn trạng thái bàn
           this.tableStatusOptions = tableStatuses || [];
 
-          // Clear current data
+          // Xóa dữ liệu hiện tại
           this.layoutSections = [];
           this.sectionTables = {};
 
-          // Process sections with tables
+          // Xử lý các khu vực và bàn ăn
           sectionsWithTables?.forEach(sectionData => {
             if (sectionData.id) {
-              // Create LayoutSectionDto from SectionWithTablesDto
+              // Tạo LayoutSectionDto từ SectionWithTablesDto
               const layoutSection: LayoutSectionDto = {
                 id: sectionData.id,
                 sectionName: sectionData.sectionName || '',
@@ -115,9 +141,13 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Xử lý khi ké thả bàn trong kanban board
+   * @param event Event drag & drop
+   */
   onTableDrop(event: CdkDragDrop<TableDto[]>): void {
     if (event.previousContainer === event.container) {
-      // Reordering within the same section
+      // Sắp xếp lại thứ tự trong cùng một khu vực
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
 
       const draggedTable = event.item.data as TableDto;
@@ -139,7 +169,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
           this.loadData();
         });
     } else {
-      // Moving between different sections
+      // Di chuyển giữa các khu vực khác nhau
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -169,11 +199,17 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
     }
   }
 
+  /**
+   * Làm mới dữ liệu kanban board
+   */
   refresh(): void {
     this.loadData();
   }
 
-  // Dialog Methods using DialogService
+  /**
+   * Mở dialog tạo bàn mới trong khu vực được chọn
+   * @param sectionId ID của khu vực để tạo bàn
+   */
   openCreateTableDialog(sectionId: string): void {
     this.selectedSectionId = sectionId;
 
@@ -187,13 +223,19 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
       });
   }
 
+  /**
+   * Xử lý khi bàn ăn được cập nhật
+   */
   onTableUpdated(): void {
-    // Reload data to get updated information
+    // Tải lại dữ liệu để lấy thông tin mới nhất
     this.loadData();
   }
 
+  /**
+   * Xử lý khi bàn ăn bị xóa
+   */
   onTableDeleted(): void {
-    // Reload data to refresh the list
+    // Tải lại dữ liệu để cập nhật danh sách
     this.loadData();
   }
 }

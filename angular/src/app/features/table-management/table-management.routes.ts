@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { RestaurantGuard } from '../../auth/guards/restaurant.guard';
+import { PERMISSIONS } from '../../shared/constants/permissions';
 
 export const TABLE_MANAGEMENT_ROUTES: Routes = [
   {
@@ -7,7 +9,11 @@ export const TABLE_MANAGEMENT_ROUTES: Routes = [
       import('./layout-sections/layout-section-list/layout-section-list.component').then(
         m => m.LayoutSectionListComponent,
       ),
-    data: { breadcrumb: 'Quản lý Khu vực Bố cục' },
+    canActivate: [RestaurantGuard],
+    data: { 
+      breadcrumb: 'Quản lý Khu vực Bố cục',
+      permission: PERMISSIONS.RESTAURANT.TABLES.LAYOUT_SECTION.DEFAULT,
+    },
   },
   {
     path: 'table-positioning',
@@ -15,7 +21,11 @@ export const TABLE_MANAGEMENT_ROUTES: Routes = [
       import('./table-positioning/table-layout-kanban/table-layout-kanban.component').then(
         m => m.TableLayoutKanbanComponent,
       ),
-    data: { breadcrumb: 'Quản lý Vị trí Bàn' },
+    canActivate: [RestaurantGuard],
+    data: { 
+      breadcrumb: 'Quản lý Vị trí Bàn',
+      permission: PERMISSIONS.RESTAURANT.TABLES.TABLE.DEFAULT,
+    },
   },
   {
     path: '',

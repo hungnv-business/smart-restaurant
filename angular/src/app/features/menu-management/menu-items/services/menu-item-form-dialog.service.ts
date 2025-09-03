@@ -6,19 +6,37 @@ import { MenuItemFormComponent } from '../menu-item-form/menu-item-form.componen
 import { MenuItemService } from '../../../../proxy/menu-management/menu-items';
 import { MenuItemDto } from '../../../../proxy/menu-management/menu-items/dto';
 
+/**
+ * Interface định nghĩa dữ liệu truyền vào dialog form món ăn
+ * Hỗ trợ cả chế độ tạo mới và chỉnh sửa
+ */
 export interface MenuItemFormData {
-  menuItemId?: string;
-  menuItem?: MenuItemDto;
-  title?: string;
+  menuItemId?: string; // ID món ăn (có trong Edit mode)
+  menuItem?: MenuItemDto; // Dữ liệu món ăn đã load từ server (Edit mode)
+  title?: string; // Tiêu đề dialog
 }
 
+/**
+ * Service quản lý dialog form cho món ăn trong thực đơn
+ * Chức năng chính:
+ * - Mở dialog tạo mới món ăn (Phở Bò, Bún Chả, Cơm Tấm...)
+ * - Mở dialog chỉnh sửa với pre-load dữ liệu món ăn
+ * - Cấu hình dialog kích thước lớn cho form phức tạp
+ * - Xử lý kết quả và thông báo thành công
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class MenuItemFormDialogService {
+  /** Service để mở dialog PrimeNG */
   private dialogService = inject(DialogService);
+  /** Service API quản lý món ăn */
   private menuItemService = inject(MenuItemService);
 
+  /**
+   * Mở dialog tạo mới món ăn
+   * @returns Observable kết quả dialog (true = lưu thành công, false = hủy)
+   */
   openCreateDialog(): Observable<boolean> {
     const dialogData: MenuItemFormData = {
       title: 'Thêm món ăn',
@@ -27,6 +45,12 @@ export class MenuItemFormDialogService {
     return this.openDialog(dialogData);
   }
 
+  /**
+   * Mở dialog chỉnh sửa món ăn hiện có
+   * Tự động tải dữ liệu món ăn trước khi mở form
+   * @param menuItemId ID món ăn cần chỉnh sửa
+   * @returns Observable kết quả dialog
+   */
   openEditDialog(menuItemId: string): Observable<boolean> {
     const dialogData: MenuItemFormData = {
       menuItemId,

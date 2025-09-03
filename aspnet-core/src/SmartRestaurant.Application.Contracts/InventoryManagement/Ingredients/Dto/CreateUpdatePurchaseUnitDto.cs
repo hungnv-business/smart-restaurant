@@ -6,6 +6,9 @@ namespace SmartRestaurant.InventoryManagement.Ingredients.Dto;
 public class CreateUpdatePurchaseUnitDto
 {
     [Required]
+    public Guid Id { get; set; }
+    
+    [Required]
     public Guid UnitId { get; set; }
     
     [Required]

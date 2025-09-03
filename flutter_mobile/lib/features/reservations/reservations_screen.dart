@@ -2,10 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../shared/constants/vietnamese_constants.dart';
 
+/// Screen quản lý đặt bàn trong ứng dụng nhà hàng mobile
+/// 
+/// Chức năng chính:
+/// - Hiển thị danh sách đặt bàn với thông tin khách hàng và thời gian
+/// - Tạo đặt bàn mới với lựa chọn bàn, thời gian, số người
+/// - Chỉnh sửa thông tin đặt bàn (trước khi đến giờ)
+/// - Xem chi tiết đặt bàn bao gồm yêu cầu đặc biệt
+/// - Liên hệ trực tiếp với khách hàng qua điện thoại
+/// - Tìm kiếm và lọc theo tên khách, ngày, trạng thái
+/// 
+/// Mode hoạt động:
+/// - null: Hiển thị danh sách tất cả đặt bàn
+/// - 'new': Form tạo đặt bàn mới
+/// - 'edit': Form sửa đặt bàn đã tồn tại
+/// - 'detail': Màn hình chi tiết đặt bàn
 class ReservationsScreen extends StatefulWidget {
-  final String? mode; // 'new', 'edit', 'detail', or null for list
+  /// Chế độ hoạt động của screen ('new', 'edit', 'detail', hoặc null cho list)
+  final String? mode;
+  
+  /// ID của đặt bàn (cần thiết cho mode 'edit' và 'detail')
   final String? reservationId;
 
+  /// Constructor với các tham số tùy chọn
   const ReservationsScreen({
     Key? key, 
     this.mode,

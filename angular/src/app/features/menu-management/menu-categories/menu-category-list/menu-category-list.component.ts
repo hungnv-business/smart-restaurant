@@ -18,6 +18,16 @@ import { ComponentBase } from '../../../../shared/base/component-base';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
 import { finalize } from 'rxjs/operators';
 
+/**
+ * Component quản lý danh sách danh mục món ăn trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách danh mục (Món khai vị, Món chính, Tráng miệng...)
+ * - Tìm kiếm theo tên và mô tả danh mục
+ * - Thêm, sửa, xóa danh mục món ăn
+ * - Xóa nhiều danh mục cùng lúc (bulk delete)
+ * - Sắp xếp theo thứ tự hiển thị trong thực đơn
+ * - Kiểm soát quyền truy cập theo role nhân viên
+ */
 @Component({
   selector: 'app-menu-category-list',
   standalone: true,

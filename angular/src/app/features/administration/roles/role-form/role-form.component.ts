@@ -27,6 +27,14 @@ import { LocalizationPipe } from '@abp/ng.core';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 
+/**
+ * Component quản lý form tạo/chỉnh sửa vai trò trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Tạo mới vai trò với các quyền tương ứng
+ * - Chỉnh sửa thông tin vai trò hiện có
+ * - Quản lý phân quyền chi tiết cho từng vai trò
+ * - Hiển thị cây quyền theo dạng phân cấp
+ */
 @Component({
   selector: 'app-role-form',
   standalone: true,
@@ -43,17 +51,23 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
   templateUrl: './role-form.component.html',
 })
 export class RoleFormComponent extends ComponentBase implements OnInit {
+  /** Form quản lý thông tin vai trò */
   roleForm!: FormGroup;
+  /** Trạng thái loading khi thực hiện các thao tác async */
   loading = false;
+  /** ID của vai trò đang chỉnh sửa (nếu có) */
   roleId?: string;
+  /** Thông tin chi tiết của vai trò */
   role: IdentityRoleDto | null = null;
 
-  // Permission management
+  /** Danh sách tất cả quyền có sẵn trong hệ thống */
   availablePermissions: GetPermissionListResultDto | null = null;
+  /** Cây quyền dưới dạng phân cấp để hiển thị */
   permissionTreeNodes: TreeNode[] = [];
+  /** Danh sách các node quyền đã được chọn */
   selectedTreeNodes: TreeNode[] = [];
 
-  // Injected services
+  /** Các service được inject */
   private fb = inject(FormBuilder);
   private identityRoleService = inject(IdentityRoleService);
   private permissionsService = inject(PermissionsService);
@@ -61,6 +75,9 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
   private dialogRef = inject(DynamicDialogRef);
   private config = inject(DynamicDialogConfig);
 
+  /**
+   * Khởi tạo component với cấu hình dialog
+   */
   constructor() {
     super();
     const data = this.config.data as RoleFormDialogData;
@@ -68,6 +85,9 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     this.initializeForm();
   }
 
+  /**
+   * Khởi tạo dữ liệu khi component được load
+   */
   ngOnInit() {
     this.loadPermissions();
 
@@ -78,6 +98,9 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Khởi tạo form với các validation rules
+   */
   private initializeForm() {
     this.roleForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -86,6 +109,10 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Tải thông tin chi tiết của vai trò theo ID
+   * @param id ID của vai trò cần tải
+   */
   async loadRole(id: string) {
     this.loading = true;
 
@@ -112,6 +139,9 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Xử lý submit form - tạo mới hoặc cập nhật vai trò
+   */
   async onSubmit() {
     if (!this.validateForm(this.roleForm)) {
       return;
@@ -127,6 +157,10 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Tạo vai trò mới với các quyền được chọn
+   * @param formValue Dữ liệu từ form
+   */
   private async createRole(formValue: any) {
     const createInput: IdentityRoleCreateDto = {
       name: formValue.name,
@@ -149,6 +183,10 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Cập nhật thông tin vai trò và quyền
+   * @param formValue Dữ liệu từ form
+   */
   private async updateRole(formValue: any) {
     const updateInput: IdentityRoleUpdateDto = {
       name: formValue.name,
@@ -172,10 +210,16 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Hủy thao tác và đóng dialog
+   */
   cancel() {
     this.dialogRef.close(false);
   }
 
+  /**
+   * Reset form về trạng thái ban đầu cho chế độ tạo mới
+   */
   private resetRoleForm() {
     this.roleForm.reset({
       isDefault: false,
@@ -190,7 +234,9 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     this.loading = false;
   }
 
-  // Permission management methods
+  /**
+   * Tải danh sách tất cả quyền có sẵn và xây dựng cây quyền
+   */
   async loadPermissions() {
     try {
       this.availablePermissions = await firstValueFrom(this.permissionsService.get('R', ''));
@@ -204,6 +250,10 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Tải danh sách quyền của vai trò và cập nhật trạng thái cây quyền
+   * @param roleName Tên vai trò cần tải quyền
+   */
   async loadRolePermissions(roleName: string) {
     try {
       const rolePermissions = await firstValueFrom(this.permissionsService.get('R', roleName));
@@ -233,6 +283,11 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     }
   }
 
+  /**
+   * Tìm node trong tất cả các nhóm quyền
+   * @param key Key của quyền cần tìm
+   * @returns TreeNode nếu tìm thấy, null nếu không
+   */
   private findNodeInAllGroups(key: string): TreeNode | null {
     for (const groupNode of this.permissionTreeNodes) {
       const found = this.findNode([groupNode], key);
@@ -241,6 +296,12 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     return null;
   }
 
+  /**
+   * Tìm node trong cây quyền theo key
+   * @param nodes Danh sách node cần tìm
+   * @param key Key của quyền
+   * @returns TreeNode nếu tìm thấy
+   */
   private findNode(nodes: TreeNode[], key: string): TreeNode | null {
     for (const node of nodes) {
       if (node.key === key) {
@@ -256,6 +317,10 @@ export class RoleFormComponent extends ComponentBase implements OnInit {
     return null;
   }
 
+  /**
+   * Cập nhật quyền cho vai trò dựa trên các node đã chọn
+   * @param roleName Tên vai trò cần cập nhật quyền
+   */
   async updateRolePermissions(roleName: string) {
     if (!this.availablePermissions) return;
 

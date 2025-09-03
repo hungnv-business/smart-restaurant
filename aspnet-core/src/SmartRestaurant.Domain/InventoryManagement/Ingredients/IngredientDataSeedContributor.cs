@@ -100,9 +100,9 @@ public class IngredientDataSeedContributor : IDataSeedContributor, ITransientDep
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, lonUnit.Id, 1, true, 12000m, true),     // Base: lon - 12,000đ/lon
-                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, locUnit.Id, 6, false, 70000m, true),    // 1 lốc = 6 lon - 70,000đ/lốc
-                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, thungUnit.Id, 24, false, 260000m, true)  // 1 thùng = 24 lon - 260,000đ/thùng
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, lonUnit.Id, 1, true, 1, 12000m, true),     // Base: lon - 12,000đ/lon
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, locUnit.Id, 6, false, 2, 70000m, true),    // 1 lốc = 6 lon - 70,000đ/lốc
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, thungUnit.Id, 24, false, 3, 260000m, true)  // 1 thùng = 24 lon - 260,000đ/thùng
             });
         }
         
@@ -110,9 +110,9 @@ public class IngredientDataSeedContributor : IDataSeedContributor, ITransientDep
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, mlUnit.Id, 1, true, 50m, true),      // Base: ml - 50đ/ml
-                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, lonUnit.Id, 330, false, 15000m, true),  // 1 lon = 330ml - 15,000đ/lon
-                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, thungUnit.Id, 50000, false, 750000m, true) // 1 thùng = 50000ml - 750,000đ/thùng
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, mlUnit.Id, 1, true, 1, 50m, true),      // Base: ml - 50đ/ml
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, lonUnit.Id, 330, false, 2, 15000m, true),  // 1 lon = 330ml - 15,000đ/lon
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, thungUnit.Id, 50000, false, 3, 750000m, true) // 1 thùng = 50000ml - 750,000đ/thùng
             });
         }
         

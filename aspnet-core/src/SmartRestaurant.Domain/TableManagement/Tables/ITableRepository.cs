@@ -6,6 +6,11 @@ using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.TableManagement.Tables
 {
+    /// <summary>
+    /// Repository interface chuyên biệt cho bàn ăn trong nhà hàng
+    /// Mở rộng IRepository cơ bản với các method truy vấn phức tạp
+    /// Hỗ trợ quản lý vị trí, sắp xếp và nhóm theo khu vực
+    /// </summary>
     public interface ITableRepository : IRepository<Table, Guid>
     {
         /// <summary>Lấy danh sách bàn theo khu vực với sắp xếp theo DisplayOrder</summary>

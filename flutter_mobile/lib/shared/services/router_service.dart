@@ -8,6 +8,24 @@ import '../widgets/splash_screen.dart';
 import '../widgets/login_screen.dart';
 import '../widgets/not_found_screen.dart';
 
+/// Service quản lý routing và navigation trong ứng dụng SmartRestaurant Mobile
+/// 
+/// Sử dụng GoRouter để cung cấp:
+/// - Declarative routing với path-based navigation
+/// - Nested routes cho từng feature module
+/// - Shell route với bottom navigation bar persistent
+/// - Deep linking support cho direct access các màn hình
+/// - Type-safe navigation với named routes
+/// 
+/// Cấu trúc routing:
+/// - `/splash` - Màn hình chào mừng và khởi tạo
+/// - `/login` - Đăng nhập nhân viên
+/// - `/orders` - Quản lý đơn hàng (với sub-routes: new, edit, detail)
+/// - `/reservations` - Quản lý đặt bàn (với sub-routes tương tự)
+/// - `/takeaway` - Quản lý mang về (với sub-routes tương tự)
+/// 
+/// Navigation flow:
+/// Splash → Login → Main App (với bottom navigation persistent)
 class RouterService {
   static final GoRouter router = GoRouter(
     initialLocation: RouteConstants.splash,

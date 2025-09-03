@@ -137,11 +137,11 @@ public class Ingredient : FullAuditedEntity<Guid>
     // === Purchase Units Query Methods ===
     
     /// <summary>
-    /// Kiểm tra đơn vị có trong danh sách purchase units không
+    /// Kiểm tra đơn vị có trong danh sách purchase units không (theo ID)
     /// </summary>
-    public bool IsInPurchaseUnits(Guid unitId)
+    public bool IsInPurchaseUnits(Guid id)
     {
-        return PurchaseUnits.Any(pu => pu.UnitId == unitId);
+        return PurchaseUnits.Any(pu => pu.Id == id);
     }
     
     /// <summary>
@@ -152,7 +152,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         var baseUnit = PurchaseUnits.FirstOrDefault(pu => pu.IsBaseUnit && pu.IsActive);
         if (baseUnit == null)
         {
-            throw new InvalidOperationException($"Ingredient {Name} does not have a base unit configured.");
+            throw new BaseUnitNotConfiguredException(Name);
         }
         return baseUnit;
     }
@@ -162,34 +162,53 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Thêm đơn vị mua hàng mới hoặc cập nhật nếu đã tồn tại
     /// </summary>
-    public void AddPurchaseUnit(Guid unitId, int conversionRatio, bool isBaseUnit, decimal? purchasePrice = null, bool isActive = true)
+    public void AddPurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice = null, int displayOrder = 1, bool isActive = true)
     {
-        if (IsInPurchaseUnits(unitId))
-        {
-            // Cập nhật đơn vị đã tồn tại
-            UpdatePurchaseUnit(unitId, conversionRatio, isBaseUnit, purchasePrice, isActive);
-            return;
-        }
-        
-        // Validation: Chỉ cho phép 1 đơn vị cơ sở
-        if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit))
-        {
-            throw new InvalidOperationException($"Ingredient {Name} already has a base unit configured");
-        }
-        
         // Validation: Đơn vị cơ sở phải có tỷ lệ = 1
         if (isBaseUnit && conversionRatio != 1)
         {
-            throw new InvalidOperationException("Base unit must have conversion ratio = 1");
+            throw new InvalidBaseUnitConversionException(conversionRatio);
+        }
+        
+        if (IsInPurchaseUnits(id))
+        {
+            // Validation cho update: Không cho phép trùng UnitId (trừ chính nó)
+            if (PurchaseUnits.Any(pu => pu.UnitId == unitId && pu.Id != id))
+            {
+                throw new DuplicateUnitException(Name, unitName);
+            }
+            
+            // Validation cho update: Chỉ cho phép 1 đơn vị cơ sở (trừ chính nó)
+            if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit && pu.Id != id))
+            {
+                throw new MultipleBaseUnitException(Name);
+            }
+            
+            // Cập nhật đơn vị đã tồn tại
+            UpdatePurchaseUnit(id, unitId, unitName, conversionRatio, isBaseUnit, purchasePrice, displayOrder, isActive);
+            return;
+        }
+        
+        // Validation cho create: Không cho phép trùng UnitId
+        if (PurchaseUnits.Any(pu => pu.UnitId == unitId))
+        {
+            throw new DuplicateUnitException(Name, unitName);
+        }
+        
+        // Validation cho create: Chỉ cho phép 1 đơn vị cơ sở
+        if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit))
+        {
+            throw new MultipleBaseUnitException(Name);
         }
         
         // Thêm đơn vị mới
         var purchaseUnit = new IngredientPurchaseUnit(
-            id: Guid.NewGuid(),
+            id: id,
             ingredientId: Id,
             unitId: unitId,
             conversionRatio: conversionRatio,
             isBaseUnit: isBaseUnit,
+            displayOrder: displayOrder,
             purchasePrice: purchasePrice
         );
         purchaseUnit.IsActive = isActive;
@@ -200,7 +219,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Thêm nhiều đơn vị mua hàng cùng lúc (gọi AddPurchaseUnit cho từng unit)
     /// </summary>
-    public void AddPurchaseUnits(IEnumerable<(Guid unitId, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, bool isActive)> units)
+    public void AddPurchaseUnits(IEnumerable<(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, bool isActive)> units)
     {
         if (units == null)
         {
@@ -209,61 +228,39 @@ public class Ingredient : FullAuditedEntity<Guid>
         
         var unitsList = units.ToList();
         
-        // Validation: Kiểm tra trùng unitId trong input
-        var unitIds = unitsList.Select(u => u.unitId).ToList();
-        var duplicateInInput = unitIds.GroupBy(id => id).Where(g => g.Count() > 1).Select(g => g.Key);
-        if (duplicateInInput.Any())
+        // Thêm từng đơn vị - AddPurchaseUnit sẽ handle tất cả validation
+        var index = 1;
+        foreach (var (id, unitId, unitName, conversionRatio, isBaseUnit, purchasePrice, isActive) in unitsList)
         {
-            throw new InvalidOperationException($"Duplicate units in input: {string.Join(", ", duplicateInInput)}");
-        }
-        
-        // Validation: Kiểm tra nhiều đơn vị cơ sở trong input
-        var newBaseUnits = unitsList.Where(u => u.isBaseUnit).ToList();
-        if (newBaseUnits.Count > 1)
-        {
-            throw new InvalidOperationException("Cannot add multiple base units");
-        }
-        
-        // Thêm từng đơn vị - AddPurchaseUnit sẽ handle logic thêm mới/update
-        foreach (var (unitId, conversionRatio, isBaseUnit, purchasePrice, isActive) in unitsList)
-        {
-            AddPurchaseUnit(unitId, conversionRatio, isBaseUnit, purchasePrice, isActive);
+            AddPurchaseUnit(id, unitId, unitName, conversionRatio, isBaseUnit, purchasePrice, index, isActive);
+            index++;
         }
     }
     
     /// <summary>
     /// Cập nhật đơn vị mua hàng
     /// </summary>
-    public void UpdatePurchaseUnit(Guid unitId, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, bool isActive)
+    public void UpdatePurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, int displayOrder = 1, bool isActive = true)
     {
-        var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.UnitId == unitId);
+        var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.Id == id);
         if (purchaseUnit == null)
         {
-            throw new ArgumentException($"Purchase unit {unitId} not found for ingredient {Name}");
+            throw new ArgumentException($"Purchase unit {id} not found for ingredient {Name}");
         }
         
-        // Validation: Chỉ cho phép 1 đơn vị cơ sở
-        if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit && pu.UnitId != unitId))
-        {
-            throw new InvalidOperationException($"Ingredient {Name} already has a base unit configured");
-        }
-        
-        // Validation: Đơn vị cơ sở phải có tỷ lệ = 1
-        if (isBaseUnit && conversionRatio != 1)
-        {
-            throw new InvalidOperationException("Base unit must have conversion ratio = 1");
-        }
-        
+        // Cập nhật thông tin (validation đã được xử lý ở AddPurchaseUnit)
+        purchaseUnit.UnitId = unitId;
         purchaseUnit.ConversionRatio = conversionRatio;
         purchaseUnit.IsBaseUnit = isBaseUnit;
         purchaseUnit.PurchasePrice = purchasePrice;
+        purchaseUnit.DisplayOrder = displayOrder;
         purchaseUnit.IsActive = isActive;
     }
     
     /// <summary>
     /// Xóa đơn vị mua hàng
     /// </summary>
-    public void RemovePurchaseUnit(Guid unitId)
+    public void RemovePurchaseUnit(Guid unitId, string unitName)
     {
         var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.UnitId == unitId);
         if (purchaseUnit == null)
@@ -274,7 +271,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         // Không cho phép xóa đơn vị cơ sở
         if (purchaseUnit.IsBaseUnit)
         {
-            throw new InvalidOperationException("Cannot remove base unit");
+            throw new CannotRemoveBaseUnitException(unitName, Name);
         }
         
         PurchaseUnits.Remove(purchaseUnit);
@@ -286,6 +283,48 @@ public class Ingredient : FullAuditedEntity<Guid>
     public void ClearPurchaseUnits()
     {
         PurchaseUnits.Clear();
+    }
+    
+    /// <summary>
+    /// Constructor mặc định cho EF Core và data seeding
+    /// </summary>
+    public Ingredient()
+    {
+    }
+
+    /// <summary>
+    /// Constructor với tham số để tạo nguyên liệu mới
+    /// </summary>
+    /// <param name="id">ID duy nhất của nguyên liệu</param>
+    /// <param name="categoryId">ID danh mục nguyên liệu</param>
+    /// <param name="name">Tên nguyên liệu</param>
+    /// <param name="unitId">ID đơn vị đo lường cơ sở</param>
+    /// <param name="description">Mô tả nguyên liệu</param>
+    /// <param name="costPerUnit">Giá thành trên đơn vị</param>
+    /// <param name="supplierInfo">Thông tin nhà cung cấp</param>
+    /// <param name="isStockTrackingEnabled">Có theo dõi kho hay không</param>
+    /// <param name="isActive">Trạng thái hoạt động</param>
+    public Ingredient(
+        Guid id,
+        Guid categoryId,
+        string name,
+        Guid unitId,
+        string? description = null,
+        decimal? costPerUnit = null,
+        string? supplierInfo = null,
+        bool isStockTrackingEnabled = true,
+        bool isActive = true
+    ) : base(id)
+    {
+        CategoryId = categoryId;
+        Name = name;
+        UnitId = unitId;
+        Description = description;
+        CostPerUnit = costPerUnit;
+        SupplierInfo = supplierInfo;
+        IsStockTrackingEnabled = isStockTrackingEnabled;
+        IsActive = isActive;
+        CurrentStock = 0; // Bắt đầu với stock = 0
     }
     
 }

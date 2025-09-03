@@ -69,8 +69,15 @@
     "SmartRestaurant:IngredientCategory:0001": "Tên danh mục nguyên liệu '{CategoryName}' đã tồn tại trong hệ thống",
     "SmartRestaurant:Unit:0001": "Tên đơn vị '{UnitName}' đã tồn tại trong hệ thống",
     "SmartRestaurant:Ingredient:0001": "Không đủ tồn kho cho nguyên liệu '{IngredientName}'. Hiện có: {CurrentStock}, yêu cầu: {RequiredQuantity}",
+    "SmartRestaurant:Ingredient:0003": "Đơn vị '{UnitName}' đã tồn tại trong nguyên liệu '{IngredientName}'",
+    "SmartRestaurant:Ingredient:0004": "Nguyên liệu '{IngredientName}' đã có đơn vị cơ sở. Không thể thêm đơn vị cơ sở thứ hai",
+    "SmartRestaurant:Ingredient:0005": "Đơn vị cơ sở phải có tỷ lệ quy đổi bằng 1. Tỷ lệ hiện tại: {ConversionRatio}",
     "SmartRestaurant:PurchaseInvoice:0001": "Số lượng không hợp lệ: {Quantity}. Số lượng phải lớn hơn 0",
     "SmartRestaurant:PurchaseInvoice:0002": "Tổng tiền không hợp lệ: {TotalPrice}. Tổng tiền không được âm",
-    "SmartRestaurant:PurchaseInvoice:0003": "Không thể xóa hóa đơn sau 6 giờ từ lúc tạo. Hóa đơn tạo lúc: {CreationTime}, hạn chót: {Deadline}"
+    "SmartRestaurant:PurchaseInvoice:0003": "Không thể xóa hóa đơn sau 6 giờ từ lúc tạo. Hóa đơn tạo lúc: {CreationTime}, hạn chót: {Deadline}",
+    "SmartRestaurant:PurchaseInvoice:0004": "Không tìm thấy item '{ItemId}' trong hóa đơn",
+    "SmartRestaurant:Table:0001": "Bàn '{TableNumber}' chưa được gán vào khu vực nào",
+    "SmartRestaurant:Ingredient:0006": "Nguyên liệu '{IngredientName}' chưa cấu hình đơn vị cơ sở",
+    "SmartRestaurant:Ingredient:0007": "Không thể xóa đơn vị cơ sở '{UnitName}' của nguyên liệu '{IngredientName}'"
   }
 }

@@ -6,7 +6,10 @@ import { MenuCategoryFormComponent } from '../menu-category-form/menu-category-f
 import { MenuCategoryService } from '../../../../proxy/menu-management/menu-categories';
 import { MenuCategoryDto } from '../../../../proxy/menu-management/menu-categories/dto';
 
-// Interface định nghĩa data truyền vào dialog form
+/**
+ * Interface định nghĩa dữ liệu truyền vào dialog form danh mục món ăn
+ * Đảm bảo type safety và có thể sử dụng cho cả Create và Edit mode
+ */
 export interface MenuCategoryFormData {
   categoryId?: string; // ID danh mục (có trong Edit mode)
   category?: MenuCategoryDto; // Entity data đã load từ server (Edit mode)
@@ -14,11 +17,21 @@ export interface MenuCategoryFormData {
   nextDisplayOrder?: number; // Thứ tự hiển thị tiếp theo (Create mode)
 }
 
+/**
+ * Service quản lý dialog form cho danh mục món ăn
+ * Chức năng chính:
+ * - Mở dialog tạo mới danh mục với auto-load nextDisplayOrder
+ * - Mở dialog chỉnh sửa với pre-load dữ liệu
+ * - Cấu hình responsive dialog cho màn hình khác nhau
+ * - Xử lý kết quả dialog và thông báo thành công/lỗi
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class MenuCategoryFormDialogService {
+  /** Service để mở dialog PrimeNG */
   private dialogService = inject(DialogService);
+  /** Service API quản lý danh mục món ăn */
   private menuCategoryService = inject(MenuCategoryService);
 
   /**
@@ -46,14 +59,19 @@ export class MenuCategoryFormDialogService {
 
   /**
    * Method dùng chung để mở dialog - tự động load dữ liệu cần thiết trước khi mở
+   * Xử lý 2 flow khác nhau:
+   * - Edit mode: Load thông tin danh mục từ server
+   * - Create mode: Load thứ tự hiển thị tiếp theo
+   * @param data Cấu hình dialog và dữ liệu ban đầu
+   * @returns Observable trả về kết quả dialog (true = thành công, false = hủy)
    */
   private openDialog(data: MenuCategoryFormData): Observable<boolean> {
     return new Observable<boolean>(observer => {
       if (data.categoryId) {
-        // Edit mode: load entity data trước
+        // Chế độ chỉnh sửa: load dữ liệu danh mục trước khi mở dialog
         this.menuCategoryService.get(data.categoryId).subscribe({
           next: (category: MenuCategoryDto) => {
-            data.category = category;
+            data.category = category; // Gán dữ liệu đã load vào data
             this.createDialog(data, observer);
           },
           error: error => {
@@ -62,7 +80,7 @@ export class MenuCategoryFormDialogService {
           },
         });
       } else {
-        // Create mode: load next display order trước
+        // Chế độ tạo mới: load thứ tự hiển thị tiếp theo
         this.menuCategoryService.getNextDisplayOrder().subscribe({
           next: (nextDisplayOrder: number) => {
             data.nextDisplayOrder = nextDisplayOrder;
@@ -77,6 +95,11 @@ export class MenuCategoryFormDialogService {
     });
   }
 
+  /**
+   * Tạo và mở dialog với cấu hình responsive
+   * @param data Dữ liệu đã được chuẩn bị cho dialog
+   * @param observer Observer để trả về kết quả cho caller
+   */
   private createDialog(
     data: MenuCategoryFormData,
     observer: {

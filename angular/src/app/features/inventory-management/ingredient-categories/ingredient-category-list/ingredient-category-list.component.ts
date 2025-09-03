@@ -18,6 +18,15 @@ import { ComponentBase } from '../../../../shared/base/component-base';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
 import { finalize } from 'rxjs/operators';
 
+/**
+ * Component quản lý danh sách danh mục nguyên liệu trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách danh mục (Rau củ, Thịt cá, Gia vị...)
+ * - Tìm kiếm theo tên và mô tả danh mục
+ * - Thêm, sửa, xóa danh mục nguyên liệu
+ * - Xóa nhiều danh mục cùng lúc (bulk delete)
+ * - Kiểm soát quyền truy cập theo role
+ */
 @Component({
   selector: 'app-ingredient-category-list',
   standalone: true,
@@ -57,13 +66,21 @@ export class IngredientCategoryListComponent extends ComponentBase implements On
   // Hằng số
   private readonly ENTITY_NAME = 'danh mục nguyên liệu'; // Tên entity dùng trong thông báo
 
+  /** Service API quản lý danh mục nguyên liệu */
   private ingredientCategoryService = inject(IngredientCategoryService);
+  /** Service mở dialog form danh mục */
   private ingredientCategoryFormDialogService = inject(IngredientCategoryFormDialogService);
 
+  /**
+   * Constructor - khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo component - tải danh sách danh mục nguyên liệu
+   */
   ngOnInit() {
     this.loadCategories();
   }

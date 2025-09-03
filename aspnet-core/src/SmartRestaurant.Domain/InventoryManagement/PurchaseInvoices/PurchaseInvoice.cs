@@ -52,10 +52,20 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         /// </summary>
         public virtual ICollection<PurchaseInvoiceItem> Items { get; set; } = new List<PurchaseInvoiceItem>();
 
+        /// <summary>
+        /// Constructor mặc định cho EF Core
+        /// </summary>
         protected PurchaseInvoice()
         {
         }
 
+        /// <summary>
+        /// Constructor tạo hóa đơn mua hàng mới
+        /// </summary>
+        /// <param name="id">ID duy nhất của hóa đơn</param>
+        /// <param name="invoiceNumber">Số hóa đơn</param>
+        /// <param name="invoiceDateId">ID ngày lập hóa đơn trong bảng DimDate</param>
+        /// <param name="notes">Ghi chú cho hóa đơn (tùy chọn)</param>
         public PurchaseInvoice(
             Guid id,
             string invoiceNumber,
@@ -174,7 +184,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             var existingItem = GetItem(itemId);
             if (existingItem == null)
             {
-                throw new InvalidOperationException($"Item with ID {itemId} not found in invoice");
+                throw new InvoiceItemNotFoundException(itemId);
             }
 
             ValidateItemData(quantity, baseUnitQuantity, totalPrice);

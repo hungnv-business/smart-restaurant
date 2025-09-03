@@ -24,7 +24,7 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients
             return await dbSet
                 .Include(x => x.Category)
                 .Include(x => x.Unit)
-                .Include(x => x.PurchaseUnits)
+                .Include(x => x.PurchaseUnits.OrderByDescending(e => e.IsBaseUnit).ThenBy(e => e.DisplayOrder))
                 .ThenInclude(x => x.Unit)
                 .FirstOrDefaultAsync(x => x.Id == id, GetCancellationToken(cancellationToken));
         }
@@ -42,7 +42,7 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients
             var query = dbSet
                 .Include(x => x.Category)
                 .Include(x => x.Unit)
-                .Include(x => x.PurchaseUnits)
+                .Include(x => x.PurchaseUnits.OrderByDescending(e => e.IsBaseUnit).ThenBy(e => e.DisplayOrder))
                 .ThenInclude(x => x.Unit)
                 .AsQueryable();
 
@@ -124,18 +124,18 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients
         public async Task<bool> HasDependenciesAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var dbContext = await GetDbContextAsync();
-            
+
             // Kiểm tra PurchaseInvoiceItem
             var hasPurchaseInvoiceItems = await dbContext.PurchaseInvoiceItems
                 .AnyAsync(x => x.IngredientId == id, GetCancellationToken(cancellationToken));
-            
+
             if (hasPurchaseInvoiceItems)
                 return true;
-            
+
             // Kiểm tra MenuItem
             var hasMenuItems = await dbContext.MenuItems
                 .AnyAsync(x => x.PrimaryIngredientId == id, GetCancellationToken(cancellationToken));
-            
+
             return hasMenuItems;
         }
     }

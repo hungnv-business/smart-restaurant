@@ -25,6 +25,15 @@ import { DateTimeHelper } from '../../../../shared/helpers';
 import { PurchaseInvoiceDto } from '../../../../proxy/inventory-management/purchase-invoices/dto';
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 
+/**
+ * Component quản lý danh sách hóa đơn mua hàng trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách hóa đơn mua nguyên liệu với phân trang server-side
+ * - Tìm kiếm theo số hóa đơn và lọc theo khoảng thời gian
+ * - Tạo mới, chỉnh sửa, xem chi tiết và xóa hóa đơn mua
+ * - Hiển thị tổng tiền theo định dạng tiền Việt (VND)
+ * - Kiểm soát quyền truy cập theo role (chỉ nhân viên kho)
+ */
 @Component({
   selector: 'app-purchase-invoice-list',
   standalone: true,
@@ -49,42 +58,53 @@ import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/p
   styleUrls: ['./purchase-invoice-list.component.scss'],
 })
 export class PurchaseInvoiceListComponent extends ComponentBase implements OnInit {
-  // Quyền truy cập
+  /** Quyền truy cập - Kiểm soát hiển thị các nút theo quyền user */
   readonly permissions = {
-    create: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.CREATE,
-    edit: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.EDIT,
-    delete: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.DELETE,
+    create: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.CREATE, // Quyền tạo hóa đơn
+    edit: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.EDIT, // Quyền sửa hóa đơn
+    delete: PERMISSIONS.RESTAURANT.INVENTORY.PURCHASE_INVOICES.DELETE, // Quyền xóa hóa đơn
   };
 
-  // Cấu hình bảng
+  /** Các field được search khi user nhập tìm kiếm */
   filterFields: string[] = ['invoiceNumber', 'totalAmount'];
 
-  // Dữ liệu hiển thị
-  purchaseInvoices = signal<PurchaseInvoiceDto[]>([]);
-  dateRange: Date[] | null = null;
-  searchText = '';
-  totalRecords = 0;
-  loading = false;
+  /** Dữ liệu hiển thị trên bảng */
+  purchaseInvoices = signal<PurchaseInvoiceDto[]>([]); // Danh sách hóa đơn mua (server-side paging)
+  dateRange: Date[] | null = null; // Khoảng thời gian lọc (từ ngày - đến ngày)
+  searchText = ''; // Văn bản tìm kiếm theo số hóa đơn
+  totalRecords = 0; // Tổng số record cho phân trang
+  loading = false; // Trạng thái loading khi gọi API
 
-  // Debounce search
+  /** Xử lý debounce cho tìm kiếm */
   private searchSubject = new Subject<string>();
 
-  // Hằng số
+  /** Tên entity dùng trong thông báo */
   readonly ENTITY_NAME = 'hóa đơn mua';
 
+  /** Các service được inject */
   private purchaseInvoiceFormDialogService = inject(PurchaseInvoiceFormDialogService);
   private purchaseInvoiceService = inject(PurchaseInvoiceService);
 
+  /** Tham chiếu đến PrimeNG Table */
   @ViewChild('dt') dt!: Table;
 
+  /**
+   * Constructor - khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo component - thiết lập debounce search
+   */
   ngOnInit() {
-    // Setup debounced search
-    this.searchSubject.pipe(debounceTime(1000), distinctUntilChanged()).subscribe(() => {
-      this.resetPagination(this.dt);
+    // Thiết lập tìm kiếm debounce để giảm tải API calls
+    this.searchSubject.pipe(
+      debounceTime(1000), // Chờ 1s sau ký tự cuối (lâu hơn vì search hóa đơn)
+      distinctUntilChanged() // Chỉ gọi nếu giá trị thay đổi
+    ).subscribe(() => {
+      this.resetPagination(this.dt); // Reset về trang đầu và tải lại
     });
   }
 

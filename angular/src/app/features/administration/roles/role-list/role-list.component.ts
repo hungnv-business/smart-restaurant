@@ -19,6 +19,16 @@ import { IdentityRoleDto, GetIdentityRolesInput } from '@abp/ng.identity/proxy';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
 import { RoleFormDialogService } from '../role-form/role-form-dialog.service';
 
+/**
+ * Component hiển thị danh sách vai trò trong hệ thống nhà hàng
+ * Chức năng chính:
+ * - Hiển thị danh sách tất cả vai trò với thông tin chi tiết
+ * - Tạo mới vai trò qua dialog form
+ * - Chỉnh sửa thông tin vai trò hiện có
+ * - Xóa vai trò (không cho phép xóa vai trò hệ thống)
+ * - Tìm kiếm và lọc vai trò theo tên
+ * - Xóa nhiều vai trò cùng lúc
+ */
 @Component({
   selector: 'app-role-list',
   standalone: true,
@@ -40,29 +50,38 @@ import { RoleFormDialogService } from '../role-form/role-form-dialog.service';
   providers: [],
 })
 export class RoleListComponent extends ComponentBase implements OnInit {
-  // Permissions constants
+  /** Hằng số quyền để kiểm soát hiển thị các nút chức năng */
   readonly PERMISSIONS = PERMISSIONS;
 
-  // Table configuration
+  /** Danh sách các trường được sử dụng để tìm kiếm */
   filterFields: string[] = ['name'];
 
-  // Data
+  /** Signal chứa danh sách vai trò */
   roles = signal<IdentityRoleDto[]>([]);
+  /** Danh sách vai trò được chọn để thực hiện thao tác */
   selectedRoles!: IdentityRoleDto[] | null;
 
-  // Injected services
+  /** Các service được inject */
   private identityRoleService = inject(IdentityRoleService);
   private roleFormDialogService = inject(RoleFormDialogService);
 
+  /**
+   * Khởi tạo component
+   */
   constructor() {
     super();
   }
 
+  /**
+   * Khởi tạo dữ liệu khi component được load
+   */
   ngOnInit() {
     this.loadRoles();
   }
 
-  // Dialog operations
+  /**
+   * Mở dialog tạo vai trò mới
+   */
   openCreateDialog() {
     this.roleFormDialogService.openCreateRoleDialog().subscribe(success => {
       if (success) {
@@ -71,6 +90,10 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Mở dialog chỉnh sửa vai trò
+   * @param roleId ID của vai trò cần chỉnh sửa
+   */
   openEditDialog(roleId: string) {
     this.roleFormDialogService.openEditRoleDialog(roleId).subscribe(success => {
       if (success) {
@@ -79,6 +102,10 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Xóa một vai trò (không cho phép xóa vai trò hệ thống)
+   * @param role Vai trò cần xóa
+   */
   deleteRole(role: IdentityRoleDto) {
     if (role.isStatic) {
       this.showWarning('Không thể xóa', 'Không thể xóa vai trò hệ thống');
@@ -97,6 +124,9 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Xóa các vai trò đã chọn (loại bỏ vai trò hệ thống)
+   */
   deleteSelectedRoles() {
     if (!this.selectedRoles?.length) return;
 
@@ -125,17 +155,27 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
-  // Table operations
+  /**
+   * Xử lý tìm kiếm global trên bảng
+   * @param table Tham chiếu đến PrimeNG Table
+   * @param event Event từ input search
+   */
   onGlobalFilter(table: Table, event: Event): void {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
+  /**
+   * Kiểm tra có vai trò nào có thể xóa được trong danh sách đã chọn
+   * @returns true nếu có ít nhất một vai trò có thể xóa
+   */
   hasDeletableRoles(): boolean {
     if (!this.selectedRoles?.length) return false;
     return this.selectedRoles.some(role => !role.isStatic);
   }
 
-  // Private methods
+  /**
+   * Tải danh sách vai trò từ API
+   */
   private loadRoles() {
     const input: GetIdentityRolesInput = {
       maxResultCount: 50,
@@ -152,6 +192,10 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Thực hiện xóa một vai trò
+   * @param role Vai trò cần xóa
+   */
   private performDeleteRole(role: IdentityRoleDto) {
     this.identityRoleService.delete(role.id!).subscribe({
       next: () => {
@@ -164,6 +208,10 @@ export class RoleListComponent extends ComponentBase implements OnInit {
     });
   }
 
+  /**
+   * Thực hiện xóa nhiều vai trò cùng lúc
+   * @param rolesToDelete Danh sách vai trò cần xóa
+   */
   private performDeleteSelectedRoles(rolesToDelete: IdentityRoleDto[]) {
     if (!rolesToDelete?.length) return;
 
