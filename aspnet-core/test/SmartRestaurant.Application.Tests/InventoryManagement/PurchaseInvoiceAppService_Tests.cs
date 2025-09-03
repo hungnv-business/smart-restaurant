@@ -58,25 +58,25 @@ public class PurchaseInvoiceAppService_Tests : SmartRestaurantApplicationTestBas
         {
             IngredientId = Guid.NewGuid(),
             Quantity = 10,
-            UnitId = Guid.NewGuid(),
+            PurchaseUnitId = Guid.NewGuid(),
             TotalPrice = 100000
         };
 
-        // Assert - Item should have required IngredientId and UnitId
+        // Assert - Item should have required IngredientId and PurchaseUnitId
         itemDto.IngredientId.ShouldNotBe(Guid.Empty);
-        itemDto.UnitId.ShouldNotBe(Guid.Empty);
+        itemDto.PurchaseUnitId.ShouldNotBe(Guid.Empty);
         itemDto.Quantity.ShouldBeGreaterThan(0);
     }
 
     [Fact]
-    public async Task Should_Handle_Ingredient_Lookup()
+    public async Task Should_Handle_Ingredient_For_Purchase_Lookup()
     {
         // Test ingredient lookup functionality
         var testIngredientId = Guid.NewGuid();
         
         try
         {
-            var result = await _purchaseInvoiceAppService.GetIngredientLookupAsync(testIngredientId);
+            var result = await _purchaseInvoiceAppService.GetIngredientForPurchaseAsync(testIngredientId);
             // If ingredient exists, should return data
             // If not exists, should handle gracefully
         }

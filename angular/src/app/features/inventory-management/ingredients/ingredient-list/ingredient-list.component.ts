@@ -1,8 +1,8 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { TableModule, Table } from 'primeng/table';
+import { TableModule, Table, TableLazyLoadEvent } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TagModule } from 'primeng/tag';
@@ -11,17 +11,17 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ToolbarModule } from 'primeng/toolbar';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { DropdownModule } from 'primeng/dropdown';
-import { IngredientDto } from '../../../../proxy/inventory-management/ingredients/dto';
+import { SelectModule } from 'primeng/select';
+import { IngredientDto, IngredientPurchaseUnitDto, GetIngredientListRequestDto } from '../../../../proxy/inventory-management/ingredients/dto';
 import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 import { GlobalService } from '../../../../proxy/common';
 import { GuidLookupItemDto } from '../../../../proxy/common/dto';
 import { VndCurrencyPipe } from '../../../../shared/pipes';
 import { IngredientFormDialogService } from '../services/ingredient-form-dialog.service';
-import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { PERMISSIONS } from '../../../../shared/constants/permissions';
-import { finalize } from 'rxjs/operators';
+import { finalize, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-ingredient-list',
@@ -39,7 +39,7 @@ import { finalize } from 'rxjs/operators';
     IconFieldModule,
     ConfirmDialogModule,
     TooltipModule,
-    DropdownModule,
+    SelectModule,
     VndCurrencyPipe,
   ],
   providers: [],
@@ -54,14 +54,22 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
     delete: PERMISSIONS.RESTAURANT.INVENTORY.INGREDIENTS.DELETE,
   };
 
-  // Cấu hình bảng
-  filterFields: string[] = ['name', 'categoryId', 'unitName', 'supplierInfo'];
-
   // Dữ liệu hiển thị
   ingredients = signal<IngredientDto[]>([]);
   categories = signal<GuidLookupItemDto[]>([]);
-  selectedIngredients: IngredientDto[] = [];
   loading = false;
+  totalRecords = 0;
+  
+  // Filter parameters
+  searchText = '';
+  selectedCategoryId: string | null = null;
+  
+  // Debounce search
+  private searchSubject = new Subject<string>();
+  
+  // Stock display unit toggle tracking
+  stockDisplayUnits = new Map<string, { unitId: string; unitName: string; isBaseUnit: boolean }>();
+  ingredientPurchaseUnits = new Map<string, IngredientPurchaseUnitDto[]>();
 
   // Hằng số
   private readonly ENTITY_NAME = 'nguyên liệu';
@@ -70,23 +78,33 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
   private globalService = inject(GlobalService);
   private ingredientFormDialogService = inject(IngredientFormDialogService);
 
+  @ViewChild('dt') dt!: Table;
+
   constructor() {
     super();
   }
 
   async ngOnInit() {
     await this.loadCategories();
-    await this.loadIngredients();
+    
+    // Setup debounced search
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.resetPagination(this.dt);
+    });
   }
 
-  // Xử lý tìm kiếm global
-  onGlobalFilter(table: Table, event: Event): void {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  // Xử lý tìm kiếm với debounce
+  onFilterChange(): void {
+    this.searchSubject.next(this.searchText);
   }
 
   // Xử lý filter theo category
-  onCategoryFilter(table: Table, categoryId: string): void {
-    table.filterGlobal(categoryId, 'equals');
+  onCategoryFilter(categoryId: string): void {
+    this.selectedCategoryId = categoryId || null;
+    this.resetPagination(this.dt);
   }
 
   // Mở dialog form
@@ -97,7 +115,7 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
 
     dialog$.subscribe(success => {
       if (success) {
-        this.loadIngredients();
+        this.resetPagination(this.dt);
 
         if (ingredientId) {
           this.showUpdateSuccess(this.ENTITY_NAME);
@@ -108,14 +126,6 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
     });
   }
 
-  // Xóa nhiều nguyên liệu
-  deleteSelectedIngredients() {
-    if (!this.selectedIngredients?.length) return;
-
-    this.confirmBulkDelete(() => {
-      this.performDeleteSelectedIngredients();
-    });
-  }
 
   // Xóa một nguyên liệu
   deleteIngredient(ingredient: IngredientDto) {
@@ -134,14 +144,17 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
     }
   }
 
-  // Load danh sách nguyên liệu
-  private loadIngredients() {
+  // Load danh sách nguyên liệu với lazy loading
+  loadIngredients(event?: TableLazyLoadEvent) {
     this.loading = true;
 
-    const request: PagedAndSortedResultRequestDto = {
-      maxResultCount: 1000,
-      skipCount: 0,
-      sorting: 'name',
+    const request: GetIngredientListRequestDto = {
+      maxResultCount: this.getMaxResultCount(event),
+      skipCount: this.getSkipCount(event),
+      sorting: this.getSorting(event, 'name'),
+      filter: this.searchText?.trim() || undefined,
+      categoryId: this.selectedCategoryId || undefined,
+      includeInactive: false,
     };
 
     this.ingredientService
@@ -151,10 +164,30 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
         next: result => {
           const ingredients = result.items || [];
           this.ingredients.set(ingredients);
+          this.totalRecords = result.totalCount || 0;
+          
+          // Setup unit toggle từ data có sẵn trong ingredient.purchaseUnits
+          ingredients.forEach(ingredient => {
+            if (ingredient.id && ingredient.purchaseUnits) {
+              const activeUnits = ingredient.purchaseUnits.filter(u => u.isActive);
+              this.ingredientPurchaseUnits.set(ingredient.id, activeUnits);
+              
+              // Set default display unit to base unit
+              const baseUnit = activeUnits.find(u => u.isBaseUnit);
+              if (baseUnit) {
+                this.stockDisplayUnits.set(ingredient.id, {
+                  unitId: baseUnit.unitId!,
+                  unitName: baseUnit.unitName!,
+                  isBaseUnit: true
+                });
+              }
+            }
+          });
         },
         error: error => {
           console.error('Error loading ingredients:', error);
           this.ingredients.set([]);
+          this.totalRecords = 0;
         },
       });
   }
@@ -172,20 +205,50 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
     });
   }
 
-  // Thực hiện xóa nhiều nguyên liệu
-  private performDeleteSelectedIngredients() {
-    if (!this.selectedIngredients?.length) return;
-
-    const ids = this.selectedIngredients.map(ingredient => ingredient.id!);
-
-    Promise.all(ids.map(id => this.ingredientService.delete(id).toPromise()))
-      .then(() => {
-        this.loadIngredients();
-        this.selectedIngredients = [];
-        this.showBulkDeleteSuccess(ids.length, this.ENTITY_NAME);
-      })
-      .catch(error => {
-        this.handleApiError(error, 'Có lỗi xảy ra khi xóa nguyên liệu');
+  
+  
+  toggleStockUnit(ingredientId: string, unitId: string) {
+    const purchaseUnits = this.ingredientPurchaseUnits.get(ingredientId) || [];
+    const selectedUnit = purchaseUnits.find(u => u.unitId === unitId);
+    
+    if (selectedUnit) {
+      this.stockDisplayUnits.set(ingredientId, {
+        unitId: selectedUnit.unitId!,
+        unitName: selectedUnit.unitName!,
+        isBaseUnit: selectedUnit.isBaseUnit
       });
+    }
+  }
+  
+  getDisplayUnit(ingredientId: string): string {
+    const displayUnit = this.stockDisplayUnits.get(ingredientId);
+    return displayUnit?.unitName || 'N/A';
+  }
+  
+  getDisplayStock(ingredient: IngredientDto): number {
+    if (!ingredient.currentStock || !ingredient.id) return 0;
+    
+    const displayUnit = this.stockDisplayUnits.get(ingredient.id);
+    const purchaseUnits = this.ingredientPurchaseUnits.get(ingredient.id) || [];
+    
+    if (!displayUnit || displayUnit.isBaseUnit) {
+      // Hiển thị theo base unit
+      return ingredient.currentStock;
+    }
+    
+    // Convert từ base unit sang display unit
+    const targetUnit = purchaseUnits.find(u => u.unitId === displayUnit.unitId);
+    if (!targetUnit) return ingredient.currentStock;
+    
+    return Math.floor(ingredient.currentStock / targetUnit.conversionRatio);
+  }
+
+  getIngredientPurchaseUnits(ingredientId: string): IngredientPurchaseUnitDto[] {
+    return this.ingredientPurchaseUnits.get(ingredientId) || [];
+  }
+
+  isSelectedUnit(ingredientId: string, unitId: string): boolean {
+    const displayUnit = this.stockDisplayUnits.get(ingredientId);
+    return displayUnit?.unitId === unitId;
   }
 }

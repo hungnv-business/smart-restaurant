@@ -22,7 +22,7 @@ public class IngredientAppService_Tests : SmartRestaurantApplicationTestBase<Sma
     public async Task Should_Get_List_Of_Ingredients()
     {
         // Act
-        var result = await _ingredientAppService.GetListAsync(new PagedAndSortedResultRequestDto());
+        var result = await _ingredientAppService.GetListAsync(new GetIngredientListRequestDto());
 
         // Assert - Check structure is correct, not requiring data
         result.ShouldNotBeNull();

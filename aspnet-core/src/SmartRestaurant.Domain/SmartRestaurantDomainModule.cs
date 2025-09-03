@@ -47,6 +47,10 @@ public class SmartRestaurantDomainModule : AbpModule
             options.IsEnabled = MultiTenancyConsts.IsEnabled;
         });
 
+        // Register domain services
+        context.Services.AddTransient<SmartRestaurant.Ingredients.IngredientManager>();
+        context.Services.AddTransient<SmartRestaurant.Inventory.PurchaseInvoiceManager>();
+
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
 #endif

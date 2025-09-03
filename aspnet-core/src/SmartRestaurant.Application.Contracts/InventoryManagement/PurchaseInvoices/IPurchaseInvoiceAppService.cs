@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -14,6 +15,6 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         Task<PurchaseInvoiceDto> UpdateAsync(Guid id, CreateUpdatePurchaseInvoiceDto input);
         Task DeleteAsync(Guid id);
         Task<PagedResultDto<PurchaseInvoiceDto>> GetListAsync(GetPurchaseInvoiceListDto input);
-        Task<IngredientLookupDto?> GetIngredientLookupAsync(Guid ingredientId);
+        Task<IngredientForPurchaseDto> GetIngredientForPurchaseAsync(Guid ingredientId);
     }
 }

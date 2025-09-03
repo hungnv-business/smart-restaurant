@@ -9,10 +9,12 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto
         public Guid IngredientId { get; set; }
         public int Quantity { get; set; }
         public Guid UnitId { get; set; }
+        public Guid? PurchaseUnitId { get; set; }
         public int? UnitPrice { get; set; }
         public int TotalPrice { get; set; }
         public string? SupplierInfo { get; set; }
         public string? Notes { get; set; }
         public Guid? CategoryId { get; set; }
+        public int DisplayOrder { get; set; }
     }
 }

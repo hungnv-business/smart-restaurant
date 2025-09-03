@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartRestaurant.InventoryManagement.Ingredients.Dto;
@@ -24,4 +25,6 @@ public class CreateUpdateIngredientDto
     public string? SupplierInfo { get; set; }
     
     public bool IsActive { get; set; } = true;
+    
+    public List<CreateUpdatePurchaseUnitDto> PurchaseUnits { get; set; } = new();
 }

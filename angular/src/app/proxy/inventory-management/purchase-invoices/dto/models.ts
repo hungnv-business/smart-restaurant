@@ -1,4 +1,5 @@
-import type { FullAuditedEntityDto, PagedAndSortedResultRequestDto } from '@abp/ng.core';
+import type { EntityDto, FullAuditedEntityDto, PagedAndSortedResultRequestDto } from '@abp/ng.core';
+import type { IngredientPurchaseUnitDto } from '../../ingredients/dto/models';
 
 export interface CreateUpdatePurchaseInvoiceDto {
   invoiceNumber: string;
@@ -7,15 +8,15 @@ export interface CreateUpdatePurchaseInvoiceDto {
   items: CreateUpdatePurchaseInvoiceItemDto[];
 }
 
-export interface CreateUpdatePurchaseInvoiceItemDto {
+export interface CreateUpdatePurchaseInvoiceItemDto extends EntityDto<string> {
   ingredientId: string;
   quantity: number;
-  unitId?: string;
-  unitName: string;
+  purchaseUnitId: string;
   unitPrice?: number;
   totalPrice?: number;
   supplierInfo?: string;
   notes?: string;
+  displayOrder: number;
 }
 
 export interface GetPurchaseInvoiceListDto extends PagedAndSortedResultRequestDto {
@@ -24,13 +25,12 @@ export interface GetPurchaseInvoiceListDto extends PagedAndSortedResultRequestDt
   toDateId?: number;
 }
 
-export interface IngredientLookupDto {
+export interface IngredientForPurchaseDto {
   id?: string;
   name?: string;
-  unitId?: string;
-  unitName?: string;
-  costPerUnit: number;
+  costPerUnit?: number;
   supplierInfo?: string;
+  purchaseUnits: IngredientPurchaseUnitDto[];
 }
 
 export interface PurchaseInvoiceDto extends FullAuditedEntityDto<string> {
@@ -49,10 +49,11 @@ export interface PurchaseInvoiceItemDto extends FullAuditedEntityDto<string> {
   ingredientId?: string;
   quantity: number;
   unitId?: string;
-  unitName?: string;
+  purchaseUnitId?: string;
   unitPrice?: number;
   totalPrice: number;
   supplierInfo?: string;
   notes?: string;
   categoryId?: string;
+  displayOrder: number;
 }

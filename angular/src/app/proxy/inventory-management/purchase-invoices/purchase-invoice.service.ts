@@ -1,4 +1,4 @@
-import type { CreateUpdatePurchaseInvoiceDto, GetPurchaseInvoiceListDto, IngredientLookupDto, PurchaseInvoiceDto } from './dto/models';
+import type { CreateUpdatePurchaseInvoiceDto, GetPurchaseInvoiceListDto, IngredientForPurchaseDto, PurchaseInvoiceDto } from './dto/models';
 import { RestService, Rest } from '@abp/ng.core';
 import type { PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -35,10 +35,10 @@ export class PurchaseInvoiceService {
     { apiName: this.apiName,...config });
   
 
-  getIngredientLookup = (ingredientId: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, IngredientLookupDto>({
+  getIngredientForPurchase = (ingredientId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, IngredientForPurchaseDto>({
       method: 'GET',
-      url: `/api/app/purchase-invoice/ingredient-lookup/${ingredientId}`,
+      url: `/api/app/purchase-invoice/ingredient-for-purchase/${ingredientId}`,
     },
     { apiName: this.apiName,...config });
   

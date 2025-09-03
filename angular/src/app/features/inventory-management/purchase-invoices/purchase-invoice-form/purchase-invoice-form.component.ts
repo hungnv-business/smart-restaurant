@@ -14,7 +14,7 @@ import { FormFooterActionsComponent } from '../../../../shared/components/form-f
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { PurchaseInvoiceItemComponent } from '../purchase-invoice-item/purchase-invoice-item.component';
 import { PurchaseInvoiceFormData } from '../services/purchase-invoice-form-dialog.service';
-import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
+import { GetIngredientListRequestDto } from '../../../../proxy/inventory-management/ingredients/dto';
 import { take, finalize } from 'rxjs';
 import { DateTimeHelper } from '../../../../shared/helpers';
 
@@ -25,11 +25,12 @@ import {
 } from '../../../../proxy/inventory-management/purchase-invoices/dto';
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
+import { GlobalService } from '../../../../proxy/common/global.service';
+import { GuidLookupItemDto } from '../../../../proxy/common/dto/models';
 
 interface IngredientLookupDto {
   id: string;
   name: string;
-  unitId: string;
   costPerUnit: number;
   supplierInfo: string;
 }
@@ -60,14 +61,14 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
   isEdit = false;
   isViewOnly = false;
   purchaseInvoice?: PurchaseInvoiceDto;
-  ingredients = signal<IngredientLookupDto[]>([]);
+  categories: GuidLookupItemDto[] = [];
 
   public ref = inject(DynamicDialogRef);
   public config = inject(DynamicDialogConfig<PurchaseInvoiceFormData>);
 
   private fb = inject(FormBuilder);
   private purchaseInvoiceService = inject(PurchaseInvoiceService);
-  private ingredientService = inject(IngredientService);
+  private globalService = inject(GlobalService);
 
   constructor() {
     super();
@@ -75,7 +76,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
   }
 
   ngOnInit() {
-    this.loadIngredients();
+    this.loadCategories();
 
     const data = this.config.data;
     if (data) {
@@ -154,32 +155,6 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     }
   }
 
-  private loadIngredients() {
-    const request: PagedAndSortedResultRequestDto = {
-      maxResultCount: 1000,
-      sorting: 'name',
-    };
-
-    this.ingredientService.getList(request).subscribe({
-      next: result => {
-        const ingredients = result?.items?.filter(i => i.isActive) || [];
-        this.ingredients.set(
-          ingredients.map(i => ({
-            id: i.id!,
-            name: i.name!,
-            unitId: i.unitId!,
-            costPerUnit: i.costPerUnit || 0,
-            supplierInfo: i.supplierInfo || '',
-          })),
-        );
-      },
-      error: error => {
-        console.error('Error loading ingredients:', error);
-        this.ingredients.set([]);
-      },
-    });
-  }
-
   private loadPurchaseInvoice(id: string) {
     this.purchaseInvoiceService.get(id).subscribe({
       next: result => {
@@ -238,14 +213,16 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
 
   private createItemFormGroup(): FormGroup {
     return this.fb.group({
+      id: [null], // ID để tracking khi update
       ingredientId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      unitId: [null],
+      purchaseUnitId: [null, [Validators.required]],
       unitPrice: [null],
       totalPrice: [null, [Validators.required, Validators.min(0)]],
       supplierInfo: [''],
       notes: ['', [Validators.maxLength(500)]],
       categoryId: [null],
+      displayOrder: [1],
     });
   }
 
@@ -266,17 +243,19 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       this.itemsFormArray.removeAt(0);
     }
 
-    purchaseInvoice.items?.forEach(item => {
+    purchaseInvoice.items?.forEach((item, index) => {
       const itemFormGroup = this.createItemFormGroup();
       itemFormGroup.patchValue({
+        id: item.id ?? null, // ID quan trọng để tracking khi update
         ingredientId: item.ingredientId ?? null,
         quantity: item.quantity ?? 1,
-        unitId: item.unitId ?? null,
+        purchaseUnitId: item.purchaseUnitId ?? null,
         unitPrice: item.unitPrice ?? null,
         totalPrice: item.totalPrice ?? 0,
         supplierInfo: item.supplierInfo ?? '',
         notes: item.notes ?? '',
         categoryId: item.categoryId ?? null,
+        displayOrder: item.displayOrder ?? (index + 1),
       });
       this.itemsFormArray.push(itemFormGroup);
     });
@@ -287,6 +266,17 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
     }
 
     this.form.markAsPristine();
+  }
+
+  private loadCategories() {
+    this.globalService.getCategories().subscribe({
+      next: categories => {
+        this.categories = categories;
+      },
+      error: error => {
+        console.error('Error loading categories:', error);
+      }
+    });
   }
 
   private setFormReadonly(formGroup: FormGroup) {

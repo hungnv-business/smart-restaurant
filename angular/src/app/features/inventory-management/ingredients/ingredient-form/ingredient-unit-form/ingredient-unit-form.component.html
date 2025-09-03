@@ -1,0 +1,92 @@
+<form [formGroup]="unitForm" class="flex flex-col gap-4">
+  <!-- Unit Selection & Conversion Ratio -->
+  <div class="flex flex-col sm:flex-row gap-4">
+    <div class="flex flex-col gap-2 flex-1">
+      <label for="unitSelect" class="block font-semibold text-sm required">Đơn vị</label>
+      <p-select
+        id="unitSelect"
+        formControlName="unitId"
+        [options]="units"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Chọn đơn vị"
+        class="w-full"
+        [filter]="true"
+        [class.p-invalid]="isFieldInvalid(unitForm, 'unitId')"
+      />
+      <app-validation-error [control]="getFormControl(unitForm, 'unitId')" fieldName="Đơn vị" />
+    </div>
+
+    <div class="flex flex-col gap-2 flex-1">
+      <label for="conversionRatio" class="block font-semibold text-sm required">Tỷ lệ chuyển đổi</label>
+      <p-inputnumber
+        inputId="conversionRatio"
+        formControlName="conversionRatio"
+        [min]="1"
+        [max]="999999999"
+        placeholder="Nhập tỷ lệ chuyển đổi"
+        class="w-full"
+        [class.p-invalid]="isFieldInvalid(unitForm, 'conversionRatio')"
+      />
+      <small class="text-gray-600">
+        Số lượng đơn vị cơ sở trong 1 đơn vị này (VD: 1 thùng = 24 lon)
+      </small>
+      <app-validation-error [control]="getFormControl(unitForm, 'conversionRatio')" fieldName="Tỷ lệ chuyển đổi" />
+    </div>
+  </div>
+
+  <!-- Purchase Price -->
+  <div class="flex flex-col gap-2">
+    <label for="purchasePrice" class="block font-semibold text-sm">Giá mua cho đơn vị này</label>
+    <p-inputnumber
+      inputId="purchasePrice"
+      formControlName="purchasePrice"
+      mode="currency"
+      currency="VND"
+      locale="vi-VN"
+      [min]="0"
+      placeholder="Nhập giá mua (tùy chọn)"
+      class="w-full"
+      [class.p-invalid]="isFieldInvalid(unitForm, 'purchasePrice')"
+    />
+    <small class="text-gray-600">
+      Để trống nếu muốn tính từ giá cơ sở × tỷ lệ chuyển đổi
+    </small>
+    <app-validation-error [control]="getFormControl(unitForm, 'purchasePrice')" fieldName="Giá mua" />
+  </div>
+
+  <!-- Base Unit Checkbox -->
+  <div class="flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <p-checkbox
+        inputId="isBaseUnit"
+        formControlName="isBaseUnit"
+        [binary]="true"
+      />
+      <label for="isBaseUnit" class="text-sm font-medium">Đơn vị cơ sở</label>
+    </div>
+    <small class="text-gray-600">
+      Đánh dấu làm đơn vị cơ sở cho việc theo dõi tồn kho
+    </small>
+  </div>
+
+  <!-- Active Checkbox -->
+  <div class="flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <p-checkbox
+        inputId="isActive"
+        formControlName="isActive"
+        [binary]="true"
+      />
+      <label for="isActive" class="text-sm font-medium">Kích hoạt</label>
+    </div>
+  </div>
+</form>
+
+<app-form-footer-actions
+  [disabled]="unitForm.invalid"
+  [loading]="false"
+  (formSave)="onSave()"
+  (formCancel)="onCancel()"
+>
+</app-form-footer-actions>

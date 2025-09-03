@@ -2,11 +2,11 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex-1 flex flex-col md:flex-row md:overflow-hidden">
     <!-- Panel trái: Thông tin cơ bản -->
     <div class="w-full md:w-1/4 p-6 flex-shrink-0 md:h-full flex flex-col md:overflow-hidden border-r-0 md:border-r border-b md:border-b-0 border-gray-200">
-      <div class="flex flex-col h-full">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2 pb-2 border-b">Thông tin hóa đơn</h3>
+      <div class="flex flex-col h-full gap-3">
+        <h3 class="text-lg font-semibold text-gray-900 pb-2 border-b">Thông tin hóa đơn</h3>
 
         <!-- Số hóa đơn -->
-        <div class="flex flex-col gap-1 mb-2">
+        <div class="flex flex-col gap-1">
           <label for="invoiceNumber" class="block font-semibold text-sm required">Số hóa đơn</label>
           <input
             type="text"
@@ -17,11 +17,11 @@
             class="w-full bg-gray-50"
             readonly
           />
-          <app-validation-error [control]="form.get('invoiceNumber')" fieldName="Số hóa đơn" />
+          <app-validation-error [control]="getFormControl(form, 'invoiceNumber')" fieldName="Số hóa đơn" />
         </div>
 
         <!-- Ngày hóa đơn -->
-        <div class="flex flex-col gap-1 mb-2">
+        <div class="flex flex-col gap-1">
           <label for="invoiceDate" class="block font-semibold text-sm required">Ngày hóa đơn</label>
           <p-calendar
             id="invoiceDate"
@@ -34,11 +34,11 @@
             [readonlyInput]="isViewOnly"
             [disabled]="isViewOnly"
           />
-          <app-validation-error [control]="form.get('invoiceDate')" fieldName="Ngày hóa đơn" />
+          <app-validation-error [control]="getFormControl(form, 'invoiceDate')" fieldName="Ngày hóa đơn" />
         </div>
 
         <!-- Ghi chú -->
-        <div class="flex flex-col gap-1 mb-6">
+        <div class="flex flex-col gap-1">
           <label for="notes" class="block font-semibold text-sm">Ghi chú</label>
           <textarea
             pInputTextarea
@@ -109,6 +109,7 @@
                   [itemForm]="item"
                   [index]="i"
                   [isViewOnly]="isViewOnly"
+                  [categories]="categories"
                   (remove)="removeItem(i)"
                 />
               </div>

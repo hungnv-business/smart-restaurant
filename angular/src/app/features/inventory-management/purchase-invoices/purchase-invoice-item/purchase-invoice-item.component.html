@@ -1,7 +1,7 @@
 <p-fluid>
   <div class="flex mt-4">
-    <div class="card flex flex-col gap-4 w-full">
-      <div class="flex justify-between items-center mb-2">
+    <div class="card flex flex-col gap-3 w-full">
+      <div class="flex justify-between items-center">
         <div class="flex items-center gap-1">
           <span class="bg-primary-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold">
             {{ index + 1 }}
@@ -22,17 +22,17 @@
         }
       </div>
 
-      <div [formGroup]="itemForm">
+      <div [formGroup]="itemForm" class="flex flex-col gap-3">
         <!-- Category và Ingredient -->
-        <div class="flex flex-row gap-4 mb-2">
+        <div class="flex flex-row gap-4">
           <div class="flex flex-col gap-1 w-full">
-            <label for="category">Loại nguyên liệu</label>
-            <p-dropdown
+            <label for="category" class="block font-semibold text-sm">Loại nguyên liệu</label>
+            <p-select
               [options]="categories"
               optionLabel="displayName"
               optionValue="id"
               placeholder="Chọn..."
-              [showClear]="true"
+              [showClear]="!isViewOnly"
               formControlName="categoryId"
               (onChange)="onCategoryChange($event.value)"
               class="w-full"
@@ -40,28 +40,29 @@
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <label for="ingredient">Nguyên liệu</label>
-            <p-dropdown
+            <label for="ingredient" class="block font-semibold text-sm required">Nguyên liệu</label>
+            <p-select
               formControlName="ingredientId"
               [options]="ingredients"
               optionLabel="displayName"
               optionValue="id"
               placeholder="Chọn..."
-              [showClear]="true"
+              [showClear]="!isViewOnly"
               (onChange)="onIngredientChange($event.value)"
               [readonly]="isViewOnly"
+              [class.p-invalid]="isFieldInvalid(itemForm, 'ingredientId')"
             />
             <app-validation-error
-              [control]="itemForm.get('ingredientId')"
+              [control]="getFormControl(itemForm, 'ingredientId')"
               fieldName="Nguyên liệu"
             />
           </div>
         </div>
 
         <!-- Số lượng và Đơn vị -->
-        <div class="flex flex-row gap-4 mb-2">
+        <div class="flex flex-row gap-4">
           <div class="flex flex-col gap-1 w-full">
-            <label for="quantity">Số lượng</label>
+            <label for="quantity" class="block font-semibold text-sm required">Số lượng</label>
             <p-inputnumber
               formControlName="quantity"
               [min]="1"
@@ -70,28 +71,66 @@
               class="w-full"
               (onInput)="onCalculateTotal()"
               [readonly]="isViewOnly"
+              [class.p-invalid]="isFieldInvalid(itemForm, 'quantity')"
             />
-            <app-validation-error [control]="itemForm.get('quantity')" fieldName="Số lượng" />
+            <app-validation-error [control]="getFormControl(itemForm, 'quantity')" fieldName="Số lượng" />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <label for="unit">Đơn vị</label>
-            <input
-              type="text"
-              pInputText
-              id="unit"
-              formControlName="unitId"
-              placeholder="Chọn nguyên liệu trước..."
-              readonly="true"
-              [class.bg-gray-50]="true"
-            />
-            <app-validation-error [control]="itemForm.get('unitId')" fieldName="Đơn vị" />
+            <label for="purchaseUnit" class="block font-semibold text-sm required">Đơn vị mua</label>
+            <p-select
+              id="purchaseUnit"
+              formControlName="purchaseUnitId"
+              [options]="purchaseUnits"
+              optionLabel="unitName"
+              optionValue="id"
+              placeholder="Chọn đơn vị mua..."
+              [showClear]="!isViewOnly"
+              [disabled]="!currentIngredientId || purchaseUnits.length === 0"
+              (onChange)="onPurchaseUnitChange($event.value)"
+              class="w-full"
+              [readonly]="isViewOnly"
+              [class.p-invalid]="isFieldInvalid(itemForm, 'purchaseUnitId')"
+            >
+              <ng-template let-unit pTemplate="item">
+                <div class="flex flex-col">
+                  <span class="font-medium">{{ unit.unitName }}</span>
+                  <small class="text-gray-500" *ngIf="!unit.isBaseUnit">
+                    1 {{ unit.unitName }} = {{ unit.conversionRatio | number }} {{ getBaseUnitName() }}
+                  </small>
+                  <small class="text-blue-600" *ngIf="unit.isBaseUnit">
+                    Đơn vị cơ sở
+                  </small>
+                </div>
+              </ng-template>
+              <ng-template let-unit pTemplate="selectedItem">
+                <span class="font-medium">{{ unit.unitName }}</span>
+                <span class="text-xs text-gray-500 ml-2" *ngIf="!unit.isBaseUnit">
+                  (1 = {{ unit.conversionRatio | number }} {{ getBaseUnitName() }})
+                </span>
+              </ng-template>
+            </p-select>
+            <app-validation-error [control]="getFormControl(itemForm, 'purchaseUnitId')" fieldName="Đơn vị mua" />
           </div>
         </div>
 
+        <!-- Conversion Preview -->
+        @if (currentIngredientId && itemForm.get('purchaseUnitId')?.value && itemForm.get('quantity')?.value) {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-calculator text-blue-600"></i>
+            <span class="text-sm font-medium text-blue-800">Quy đổi tự động:</span>
+            <span class="text-sm text-blue-900">
+              {{ itemForm.get('quantity')?.value | number }} {{ getPurchaseUnitName() }} 
+              = {{ getConvertedBaseQuantity() | number }} {{ getBaseUnitName() }}
+            </span>
+          </div>
+        </div>
+        }
+
         <!-- Đơn giá và Thành tiền -->
-        <div class="flex flex-row gap-4 mb-2">
+        <div class="flex flex-row gap-4">
           <div class="flex flex-col gap-1 w-full">
-            <label for="unitPrice">Đơn giá</label>
+            <label for="unitPrice" class="block font-semibold text-sm">Đơn giá</label>
             <p-inputnumber
               formControlName="unitPrice"
               mode="currency"
@@ -107,7 +146,7 @@
             <app-validation-error [control]="itemForm.get('unitPrice')" fieldName="Đơn giá" />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <label for="totalPrice">Thành tiền</label>
+            <label for="totalPrice" class="block font-semibold text-sm required">Thành tiền</label>
             <p-inputnumber
               formControlName="totalPrice"
               mode="currency"
@@ -118,15 +157,16 @@
               [maxFractionDigits]="0"
               class="w-full"
               [readonly]="isViewOnly"
+              [class.p-invalid]="itemForm.get('totalPrice')?.invalid && itemForm.get('totalPrice')?.touched"
             />
             <app-validation-error [control]="itemForm.get('totalPrice')" fieldName="Thành tiền" />
           </div>
         </div>
 
         <!-- Nhà cung cấp và Ghi chú -->
-        <div class="flex flex-row gap-4 mb-2">
+        <div class="flex flex-row gap-4">
           <div class="flex flex-col gap-1 w-full">
-            <label for="supplier">Nhà cung cấp</label>
+            <label for="supplier" class="block font-semibold text-sm">Nhà cung cấp</label>
             <input
               pInputText
               id="supplier"
@@ -137,7 +177,7 @@
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <label for="notes">Ghi chú</label>
+            <label for="notes" class="block font-semibold text-sm">Ghi chú</label>
             <input
               type="text"
               pInputText

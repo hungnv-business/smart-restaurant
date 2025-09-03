@@ -42,6 +42,7 @@ public class SmartRestaurantDbContext :
     // Inventory Management
     public DbSet<IngredientCategory> IngredientCategories { get; set; }
     public DbSet<Ingredient> Ingredients { get; set; }
+    public DbSet<IngredientPurchaseUnit> IngredientPurchaseUnits { get; set; }
     
     // Purchase Invoice Management
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
@@ -167,15 +168,23 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.IsAvailable).IsRequired();
             b.Property(x => x.ImageUrl).HasMaxLength(500);
             b.Property(x => x.CategoryId).IsRequired();
+            b.Property(x => x.PrimaryIngredientId);
+            b.Property(x => x.RequiredQuantity);
             
             b.HasOne(x => x.Category)
                 .WithMany()
                 .HasForeignKey(x => x.CategoryId)
                 .IsRequired();
+
+            b.HasOne(x => x.PrimaryIngredient)
+                .WithMany()
+                .HasForeignKey(x => x.PrimaryIngredientId)
+                .IsRequired(false);
                 
             b.HasIndex(x => x.CategoryId);
             b.HasIndex(x => new { x.CategoryId, x.IsAvailable });
             b.HasIndex(x => x.Name);
+            b.HasIndex(x => x.PrimaryIngredientId);
         });
         
         // Configure IngredientCategory entity
@@ -224,6 +233,39 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.UnitId);
             b.HasIndex(x => new { x.CategoryId, x.IsActive });
             b.HasIndex(x => x.Name);
+        });
+        
+        // Configure IngredientPurchaseUnit entity
+        builder.Entity<IngredientPurchaseUnit>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "IngredientPurchaseUnits", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.IngredientId).IsRequired();
+            b.Property(x => x.UnitId).IsRequired();
+            b.Property(x => x.ConversionRatio).IsRequired();
+            b.Property(x => x.IsBaseUnit).IsRequired();
+            b.Property(x => x.IsActive).IsRequired();
+            
+            b.HasOne(x => x.Ingredient)
+                .WithMany(x => x.PurchaseUnits)
+                .HasForeignKey(x => x.IngredientId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            b.HasOne(x => x.Unit)
+                .WithMany()
+                .HasForeignKey(x => x.UnitId)
+                .IsRequired();
+            
+            // Performance optimization indexes
+            b.HasIndex(x => new { x.IngredientId, x.IsActive });
+            b.HasIndex(x => x.UnitId);
+            
+            // Business constraint: exactly one base unit per ingredient
+            b.HasIndex(x => x.IngredientId)
+                .IsUnique()
+                .HasFilter("\"IsBaseUnit\" = true");
         });
         
         // Configure Unit entity
@@ -284,7 +326,8 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.PurchaseInvoiceId).IsRequired();
             b.Property(x => x.IngredientId).IsRequired();
             b.Property(x => x.Quantity).IsRequired();
-            b.Property(x => x.UnitId).IsRequired();
+            b.Property(x => x.PurchaseUnitId).IsRequired();
+            b.Property(x => x.BaseUnitQuantity).IsRequired();
             b.Property(x => x.UnitPrice);
             b.Property(x => x.TotalPrice).IsRequired();
             b.Property(x => x.SupplierInfo).HasMaxLength(500);
@@ -299,9 +342,15 @@ public class SmartRestaurantDbContext :
                 .WithMany()
                 .HasForeignKey(x => x.IngredientId)
                 .IsRequired(false);
+
+            b.HasOne(x => x.PurchaseUnit)
+                .WithMany()
+                .HasForeignKey(x => x.PurchaseUnitId)
+                .IsRequired();
                 
             b.HasIndex(x => x.PurchaseInvoiceId);
             b.HasIndex(x => x.IngredientId);
+            b.HasIndex(x => x.PurchaseUnitId);
         });
     }
 }

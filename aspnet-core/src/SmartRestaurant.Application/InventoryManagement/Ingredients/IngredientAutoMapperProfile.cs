@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoMapper;
 using SmartRestaurant.Entities.InventoryManagement;
 using SmartRestaurant.InventoryManagement.Ingredients.Dto;
@@ -10,8 +11,14 @@ public class IngredientAutoMapperProfile : Profile
     {
         CreateMap<Ingredient, IngredientDto>()
             .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit != null ? src.Unit.Name : string.Empty))
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty));
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+            .ForMember(dest => dest.PurchaseUnits, opt => opt.MapFrom(src => src.PurchaseUnits.Where(pu => pu.IsActive)));
             
         CreateMap<CreateUpdateIngredientDto, Ingredient>();
+        
+        CreateMap<IngredientPurchaseUnit, IngredientPurchaseUnitDto>()
+            .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit != null ? src.Unit.Name : string.Empty));
+            
+        CreateMap<CreateUpdatePurchaseUnitDto, IngredientPurchaseUnit>();
     }
 }

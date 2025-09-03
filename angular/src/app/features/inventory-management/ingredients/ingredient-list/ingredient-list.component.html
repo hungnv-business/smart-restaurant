@@ -10,16 +10,6 @@
           (onClick)="openFormDialog()"
         />
       }
-      @if (hasPermission(permissions.delete)) {
-        <p-button
-          label="Xóa"
-          icon="pi pi-trash"
-          severity="danger"
-          [outlined]="true"
-          [disabled]="!selectedIngredients || selectedIngredients.length === 0"
-          (onClick)="deleteSelectedIngredients()"
-        />
-      }
     </ng-template>
   </p-toolbar>
 
@@ -27,13 +17,14 @@
     #dt
     [value]="ingredients()"
     [loading]="loading"
+    [lazy]="true"
     [rows]="pageSize"
     [paginator]="paginator"
-    [globalFilterFields]="filterFields"
+    [totalRecords]="totalRecords"
+    (onLazyLoad)="loadIngredients($event)"
     styleClass="w-full"
     [rowHover]="rowHover"
     dataKey="id"
-    [(selection)]="selectedIngredients"
     currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} nguyên liệu"
     [showCurrentPageReport]="showCurrentPageReport"
     [rowsPerPageOptions]="rowsPerPageOptions"
@@ -44,10 +35,10 @@
 
         <div class="flex gap-4">
           <p-iconfield>
-            <p-dropdown
+            <p-select
               id="categoryFilter"
               [options]="categories()"
-              (onChange)="onCategoryFilter(dt, $event.value)"
+              (onChange)="onCategoryFilter($event.value)"
               optionLabel="displayName"
               optionValue="id"
               placeholder="Chọn danh mục"
@@ -60,7 +51,8 @@
             <input
               pInputText
               type="text"
-              (input)="onGlobalFilter(dt, $event)"
+              [(ngModel)]="searchText"
+              (input)="onFilterChange()"
               placeholder="Tìm kiếm..."
             />
           </p-iconfield>
@@ -70,9 +62,6 @@
 
     <ng-template #header>
       <tr>
-        <th class="min-w-12">
-          <p-tableHeaderCheckbox />
-        </th>
         <th class="min-w-48" pSortableColumn="name">
           <span class="flex items-center gap-2">Tên nguyên liệu <p-sortIcon field="name" /></span>
         </th>
@@ -88,6 +77,12 @@
         <th class="min-w-32" pSortableColumn="supplierInfo">
           <span class="flex items-center gap-2">Nhà cung cấp <p-sortIcon field="supplierInfo" /></span>
         </th>
+        <th class="min-w-32" pSortableColumn="currentStock">
+          <span class="flex items-center gap-2">Tồn kho <p-sortIcon field="currentStock" /></span>
+        </th>
+        <th class="min-w-32">
+          <span class="flex items-center gap-2">Đơn vị mua</span>
+        </th>
         <th class="min-w-24" pSortableColumn="isActive">
           <span class="flex items-center gap-2">Trạng thái <p-sortIcon field="isActive" /></span>
         </th>
@@ -97,15 +92,36 @@
 
     <ng-template #body let-ingredient>
       <tr>
-        <td class="min-w-12">
-          <p-tableCheckbox [value]="ingredient" />
-        </td>
         <td class="min-w-48 font-medium">{{ ingredient.name }}</td>
         <td class="min-w-32">{{ ingredient.categoryName || '-' }}</td>
         <td class="min-w-20">{{ ingredient.unitName }}</td>
         <td class="min-w-32">{{ ingredient.costPerUnit | vndCurrency }}</td>
         <td class="min-w-32 text-gray-600">
           <span class="line-clamp-1">{{ ingredient.supplierInfo || '-' }}</span>
+        </td>
+        <td class="min-w-32">
+          <div class="flex items-center gap-2">
+            <span class="font-medium text-lg">{{ getDisplayStock(ingredient) | number:'1.0-0' }}</span>
+            <span class="text-sm text-gray-600">
+              {{ getDisplayUnit(ingredient.id!) }}
+            </span>
+          </div>
+        </td>
+        <td class="min-w-32">
+          <div class="flex flex-wrap gap-1">
+            @for (unit of getIngredientPurchaseUnits(ingredient.id!); track unit.id) {
+              <p-tag 
+                [value]="unit.unitName + (unit.isBaseUnit ? ' (cơ sở)' : '')"
+                [severity]="isSelectedUnit(ingredient.id!, unit.unitId!) ? 'success' : (unit.isBaseUnit ? 'primary' : 'secondary')"
+                styleClass="text-xs cursor-pointer hover:opacity-80"
+                (click)="toggleStockUnit(ingredient.id!, unit.unitId!)"
+                title="Click để xem tồn kho theo {{ unit.unitName }}"
+              />
+            }
+            @if (getIngredientPurchaseUnits(ingredient.id!).length === 0) {
+              <span class="text-gray-400 text-sm">Chưa cấu hình</span>
+            }
+          </div>
         </td>
         <td class="min-w-24">
           <p-tag
@@ -124,7 +140,7 @@
                 pTooltip="Sửa"
               />
             }
-            @if (hasPermission(permissions.delete)) {
+            @if (hasPermission(permissions.delete) && ingredient.canDelete) {
               <p-button
                 icon="pi pi-trash"
                 severity="danger"

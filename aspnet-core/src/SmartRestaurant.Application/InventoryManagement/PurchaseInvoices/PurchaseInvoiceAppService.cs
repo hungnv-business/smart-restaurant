@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using SmartRestaurant.Common;
 using SmartRestaurant.Entities.Inventory;
 using SmartRestaurant.Entities.InventoryManagement;
-using SmartRestaurant.Entities.Common;
 using SmartRestaurant.Permissions;
 using SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto;
 using SmartRestaurant.InventoryManagement.Ingredients.Dto;
+using SmartRestaurant.Repositories;
+using SmartRestaurant.Inventory;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -27,21 +28,24 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
     {
         private readonly IPurchaseInvoiceRepository _purchaseInvoiceRepository;
         private readonly IRepository<Ingredient, Guid> _ingredientRepository;
-        private readonly IRepository<Unit, Guid> _unitRepository;
-        private readonly IRepository<DimDate, int> _dimDateRepository;
+        private readonly IIngredientRepository _ingredientDetailRepository;
+        private readonly PurchaseInvoiceManager _purchaseInvoiceManager;
 
         public PurchaseInvoiceAppService(
             IPurchaseInvoiceRepository purchaseInvoiceRepository,
             IRepository<Ingredient, Guid> ingredientRepository,
-            IRepository<Unit, Guid> unitRepository,
-            IRepository<DimDate, int> dimDateRepository)
+            IIngredientRepository ingredientDetailRepository,
+            PurchaseInvoiceManager purchaseInvoiceManager)
         {
             _purchaseInvoiceRepository = purchaseInvoiceRepository;
             _ingredientRepository = ingredientRepository;
-            _unitRepository = unitRepository;
-            _dimDateRepository = dimDateRepository;
+            _ingredientDetailRepository = ingredientDetailRepository;
+            _purchaseInvoiceManager = purchaseInvoiceManager;
         }
 
+        /// <summary>
+        /// Lấy thông tin chi tiết hóa đơn mua theo ID
+        /// </summary>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default)]
         public async Task<PurchaseInvoiceDto> GetAsync(Guid id)
         {
@@ -55,65 +59,63 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             return ObjectMapper.Map<PurchaseInvoice, PurchaseInvoiceDto>(purchaseInvoice);
         }
 
+        /// <summary>
+        /// Tạo mới hóa đơn mua với các mặt hàng
+        /// </summary>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Create)]
         public async Task<PurchaseInvoiceDto> CreateAsync(CreateUpdatePurchaseInvoiceDto input)
         {
-            // Normalize input data
+            // Chuẩn hóa dữ liệu đầu vào
             input.InvoiceNumber = StringUtility.NormalizeString(input.InvoiceNumber);
             input.Notes = StringUtility.NormalizeStringNullable(input.Notes);
 
-            // Create master entity
+            // Tạo entity chính
             var purchaseInvoice = new PurchaseInvoice(
                 GuidGenerator.Create(),
                 input.InvoiceNumber,
                 input.InvoiceDateId,
                 input.Notes);
 
-            // Add items to collection
-            await AddItemsToInvoiceAsync(purchaseInvoice, input.Items);
+            // Thêm các mặt hàng sử dụng PurchaseInvoiceManager
+            await _purchaseInvoiceManager.AddPurchaseInvoiceItemsAsync(purchaseInvoice, input.Items);
 
-            // Calculate total amount
+            // Tính tổng tiền hóa đơn
             purchaseInvoice.CalculateTotalAmount();
 
-            // Insert master with cascading details
+            // Lưu hóa đơn cùng với chi tiết mặt hàng
             var insertedEntity = await _purchaseInvoiceRepository.InsertAsync(purchaseInvoice);
 
             return ObjectMapper.Map<PurchaseInvoice, PurchaseInvoiceDto>(insertedEntity);
         }
 
+        /// <summary>
+        /// Cập nhật hóa đơn mua và các mặt hàng
+        /// </summary>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Edit)]
         public async Task<PurchaseInvoiceDto> UpdateAsync(Guid id, CreateUpdatePurchaseInvoiceDto input)
         {
-            // Normalize input data
+            // Chuẩn hóa dữ liệu đầu vào
             input.InvoiceNumber = StringUtility.NormalizeString(input.InvoiceNumber);
             input.Notes = StringUtility.NormalizeStringNullable(input.Notes);
 
-            // Get existing entity with items
+            // Lấy entity hiện có cùng với chi tiết mặt hàng
             var existingEntity = await _purchaseInvoiceRepository.GetWithDetailsAsync(id);
 
-            if (existingEntity == null)
-            {
+            if (existingEntity is null)
                 throw new EntityNotFoundException(typeof(PurchaseInvoice), id);
-            }
 
-            // Trừ stock từ items cũ trước khi update
-            foreach (var oldItem in existingEntity.Items.ToList())
-            {
-                await UpdateIngredientStockAsync(oldItem.IngredientId, -oldItem.Quantity);
-            }
+            // Kiểm tra có thể chỉnh sửa không
+            existingEntity.ValidateCanEdit();
 
-            // Update master properties
+            // Cập nhật thông tin cơ bản
             existingEntity.InvoiceNumber = input.InvoiceNumber;
             existingEntity.InvoiceDateId = input.InvoiceDateId;
             existingEntity.Notes = input.Notes;
 
-            // Clear existing items
-            existingEntity.Items.Clear();
+            // Cập nhật danh sách mặt hàng sử dụng PurchaseInvoiceManager
+            await _purchaseInvoiceManager.UpdatePurchaseInvoiceItemsAsync(existingEntity, input.Items);
 
-            // Add new items
-            await AddItemsToInvoiceAsync(existingEntity, input.Items);
-
-            // Recalculate total amount
+            // Tính lại tổng tiền
             existingEntity.CalculateTotalAmount();
 
             var updatedEntity = await _purchaseInvoiceRepository.UpdateAsync(existingEntity);
@@ -121,6 +123,9 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             return ObjectMapper.Map<PurchaseInvoice, PurchaseInvoiceDto>(updatedEntity);
         }
 
+        /// <summary>
+        /// Lấy danh sách hóa đơn mua có phân trang và lọc
+        /// </summary>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default)]
         public async Task<PagedResultDto<PurchaseInvoiceDto>> GetListAsync(GetPurchaseInvoiceListDto input)
         {
@@ -150,96 +155,45 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             );
         }
 
+        /// <summary>
+        /// Xóa hóa đơn mua và xử lý stock nguyên liệu
+        /// </summary>
         [Authorize(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Delete)]
         public async Task DeleteAsync(Guid id)
         {
-            var entity = await _purchaseInvoiceRepository.GetAsync(id);
-            entity.ValidateDelete();
+            var entity = await _purchaseInvoiceRepository.GetWithDetailsAsync(id);
+            
+            // Xóa hóa đơn và xử lý stock sử dụng PurchaseInvoiceManager
+            await _purchaseInvoiceManager.DeletePurchaseInvoiceAsync(entity);
             await _purchaseInvoiceRepository.DeleteAsync(entity);
         }
 
-        /// <summary>
-        /// Helper method để add items vào invoice và update stock
-        /// </summary>
-        private async Task AddItemsToInvoiceAsync(PurchaseInvoice invoice, List<CreateUpdatePurchaseInvoiceItemDto> itemDtos)
-        {
-            foreach (var itemDto in itemDtos)
-            {
-                await ValidateAndPopulateItemAsync(itemDto);
-
-                var item = new PurchaseInvoiceItem(
-                    GuidGenerator.Create(),
-                    invoice.Id,
-                    itemDto.IngredientId,
-                    itemDto.Quantity,
-                    itemDto.UnitId,
-                    itemDto.TotalPrice ?? 0,
-                    itemDto.UnitPrice,
-                    itemDto.SupplierInfo,
-                    itemDto.Notes);
-
-                invoice.Items.Add(item);
-
-                // Update CurrentStock for ingredients
-                await UpdateIngredientStockAsync(itemDto.IngredientId, itemDto.Quantity);
-            }
-        }
 
         /// <summary>
-        /// Validate và auto-populate item data từ Ingredient/Unit
+        /// Lấy thông tin nguyên liệu để sử dụng trong hóa đơn mua
+        /// Bao gồm các đơn vị mua và giá cơ bản
         /// </summary>
-        private async Task ValidateAndPopulateItemAsync(CreateUpdatePurchaseInvoiceItemDto itemDto)
-        {
-            // Auto-populate from Ingredient (IngredientId is now required)
-            var ingredient = await _ingredientRepository.GetAsync(itemDto.IngredientId);
-
-            // Auto-populate Unit info
-            var unit = await _unitRepository.GetAsync(ingredient.UnitId);
-            itemDto.UnitId = unit.Id;
-
-            // Auto-populate SupplierInfo if available
-            if (!string.IsNullOrEmpty(ingredient.SupplierInfo))
-            {
-                itemDto.SupplierInfo = ingredient.SupplierInfo;
-            }
-
-            // Auto-calculate TotalPrice if not provided
-            if (!itemDto.TotalPrice.HasValue && itemDto.UnitPrice.HasValue)
-            {
-                itemDto.TotalPrice = itemDto.Quantity * itemDto.UnitPrice.Value;
-            }
-        }
-
-        /// <summary>
-        /// Update CurrentStock cho nguyên liệu chính - chỉ apply với nguyên liệu có IsStockTrackingEnabled = true
-        /// </summary>
-        private async Task UpdateIngredientStockAsync(Guid ingredientId, int quantity)
-        {
-            var ingredient = await _ingredientRepository.GetAsync(ingredientId);
-
-            // Chỉ cập nhật stock nếu nguyên liệu có bật theo dõi kho
-            if (!ingredient.IsStockTrackingEnabled)
-            {
-                return;
-            }
-
-            if (quantity > 0)
-            {
-                ingredient.AddStock(quantity);
-            }
-            else if (quantity < 0)
-            {
-                ingredient.SubtractStock(Math.Abs(quantity));
-            }
-        }
-
         [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
-        public async Task<IngredientLookupDto?> GetIngredientLookupAsync(Guid ingredientId)
+        public async Task<IngredientForPurchaseDto> GetIngredientForPurchaseAsync(Guid ingredientId)
         {
-            var ingredient = await _ingredientRepository.GetAsync(ingredientId);
-            await _ingredientRepository.EnsurePropertyLoadedAsync(ingredient, x => x.Unit);
+            var ingredient = await _ingredientDetailRepository.GetWithDetailsAsync(ingredientId);
+            if (ingredient is null) 
+                throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
             
-            return ObjectMapper.Map<Ingredient, IngredientLookupDto>(ingredient);
+            var result = new IngredientForPurchaseDto
+            {
+                Id = ingredient.Id,
+                Name = ingredient.Name,
+                CostPerUnit = ingredient.CostPerUnit,
+                SupplierInfo = ingredient.SupplierInfo,
+                PurchaseUnits = ObjectMapper.Map<List<IngredientPurchaseUnit>, List<IngredientPurchaseUnitDto>>(
+                    [.. ingredient.PurchaseUnits.Where(pu => pu.IsActive)
+                        .OrderByDescending(pu => pu.IsBaseUnit)
+                        .ThenBy(pu => pu.ConversionRatio)])
+            };
+            
+            return result;
         }
+
     }
 }

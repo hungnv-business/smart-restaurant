@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SmartRestaurant.Entities.InventoryManagement;
@@ -18,15 +19,18 @@ public class IngredientDataSeedContributor : IDataSeedContributor, ITransientDep
     private readonly IRepository<Ingredient, Guid> _ingredientRepository;
     private readonly IRepository<IngredientCategory, Guid> _categoryRepository;
     private readonly IRepository<Unit, Guid> _unitRepository;
+    private readonly IRepository<IngredientPurchaseUnit, Guid> _purchaseUnitRepository;
 
     public IngredientDataSeedContributor(
         IRepository<Ingredient, Guid> ingredientRepository,
         IRepository<IngredientCategory, Guid> categoryRepository,
-        IRepository<Unit, Guid> unitRepository)
+        IRepository<Unit, Guid> unitRepository,
+        IRepository<IngredientPurchaseUnit, Guid> purchaseUnitRepository)
     {
         _ingredientRepository = ingredientRepository;
         _categoryRepository = categoryRepository;
         _unitRepository = unitRepository;
+        _purchaseUnitRepository = purchaseUnitRepository;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -49,50 +53,69 @@ public class IngredientDataSeedContributor : IDataSeedContributor, ITransientDep
         // Tìm categories theo tên
         var rauCuCategory = categories.FirstOrDefault(x => x.Name == "Rau củ");
         var thitCaCategory = categories.FirstOrDefault(x => x.Name == "Thịt cá");
-        var giaViCategory = categories.FirstOrDefault(x => x.Name == "Gia vị");
-        var doKhoCategory = categories.FirstOrDefault(x => x.Name == "Đồ khô");
         var doUongCategory = categories.FirstOrDefault(x => x.Name == "Đồ uống");
 
         // Tìm units theo tên
         var kgUnit = units.FirstOrDefault(x => x.Name == "kg");
-        var goiUnit = units.FirstOrDefault(x => x.Name == "gói");
-        var chaiUnit = units.FirstOrDefault(x => x.Name == "chai");
         var lonUnit = units.FirstOrDefault(x => x.Name == "lon");
+        var mlUnit = units.FirstOrDefault(x => x.Name == "ml");
+        var thungUnit = units.FirstOrDefault(x => x.Name == "thùng");
+        var locUnit = units.FirstOrDefault(x => x.Name == "lốc");
 
         // Kiểm tra có đủ dữ liệu không
-        if (rauCuCategory == null || thitCaCategory == null || giaViCategory == null || 
-            doKhoCategory == null || doUongCategory == null ||
-            kgUnit == null || goiUnit == null || chaiUnit == null || lonUnit == null)
+        if (rauCuCategory == null || thitCaCategory == null || doUongCategory == null ||
+            kgUnit == null || lonUnit == null || mlUnit == null || thungUnit == null || locUnit == null)
         {
             return; // Thiếu dữ liệu cần thiết
         }
 
+        // Create sample ingredients với multi-unit support
         var ingredients = new[]
         {
-            // Rau củ
-            new Ingredient { CategoryId = rauCuCategory.Id, Name = "Cà chua", UnitId = kgUnit.Id, CostPerUnit = 25000m, SupplierInfo = "Chợ Bến Thành", IsActive = true },
-            new Ingredient { CategoryId = rauCuCategory.Id, Name = "Hành tây", UnitId = kgUnit.Id, CostPerUnit = 20000m, SupplierInfo = "Chợ Bến Thành", IsActive = true },
-            new Ingredient { CategoryId = rauCuCategory.Id, Name = "Rau muống", UnitId = kgUnit.Id, CostPerUnit = 15000m, SupplierInfo = "Chợ Bến Thành", IsActive = true },
+            // Rau củ - simple single unit
+            new Ingredient { CategoryId = rauCuCategory.Id, Name = "Cà chua", Description = "Cà chua tươi", 
+                UnitId = kgUnit.Id, CostPerUnit = 25000m, SupplierInfo = "Chợ Bến Thành", IsActive = true },
             
-            // Thịt cá
-            new Ingredient { CategoryId = thitCaCategory.Id, Name = "Thịt bò", UnitId = kgUnit.Id, CostPerUnit = 300000m, SupplierInfo = "Lò mổ Sài Gòn", IsActive = true },
-            new Ingredient { CategoryId = thitCaCategory.Id, Name = "Thịt heo", UnitId = kgUnit.Id, CostPerUnit = 180000m, SupplierInfo = "Lò mổ Sài Gòn", IsActive = true },
-            new Ingredient { CategoryId = thitCaCategory.Id, Name = "Cá tra", UnitId = kgUnit.Id, CostPerUnit = 85000m, SupplierInfo = "Chợ cá Bình Điền", IsActive = true },
+            // Thịt cá - simple single unit  
+            new Ingredient { CategoryId = thitCaCategory.Id, Name = "Thịt bò", Description = "Thịt bò tươi", 
+                UnitId = kgUnit.Id, CostPerUnit = 300000m, SupplierInfo = "Lò mổ Sài Gòn", IsActive = true },
             
-            // Gia vị
-            new Ingredient { CategoryId = giaViCategory.Id, Name = "Muối", UnitId = goiUnit.Id, CostPerUnit = 5000m, SupplierInfo = "Cty Vissan", IsActive = true },
-            new Ingredient { CategoryId = giaViCategory.Id, Name = "Đường", UnitId = kgUnit.Id, CostPerUnit = 22000m, SupplierInfo = "Cty Biên Hòa", IsActive = true },
-            new Ingredient { CategoryId = giaViCategory.Id, Name = "Nước mắm", UnitId = chaiUnit.Id, CostPerUnit = 45000m, SupplierInfo = "Cty Phú Quốc", IsActive = true },
-            
-            // Đồ khô
-            new Ingredient { CategoryId = doKhoCategory.Id, Name = "Gạo tẻ", UnitId = kgUnit.Id, CostPerUnit = 18000m, SupplierInfo = "Cty Lương thực", IsActive = true },
-            new Ingredient { CategoryId = doKhoCategory.Id, Name = "Bún tươi", UnitId = kgUnit.Id, CostPerUnit = 12000m, SupplierInfo = "Lò bánh tráng", IsActive = true },
-            
-            // Đồ uống
-            new Ingredient { CategoryId = doUongCategory.Id, Name = "Coca Cola", UnitId = chaiUnit.Id, CostPerUnit = 15000m, SupplierInfo = "Đại lý Coca", IsActive = true },
-            new Ingredient { CategoryId = doUongCategory.Id, Name = "Bia Saigon", UnitId = lonUnit.Id, CostPerUnit = 18000m, SupplierInfo = "Đại lý bia", IsActive = true }
+            // Đồ uống - multi-unit examples
+            new Ingredient { CategoryId = doUongCategory.Id, Name = "Coca Cola", Description = "Coca Cola 330ml", 
+                UnitId = lonUnit.Id, CostPerUnit = 15000m, SupplierInfo = "Đại lý Coca", IsActive = true },
+                
+            new Ingredient { CategoryId = doUongCategory.Id, Name = "Bia Saigon", Description = "Bia Saigon 330ml", 
+                UnitId = mlUnit.Id, CostPerUnit = 18000m, SupplierInfo = "Đại lý bia", IsActive = true }
         };
 
         await _ingredientRepository.InsertManyAsync(ingredients, autoSave: true);
+        
+        // Create purchase units for multi-unit ingredients
+        var purchaseUnits = new List<IngredientPurchaseUnit>();
+        
+        var cocaColaIngredient = ingredients.FirstOrDefault(i => i.Name == "Coca Cola");
+        var biaIngredient = ingredients.FirstOrDefault(i => i.Name == "Bia Saigon");
+        
+        if (cocaColaIngredient != null)
+        {
+            purchaseUnits.AddRange(new[]
+            {
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, lonUnit.Id, 1, true, 12000m, true),     // Base: lon - 12,000đ/lon
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, locUnit.Id, 6, false, 70000m, true),    // 1 lốc = 6 lon - 70,000đ/lốc
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaColaIngredient.Id, thungUnit.Id, 24, false, 260000m, true)  // 1 thùng = 24 lon - 260,000đ/thùng
+            });
+        }
+        
+        if (biaIngredient != null)
+        {
+            purchaseUnits.AddRange(new[]
+            {
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, mlUnit.Id, 1, true, 50m, true),      // Base: ml - 50đ/ml
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, lonUnit.Id, 330, false, 15000m, true),  // 1 lon = 330ml - 15,000đ/lon
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, thungUnit.Id, 50000, false, 750000m, true) // 1 thùng = 50000ml - 750,000đ/thùng
+            });
+        }
+        
+        await _purchaseUnitRepository.InsertManyAsync(purchaseUnits, autoSave: true);
     }
 }

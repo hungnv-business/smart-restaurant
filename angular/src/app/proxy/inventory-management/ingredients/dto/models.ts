@@ -1,4 +1,4 @@
-import type { FullAuditedEntityDto } from '@abp/ng.core';
+import type { FullAuditedEntityDto, PagedAndSortedResultRequestDto } from '@abp/ng.core';
 
 export interface CreateUpdateIngredientDto {
   categoryId: string;
@@ -8,6 +8,21 @@ export interface CreateUpdateIngredientDto {
   costPerUnit?: number;
   supplierInfo?: string;
   isActive: boolean;
+  purchaseUnits: CreateUpdatePurchaseUnitDto[];
+}
+
+export interface CreateUpdatePurchaseUnitDto {
+  unitId: string;
+  conversionRatio: number;
+  isBaseUnit: boolean;
+  purchasePrice?: number;
+  isActive: boolean;
+}
+
+export interface GetIngredientListRequestDto extends PagedAndSortedResultRequestDto {
+  filter?: string;
+  categoryId?: string;
+  includeInactive: boolean;
 }
 
 export interface IngredientDto extends FullAuditedEntityDto<string> {
@@ -19,5 +34,18 @@ export interface IngredientDto extends FullAuditedEntityDto<string> {
   unitName?: string;
   costPerUnit?: number;
   supplierInfo?: string;
+  currentStock: number;
+  isActive: boolean;
+  purchaseUnits: IngredientPurchaseUnitDto[];
+  canDelete: boolean;
+}
+
+export interface IngredientPurchaseUnitDto extends FullAuditedEntityDto<string> {
+  ingredientId?: string;
+  unitId?: string;
+  unitName?: string;
+  conversionRatio: number;
+  isBaseUnit: boolean;
+  purchasePrice?: number;
   isActive: boolean;
 }

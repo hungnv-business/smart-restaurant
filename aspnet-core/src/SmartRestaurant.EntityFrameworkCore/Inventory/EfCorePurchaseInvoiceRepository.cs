@@ -75,11 +75,13 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         public async Task<PurchaseInvoice?> GetWithDetailsAsync(Guid id)
         {
             var dbSet = await GetDbSetAsync();
-            return await dbSet
-                .Include(x => x.Items)
+            var result = await dbSet
+                .Include(x => x.Items.OrderBy(item => item.DisplayOrder))
                     .ThenInclude(item => item.Ingredient)
                 .Include(x => x.InvoiceDate)
                 .FirstOrDefaultAsync(x => x.Id == id);
+            
+            return result;
         }
     }
 }

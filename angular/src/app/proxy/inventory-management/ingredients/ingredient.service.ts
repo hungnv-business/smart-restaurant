@@ -1,6 +1,6 @@
-import type { CreateUpdateIngredientDto, IngredientDto } from './dto/models';
+import type { CreateUpdateIngredientDto, GetIngredientListRequestDto, IngredientDto } from './dto/models';
 import { RestService, Rest } from '@abp/ng.core';
-import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
+import type { PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -35,19 +35,11 @@ export class IngredientService {
     { apiName: this.apiName,...config });
   
 
-  getIngredientsByCategory = (categoryId: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, IngredientDto[]>({
-      method: 'GET',
-      url: `/api/app/ingredient/ingredients-by-category/${categoryId}`,
-    },
-    { apiName: this.apiName,...config });
-  
-
-  getList = (input: PagedAndSortedResultRequestDto, config?: Partial<Rest.Config>) =>
+  getList = (input: GetIngredientListRequestDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, PagedResultDto<IngredientDto>>({
       method: 'GET',
       url: '/api/app/ingredient',
-      params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
+      params: { filter: input.filter, categoryId: input.categoryId, includeInactive: input.includeInactive, sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
     },
     { apiName: this.apiName,...config });
   

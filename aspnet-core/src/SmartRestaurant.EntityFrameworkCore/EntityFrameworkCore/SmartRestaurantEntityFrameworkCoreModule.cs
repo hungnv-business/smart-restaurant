@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using SmartRestaurant.EntityFrameworkCore.Repositories;
+using SmartRestaurant.Repositories;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -53,5 +55,7 @@ public class SmartRestaurantEntityFrameworkCoreModule : AbpModule
             options.UseNpgsql();
         });
 
+        // Register custom repositories
+        context.Services.AddTransient<IIngredientRepository, EfCoreIngredientRepository>();
     }
 }

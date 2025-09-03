@@ -292,6 +292,9 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("BaseUnitQuantity")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("CreationTime");
@@ -307,6 +310,9 @@ namespace SmartRestaurant.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("DeletionTime");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("uuid");
@@ -332,6 +338,9 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid>("PurchaseInvoiceId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("PurchaseUnitId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -342,9 +351,6 @@ namespace SmartRestaurant.Migrations
                     b.Property<int>("TotalPrice")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UnitId")
-                        .HasColumnType("uuid");
-
                     b.Property<int?>("UnitPrice")
                         .HasColumnType("integer");
 
@@ -353,6 +359,8 @@ namespace SmartRestaurant.Migrations
                     b.HasIndex("IngredientId");
 
                     b.HasIndex("PurchaseInvoiceId");
+
+                    b.HasIndex("PurchaseUnitId");
 
                     b.ToTable("AppPurchaseInvoiceItems", (string)null);
                 });
@@ -497,6 +505,72 @@ namespace SmartRestaurant.Migrations
                     b.ToTable("AppIngredientCategories", (string)null);
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.IngredientPurchaseUnit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ConversionRatio")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsBaseUnit")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<decimal?>("PurchasePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId")
+                        .IsUnique()
+                        .HasFilter("\"IsBaseUnit\" = true");
+
+                    b.HasIndex("UnitId");
+
+                    b.HasIndex("IngredientId", "IsActive");
+
+                    b.ToTable("AppIngredientPurchaseUnits", (string)null);
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.MenuManagement.MenuCategory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -622,6 +696,12 @@ namespace SmartRestaurant.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("PrimaryIngredientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("RequiredQuantity")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -629,6 +709,8 @@ namespace SmartRestaurant.Migrations
                     b.HasIndex("MenuCategoryId");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("PrimaryIngredientId");
 
                     b.HasIndex("CategoryId", "IsAvailable");
 
@@ -2556,9 +2638,17 @@ namespace SmartRestaurant.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SmartRestaurant.Entities.InventoryManagement.IngredientPurchaseUnit", "PurchaseUnit")
+                        .WithMany()
+                        .HasForeignKey("PurchaseUnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Ingredient");
 
                     b.Navigation("PurchaseInvoice");
+
+                    b.Navigation("PurchaseUnit");
                 });
 
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.Ingredient", b =>
@@ -2580,6 +2670,25 @@ namespace SmartRestaurant.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.IngredientPurchaseUnit", b =>
+                {
+                    b.HasOne("SmartRestaurant.Entities.InventoryManagement.Ingredient", "Ingredient")
+                        .WithMany("PurchaseUnits")
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartRestaurant.Entities.Common.Unit", "Unit")
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Unit");
+                });
+
             modelBuilder.Entity("SmartRestaurant.Entities.MenuManagement.MenuItem", b =>
                 {
                     b.HasOne("SmartRestaurant.Entities.MenuManagement.MenuCategory", "Category")
@@ -2592,7 +2701,13 @@ namespace SmartRestaurant.Migrations
                         .WithMany("MenuItems")
                         .HasForeignKey("MenuCategoryId");
 
+                    b.HasOne("SmartRestaurant.Entities.InventoryManagement.Ingredient", "PrimaryIngredient")
+                        .WithMany()
+                        .HasForeignKey("PrimaryIngredientId");
+
                     b.Navigation("Category");
+
+                    b.Navigation("PrimaryIngredient");
                 });
 
             modelBuilder.Entity("SmartRestaurant.Entities.Tables.Table", b =>
@@ -2749,6 +2864,11 @@ namespace SmartRestaurant.Migrations
             modelBuilder.Entity("SmartRestaurant.Entities.Inventory.PurchaseInvoice", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.Ingredient", b =>
+                {
+                    b.Navigation("PurchaseUnits");
                 });
 
             modelBuilder.Entity("SmartRestaurant.Entities.InventoryManagement.IngredientCategory", b =>

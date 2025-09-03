@@ -25,9 +25,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                 .ForMember(dest => dest.Items, opt => opt.Ignore()) // Handle manually in AppService
                 .ForMember(dest => dest.TotalAmount, opt => opt.Ignore()); // Calculated by domain method
 
-            // Ingredient lookup mapping
-            CreateMap<Ingredient, IngredientLookupDto>()
-                .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit.Name));
+            // Ingredient basic info mapping
+            CreateMap<Ingredient, IngredientBasicInfoDto>();
         }
     }
 }

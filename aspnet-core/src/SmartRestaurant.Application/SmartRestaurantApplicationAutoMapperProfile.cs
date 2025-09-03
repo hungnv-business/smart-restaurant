@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SmartRestaurant.Entities.Common;
 using SmartRestaurant.Common.Units.Dto;
+
 namespace SmartRestaurant;
 
 public class SmartRestaurantApplicationAutoMapperProfile : Profile

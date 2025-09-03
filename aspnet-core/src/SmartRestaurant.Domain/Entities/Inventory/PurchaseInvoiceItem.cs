@@ -31,10 +31,16 @@ namespace SmartRestaurant.Entities.Inventory
         public int Quantity { get; set; }
 
         /// <summary>
-        /// ID đơn vị (Bắt buộc - chọn từ Unit)
+        /// ID đơn vị mua hàng (từ IngredientPurchaseUnit)
         /// </summary>
         [Required]
-        public Guid UnitId { get; set; }
+        public Guid PurchaseUnitId { get; set; }
+
+        /// <summary>
+        /// Số lượng chuyển đổi về đơn vị cơ sở (để tracking stock)
+        /// </summary>
+        [Required]
+        public int BaseUnitQuantity { get; set; }
 
         /// <summary>
         /// Giá đơn vị (Nullable - có thể bỏ trống)
@@ -60,6 +66,12 @@ namespace SmartRestaurant.Entities.Inventory
         public string? Notes { get; set; }
 
         /// <summary>
+        /// Thứ tự hiển thị item trong hóa đơn
+        /// </summary>
+        [Required]
+        public int DisplayOrder { get; set; }
+
+        /// <summary>
         /// Navigation property về PurchaseInvoice
         /// </summary>
         public virtual PurchaseInvoice PurchaseInvoice { get; set; } = null!;
@@ -68,6 +80,11 @@ namespace SmartRestaurant.Entities.Inventory
         /// Navigation property về Ingredient
         /// </summary>
         public virtual Ingredient Ingredient { get; set; }
+
+        /// <summary>
+        /// Navigation property về IngredientPurchaseUnit
+        /// </summary>
+        public virtual IngredientPurchaseUnit PurchaseUnit { get; set; } = null!;
 
         protected PurchaseInvoiceItem()
         {
@@ -78,8 +95,10 @@ namespace SmartRestaurant.Entities.Inventory
             Guid purchaseInvoiceId,
             Guid ingredientId,
             int quantity,
-            Guid unitId,
+            Guid purchaseUnitId,
+            int baseUnitQuantity,
             int totalPrice,
+            int displayOrder,
             int? unitPrice = null,
             string? supplierInfo = null,
             string? notes = null) : base(id)
@@ -87,6 +106,11 @@ namespace SmartRestaurant.Entities.Inventory
             if (quantity <= 0)
             {
                 throw new InvalidQuantityException(quantity);
+            }
+
+            if (baseUnitQuantity <= 0)
+            {
+                throw new InvalidQuantityException(baseUnitQuantity);
             }
 
             if (totalPrice < 0)
@@ -97,9 +121,49 @@ namespace SmartRestaurant.Entities.Inventory
             PurchaseInvoiceId = purchaseInvoiceId;
             IngredientId = ingredientId;
             Quantity = quantity;
-            UnitId = unitId;
+            PurchaseUnitId = purchaseUnitId;
+            BaseUnitQuantity = baseUnitQuantity;
             UnitPrice = unitPrice;
             TotalPrice = totalPrice;
+            DisplayOrder = displayOrder;
+            SupplierInfo = supplierInfo;
+            Notes = notes;
+        }
+
+        /// <summary>
+        /// Cập nhật thông tin chi tiết của item
+        /// </summary>
+        public void UpdateDetails(
+            int quantity,
+            Guid purchaseUnitId,
+            int baseUnitQuantity,
+            int totalPrice,
+            int displayOrder,
+            int? unitPrice = null,
+            string? supplierInfo = null,
+            string? notes = null)
+        {
+            if (quantity <= 0)
+            {
+                throw new InvalidQuantityException(quantity);
+            }
+
+            if (baseUnitQuantity <= 0)
+            {
+                throw new InvalidQuantityException(baseUnitQuantity);
+            }
+
+            if (totalPrice < 0)
+            {
+                throw new InvalidTotalPriceException(totalPrice);
+            }
+
+            Quantity = quantity;
+            PurchaseUnitId = purchaseUnitId;
+            BaseUnitQuantity = baseUnitQuantity;
+            TotalPrice = totalPrice;
+            DisplayOrder = displayOrder;
+            UnitPrice = unitPrice;
             SupplierInfo = supplierInfo;
             Notes = notes;
         }

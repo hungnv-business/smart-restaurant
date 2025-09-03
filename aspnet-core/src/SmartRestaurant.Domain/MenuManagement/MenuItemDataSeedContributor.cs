@@ -44,6 +44,7 @@ public class MenuItemDataSeedContributor : IDataSeedContributor, ITransientDepen
             return; // Categories not yet seeded
         }
 
+        // Menu items với ingredient references là optional
         var menuItems = new[]
         {
             // Món Phở

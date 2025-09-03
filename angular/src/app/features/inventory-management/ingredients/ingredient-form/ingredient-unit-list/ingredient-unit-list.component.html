@@ -1,0 +1,113 @@
+<div class="border-t pt-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">Cấu hình đa đơn vị</h3>
+    <p-button 
+      label="Thêm đơn vị" 
+      icon="pi pi-plus" 
+      size="small"
+      (onClick)="onAddClick()"
+      pTooltip="Thêm đơn vị mua mới"
+    />
+  </div>
+  
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+    <div class="flex items-start gap-3">
+      <i class="pi pi-info-circle text-blue-600 mt-1"></i>
+      <div class="text-sm text-blue-800">
+        <p class="font-medium mb-1">Hướng dẫn sử dụng đa đơn vị:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Đơn vị cơ sở dùng để theo dõi tồn kho</li>
+          <li>Tỷ lệ chuyển đổi = Số lượng đơn vị cơ sở trong 1 đơn vị mua</li>
+          <li>Ví dụ: 1 thùng bia = 50000ml → Tỷ lệ chuyển đổi = 50000</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p-table 
+      [value]="purchaseUnits" 
+      [rows]="10"
+      [loading]="loading"
+      styleClass="p-datatable-gridlines p-datatable-sm"
+    >
+      <ng-template pTemplate="caption">
+        <div class="flex justify-between items-center">
+          <span class="text-sm font-medium">Danh sách đơn vị mua</span>
+          <span class="text-xs text-gray-500" *ngIf="purchaseUnits.length > 0">
+            {{purchaseUnits.length}} đơn vị
+          </span>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Đơn vị</th>
+          <th>Tỷ lệ chuyển đổi</th>
+          <th>Đơn vị cơ sở</th>
+          <th>Trạng thái</th>
+          <th width="120">Thao tác</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-unit>
+        <tr>
+          <td class="font-medium">{{ getUnitName(unit.unitId) }}</td>
+          <td>
+            <span class="text-sm">
+              {{ getUnitName(unit.unitId) }} = {{ unit.conversionRatio | number }} {{ baseUnitName }}
+            </span>
+          </td>
+          <td>
+            <p-checkbox 
+              [ngModel]="unit.isBaseUnit" 
+              [binary]="true" 
+              [readonly]="true"
+            />
+            <span class="ml-2 text-xs" [class]="unit.isBaseUnit ? 'text-blue-600 font-medium' : 'text-gray-500'">
+              {{ unit.isBaseUnit ? 'Cơ sở' : 'Mua' }}
+            </span>
+          </td>
+          <td>
+            <p-tag
+              [value]="unit.isActive ? 'Hoạt động' : 'Tạm dừng'"
+              [severity]="unit.isActive ? 'success' : 'secondary'"
+            />
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                size="small"
+                [outlined]="true"
+                (onClick)="onEditClick(unit)"
+                pTooltip="Chỉnh sửa"
+              />
+              <p-button
+                icon="pi pi-trash"
+                size="small"
+                severity="danger"
+                [outlined]="true"
+                (onClick)="onDeleteClick(unit)"
+                pTooltip="Xóa"
+                [disabled]="unit.isBaseUnit"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center text-gray-500 py-8">
+            <div class="flex flex-col items-center gap-2">
+              <i class="pi pi-info-circle text-3xl"></i>
+              <p>Chưa có đơn vị mua nào được cấu hình</p>
+              <small>Click "Thêm đơn vị" để bắt đầu</small>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

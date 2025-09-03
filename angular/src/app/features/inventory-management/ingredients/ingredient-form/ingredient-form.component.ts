@@ -1,15 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
-import { Checkbox } from 'primeng/checkbox';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   IngredientDto,
   CreateUpdateIngredientDto,
+  IngredientPurchaseUnitDto,
+  CreateUpdatePurchaseUnitDto,
 } from '../../../../proxy/inventory-management/ingredients/dto';
 import { IngredientCategoryDto } from '../../../../proxy/inventory-management/ingredient-categories/dto';
 import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
@@ -19,6 +24,8 @@ import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 import { IngredientFormData } from '../services/ingredient-form-dialog.service';
+import { IngredientUnitListComponent } from './ingredient-unit-list/ingredient-unit-list.component';
+import { IngredientUnitService } from '../services/ingredient-unit.service';
 import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
 import { take, finalize } from 'rxjs';
 import { GlobalService } from '@proxy/common';
@@ -29,13 +36,18 @@ import { GlobalService } from '@proxy/common';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     InputTextModule,
     InputNumber,
-    Checkbox,
-    DropdownModule,
+    SelectModule,
     ProgressSpinnerModule,
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    TooltipModule,
     ValidationErrorComponent,
     FormFooterActionsComponent,
+    IngredientUnitListComponent,
   ],
   templateUrl: './ingredient-form.component.html',
   styleUrls: ['./ingredient-form.component.scss'],
@@ -47,9 +59,11 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   ingredient?: IngredientDto;
   categories: IngredientCategoryDto[] = [];
   units: UnitDto[] = [];
+  purchaseUnits: CreateUpdatePurchaseUnitDto[] = [];
 
   public ref = inject(DynamicDialogRef);
   public config = inject(DynamicDialogConfig<IngredientFormData>);
+  private ingredientUnitService = inject(IngredientUnitService);
 
   private fb = inject(FormBuilder);
   private ingredientService = inject(IngredientService);
@@ -72,6 +86,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
 
       if (this.isEdit && this.ingredient) {
         this.populateForm(this.ingredient);
+        this.loadPurchaseUnits();
       }
     }
   }
@@ -89,6 +104,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
       costPerUnit: formValue.costPerUnit || null,
       supplierInfo: formValue.supplierInfo || '',
       isActive: formValue.isActive,
+      purchaseUnits: this.preparePurchaseUnits(),
     };
 
     this.loading = true;
@@ -171,5 +187,79 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
     });
 
     this.form.markAsPristine();
+  }
+
+  private loadPurchaseUnits() {
+    if (!this.ingredient?.purchaseUnits) return;
+    
+    // Lấy từ data có sẵn trong ingredient.purchaseUnits
+    this.purchaseUnits = this.ingredient.purchaseUnits
+      .filter(unit => unit.isActive)
+      .map(unit => ({
+        unitId: unit.unitId!,
+        conversionRatio: unit.conversionRatio,
+        isBaseUnit: unit.isBaseUnit,
+        purchasePrice: unit.purchasePrice,
+        isActive: unit.isActive,
+      }));
+  }
+
+
+  private preparePurchaseUnits(): CreateUpdatePurchaseUnitDto[] {
+    return this.purchaseUnits.map(unit => ({
+      unitId: unit.unitId!,
+      conversionRatio: unit.conversionRatio,
+      isBaseUnit: unit.isBaseUnit,
+      purchasePrice: unit.purchasePrice,
+      isActive: unit.isActive,
+    }));
+  }
+
+  onAddUnit() {
+    const dialogData = {
+      units: this.units,
+      baseUnitId: this.form.get('unitId')?.value || '',
+      existingUnits: this.purchaseUnits
+    };
+
+    this.ingredientUnitService.openAddUnitModal(dialogData).subscribe({
+      next: (result) => {
+        if (result) {
+          this.purchaseUnits.push(result);
+        }
+      }
+    });
+  }
+
+  onEditUnit(unit: CreateUpdatePurchaseUnitDto) {
+    const dialogData = {
+      editingUnit: unit,
+      units: this.units,
+      baseUnitId: this.form.get('unitId')?.value || '',
+      existingUnits: this.purchaseUnits
+    };
+
+    this.ingredientUnitService.openEditUnitModal(dialogData).subscribe({
+      next: (result) => {
+        if (result) {
+          const index = this.purchaseUnits.findIndex(u => u === unit);
+          if (index > -1) {
+            this.purchaseUnits[index] = result;
+          }
+        }
+      }
+    });
+  }
+
+  onDeleteUnit(unit: CreateUpdatePurchaseUnitDto) {
+    const index = this.purchaseUnits.findIndex(u => u === unit);
+    if (index > -1) {
+      this.purchaseUnits.splice(index, 1);
+    }
+  }
+
+
+  getUnitName(unitId: string): string {
+    return this.units.find(u => u.id === unitId)?.name || 'N/A';
   }
 }

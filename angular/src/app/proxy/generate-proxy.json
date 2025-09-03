@@ -1445,20 +1445,20 @@
               "name": "IIngredientAppService",
               "methods": [
                 {
-                  "name": "GetIngredientsByCategoryAsync",
+                  "name": "GetListAsync",
                   "parametersOnMethod": [
                     {
-                      "name": "categoryId",
-                      "typeAsString": "System.Guid, System.Private.CoreLib",
-                      "type": "System.Guid",
-                      "typeSimple": "string",
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto",
+                      "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto",
                       "isOptional": false,
                       "defaultValue": null
                     }
                   ],
                   "returnValue": {
-                    "type": "System.Collections.Generic.List<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>",
-                    "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto]"
+                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>"
                   }
                 },
                 {
@@ -1476,23 +1476,6 @@
                   "returnValue": {
                     "type": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto",
                     "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto"
-                  }
-                },
-                {
-                  "name": "GetListAsync",
-                  "parametersOnMethod": [
-                    {
-                      "name": "input",
-                      "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
-                      "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                      "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                      "isOptional": false,
-                      "defaultValue": null
-                    }
-                  ],
-                  "returnValue": {
-                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>",
-                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>"
                   }
                 },
                 {
@@ -1567,14 +1550,50 @@
               "parametersOnMethod": [
                 {
                   "name": "input",
-                  "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
-                  "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                  "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+                  "typeAsString": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto",
+                  "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto",
                   "isOptional": false,
                   "defaultValue": null
                 }
               ],
               "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "Filter",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "CategoryId",
+                  "jsonName": null,
+                  "type": "System.Guid?",
+                  "typeSimple": "string?",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "IncludeInactive",
+                  "jsonName": null,
+                  "type": "System.Boolean",
+                  "typeSimple": "boolean",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
                 {
                   "nameOnMethod": "input",
                   "name": "Sorting",
@@ -1617,7 +1636,7 @@
                 "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
             },
             "GetAsyncById": {
               "uniqueName": "GetAsyncById",
@@ -1652,43 +1671,6 @@
               "returnValue": {
                 "type": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto",
                 "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto"
-              },
-              "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
-            },
-            "GetIngredientsByCategoryAsyncByCategoryId": {
-              "uniqueName": "GetIngredientsByCategoryAsyncByCategoryId",
-              "name": "GetIngredientsByCategoryAsync",
-              "httpMethod": "GET",
-              "url": "api/app/ingredient/ingredients-by-category/{categoryId}",
-              "supportedVersions": [],
-              "parametersOnMethod": [
-                {
-                  "name": "categoryId",
-                  "typeAsString": "System.Guid, System.Private.CoreLib",
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null
-                }
-              ],
-              "parameters": [
-                {
-                  "nameOnMethod": "categoryId",
-                  "name": "categoryId",
-                  "jsonName": null,
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": [],
-                  "bindingSourceId": "Path",
-                  "descriptorName": ""
-                }
-              ],
-              "returnValue": {
-                "type": "System.Collections.Generic.List<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto>",
-                "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto]"
               },
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
@@ -1728,7 +1710,7 @@
                 "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.ICreateAppService<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,SmartRestaurant.InventoryManagement.Ingredients.Dto.CreateUpdateIngredientDto>"
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
             },
             "UpdateAsyncByIdAndInput": {
               "uniqueName": "UpdateAsyncByIdAndInput",
@@ -1785,7 +1767,7 @@
                 "typeSimple": "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IUpdateAppService<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientDto,System.Guid,SmartRestaurant.InventoryManagement.Ingredients.Dto.CreateUpdateIngredientDto>"
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
             },
             "DeleteAsyncById": {
               "uniqueName": "DeleteAsyncById",
@@ -1822,7 +1804,7 @@
                 "typeSimple": "System.Void"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IDeleteAppService<System.Guid>"
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
             }
           }
         },
@@ -1932,7 +1914,7 @@
                   }
                 },
                 {
-                  "name": "GetIngredientLookupAsync",
+                  "name": "GetIngredientForPurchaseAsync",
                   "parametersOnMethod": [
                     {
                       "name": "ingredientId",
@@ -1944,8 +1926,8 @@
                     }
                   ],
                   "returnValue": {
-                    "type": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientLookupDto",
-                    "typeSimple": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientLookupDto"
+                    "type": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientForPurchaseDto",
+                    "typeSimple": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientForPurchaseDto"
                   }
                 }
               ]
@@ -2217,11 +2199,11 @@
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.InventoryManagement.PurchaseInvoices.IPurchaseInvoiceAppService"
             },
-            "GetIngredientLookupAsyncByIngredientId": {
-              "uniqueName": "GetIngredientLookupAsyncByIngredientId",
-              "name": "GetIngredientLookupAsync",
+            "GetIngredientForPurchaseAsyncByIngredientId": {
+              "uniqueName": "GetIngredientForPurchaseAsyncByIngredientId",
+              "name": "GetIngredientForPurchaseAsync",
               "httpMethod": "GET",
-              "url": "api/app/purchase-invoice/ingredient-lookup/{ingredientId}",
+              "url": "api/app/purchase-invoice/ingredient-for-purchase/{ingredientId}",
               "supportedVersions": [],
               "parametersOnMethod": [
                 {
@@ -2248,8 +2230,8 @@
                 }
               ],
               "returnValue": {
-                "type": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientLookupDto",
-                "typeSimple": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientLookupDto"
+                "type": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientForPurchaseDto",
+                "typeSimple": "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientForPurchaseDto"
               },
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.InventoryManagement.PurchaseInvoices.IPurchaseInvoiceAppService"
@@ -7216,6 +7198,132 @@
           "minimum": null,
           "maximum": null,
           "regex": null
+        },
+        {
+          "name": "PurchaseUnits",
+          "jsonName": null,
+          "type": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.CreateUpdatePurchaseUnitDto]",
+          "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.CreateUpdatePurchaseUnitDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.InventoryManagement.Ingredients.Dto.CreateUpdatePurchaseUnitDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "UnitId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ConversionRatio",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "1000000",
+          "regex": null
+        },
+        {
+          "name": "IsBaseUnit",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PurchasePrice",
+          "jsonName": null,
+          "type": "System.Decimal?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.InventoryManagement.Ingredients.Dto.GetIngredientListRequestDto": {
+      "baseType": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Filter",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CategoryId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IncludeInactive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
         }
       ]
     },
@@ -7323,6 +7431,135 @@
           "regex": null
         },
         {
+          "name": "CurrentStock",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsActive",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PurchaseUnits",
+          "jsonName": null,
+          "type": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]",
+          "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CanDelete",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto": {
+      "baseType": "Volo.Abp.Application.Dtos.FullAuditedEntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "IngredientId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UnitId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UnitName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ConversionRatio",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsBaseUnit",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PurchasePrice",
+          "jsonName": null,
+          "type": "System.Decimal?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
           "name": "IsActive",
           "jsonName": null,
           "type": "System.Boolean",
@@ -7394,7 +7631,7 @@
       ]
     },
     "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.CreateUpdatePurchaseInvoiceItemDto": {
-      "baseType": null,
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid?>",
       "isEnum": false,
       "enumNames": null,
       "enumValues": null,
@@ -7425,25 +7662,13 @@
           "regex": null
         },
         {
-          "name": "UnitId",
+          "name": "PurchaseUnitId",
           "jsonName": null,
-          "type": "System.Guid?",
-          "typeSimple": "string?",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "UnitName",
-          "jsonName": null,
-          "type": "System.String",
+          "type": "System.Guid",
           "typeSimple": "string",
           "isRequired": true,
           "minLength": null,
-          "maxLength": 50,
+          "maxLength": null,
           "minimum": null,
           "maximum": null,
           "regex": null
@@ -7495,6 +7720,18 @@
           "minimum": null,
           "maximum": null,
           "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
         }
       ]
     },
@@ -7543,7 +7780,7 @@
         }
       ]
     },
-    "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientLookupDto": {
+    "SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto.IngredientForPurchaseDto": {
       "baseType": null,
       "isEnum": false,
       "enumNames": null,
@@ -7575,34 +7812,10 @@
           "regex": null
         },
         {
-          "name": "UnitId",
-          "jsonName": null,
-          "type": "System.Guid",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "UnitName",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
           "name": "CostPerUnit",
           "jsonName": null,
-          "type": "System.Int32",
-          "typeSimple": "number",
+          "type": "System.Decimal?",
+          "typeSimple": "number?",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
@@ -7615,6 +7828,18 @@
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PurchaseUnits",
+          "jsonName": null,
+          "type": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]",
+          "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
@@ -7775,8 +8000,8 @@
         {
           "name": "UnitId",
           "jsonName": null,
-          "type": "System.Guid?",
-          "typeSimple": "string?",
+          "type": "System.Guid",
+          "typeSimple": "string",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
@@ -7785,10 +8010,10 @@
           "regex": null
         },
         {
-          "name": "UnitName",
+          "name": "PurchaseUnitId",
           "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
+          "type": "System.Guid?",
+          "typeSimple": "string?",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
@@ -7849,6 +8074,18 @@
           "jsonName": null,
           "type": "System.Guid?",
           "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,

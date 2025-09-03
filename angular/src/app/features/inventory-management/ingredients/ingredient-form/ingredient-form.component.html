@@ -1,10 +1,10 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <div class="flex flex-col gap-4 w-full">
+<form [formGroup]="form" class="p-fluid">
+  <div class="flex flex-col gap-6">
     <!-- Category & Name -->
     <div class="flex flex-col sm:flex-row gap-4">
       <div class="flex flex-col gap-2 flex-1">
         <label for="categoryId" class="block font-semibold text-sm required">Danh mục</label>
-        <p-dropdown
+        <p-select
           id="categoryId"
           formControlName="categoryId"
           [options]="categories"
@@ -35,7 +35,7 @@
     <div class="flex flex-col sm:flex-row gap-4">
       <div class="flex flex-col gap-2 flex-1">
         <label for="unit" class="block font-semibold text-sm required">Đơn vị</label>
-        <p-dropdown
+        <p-select
           id="unit"
           formControlName="unitId"
           [options]="units"
@@ -57,9 +57,22 @@
           locale="vi-VN"
           [min]="0"
           class="w-full"
+          placeholder="Nhập giá đơn vị"
         />
-        <small class="text-gray-600">Để trống nếu chưa có giá</small>
       </div>
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label for="description" class="block font-semibold text-sm">Mô tả</label>
+      <input
+        type="text"
+        pInputText
+        id="description"
+        formControlName="description"
+        placeholder="Nhập mô tả nguyên liệu"
+        class="w-full"
+      />
     </div>
 
     <!-- Supplier Info -->
@@ -75,20 +88,17 @@
       />
     </div>
 
-    <!-- Active Status -->
-    <div class="flex flex-col gap-3">
-      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <p-checkbox 
-          inputId="isActive" 
-          formControlName="isActive" 
-          [binary]="true" 
-          class="cursor-pointer"
-        />
-        <label for="isActive" class="cursor-pointer font-medium select-none">
-          Kích hoạt nguyên liệu
-        </label>
-      </div>
-    </div>
+    <!-- Multi-Unit Configuration -->
+    <app-ingredient-unit-list
+      *ngIf="isEdit && ingredient"
+      [purchaseUnits]="purchaseUnits"
+      [baseUnitName]="getUnitName(form.get('unitId')?.value)"
+      [units]="units"
+      [loading]="loading"
+      (editUnit)="onEditUnit($event)"
+      (deleteUnit)="onDeleteUnit($event)"
+      (addUnit)="onAddUnit()"
+    />
   </div>
 </form>
 

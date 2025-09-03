@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using SmartRestaurant.Entities.InventoryManagement;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SmartRestaurant.Entities.MenuManagement
@@ -32,10 +33,19 @@ namespace SmartRestaurant.Entities.MenuManagement
         /// <summary>ID danh mục menu mà món ăn này thuộc về</summary>
         [Required]
         public Guid CategoryId { get; set; }
+
+        /// <summary>ID nguyên liệu chính cho món ăn (để tracking inventory)</summary>
+        public Guid? PrimaryIngredientId { get; set; }
+
+        /// <summary>Số lượng nguyên liệu chính cần dùng (theo base unit)</summary>
+        public int? RequiredQuantity { get; set; }
         
-        // Navigation property cho one-to-many với MenuCategory
+        // Navigation properties
         /// <summary>Danh mục menu chứa món ăn này</summary>
         public virtual MenuCategory? Category { get; set; }
+
+        /// <summary>Nguyên liệu chính của món ăn</summary>
+        public virtual Ingredient PrimaryIngredient { get; set; } = null!;
 
         protected MenuItem()
         {
@@ -48,14 +58,23 @@ namespace SmartRestaurant.Entities.MenuManagement
             decimal price,
             bool isAvailable,
             string? imageUrl,
-            Guid categoryId) : base(id)
+            Guid categoryId,
+            Guid? primaryIngredientId = null,
+            int? requiredQuantity = null) : base(id)
         {
+            if (requiredQuantity.HasValue && requiredQuantity <= 0)
+            {
+                throw new ArgumentException("Required quantity must be greater than 0", nameof(requiredQuantity));
+            }
+
             Name = name;
             Description = description;
             Price = price;
             IsAvailable = isAvailable;
             ImageUrl = imageUrl;
             CategoryId = categoryId;
+            PrimaryIngredientId = primaryIngredientId;
+            RequiredQuantity = requiredQuantity;
         }
     }
 }

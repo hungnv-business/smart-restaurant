@@ -67,6 +67,11 @@ public static class SmartRestaurantDomainErrorCodes
         /// Không đủ tồn kho để thực hiện thao tác
         /// </summary>
         public const string InsufficientStock = "SmartRestaurant:Ingredient:0001";
+        
+        /// <summary>
+        /// Không thể xóa nguyên liệu vì đang được sử dụng
+        /// </summary>
+        public const string IsBeingUsed = "SmartRestaurant:Ingredient:0002";
     }
 
     /// <summary>
