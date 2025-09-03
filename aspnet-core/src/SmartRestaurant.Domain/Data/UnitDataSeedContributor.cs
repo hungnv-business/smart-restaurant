@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using SmartRestaurant.Entities.Common;
+using SmartRestaurant.Common;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;

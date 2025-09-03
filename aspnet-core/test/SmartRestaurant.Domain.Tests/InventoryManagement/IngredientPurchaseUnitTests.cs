@@ -1,5 +1,5 @@
 using System;
-using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.InventoryManagement.Ingredients;
 using Shouldly;
 using Xunit;
 

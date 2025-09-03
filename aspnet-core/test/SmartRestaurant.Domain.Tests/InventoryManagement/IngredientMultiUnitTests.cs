@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using SmartRestaurant.Entities.InventoryManagement;
-using SmartRestaurant.Entities.Common;
+using SmartRestaurant.InventoryManagement.Ingredients;
+using SmartRestaurant.Common;
 using Shouldly;
 using Xunit;
 

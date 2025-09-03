@@ -1,9 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SmartRestaurant.Entities.Tables;
-using SmartRestaurant.Entities.MenuManagement;
-using SmartRestaurant.Entities.InventoryManagement;
-using SmartRestaurant.Entities.Inventory;
-using SmartRestaurant.Entities.Common;
+using SmartRestaurant.TableManagement.Tables;
+using SmartRestaurant.TableManagement.LayoutSections;
+using SmartRestaurant.MenuManagement.MenuItems;
+using SmartRestaurant.MenuManagement.MenuCategories;
+using SmartRestaurant.InventoryManagement.Ingredients;
+using SmartRestaurant.InventoryManagement.IngredientCategories;
+using SmartRestaurant.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.Common;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;

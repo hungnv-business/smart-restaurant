@@ -1,6 +1,6 @@
 using AutoMapper;
-using SmartRestaurant.Entities.Inventory;
-using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.InventoryManagement.PurchaseInvoices.Dto;
 using SmartRestaurant.InventoryManagement.Ingredients.Dto;
 using System;

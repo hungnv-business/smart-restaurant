@@ -1,8 +1,13 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using SmartRestaurant.EntityFrameworkCore.Repositories;
-using SmartRestaurant.Repositories;
-using Volo.Abp.Uow;
+using SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients;
+using SmartRestaurant.EntityFrameworkCore.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.EntityFrameworkCore.TableManagement.Tables;
+using SmartRestaurant.EntityFrameworkCore.TableManagement.LayoutSections;
+using SmartRestaurant.InventoryManagement.Ingredients;
+using SmartRestaurant.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.TableManagement.Tables;
+using SmartRestaurant.TableManagement.LayoutSections;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -54,8 +59,5 @@ public class SmartRestaurantEntityFrameworkCoreModule : AbpModule
                  * See also SmartRestaurantMigrationsDbContextFactory for EF Core tooling. */
             options.UseNpgsql();
         });
-
-        // Register custom repositories
-        context.Services.AddTransient<IIngredientRepository, EfCoreIngredientRepository>();
     }
 }

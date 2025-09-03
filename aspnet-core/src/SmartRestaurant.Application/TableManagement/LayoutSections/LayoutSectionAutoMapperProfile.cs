@@ -1,6 +1,6 @@
 using System;
 using AutoMapper;
-using SmartRestaurant.Entities.Tables;
+using SmartRestaurant.TableManagement.LayoutSections;
 using SmartRestaurant.TableManagement.LayoutSections.Dto;
 
 namespace SmartRestaurant.TableManagement.LayoutSections

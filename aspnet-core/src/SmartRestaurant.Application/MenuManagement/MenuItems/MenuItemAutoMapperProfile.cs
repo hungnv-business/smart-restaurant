@@ -1,5 +1,5 @@
 using AutoMapper;
-using SmartRestaurant.Entities.MenuManagement;
+using SmartRestaurant.MenuManagement.MenuCategories;
 using SmartRestaurant.MenuManagement.MenuItems.Dto;
 
 namespace SmartRestaurant.MenuManagement.MenuItems

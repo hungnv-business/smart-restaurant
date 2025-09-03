@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using SmartRestaurant.Entities.Tables;
+using SmartRestaurant.TableManagement.LayoutSections;
 using SmartRestaurant.Permissions;
 using SmartRestaurant.TableManagement.LayoutSections.Dto;
 using Volo.Abp.Application.Services;

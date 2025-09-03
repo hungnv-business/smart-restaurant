@@ -5,7 +5,6 @@ using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.MenuManagement.MenuItems.Dto;
 using SmartRestaurant.MenuManagement.MenuCategories;
 using SmartRestaurant.MenuManagement.MenuCategories.Dto;
-using SmartRestaurant.Exceptions;
 using SmartRestaurant.Permissions;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;

@@ -8,7 +8,7 @@ using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Modularity;
 using Xunit;
-using SmartRestaurant.Entities.Tables;
+using SmartRestaurant.TableManagement.Tables;
 using SmartRestaurant.TableManagement.LayoutSections.Dto;
 
 namespace SmartRestaurant.TableManagement.LayoutSections

@@ -1,6 +1,6 @@
 using System.Linq;
 using AutoMapper;
-using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.InventoryManagement.Ingredients.Dto;
 
 namespace SmartRestaurant.InventoryManagement.Ingredients;

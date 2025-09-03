@@ -1,5 +1,5 @@
 using AutoMapper;
-using SmartRestaurant.Entities.Tables;
+using SmartRestaurant.TableManagement.Tables;
 using SmartRestaurant.TableManagement.Tables.Dto;
 
 namespace SmartRestaurant.TableManagement.Tables

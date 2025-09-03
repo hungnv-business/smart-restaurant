@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using SmartRestaurant.Common.Dto;
 using SmartRestaurant.Common.Units.Dto;
-using SmartRestaurant.Entities.Common;
-using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.Common;
+using SmartRestaurant.InventoryManagement.IngredientCategories;
+using SmartRestaurant.InventoryManagement.Ingredients;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 

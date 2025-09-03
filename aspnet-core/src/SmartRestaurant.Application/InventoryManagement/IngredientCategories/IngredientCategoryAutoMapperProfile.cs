@@ -1,5 +1,5 @@
 using AutoMapper;
-using SmartRestaurant.Entities.InventoryManagement;
+using SmartRestaurant.InventoryManagement.IngredientCategories;
 using SmartRestaurant.InventoryManagement.IngredientCategories.Dto;
 
 namespace SmartRestaurant.InventoryManagement.IngredientCategories;
