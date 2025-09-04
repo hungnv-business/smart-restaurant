@@ -20,9 +20,7 @@ public class IngredientPurchaseUnitTests
             1); // displayOrder
 
         // Act
-        // Note: ConvertToBaseUnit method không tồn tại trong IngredientPurchaseUnit
-        // Calculation: 2 thùng * 24 lon/thùng = 48 lon
-        var result = 2 * purchaseUnit.ConversionRatio;
+        var result = purchaseUnit.ConvertToBaseUnit(2);
 
         // Assert
         result.ShouldBe(48); // 2 * 24 = 48 lon
@@ -41,12 +39,7 @@ public class IngredientPurchaseUnitTests
             1); // displayOrder
 
         // Act & Assert
-        // Note: ConvertToBaseUnit method không tồn tại trong IngredientPurchaseUnit
-        // Kiểm tra logic validation thay thế
-        var quantity = 0;
-        Should.Throw<ArgumentException>(() => {
-            if (quantity <= 0) throw new ArgumentException("Quantity must be greater than 0");
-        });
+        Should.Throw<ArgumentException>(() => purchaseUnit.ConvertToBaseUnit(-1));
     }
 
     [Fact]
@@ -62,9 +55,7 @@ public class IngredientPurchaseUnitTests
             1); // displayOrder
 
         // Act
-        // Note: ConvertFromBaseUnit method không tồn tại trong IngredientPurchaseUnit
-        // Calculation: 100000ml / 50000ml/thùng = 2 thùng
-        var result = 100000 / purchaseUnit.ConversionRatio;
+        var result = purchaseUnit.ConvertFromBaseUnit(100000);
 
         // Assert
         result.ShouldBe(2); // 100000 / 50000 = 2 thùng
@@ -83,9 +74,7 @@ public class IngredientPurchaseUnitTests
             1); // displayOrder
 
         // Act
-        // Note: ConvertFromBaseUnit method không tồn tại trong IngredientPurchaseUnit
-        // Calculation: 50 lon / 24 lon/thùng = 2.08... -> 2 (integer division)
-        var result = 50 / purchaseUnit.ConversionRatio;
+        var result = purchaseUnit.ConvertFromBaseUnit(50);
 
         // Assert
         result.ShouldBe(2); // 50 / 24 = 2.08... -> 2 (integer division)
@@ -108,10 +97,8 @@ public class IngredientPurchaseUnitTests
             1); // displayOrder
 
         // Act
-        // Note: ConvertToBaseUnit/ConvertFromBaseUnit methods không tồn tại trong IngredientPurchaseUnit
-        // Thực hiện calculation trực tiếp
-        var toBase = quantity * purchaseUnit.ConversionRatio;
-        var fromBase = toBase / purchaseUnit.ConversionRatio;
+        var toBase = purchaseUnit.ConvertToBaseUnit(quantity);
+        var fromBase = purchaseUnit.ConvertFromBaseUnit(toBase);
 
         // Assert
         toBase.ShouldBe(quantity * conversionRatio);

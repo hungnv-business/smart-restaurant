@@ -202,4 +202,54 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         await _ingredientRepository.DeleteAsync(id);
     }
 
+    // === Multi-Unit Management Methods ===
+    
+    /// <summary>
+    /// Lấy danh sách đơn vị mua hàng của nguyên liệu
+    /// </summary>
+    /// <param name="ingredientId">ID của nguyên liệu</param>
+    /// <returns>Danh sách đơn vị mua hàng với tỷ lệ quy đổi</returns>
+    [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
+    public virtual async Task<List<IngredientPurchaseUnitDto>> GetPurchaseUnitsAsync(Guid ingredientId)
+    {
+        var ingredient = await _ingredientRepository.GetWithDetailsAsync(ingredientId);
+        if (ingredient == null)
+        {
+            throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
+        }
+        
+        var purchaseUnits = ingredient.PurchaseUnits
+            .Where(pu => pu.IsActive)
+            .OrderBy(pu => pu.DisplayOrder)
+            .ToList();
+            
+        return ObjectMapper.Map<List<IngredientPurchaseUnit>, List<IngredientPurchaseUnitDto>>(purchaseUnits);
+    }
+    
+    /// <summary>
+    /// Chuyển đổi số lượng từ đơn vị này sang đơn vị khác cho nguyên liệu
+    /// </summary>
+    /// <param name="ingredientId">ID của nguyên liệu</param>
+    /// <param name="fromUnitId">ID đơn vị nguồn</param>
+    /// <param name="toUnitId">ID đơn vị đích</param>
+    /// <param name="quantity">Số lượng cần chuyển đổi</param>
+    /// <returns>Số lượng sau chuyển đổi</returns>
+    [Authorize(SmartRestaurantPermissions.Inventory.Ingredients.Default)]
+    public virtual async Task<int> ConvertQuantityAsync(Guid ingredientId, Guid fromUnitId, Guid toUnitId, int quantity)
+    {
+        var ingredient = await _ingredientRepository.GetWithDetailsAsync(ingredientId);
+        if (ingredient == null)
+        {
+            throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
+        }
+        
+        // Chuyển đổi từ fromUnit sang base unit
+        var baseQuantity = ingredient.ConvertToBaseUnit(quantity, fromUnitId);
+        
+        // Chuyển đổi từ base unit sang toUnit
+        var convertedQuantity = ingredient.ConvertFromBaseUnit(baseQuantity, toUnitId);
+        
+        return convertedQuantity;
+    }
+
 }

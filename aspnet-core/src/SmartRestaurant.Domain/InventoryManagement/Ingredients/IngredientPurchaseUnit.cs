@@ -91,4 +91,36 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         IsActive = isActive;
     }
     
+    // === Business Methods cho Unit Conversion ===
+    
+    /// <summary>
+    /// Chuyển đổi số lượng từ đơn vị mua hàng này sang đơn vị cơ sở
+    /// </summary>
+    /// <param name="quantity">Số lượng trong đơn vị mua hàng</param>
+    /// <returns>Số lượng tương ứng trong đơn vị cơ sở</returns>
+    public int ConvertToBaseUnit(int quantity)
+    {
+        if (quantity < 0)
+        {
+            throw new ArgumentException("Quantity cannot be negative", nameof(quantity));
+        }
+        
+        return quantity * ConversionRatio;
+    }
+    
+    /// <summary>
+    /// Chuyển đổi số lượng từ đơn vị cơ sở sang đơn vị mua hàng này
+    /// </summary>
+    /// <param name="baseQuantity">Số lượng trong đơn vị cơ sở</param>
+    /// <returns>Số lượng tương ứng trong đơn vị mua hàng (làm tròn xuống)</returns>
+    public int ConvertFromBaseUnit(int baseQuantity)
+    {
+        if (baseQuantity < 0)
+        {
+            throw new ArgumentException("Base quantity cannot be negative", nameof(baseQuantity));
+        }
+        
+        return baseQuantity / ConversionRatio; // Integer division - làm tròn xuống
+    }
+    
 }

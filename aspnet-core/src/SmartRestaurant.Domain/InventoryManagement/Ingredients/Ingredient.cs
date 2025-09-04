@@ -157,6 +157,40 @@ public class Ingredient : FullAuditedEntity<Guid>
         return baseUnit;
     }
     
+    /// <summary>
+    /// Chuyển đổi số lượng từ một đơn vị mua hàng sang đơn vị cơ sở
+    /// </summary>
+    /// <param name="quantity">Số lượng trong đơn vị mua hàng</param>
+    /// <param name="purchaseUnitId">ID của đơn vị mua hàng</param>
+    /// <returns>Số lượng tương ứng trong đơn vị cơ sở</returns>
+    public int ConvertToBaseUnit(int quantity, Guid purchaseUnitId)
+    {
+        var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.UnitId == purchaseUnitId && pu.IsActive);
+        if (purchaseUnit == null)
+        {
+            throw new ArgumentException($"Purchase unit {purchaseUnitId} not found for ingredient {Name}");
+        }
+        
+        return purchaseUnit.ConvertToBaseUnit(quantity);
+    }
+    
+    /// <summary>
+    /// Chuyển đổi số lượng từ đơn vị cơ sở sang một đơn vị mua hàng
+    /// </summary>
+    /// <param name="baseQuantity">Số lượng trong đơn vị cơ sở</param>
+    /// <param name="targetUnitId">ID của đơn vị mua hàng đích</param>
+    /// <returns>Số lượng tương ứng trong đơn vị mua hàng đích (làm tròn xuống)</returns>
+    public int ConvertFromBaseUnit(int baseQuantity, Guid targetUnitId)
+    {
+        var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.UnitId == targetUnitId && pu.IsActive);
+        if (purchaseUnit == null)
+        {
+            throw new ArgumentException($"Purchase unit {targetUnitId} not found for ingredient {Name}");
+        }
+        
+        return purchaseUnit.ConvertFromBaseUnit(baseQuantity);
+    }
+    
     // === Purchase Units Management Methods ===
     
     /// <summary>

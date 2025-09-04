@@ -29,4 +29,12 @@ public interface IIngredientAppService : IApplicationService
     /// <summary>Xóa nguyên liệu</summary>
     Task DeleteAsync(Guid id);
     
+    // === Multi-Unit Management Methods ===
+    
+    /// <summary>Lấy danh sách đơn vị mua hàng của nguyên liệu</summary>
+    Task<List<IngredientPurchaseUnitDto>> GetPurchaseUnitsAsync(Guid ingredientId);
+    
+    /// <summary>Chuyển đổi số lượng từ đơn vị này sang đơn vị khác</summary>
+    Task<int> ConvertQuantityAsync(Guid ingredientId, Guid fromUnitId, Guid toUnitId, int quantity);
+    
 }

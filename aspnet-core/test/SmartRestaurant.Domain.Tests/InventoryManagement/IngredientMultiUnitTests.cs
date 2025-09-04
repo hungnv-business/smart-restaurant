@@ -65,7 +65,7 @@ public class IngredientMultiUnitTests
         ingredient.PurchaseUnits = new List<IngredientPurchaseUnit>();
 
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => ingredient.GetBaseUnit());
+        Should.Throw<BaseUnitNotConfiguredException>(() => ingredient.GetBaseUnit());
     }
 
     [Fact]
