@@ -1,5 +1,4 @@
 import type { GuidLookupItemDto, IntLookupItemDto } from './dto/models';
-import type { UnitDto } from './units/dto/models';
 import { RestService, Rest } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 
@@ -10,34 +9,34 @@ export class GlobalService {
   apiName = 'Default';
   
 
-  getCategories = (config?: Partial<Rest.Config>) =>
+  getCategoriesLookup = (config?: Partial<Rest.Config>) =>
     this.restService.request<any, GuidLookupItemDto[]>({
       method: 'GET',
-      url: '/api/app/global/categories',
+      url: '/api/app/global/categories-lookup',
     },
     { apiName: this.apiName,...config });
   
 
-  getIngredientsByCategory = (categoryId: string, config?: Partial<Rest.Config>) =>
+  getIngredientsByCategoryLookup = (categoryId: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, GuidLookupItemDto[]>({
       method: 'GET',
-      url: `/api/app/global/ingredients-by-category/${categoryId}`,
+      url: `/api/app/global/ingredients-by-category-lookup/${categoryId}`,
     },
     { apiName: this.apiName,...config });
   
 
-  getTableStatuses = (config?: Partial<Rest.Config>) =>
+  getTableStatusLookup = (config?: Partial<Rest.Config>) =>
     this.restService.request<any, IntLookupItemDto[]>({
       method: 'GET',
-      url: '/api/app/global/table-statuses',
+      url: '/api/app/global/table-status-lookup',
     },
     { apiName: this.apiName,...config });
   
 
-  getUnits = (config?: Partial<Rest.Config>) =>
-    this.restService.request<any, UnitDto[]>({
+  getUnitsLookup = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, GuidLookupItemDto[]>({
       method: 'GET',
-      url: '/api/app/global/units',
+      url: '/api/app/global/units-lookup',
     },
     { apiName: this.apiName,...config });
 

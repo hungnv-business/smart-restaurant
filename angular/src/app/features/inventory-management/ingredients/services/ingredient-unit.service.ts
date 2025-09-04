@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Observable } from 'rxjs';
 import { CreateUpdatePurchaseUnitDto } from '../../../../proxy/inventory-management/ingredients/dto';
-import { UnitDto } from '../../../../proxy/common/units/dto';
 import { IngredientUnitFormComponent } from '../ingredient-form/ingredient-unit-form/ingredient-unit-form.component';
+import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Interface định nghĩa data truyền vào dialog form đơn vị mua hàng
@@ -13,7 +13,7 @@ export interface IngredientUnitDialogData {
   /** Đơn vị đang chỉnh sửa (null trong mode thêm mới) */
   editingUnit?: CreateUpdatePurchaseUnitDto | null;
   /** Danh sách tất cả đơn vị đo lường từ hệ thống */
-  units: UnitDto[];
+  units: GuidLookupItemDto[];
   /** ID của đơn vị cơ bản đã chọn cho nguyên liệu */
   baseUnitId: string;
   /** Danh sách các đơn vị mua hàng hiện có (để validate trùng lặp) */
@@ -137,8 +137,8 @@ export class IngredientUnitService {
    * @param units - Danh sách các đơn vị từ hệ thống
    * @returns Tên đơn vị hoặc chuỗi rỗng nếu không tìm thấy
    */
-  getUnitName(unitId: string, units: UnitDto[]): string {
-    return units.find(u => u.id === unitId)?.name || '';
+  getUnitName(unitId: string, units: GuidLookupItemDto[]): string {
+    return units.find(u => u.id === unitId)?.displayName || '';
   }
 
   /**
@@ -189,7 +189,7 @@ export class IngredientUnitService {
    * @param units - Danh sách các đơn vị từ hệ thống
    * @returns Text preview VD: "1 thùng = 24 chai" hoặc "chai (đơn vị cơ sở)"
    */
-  getConversionPreview(unit: CreateUpdatePurchaseUnitDto, baseUnitName: string, units: UnitDto[]): string {
+  getConversionPreview(unit: CreateUpdatePurchaseUnitDto, baseUnitName: string, units: GuidLookupItemDto[]): string {
     const unitName = this.getUnitName(unit.unitId, units);
     if (unit.isBaseUnit) {
       return `${unitName} (đơn vị cơ sở)`;

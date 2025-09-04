@@ -134,7 +134,7 @@ export class TableFormDialogComponent extends ComponentBase implements OnInit {
       tableData?: Observable<TableDto>;
       nextDisplayOrder?: Observable<number>;
     } = {
-      statuses: this.globalService.getTableStatuses(),
+      statuses: this.globalService.getTableStatusLookup(),
     };
 
     // Thêm các observable cụ thể dựa trên chế độ

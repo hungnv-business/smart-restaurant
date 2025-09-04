@@ -19,7 +19,6 @@ import {
 import { IngredientCategoryDto } from '../../../../proxy/inventory-management/ingredient-categories/dto';
 import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 import { IngredientCategoryService } from '../../../../proxy/inventory-management/ingredient-categories';
-import { UnitDto } from '../../../../proxy/common/units/dto';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
@@ -29,6 +28,7 @@ import { IngredientUnitService } from '../services/ingredient-unit.service';
 import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
 import { take, finalize } from 'rxjs';
 import { GlobalService } from '@proxy/common';
+import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Component quản lý form tạo/chỉnh sửa nguyên liệu trong hệ thống nhà hàng
@@ -76,7 +76,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   /** Danh sách các danh mục nguyên liệu để lựa chọn */
   categories: IngredientCategoryDto[] = [];
   /** Danh sách các đơn vị đo lường (kg, g, lít...) */
-  units: UnitDto[] = [];
+  units: GuidLookupItemDto[] = [];
   /** Danh sách các đơn vị mua hàng (thùng, bao, kiện...) */
   purchaseUnits: CreateUpdatePurchaseUnitDto[] = [];
 
@@ -177,7 +177,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
    * @private
    */
   private loadUnits() {
-    this.globalService.getUnits().subscribe({
+    this.globalService.getUnitsLookup().subscribe({
       next: units => {
         this.units = units || [];
       },
@@ -357,7 +357,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
    * @returns Tên đơn vị hoặc 'N/A' nếu không tìm thấy
    */
   getUnitName(unitId: string): string {
-    return this.units.find(u => u.id === unitId)?.name || 'N/A';
+    return this.units.find(u => u.id === unitId)?.displayName || 'N/A';
   }
 
   /**

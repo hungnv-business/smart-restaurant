@@ -358,7 +358,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
    * @private
    */
   private loadCategories() {
-    this.globalService.getCategories().subscribe({
+    this.globalService.getCategoriesLookup().subscribe({
       next: categories => {
         this.categories = categories;
       },

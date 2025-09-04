@@ -164,7 +164,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
    * @private
    */
   private loadIngredientsByCategory(categoryId: string) {
-    this.globalService.getIngredientsByCategory(categoryId).subscribe({
+    this.globalService.getIngredientsByCategoryLookup(categoryId).subscribe({
       next: ingredients => {
         this.ingredients = ingredients;
       },

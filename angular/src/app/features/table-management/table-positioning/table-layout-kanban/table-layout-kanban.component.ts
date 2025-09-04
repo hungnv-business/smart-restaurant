@@ -103,7 +103,7 @@ export class TableLayoutKanbanComponent extends ComponentBase implements OnInit 
 
     forkJoin({
       sectionsWithTables: this.tableService.getAllSectionsWithTables(),
-      tableStatuses: this.globalService.getTableStatuses(),
+      tableStatuses: this.globalService.getTableStatusLookup(),
     })
       .pipe(takeUntil(this.destroyed$))
       .subscribe({

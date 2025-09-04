@@ -7,7 +7,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { Checkbox } from 'primeng/checkbox';
 import { CreateUpdatePurchaseUnitDto } from '../../../../../proxy/inventory-management/ingredients/dto';
-import { UnitDto } from '../../../../../proxy/common/units/dto';
+import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Component hiển thị danh sách các đơn vị mua hàng của nguyên liệu
@@ -51,7 +51,7 @@ export class IngredientUnitListComponent {
   /** Tên đơn vị cơ bản để hiển thị trong tooltip */
   @Input() baseUnitName: string = '';
   /** Danh sách tất cả đơn vị đo lường từ hệ thống */
-  @Input() units: UnitDto[] = [];
+  @Input() units: GuidLookupItemDto[] = [];
   /** Trạng thái loading khi thực hiện thao tác */
   @Input() loading: boolean = false;
 
@@ -68,7 +68,7 @@ export class IngredientUnitListComponent {
    * @returns Tên đơn vị hoặc chuỗi rỗng nếu không tìm thấy
    */
   getUnitName(unitId: string): string {
-    return this.units.find(u => u.id === unitId)?.name || '';
+    return this.units.find(u => u.id === unitId)?.displayName || '';
   }
 
   /**

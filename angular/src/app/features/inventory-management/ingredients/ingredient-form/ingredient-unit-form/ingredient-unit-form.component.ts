@@ -7,11 +7,11 @@ import { SelectModule } from 'primeng/select';
 import { Checkbox } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
 import { CreateUpdatePurchaseUnitDto } from '../../../../../proxy/inventory-management/ingredients/dto';
-import { UnitDto } from '../../../../../proxy/common/units/dto';
 import { ValidationErrorComponent } from '../../../../../shared/components/validation-error/validation-error.component';
 import { ComponentBase } from '../../../../../shared/base/component-base';
 import { IngredientUnitDialogData } from '../../services/ingredient-unit.service';
 import { FormFooterActionsComponent } from '../../../../../shared/components/form-footer-actions/form-footer-actions.component';
+import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Component quản lý form thêm/chỉnh sửa đơn vị mua hàng cho nguyên liệu
@@ -172,7 +172,7 @@ export class IngredientUnitFormComponent extends ComponentBase implements OnInit
    * Getter trả về danh sách các đơn vị đo lường có thể chọn
    * @returns Mảng các đơn vị đo lường từ hệ thống
    */
-  get units(): UnitDto[] {
+  get units(): GuidLookupItemDto[] {
     return this.data.units;
   }
 

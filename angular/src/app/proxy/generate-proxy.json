@@ -887,7 +887,7 @@
               "name": "IGlobalAppService",
               "methods": [
                 {
-                  "name": "GetTableStatusesAsync",
+                  "name": "GetTableStatusLookupAsync",
                   "parametersOnMethod": [],
                   "returnValue": {
                     "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.IntLookupItemDto>",
@@ -895,15 +895,7 @@
                   }
                 },
                 {
-                  "name": "GetUnitsAsync",
-                  "parametersOnMethod": [],
-                  "returnValue": {
-                    "type": "System.Collections.Generic.List<SmartRestaurant.Common.Units.Dto.UnitDto>",
-                    "typeSimple": "[SmartRestaurant.Common.Units.Dto.UnitDto]"
-                  }
-                },
-                {
-                  "name": "GetCategoriesAsync",
+                  "name": "GetUnitsLookupAsync",
                   "parametersOnMethod": [],
                   "returnValue": {
                     "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
@@ -911,7 +903,15 @@
                   }
                 },
                 {
-                  "name": "GetIngredientsByCategoryAsync",
+                  "name": "GetCategoriesLookupAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                    "typeSimple": "[SmartRestaurant.Common.Dto.GuidLookupItemDto]"
+                  }
+                },
+                {
+                  "name": "GetIngredientsByCategoryLookupAsync",
                   "parametersOnMethod": [
                     {
                       "name": "categoryId",
@@ -931,11 +931,11 @@
             }
           ],
           "actions": {
-            "GetTableStatusesAsync": {
-              "uniqueName": "GetTableStatusesAsync",
-              "name": "GetTableStatusesAsync",
+            "GetTableStatusLookupAsync": {
+              "uniqueName": "GetTableStatusLookupAsync",
+              "name": "GetTableStatusLookupAsync",
               "httpMethod": "GET",
-              "url": "api/app/global/table-statuses",
+              "url": "api/app/global/table-status-lookup",
               "supportedVersions": [],
               "parametersOnMethod": [],
               "parameters": [],
@@ -946,26 +946,11 @@
               "allowAnonymous": null,
               "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
             },
-            "GetUnitsAsync": {
-              "uniqueName": "GetUnitsAsync",
-              "name": "GetUnitsAsync",
+            "GetUnitsLookupAsync": {
+              "uniqueName": "GetUnitsLookupAsync",
+              "name": "GetUnitsLookupAsync",
               "httpMethod": "GET",
-              "url": "api/app/global/units",
-              "supportedVersions": [],
-              "parametersOnMethod": [],
-              "parameters": [],
-              "returnValue": {
-                "type": "System.Collections.Generic.List<SmartRestaurant.Common.Units.Dto.UnitDto>",
-                "typeSimple": "[SmartRestaurant.Common.Units.Dto.UnitDto]"
-              },
-              "allowAnonymous": null,
-              "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
-            },
-            "GetCategoriesAsync": {
-              "uniqueName": "GetCategoriesAsync",
-              "name": "GetCategoriesAsync",
-              "httpMethod": "GET",
-              "url": "api/app/global/categories",
+              "url": "api/app/global/units-lookup",
               "supportedVersions": [],
               "parametersOnMethod": [],
               "parameters": [],
@@ -976,11 +961,26 @@
               "allowAnonymous": null,
               "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
             },
-            "GetIngredientsByCategoryAsyncByCategoryId": {
-              "uniqueName": "GetIngredientsByCategoryAsyncByCategoryId",
-              "name": "GetIngredientsByCategoryAsync",
+            "GetCategoriesLookupAsync": {
+              "uniqueName": "GetCategoriesLookupAsync",
+              "name": "GetCategoriesLookupAsync",
               "httpMethod": "GET",
-              "url": "api/app/global/ingredients-by-category/{categoryId}",
+              "url": "api/app/global/categories-lookup",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                "typeSimple": "[SmartRestaurant.Common.Dto.GuidLookupItemDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
+            },
+            "GetIngredientsByCategoryLookupAsyncByCategoryId": {
+              "uniqueName": "GetIngredientsByCategoryLookupAsyncByCategoryId",
+              "name": "GetIngredientsByCategoryLookupAsync",
+              "httpMethod": "GET",
+              "url": "api/app/global/ingredients-by-category-lookup/{categoryId}",
               "supportedVersions": [],
               "parametersOnMethod": [
                 {
@@ -6940,51 +6940,6 @@
           "jsonName": null,
           "type": "System.String",
           "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        }
-      ]
-    },
-    "SmartRestaurant.Common.Units.Dto.UnitDto": {
-      "baseType": "Volo.Abp.Application.Dtos.FullAuditedEntityDto<System.Guid>",
-      "isEnum": false,
-      "enumNames": null,
-      "enumValues": null,
-      "genericArguments": null,
-      "properties": [
-        {
-          "name": "Name",
-          "jsonName": null,
-          "type": "System.String",
-          "typeSimple": "string",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "DisplayOrder",
-          "jsonName": null,
-          "type": "System.Int32",
-          "typeSimple": "number",
-          "isRequired": false,
-          "minLength": null,
-          "maxLength": null,
-          "minimum": null,
-          "maximum": null,
-          "regex": null
-        },
-        {
-          "name": "IsActive",
-          "jsonName": null,
-          "type": "System.Boolean",
-          "typeSimple": "boolean",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
