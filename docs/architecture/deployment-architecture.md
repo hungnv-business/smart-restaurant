@@ -56,15 +56,6 @@ jobs:
         ports:
           - 5432:5432
           
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
     
     steps:
     - name: Checkout code
@@ -107,7 +98,6 @@ jobs:
     - name: Run Backend Integration Tests
       env:
         ConnectionStrings__Default: "Host=localhost;Database=SmartRestaurant_Test;Username=postgres;Password=postgres;"
-        Redis__Configuration: "localhost:6379"
       run: |
         dotnet test test/SmartRestaurant.EntityFrameworkCore.Tests/ --no-restore --logger trx --results-directory TestResults/
         
@@ -290,21 +280,18 @@ jobs:
 # Development
 export ASPNETCORE_ENVIRONMENT=Development
 export ConnectionStrings__Default="Host=postgres-dev;Database=SmartRestaurant_Dev;Username=dev_user;Password=${DEV_DB_PASSWORD};"
-export Redis__Configuration="redis-dev:6379"
 export App__SelfUrl="https://dev-api.restaurant.local"
 export App__CorsOrigins="https://dev.restaurant.local"
 
 # Staging
 export ASPNETCORE_ENVIRONMENT=Staging
 export ConnectionStrings__Default="Host=postgres-staging;Database=SmartRestaurant_Staging;Username=staging_user;Password=${STAGING_DB_PASSWORD};"
-export Redis__Configuration="redis-staging:6379"
 export App__SelfUrl="https://staging-api.restaurant.com"
 export App__CorsOrigins="https://staging.restaurant.com"
 
 # Production
 export ASPNETCORE_ENVIRONMENT=Production
 export ConnectionStrings__Default="Host=postgres-prod;Database=SmartRestaurant_Prod;Username=prod_user;Password=${PROD_DB_PASSWORD};"
-export Redis__Configuration="redis-prod:6379"
 export App__SelfUrl="https://api.restaurant.com"
 export App__CorsOrigins="https://restaurant.com"
 ```
@@ -629,13 +616,6 @@ services:
       "-c", "log_statement=all"
     ]
       
-  redis-test:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_test_data:/data
-      
   api-test:
     build:
       context: .
@@ -643,13 +623,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Test
       ConnectionStrings__Default: "Host=postgres-test;Database=SmartRestaurant_Test;Username=postgres;Password=postgres;"
-      Redis__Configuration: "redis-test:6379"
       App__SelfUrl: "http://localhost:5000"
     ports:
       - "5000:80"
     depends_on:
       - postgres-test
-      - redis-test
     volumes:
       - ./test-logs:/app/logs
       
@@ -667,7 +645,6 @@ services:
 
 volumes:
   postgres_test_data:
-  redis_test_data:
 ```
 
 **Test Environment Management Script (Script Quản lý Môi trường Kiểm thử):**

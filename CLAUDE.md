@@ -18,7 +18,7 @@ Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, An
 cd infrastructure/docker
 docker-compose -f docker-compose.dev.yml up -d
 
-# Or run locally (requires PostgreSQL and Redis running)
+# Or run locally (requires PostgreSQL running)
 npm run dev
 
 # Start mobile development
@@ -292,9 +292,6 @@ dotnet ef migrations script -p src/SmartRestaurant.EntityFrameworkCore
 {
   "ConnectionStrings": {
     "Default": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=SmartRestaurant;"
-  },
-  "Redis": {
-    "Configuration": "localhost:6379,password=redis123"
   }
 }
 ```
@@ -456,7 +453,6 @@ docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
 ```bash
 # Check what's using the ports
 lsof -i :5432  # PostgreSQL
-lsof -i :6379  # Redis
 lsof -i :44346 # API
 lsof -i :4200  # Angular
 
@@ -474,8 +470,8 @@ lsof -i :8080  # Flutter web (if using)
 # Enable query logging in PostgreSQL
 # Monitor with Azure Application Insights (production)
 
-# Check Redis connection
-redis-cli ping
+# Check database connection
+psql -h localhost -U postgres -d SmartRestaurant -c "SELECT 1;"
 ```
 
 #### Large Angular bundle size

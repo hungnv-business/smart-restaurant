@@ -12,7 +12,7 @@
 | Backend Framework | ABP Framework | 8.0 | Application framework | Domain-driven design, multitenancy, localization support |
 | API Style | REST + SignalR | HTTP/1.1 + WebSocket | API communication | RESTful services + real-time kitchen updates |
 | Database | PostgreSQL | 14+ | Primary data storage | Vietnamese text search, JSON support, reliability |
-| Cache | Redis | 7.0+ | Session and performance caching | Fast access for menu data, session management |
+| Cache | ABP Memory Cache | Built-in | In-memory caching | Simplified caching for menu data, user sessions, built-in with ABP |
 | File Storage | Local File System | - | Menu images and documents | Simple VPS storage, future cloud migration path |
 | Authentication | ABP Identity | 8.0 | User authentication and authorization | Built-in role management, Vietnamese user workflows |
 | Frontend Testing | Jasmine + Karma | Latest | Unit and integration testing | Angular ecosystem standard |

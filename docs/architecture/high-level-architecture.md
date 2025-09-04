@@ -2,12 +2,12 @@
 
 ## Technical Summary (Tóm tắt Kỹ thuật)
 
-Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and Redis caching for peak hours (11:30-13:30, 18:00-21:00). Frontend uses PrimeNG with Poseidon theme for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows like two-level menu management and seasonal category control (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và Redis caching cho giờ cao điểm. Frontend sử dụng PrimeNG với theme Poseidon cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
+Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and ABP built-in memory caching for improved performance. Frontend uses PrimeNG with Poseidon theme for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows like two-level menu management and seasonal category control (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và ABP memory caching built-in để cải thiện hiệu suất. Frontend sử dụng PrimeNG với theme Poseidon cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
 
 ## Platform and Infrastructure Choice (Lựa chọn Nền tảng và Hạ tầng)
 
 **Platform:** VPS (Ubuntu 22.04 LTS) with Docker containerization (VPS (Ubuntu 22.04 LTS) với đóng gói Docker)
-**Key Services:** Nginx reverse proxy, PostgreSQL 14+, Redis cache, .NET 8 Runtime, Angular static hosting (Các dịch vụ chính: Nginx reverse proxy, PostgreSQL 14+, Redis cache, .NET 8 Runtime, Angular static hosting)
+**Key Services:** Nginx reverse proxy, PostgreSQL 14+, .NET 8 Runtime với ABP Memory Cache, Angular static hosting (Các dịch vụ chính: Nginx reverse proxy, PostgreSQL 14+, .NET 8 Runtime với ABP Memory Cache, Angular static hosting)
 **Deployment Host and Regions:** Single VPS deployment (Asia/Ho_Chi_Minh timezone) with horizontal scaling capability (Máy chủ và Khu vực triển khai: Triển khai VPS đơn lẻ với khả năng mở rộng ngang)
 
 **Rationale (Lý do lựa chọn):**
@@ -96,7 +96,7 @@ graph TB
     
     subgraph "Data Layer"
         PG[(PostgreSQL 14+<br/>Vietnamese Collation)]
-        REDIS[(Redis Cache<br/>Session & Performance)]
+        CACHE[ABP Memory Cache<br/>Built-in Caching]
         FILES[File Storage<br/>Menu Images]
     end
     
@@ -111,7 +111,7 @@ graph TB
     NGINX --> API
     API --> SIGNAL
     API --> PG
-    API --> REDIS
+    API --> CACHE
     API --> FILES
     SIGNAL --> PRINT
     API --> QR
