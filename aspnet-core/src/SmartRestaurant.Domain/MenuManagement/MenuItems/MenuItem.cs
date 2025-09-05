@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.MenuManagement.MenuCategories;
+using SmartRestaurant.MenuManagement.MenuItemIngredients;
+using SmartRestaurant.Orders;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SmartRestaurant.MenuManagement.MenuItems
@@ -37,18 +39,21 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         [Required]
         public Guid CategoryId { get; set; }
 
-        /// <summary>ID nguyên liệu chính cho món ăn (để tracking inventory)</summary>
-        public Guid? PrimaryIngredientId { get; set; }
-
-        /// <summary>Số lượng nguyên liệu chính cần dùng (theo base unit)</summary>
-        public int? RequiredQuantity { get; set; }
         
         // Navigation properties
         /// <summary>Danh mục menu chứa món ăn này</summary>
         public virtual MenuCategory? Category { get; set; }
 
-        /// <summary>Nguyên liệu chính của món ăn</summary>
-        public virtual Ingredient PrimaryIngredient { get; set; } = null!;
+
+        /// <summary>
+        /// Danh sách nguyên liệu sử dụng trong món ăn này (nhiều-nhiều relationship)
+        /// </summary>
+        public virtual ICollection<MenuItemIngredient> Ingredients { get; set; } = new List<MenuItemIngredient>();
+
+        /// <summary>
+        /// Danh sách OrderItems sử dụng món ăn này
+        /// </summary>
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         /// <summary>
         /// Constructor mặc định cho EF Core
@@ -58,7 +63,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         }
 
         /// <summary>
-        /// Constructor tạo mới món ăn với đầy đủ thông tin
+        /// Constructor tạo mới món ăn với Recipe system (recommended)
         /// </summary>
         /// <param name="id">ID duy nhất của món ăn</param>
         /// <param name="name">Tên món ăn</param>
@@ -67,8 +72,6 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         /// <param name="isAvailable">Tình trạng có sẵn</param>
         /// <param name="imageUrl">URL hình ảnh món ăn</param>
         /// <param name="categoryId">ID danh mục chứa món ăn</param>
-        /// <param name="primaryIngredientId">ID nguyên liệu chính (tùy chọn)</param>
-        /// <param name="requiredQuantity">Số lượng nguyên liệu cần dùng (tùy chọn)</param>
         public MenuItem(
             Guid id,
             string name,
@@ -76,23 +79,48 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             decimal price,
             bool isAvailable,
             string? imageUrl,
-            Guid categoryId,
-            Guid? primaryIngredientId = null,
-            int? requiredQuantity = null) : base(id)
+            Guid categoryId) : base(id)
         {
-            if (requiredQuantity.HasValue && requiredQuantity <= 0)
-            {
-                throw new ArgumentException("Required quantity must be greater than 0", nameof(requiredQuantity));
-            }
-
             Name = name;
             Description = description;
             Price = price;
             IsAvailable = isAvailable;
             ImageUrl = imageUrl;
             CategoryId = categoryId;
-            PrimaryIngredientId = primaryIngredientId;
-            RequiredQuantity = requiredQuantity;
+            
+            // Initialize collections
+            Ingredients = new List<MenuItemIngredient>();
+            OrderItems = new List<OrderItem>();
+        }
+
+
+        /// <summary>
+        /// Thêm nguyên liệu vào recipe của món ăn
+        /// </summary>
+        /// <param name="ingredientId">ID nguyên liệu</param>
+        /// <param name="requiredQuantity">Số lượng cần thiết</param>
+        /// <param name="isOptional">Có tùy chọn không</param>
+        /// <param name="preparationNotes">Ghi chú chuẩn bị</param>
+        /// <param name="displayOrder">Thứ tự hiển thị</param>
+        /// <returns>MenuItemIngredient được tạo</returns>
+        public MenuItemIngredient AddIngredient(
+            Guid ingredientId, 
+            int requiredQuantity, 
+            bool isOptional = false, 
+            string? preparationNotes = null, 
+            int displayOrder = 0)
+        {
+            var ingredient = new MenuItemIngredient(
+                Guid.NewGuid(),
+                Id,
+                ingredientId,
+                requiredQuantity,
+                isOptional,
+                preparationNotes,
+                displayOrder);
+
+            Ingredients.Add(ingredient);
+            return ingredient;
         }
     }
 }

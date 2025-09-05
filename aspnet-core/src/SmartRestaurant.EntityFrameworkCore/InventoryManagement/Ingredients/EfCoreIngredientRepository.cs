@@ -132,11 +132,11 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients
             if (hasPurchaseInvoiceItems)
                 return true;
 
-            // Kiểm tra MenuItem
-            var hasMenuItems = await dbContext.MenuItems
-                .AnyAsync(x => x.PrimaryIngredientId == id, GetCancellationToken(cancellationToken));
+            // Kiểm tra MenuItemIngredient
+            var hasMenuItemIngredients = await dbContext.MenuItemIngredients
+                .AnyAsync(x => x.IngredientId == id, GetCancellationToken(cancellationToken));
 
-            return hasMenuItems;
+            return hasMenuItemIngredients;
         }
     }
 }

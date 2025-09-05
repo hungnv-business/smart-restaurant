@@ -28,4 +28,15 @@
 4. Smart preparation suggestions balancing FIFO order priority with quick-serve opportunities (Gợi ý chuẩn bị thông minh cân bằng ưu tiên đơn hàng đến trước với cơ hội phục vụ nhanh)
 5. Real-time updates when dishes are completed and served to tables (Cập nhật thời gian thực khi món được hoàn thành và phục vụ cho bàn)
 
+## Story 5.3: Admin Order Monitoring Dashboard (Bảng điều khiển Giám sát Đơn hàng cho Admin)
+**As an** admin/manager (admin/quản lý),  
+**I want** to monitor all orders with advanced filtering and export capabilities (tôi muốn giám sát tất cả đơn hàng với khả năng lọc nâng cao và xuất dữ liệu),  
+**so that** I can track restaurant operations, analyze order patterns, and generate reports for business insights (để tôi có thể theo dõi hoạt động nhà hàng, phân tích mẫu đơn hàng và tạo báo cáo cho thông tin kinh doanh).
+
+**Acceptance Criteria:**
+1. **Order Overview Grid**: PrimeNG DataTable displaying all orders with real-time updates showing OrderNumber, Table, Status, OrderType, TotalAmount, CreationTime, and Staff columns (Lưới tổng quan đơn hàng: PrimeNG DataTable hiển thị tất cả đơn hàng với cập nhật thời gian thực cho các cột Số đơn, Bàn, Trạng thái, Loại đơn, Tổng tiền, Thời gian tạo và Nhân viên)
+2. **Advanced Filtering Panel**: Comprehensive filter options including date range picker, multi-select status filter, table dropdown, order type selection, and staff member filter with apply/reset functionality (Bảng lọc nâng cao: Các tùy chọn lọc toàn diện bao gồm chọn khoảng ngày, lọc đa trạng thái, dropdown bàn, chọn loại đơn và lọc nhân viên với chức năng áp dụng/đặt lại)
+3. **Built-in Export Functions**: PrimeNG DataTable export capabilities for Excel, PDF, and CSV formats with current filter applied to exported data (Chức năng xuất tích hợp: Khả năng xuất PrimeNG DataTable cho định dạng Excel, PDF và CSV với bộ lọc hiện tại áp dụng cho dữ liệu xuất)
+4. **Real-time Order Updates**: SignalR integration for automatic grid refresh when orders are created, updated, or status changed without page reload (Cập nhật đơn hàng thời gian thực: Tích hợp SignalR để tự động làm mới lưới khi đơn hàng được tạo, cập nhật hoặc thay đổi trạng thái mà không cần tải lại trang)
+
 ---

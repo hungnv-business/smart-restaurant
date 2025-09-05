@@ -1,14 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'shared/services/router_service.dart';
 import 'shared/constants/vietnamese_constants.dart';
+import 'features/orders/services/order_service.dart';
+import 'features/orders/services/table_service.dart';
+import 'features/orders/services/menu_service.dart';
+import 'features/orders/services/order_tracking_service.dart';
+import 'features/orders/services/offline_storage_service.dart';
+import 'features/orders/services/ingredient_check_service.dart';
+import 'features/orders/widgets/advanced_error_handler.dart';
 
 /// Entry point của ứng dụng Smart Restaurant Mobile
 /// 
-/// Khởi tạo ProviderScope cho state management và chạy ứng dụng chính
+/// Khởi tạo MultiProvider cho state management và chạy ứng dụng chính
 void main() {
-  runApp(const ProviderScope(child: SmartRestaurantApp()));
+  // Initialize error handling
+  AdvancedErrorHandler.initialize();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => OrderService()),
+        ChangeNotifierProvider(create: (_) => TableService()),
+        ChangeNotifierProvider(create: (_) => MenuService()),
+        ChangeNotifierProvider(create: (_) => OrderTrackingService()),
+        ChangeNotifierProvider(create: (_) => OfflineStorageService()),
+        ChangeNotifierProvider(create: (_) => IngredientCheckService()),
+      ],
+      child: const SmartRestaurantApp(),
+    ),
+  );
 }
 
 /// Ứng dụng mobile Smart Restaurant cho khách hàng nhà hàng
@@ -39,6 +61,9 @@ class SmartRestaurantApp extends StatelessWidget {
       builder: (context, child) => MaterialApp.router(
         title: VietnameseConstants.appName,
         debugShowCheckedModeBanner: false,
+        
+        // Global navigator key for error handling
+        // navigatorKey: AdvancedErrorHandler.navigatorKey,
         
         // Cấu hình routing với GoRouter
         routerConfig: RouterService.router,

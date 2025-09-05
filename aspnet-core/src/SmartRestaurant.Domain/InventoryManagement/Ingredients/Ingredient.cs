@@ -96,9 +96,24 @@ public class Ingredient : FullAuditedEntity<Guid>
     }
 
     /// <summary>
-    /// Trừ khỏi kho
+    /// Trừ khỏi kho (cho phép kho âm để hỗ trợ recipe management)
     /// </summary>
     public void SubtractStock(int quantity)
+    {
+        if (quantity <= 0)
+        {
+            throw new InvalidQuantityException(quantity);
+        }
+
+        // Cho phép kho âm - không kiểm tra CanSubtractStock nữa
+        CurrentStock -= quantity;
+    }
+
+    /// <summary>
+    /// Trừ khỏi kho với kiểm tra ràng buộc (legacy method)
+    /// </summary>
+    [Obsolete("Use SubtractStock instead. This method will be removed in future version.")]
+    public void SubtractStockWithValidation(int quantity)
     {
         if (quantity <= 0)
         {
@@ -122,16 +137,35 @@ public class Ingredient : FullAuditedEntity<Guid>
     }
 
     /// <summary>
-    /// Set stock trực tiếp (chỉ dùng cho migration/seed data)
+    /// Set stock trực tiếp (cho phép giá trị âm để hỗ trợ recipe management)
     /// </summary>
     public void SetStock(int stock)
     {
-        if (stock < 0)
-        {
-            throw new InvalidQuantityException(stock);
-        }
-
+        // Cho phép giá trị âm
         CurrentStock = stock;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem kho có âm không
+    /// </summary>
+    public bool HasNegativeStock()
+    {
+        return CurrentStock < 0;
+    }
+
+    /// <summary>
+    /// Lấy thông tin hiển thị stock với định dạng phù hợp cho kho âm
+    /// </summary>
+    public string GetStockDisplayText()
+    {
+        var unitName = Unit?.Name ?? "đơn vị";
+        
+        if (CurrentStock < 0)
+        {
+            return $"-{Math.Abs(CurrentStock)}{unitName} (thiếu)";
+        }
+        
+        return $"{CurrentStock}{unitName}";
     }
     
     // === Purchase Units Query Methods ===

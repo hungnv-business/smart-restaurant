@@ -29,6 +29,7 @@ using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using SmartRestaurant.HttpApi.Host.Hubs;
 
 namespace SmartRestaurant;
 
@@ -70,6 +71,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        ConfigureSignalR(context);
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -175,6 +177,17 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         });
     }
 
+    private void ConfigureSignalR(ServiceConfigurationContext context)
+    {
+        context.Services.AddSignalR(options =>
+        {
+            // Cấu hình SignalR options
+            options.EnableDetailedErrors = true;
+            options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+            options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        });
+    }
+
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
@@ -219,6 +232,12 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
 
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(endpoints =>
+        {
+            // Cấu hình SignalR Hub endpoints
+            endpoints.MapHub<KitchenHub>("/signalr-hubs/kitchen");
+            endpoints.MapHub<TableManagementHub>("/signalr-hubs/table-management");
+            endpoints.MapHub<OrderStatusHub>("/signalr-hubs/order-status");
+        });
     }
 }

@@ -34,7 +34,9 @@
       "Bash(curl:*)",
       "Bash(abp generate-proxy:*)",
       "Bash(timeout 60s npm test -- --watch=false --browsers=ChromeHeadless)",
-      "Bash(timeout 120s npm test -- --watch=false --browsers=ChromeHeadless)"
+      "Bash(timeout 120s npm test -- --watch=false --browsers=ChromeHeadless)",
+      "Bash(flutter pub run:*)",
+      "Bash(flutter clean:*)"
     ],
     "deny": [],
     "ask": []

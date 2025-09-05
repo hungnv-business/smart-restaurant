@@ -6,6 +6,8 @@ using SmartRestaurant.MenuManagement.MenuCategories;
 using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.InventoryManagement.IngredientCategories;
 using SmartRestaurant.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.Orders;
+using SmartRestaurant.MenuManagement.MenuItemIngredients;
 using SmartRestaurant.Common;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -41,6 +43,7 @@ public class SmartRestaurantDbContext :
     // Menu Management
     public DbSet<MenuCategory> MenuCategories { get; set; }
     public DbSet<MenuItem> MenuItems { get; set; }
+    public DbSet<MenuItemIngredient> MenuItemIngredients { get; set; }
     
     // Inventory Management
     public DbSet<IngredientCategory> IngredientCategories { get; set; }
@@ -50,6 +53,10 @@ public class SmartRestaurantDbContext :
     // Purchase Invoice Management
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
     public DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
+    
+    // Order Management
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
     
     // Common
     public DbSet<Unit> Units { get; set; }
@@ -171,23 +178,46 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.IsAvailable).IsRequired();
             b.Property(x => x.ImageUrl).HasMaxLength(500);
             b.Property(x => x.CategoryId).IsRequired();
-            b.Property(x => x.PrimaryIngredientId);
-            b.Property(x => x.RequiredQuantity);
             
             b.HasOne(x => x.Category)
                 .WithMany()
                 .HasForeignKey(x => x.CategoryId)
                 .IsRequired();
-
-            b.HasOne(x => x.PrimaryIngredient)
-                .WithMany()
-                .HasForeignKey(x => x.PrimaryIngredientId)
-                .IsRequired(false);
                 
             b.HasIndex(x => x.CategoryId);
             b.HasIndex(x => new { x.CategoryId, x.IsAvailable });
             b.HasIndex(x => x.Name);
-            b.HasIndex(x => x.PrimaryIngredientId);
+        });
+        
+        // Configure MenuItemIngredient entity
+        builder.Entity<MenuItemIngredient>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "MenuItemIngredients", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.MenuItemId).IsRequired();
+            b.Property(x => x.IngredientId).IsRequired();
+            b.Property(x => x.RequiredQuantity).IsRequired();
+            b.Property(x => x.IsOptional).IsRequired();
+            b.Property(x => x.PreparationNotes).HasMaxLength(500);
+            b.Property(x => x.DisplayOrder).IsRequired();
+            
+            b.HasOne(x => x.MenuItem)
+                .WithMany(x => x.Ingredients)
+                .HasForeignKey(x => x.MenuItemId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            b.HasOne(x => x.Ingredient)
+                .WithMany()
+                .HasForeignKey(x => x.IngredientId)
+                .IsRequired();
+                
+            // Performance indexes
+            b.HasIndex(x => x.MenuItemId);
+            b.HasIndex(x => x.IngredientId);
+            b.HasIndex(x => new { x.MenuItemId, x.IngredientId }).IsUnique();
+            b.HasIndex(x => new { x.MenuItemId, x.DisplayOrder });
         });
         
         // Configure IngredientCategory entity
@@ -354,6 +384,68 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.PurchaseInvoiceId);
             b.HasIndex(x => x.IngredientId);
             b.HasIndex(x => x.PurchaseUnitId);
+        });
+
+        // Configure Order entity
+        builder.Entity<Order>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Orders", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.OrderNumber).IsRequired().HasMaxLength(20);
+            b.Property(x => x.TableId);
+            b.Property(x => x.OrderType).IsRequired();
+            b.Property(x => x.Status).IsRequired();
+            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.Notes).HasMaxLength(500);
+            b.Property(x => x.ConfirmedTime);
+            b.Property(x => x.PreparingTime);
+            b.Property(x => x.ReadyTime);
+            b.Property(x => x.ServedTime);
+            b.Property(x => x.PaidTime);
+            
+            b.HasOne(x => x.Table)
+                .WithMany()
+                .HasForeignKey(x => x.TableId)
+                .IsRequired(false);
+                
+            b.HasIndex(x => x.OrderNumber).IsUnique();
+            b.HasIndex(x => x.TableId);
+            b.HasIndex(x => x.Status);
+            b.HasIndex(x => new { x.Status, x.CreationTime });
+            b.HasIndex(x => x.CreationTime);
+        });
+        
+        // Configure OrderItem entity
+        builder.Entity<OrderItem>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "OrderItems", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.OrderId).IsRequired();
+            b.Property(x => x.MenuItemId).IsRequired();
+            b.Property(x => x.MenuItemName).IsRequired().HasMaxLength(200);
+            b.Property(x => x.Quantity).IsRequired();
+            b.Property(x => x.UnitPrice).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.Notes).HasMaxLength(300);
+            b.Property(x => x.Status).IsRequired();
+            b.Property(x => x.PreparationStartTime);
+            b.Property(x => x.PreparationCompleteTime);
+            
+            b.HasOne(x => x.Order)
+                .WithMany(x => x.OrderItems)
+                .HasForeignKey(x => x.OrderId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            b.HasOne(x => x.MenuItem)
+                .WithMany(x => x.OrderItems)
+                .HasForeignKey(x => x.MenuItemId)
+                .IsRequired();
+                
+            b.HasIndex(x => x.OrderId);
+            b.HasIndex(x => x.MenuItemId);
+            b.HasIndex(x => new { x.OrderId, x.Status });
         });
     }
 }
