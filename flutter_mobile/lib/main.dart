@@ -3,12 +3,12 @@ import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'features/auth/screens/login_screen.dart';
 
-/// Entry point của ứng dụng Smart Restaurant Mobile
+/// Entry point của ứng dụng Quán bia Mobile
 void main() {
-  runApp(const SmartRestaurantApp());
+  runApp(const QuanBiaApp());
 }
 
-/// Ứng dụng mobile Smart Restaurant cho nhân viên nhà hàng
+/// Ứng dụng mobile Quán bia cho nhân viên
 /// 
 /// Chức năng chính:
 /// - Gọi món từ thực đơn với hình ảnh và mô tả chi tiết
@@ -17,9 +17,9 @@ void main() {
 /// - Theo dõi trạng thái đơn hàng real-time
 /// 
 /// Tối ưu hóa cho tablet nhà hàng với responsive design
-class SmartRestaurantApp extends StatelessWidget {
+class QuanBiaApp extends StatelessWidget {
   /// Constructor với key tùy chọn
-  const SmartRestaurantApp({Key? key}) : super(key: key);
+  const QuanBiaApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

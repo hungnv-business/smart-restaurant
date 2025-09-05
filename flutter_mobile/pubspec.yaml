@@ -1,5 +1,5 @@
 name: flutter_mobile
-description: "SmartRestaurant Mobile App - Vietnamese Restaurant Management System"
+description: "Quán bia Mobile App - Vietnamese Beer Restaurant Management System"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

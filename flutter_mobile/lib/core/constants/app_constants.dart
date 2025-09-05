@@ -1,7 +1,7 @@
-/// Các hằng số ứng dụng Smart Restaurant
+/// Các hằng số ứng dụng Quán bia
 class AppConstants {
   // Thông tin ứng dụng
-  static const String appName = 'Smart Restaurant';
+  static const String appName = 'Quán bia';
   static const String appVersion = '1.0.0';
   
   // Routes
@@ -19,7 +19,7 @@ class AppConstants {
   static const String userKey = 'user_data';
   
   // Vietnamese strings
-  static const String vietnameseTitle = 'Nhà hàng thông minh';
+  static const String vietnameseTitle = 'Quán bia Việt Nam';
   static const String orderTabTitle = 'Gọi món';
   static const String takeawayTabTitle = 'Mang về';
   static const String paymentTabTitle = 'Thanh toán';
