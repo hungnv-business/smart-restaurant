@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/auth_service.dart';
+import '../../auth/screens/login_screen.dart';
 import '../../order/screens/order_screen.dart';
 import '../../takeaway/screens/takeaway_screen.dart';
 import '../../payment/screens/payment_screen.dart';
@@ -94,6 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showProfileBottomSheet(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userInfo = authService.userInfo;
+    
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -107,12 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Nhân viên Demo',
+              userInfo?.displayName ?? userInfo?.username ?? 'Nhân viên',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Phục vụ bàn',
+              _getUserRoleDisplay(userInfo?.roles ?? []),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
@@ -151,6 +157,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _getUserRoleDisplay(List<String> roles) {
+    if (roles.isEmpty) return 'Nhân viên';
+    
+    // Map roles to Vietnamese display names
+    final roleMap = {
+      'admin': 'Quản lý',
+      'manager': 'Quản lý',
+      'staff': 'Nhân viên',
+      'waiter': 'Phục vụ bàn',
+      'cashier': 'Thu ngân',
+      'kitchen': 'Bếp',
+      'cook': 'Đầu bếp',
+    };
+    
+    final displayRoles = roles
+        .map((role) => roleMap[role.toLowerCase()] ?? role)
+        .toList();
+    
+    return displayRoles.join(', ');
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -163,10 +190,19 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Hủy'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
+              
+              final authService = Provider.of<AuthService>(context, listen: false);
+              await authService.logout();
+              
               // Quay về màn hình login
-              Navigator.of(context).pushReplacementNamed('/');
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
             },
             child: const Text('Đăng xuất'),
           ),

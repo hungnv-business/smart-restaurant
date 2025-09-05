@@ -37,7 +37,8 @@
       "Bash(timeout 120s npm test -- --watch=false --browsers=ChromeHeadless)",
       "Bash(flutter pub run:*)",
       "Bash(flutter clean:*)",
-      "Bash(flutter pub:*)"
+      "Bash(flutter pub:*)",
+      "Bash(dart format:*)"
     ],
     "deny": [],
     "ask": []

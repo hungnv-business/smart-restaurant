@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
+import 'core/services/auth_service.dart';
 import 'features/auth/screens/login_screen.dart';
 
 /// Entry point của ứng dụng Quán bia Mobile
 void main() {
-  runApp(const QuanBiaApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+      ],
+      child: const QuanBiaApp(),
+    ),
+  );
 }
 
 /// Ứng dụng mobile Quán bia cho nhân viên

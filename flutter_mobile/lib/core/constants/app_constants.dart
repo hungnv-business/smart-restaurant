@@ -11,7 +11,7 @@ class AppConstants {
   static const String takeawayRoute = '/takeaway';
   static const String paymentRoute = '/payment';
   
-  // API endpoints (sẽ cấu hình sau)
+  // API endpoints
   static const String baseUrl = 'https://localhost:44346';
   
   // Storage keys
