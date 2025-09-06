@@ -762,7 +762,7 @@ namespace SmartRestaurant.Migrations
                         .HasColumnType("character varying(40)")
                         .HasColumnName("ConcurrencyStamp");
 
-                    b.Property<DateTime?>("ConfirmedTime")
+                    b.Property<DateTime>("CreatedTime")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreationTime")
@@ -815,15 +815,6 @@ namespace SmartRestaurant.Migrations
                     b.Property<DateTime?>("PaidTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime?>("PreparingTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("ReadyTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("ServedTime")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -853,6 +844,9 @@ namespace SmartRestaurant.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CanceledTime")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone")
@@ -899,6 +893,9 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("PendingTime")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime?>("PreparationCompleteTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -907,6 +904,9 @@ namespace SmartRestaurant.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ServedTime")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -997,6 +997,9 @@ namespace SmartRestaurant.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("CreatorId");
 
+                    b.Property<Guid?>("CurrentOrderId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("DeleterId")
                         .HasColumnType("uuid")
                         .HasColumnName("DeleterId");
@@ -1037,6 +1040,9 @@ namespace SmartRestaurant.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CurrentOrderId")
+                        .IsUnique();
 
                     b.HasIndex("LayoutSectionId");
 
@@ -2934,7 +2940,7 @@ namespace SmartRestaurant.Migrations
             modelBuilder.Entity("SmartRestaurant.Orders.Order", b =>
                 {
                     b.HasOne("SmartRestaurant.TableManagement.Tables.Table", "Table")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("TableId");
 
                     b.Navigation("Table");
@@ -2961,9 +2967,15 @@ namespace SmartRestaurant.Migrations
 
             modelBuilder.Entity("SmartRestaurant.TableManagement.Tables.Table", b =>
                 {
+                    b.HasOne("SmartRestaurant.Orders.Order", "CurrentOrder")
+                        .WithOne()
+                        .HasForeignKey("SmartRestaurant.TableManagement.Tables.Table", "CurrentOrderId");
+
                     b.HasOne("SmartRestaurant.TableManagement.LayoutSections.LayoutSection", "LayoutSection")
                         .WithMany("Tables")
                         .HasForeignKey("LayoutSectionId");
+
+                    b.Navigation("CurrentOrder");
 
                     b.Navigation("LayoutSection");
                 });
@@ -3145,6 +3157,11 @@ namespace SmartRestaurant.Migrations
             modelBuilder.Entity("SmartRestaurant.TableManagement.LayoutSections.LayoutSection", b =>
                 {
                     b.Navigation("Tables");
+                });
+
+            modelBuilder.Entity("SmartRestaurant.TableManagement.Tables.Table", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

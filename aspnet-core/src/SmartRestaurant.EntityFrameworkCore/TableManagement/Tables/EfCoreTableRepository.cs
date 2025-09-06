@@ -81,5 +81,37 @@ namespace SmartRestaurant.EntityFrameworkCore.TableManagement.Tables
 
             await dbContext.SaveChangesAsync(GetCancellationToken(cancellationToken));
         }
+
+        public async Task<List<Table>> GetAllActiveTablesWithOrdersAsync(
+            string? tableNameFilter = null,
+            TableStatus? statusFilter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var dbContext = await GetDbContextAsync();
+            return await dbContext.Tables
+                .Include(t => t.LayoutSection) // Include layout section info
+                .Include(t => t.CurrentOrder) // Include current order
+                    .ThenInclude(o => o.OrderItems) // Include order items for current order
+                .Where(t => t.IsActive && t.LayoutSection != null && t.LayoutSection.IsActive) // Only active tables in active sections
+                .WhereIf(!string.IsNullOrWhiteSpace(tableNameFilter), t => t.TableNumber.Contains(tableNameFilter!))
+                .WhereIf(statusFilter.HasValue, t => t.Status == statusFilter!.Value)
+                .OrderBy(t => t.LayoutSection.DisplayOrder)
+                .ThenBy(t => t.DisplayOrder)
+                .ThenBy(t => t.TableNumber)
+                .ToListAsync(GetCancellationToken(cancellationToken));
+        }
+
+        public async Task<Table?> GetTableWithActiveOrdersAsync(
+            Guid tableId,
+            CancellationToken cancellationToken = default)
+        {
+            var dbContext = await GetDbContextAsync();
+            return await dbContext.Tables
+                .Include(t => t.LayoutSection) // Include layout section info
+                .Include(t => t.CurrentOrder) // Include current order if exists
+                    .ThenInclude(o => o.OrderItems) // Include order items for current order
+                .Where(t => t.Id == tableId)
+                .FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
+        }
     }
 }

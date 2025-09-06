@@ -10,9 +10,6 @@ namespace SmartRestaurant
         Occupied = 1,
         
         /// <summary>Bàn đã được đặt trước</summary>
-        Reserved = 2,
-        
-        /// <summary>Bàn đang được dọn dẹp</summary>
-        Cleaning = 3
+        Reserved = 2
     }
 }

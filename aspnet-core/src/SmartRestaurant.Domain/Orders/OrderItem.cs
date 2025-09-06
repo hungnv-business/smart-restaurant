@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Domain.Entities.Auditing;
 using SmartRestaurant.MenuManagement.MenuItems;
@@ -7,6 +8,12 @@ namespace SmartRestaurant.Orders;
 
 /// <summary>
 /// Entity OrderItem đại diện cho một món ăn trong đơn hàng
+/// 
+/// DOMAIN EVENTS NOTE:
+/// - Hiện tại không sử dụng domain events để giữ code đơn giản
+/// - Khi cần real-time features (kitchen dashboard, notifications), 
+///   có thể thêm domain events vào các methods: StartPreparation(), MarkAsReady(), MarkAsServed()
+/// - Events sẽ handle: SignalR notifications, analytics logging, auto-printing
 /// </summary>
 public class OrderItem : FullAuditedEntity<Guid>
 {
@@ -50,17 +57,32 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// <summary>
     /// Trạng thái chuẩn bị của món này
     /// </summary>
-    public OrderItemStatus Status { get; set; } = OrderItemStatus.Pending;
+    public OrderItemStatus Status { get; private set; } = OrderItemStatus.Pending;
 
     /// <summary>
-    /// Thời gian bắt đầu chuẩn bị món này
+    /// Thời gian xác nhận đơn hàng (Pending)
     /// </summary>
-    public DateTime? PreparationStartTime { get; set; }
+    public DateTime? PendingTime { get; private set; }
 
     /// <summary>
-    /// Thời gian hoàn thành chuẩn bị món này
+    /// Thời gian bắt đầu chuẩn bị món này (Preparing)
     /// </summary>
-    public DateTime? PreparationCompleteTime { get; set; }
+    public DateTime? PreparationStartTime { get; private set; }
+
+    /// <summary>
+    /// Thời gian hoàn thành chuẩn bị món này (Ready)
+    /// </summary>
+    public DateTime? PreparationCompleteTime { get; private set; }
+
+    /// <summary>
+    /// Thời gian phục vụ món này (Served)
+    /// </summary>
+    public DateTime? ServedTime { get; private set; }
+
+    /// <summary>
+    /// Thời gian hủy món này (Canceled)
+    /// </summary>
+    public DateTime? CanceledTime { get; private set; }
 
     // Navigation Properties
 
@@ -96,6 +118,7 @@ public class OrderItem : FullAuditedEntity<Guid>
         UnitPrice = unitPrice;
         Notes = notes;
         Status = OrderItemStatus.Pending;
+        PendingTime = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -107,23 +130,138 @@ public class OrderItem : FullAuditedEntity<Guid>
     }
 
     /// <summary>
-    /// Cập nhật trạng thái chuẩn bị của món
+    /// Bắt đầu chuẩn bị món (Pending → Preparing)
     /// </summary>
-    /// <param name="newStatus">Trạng thái mới</param>
-    public void UpdatePreparationStatus(OrderItemStatus newStatus)
+    public void StartPreparation()
     {
-        Status = newStatus;
-        var now = DateTime.UtcNow;
-
-        switch (newStatus)
+        if (Status != OrderItemStatus.Pending)
         {
-            case OrderItemStatus.Preparing:
-                PreparationStartTime = now;
-                break;
-            case OrderItemStatus.Ready:
-                PreparationCompleteTime = now;
-                break;
+            throw OrderItemValidationException.CannotStartPreparationNonPendingItem();
         }
+
+        Status = OrderItemStatus.Preparing;
+        PreparationStartTime = DateTime.UtcNow;
+        
+        // TODO: Thêm domain event khi cần real-time kitchen dashboard
+        // AddLocalEvent(new OrderItemPreparationStartedEvent(Id, OrderId, MenuItemName));
+    }
+
+    /// <summary>
+    /// Đánh dấu món đã hoàn thành (Preparing → Ready)
+    /// </summary>
+    public void MarkAsReady()
+    {
+        if (Status != OrderItemStatus.Preparing)
+        {
+            throw OrderItemValidationException.CannotMarkReadyNonPreparingItem();
+        }
+
+        Status = OrderItemStatus.Ready;
+        PreparationCompleteTime = DateTime.UtcNow;
+        
+        // TODO: Thêm domain event khi cần real-time notifications cho nhân viên phục vụ
+        // AddLocalEvent(new OrderItemReadyEvent(Id, OrderId, MenuItemName));
+    }
+
+    /// <summary>
+    /// Đánh dấu món đã được phục vụ (Ready → Served)  
+    /// </summary>
+    public void MarkAsServed()
+    {
+        if (Status != OrderItemStatus.Ready)
+        {
+            throw OrderItemValidationException.CannotServeNonReadyItem();
+        }
+
+        Status = OrderItemStatus.Served;
+        ServedTime = DateTime.UtcNow;
+        
+        // TODO: Thêm domain event khi cần analytics và tracking
+        // AddLocalEvent(new OrderItemServedEvent(Id, OrderId, MenuItemName));
+    }
+
+    /// <summary>
+    /// Kiểm tra có thể chuyển sang trạng thái mới không
+    /// </summary>
+    public bool CanTransitionTo(OrderItemStatus newStatus)
+    {
+        return Status switch
+        {
+            OrderItemStatus.Pending => newStatus == OrderItemStatus.Preparing || newStatus == OrderItemStatus.Canceled,
+            OrderItemStatus.Preparing => newStatus == OrderItemStatus.Ready,
+            OrderItemStatus.Ready => newStatus == OrderItemStatus.Served,
+            OrderItemStatus.Served => false,
+            OrderItemStatus.Canceled => false,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Tính thời gian chuẩn bị món (phút)
+    /// </summary>
+    public int? GetPreparationTimeInMinutes()
+    {
+        if (PreparationStartTime.HasValue && PreparationCompleteTime.HasValue)
+        {
+            return (int)(PreparationCompleteTime.Value - PreparationStartTime.Value).TotalMinutes;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Lấy thời gian audit cho trạng thái hiện tại
+    /// </summary>
+    public DateTime? GetCurrentStatusTimestamp()
+    {
+        return Status switch
+        {
+            OrderItemStatus.Pending => PendingTime,
+            OrderItemStatus.Preparing => PreparationStartTime,
+            OrderItemStatus.Ready => PreparationCompleteTime,
+            OrderItemStatus.Served => ServedTime,
+            OrderItemStatus.Canceled => CanceledTime,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Tính tổng thời gian từ pending đến trạng thái hiện tại (phút)
+    /// </summary>
+    public int? GetTotalProcessingTimeInMinutes()
+    {
+        var currentTime = GetCurrentStatusTimestamp();
+        if (PendingTime.HasValue && currentTime.HasValue)
+        {
+            return (int)(currentTime.Value - PendingTime.Value).TotalMinutes;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Tính thời gian chờ từ khi ready đến khi served (phút)
+    /// </summary>
+    public int? GetWaitingTimeInMinutes()
+    {
+        if (PreparationCompleteTime.HasValue && ServedTime.HasValue)
+        {
+            return (int)(ServedTime.Value - PreparationCompleteTime.Value).TotalMinutes;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Lấy tất cả timestamps audit theo thứ tự thời gian
+    /// </summary>
+    public Dictionary<OrderItemStatus, DateTime?> GetAuditTimestamps()
+    {
+        return new Dictionary<OrderItemStatus, DateTime?>
+        {
+            { OrderItemStatus.Pending, PendingTime },
+            { OrderItemStatus.Preparing, PreparationStartTime },
+            { OrderItemStatus.Ready, PreparationCompleteTime },
+            { OrderItemStatus.Served, ServedTime },
+            { OrderItemStatus.Canceled, CanceledTime }
+        };
     }
 
     /// <summary>
@@ -147,5 +285,22 @@ public class OrderItem : FullAuditedEntity<Guid>
     public void UpdateNotes(string? notes)
     {
         Notes = notes?.Trim();
+    }
+
+    /// <summary>
+    /// Hủy món ăn (chỉ cho phép hủy khi chưa bắt đầu chuẩn bị)
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status != OrderItemStatus.Pending)
+        {
+            throw OrderItemValidationException.CannotCancelNonPendingItem(Status);
+        }
+
+        Status = OrderItemStatus.Canceled;
+        CanceledTime = DateTime.UtcNow;
+        
+        // TODO: Thêm domain event khi cần thông báo hủy món
+        // AddLocalEvent(new OrderItemCancelledEvent(Id, OrderId, MenuItemName));
     }
 }

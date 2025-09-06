@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
+using SmartRestaurant.Application.Contracts.Common;
 using SmartRestaurant.Orders;
 
 namespace SmartRestaurant.HttpApi.Host.Hubs;
@@ -166,16 +167,7 @@ public class OrderStatusHub : Hub
     /// </summary>
     private string GetStatusMessage(OrderStatus status)
     {
-        return status switch
-        {
-            OrderStatus.Pending => "đang chờ xác nhận",
-            OrderStatus.Confirmed => "đã được xác nhận",
-            OrderStatus.Preparing => "đang chuẩn bị",
-            OrderStatus.Ready => "sẵn sàng phục vụ",
-            OrderStatus.Served => "đã được phục vụ",
-            OrderStatus.Paid => "đã thanh toán",
-            _ => "trạng thái không xác định"
-        };
+        return GlobalEnums.GetOrderStatusDisplayName(status);
     }
 
     /// <summary>

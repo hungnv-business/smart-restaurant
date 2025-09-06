@@ -33,5 +33,27 @@ namespace SmartRestaurant.TableManagement.Tables
         Task UpdateMultipleTablePositionsAsync(
             List<(Guid tableId, Guid? layoutSectionId, int displayOrder)> updates,
             CancellationToken cancellationToken = default);
+            
+        /// <summary>
+        /// Lấy tất cả bàn active trong table section active, bao gồm các order hiện tại và order items
+        /// </summary>
+        /// <param name="tableNameFilter">Lọc theo tên bàn (tìm kiếm gần đúng)</param>
+        /// <param name="statusFilter">Lọc theo trạng thái bàn</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Danh sách bàn active với order và order items</returns>
+        Task<List<Table>> GetAllActiveTablesWithOrdersAsync(
+            string? tableNameFilter = null,
+            TableStatus? statusFilter = null,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy thông tin bàn cụ thể với các đơn hàng đang hoạt động
+        /// </summary>
+        /// <param name="tableId">ID bàn cần lấy thông tin</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Bàn với thông tin chi tiết</returns>
+        Task<Table?> GetTableWithActiveOrdersAsync(
+            Guid tableId,
+            CancellationToken cancellationToken = default);
     }
 }

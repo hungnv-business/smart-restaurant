@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/auth_service.dart';
-import 'features/auth/screens/login_screen.dart';
+import 'core/services/order_service.dart';
+import 'core/widgets/auth_wrapper.dart';
 
 /// Entry point của ứng dụng Quán bia Mobile
 void main() {
@@ -11,6 +12,12 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProxyProvider<AuthService, OrderService>(
+          create: (_) => OrderService(accessToken: null),
+          update: (_, auth, previous) => OrderService(
+            accessToken: auth.accessToken,
+          ),
+        ),
       ],
       child: const QuanBiaApp(),
     ),
@@ -36,10 +43,7 @@ class QuanBiaApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
-      routes: {
-        AppConstants.loginRoute: (context) => const LoginScreen(),
-      },
+      home: const AuthWrapper(),
     );
   }
 }

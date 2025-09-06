@@ -1,8 +1,13 @@
+import 'package:flutter/foundation.dart';
+
 /// Các hằng số ứng dụng Quán bia
 class AppConstants {
   // Thông tin ứng dụng
   static const String appName = 'Quán bia';
   static const String appVersion = '1.0.0';
+  
+  // Debug mode
+  static bool get isDebug => kDebugMode;
   
   // Routes
   static const String loginRoute = '/login';
@@ -17,6 +22,7 @@ class AppConstants {
   // Storage keys
   static const String tokenKey = 'auth_token';
   static const String userKey = 'user_data';
+  
   
   // Vietnamese strings
   static const String vietnameseTitle = 'Quán bia Việt Nam';

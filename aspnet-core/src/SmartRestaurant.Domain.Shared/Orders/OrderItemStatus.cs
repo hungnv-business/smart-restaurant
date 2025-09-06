@@ -8,31 +8,31 @@ namespace SmartRestaurant.Orders;
 public enum OrderItemStatus
 {
     /// <summary>
-    /// Chờ chuẩn bị
+    /// Chờ chuẩn bị (Nhân viên)
     /// </summary>
     [Description("Chờ chuẩn bị")]
     Pending = 0,
 
     /// <summary>
-    /// Đang chuẩn bị
+    /// Đang chuẩn bị (Bếp)
     /// </summary>
     [Description("Đang chuẩn bị")]
     Preparing = 1,
 
     /// <summary>
-    /// Đã hoàn thành
+    /// Đã hoàn thành (Bếp)
     /// </summary>
     [Description("Đã hoàn thành")]
     Ready = 2,
 
     /// <summary>
-    /// Đã phục vụ
+    /// Đã phục vụ (Nhân viên)
     /// </summary>
     [Description("Đã phục vụ")]
     Served = 3,
 
     /// <summary>
-    /// Đã Huỷ
+    /// Đã Huỷ (Nhân viên)
     /// </summary>
     [Description("Đã Huỷ")]
     Canceled = 4

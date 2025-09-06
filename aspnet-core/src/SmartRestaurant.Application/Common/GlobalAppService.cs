@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SmartRestaurant.Common.Dto;
+using SmartRestaurant.Application.Contracts.Common;
 using SmartRestaurant.InventoryManagement.IngredientCategories;
 using SmartRestaurant.InventoryManagement.Ingredients;
 using Volo.Abp.Application.Services;
@@ -37,13 +38,13 @@ namespace SmartRestaurant.Common
 
         public Task<List<IntLookupItemDto>> GetTableStatusLookupAsync()
         {
-            var tableStatuses = new List<IntLookupItemDto>
-            {
-                new() { Id = (int)TableStatus.Available, DisplayName = "Có sẵn" },
-                new() { Id = (int)TableStatus.Occupied, DisplayName = "Đang sử dụng" },
-                new() { Id = (int)TableStatus.Reserved, DisplayName = "Đã đặt trước" },
-                new() { Id = (int)TableStatus.Cleaning, DisplayName = "Đang dọn dẹp" }
-            };
+            var tableStatuses = GlobalEnums.TableStatuses
+                .Select(kvp => new IntLookupItemDto 
+                { 
+                    Id = (int)kvp.Key, 
+                    DisplayName = kvp.Value 
+                })
+                .ToList();
 
             return Task.FromResult(tableStatuses);
         }

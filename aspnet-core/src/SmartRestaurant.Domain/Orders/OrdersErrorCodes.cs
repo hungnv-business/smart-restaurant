@@ -25,4 +25,29 @@ public static class OrdersErrorCodes
     /// Bàn không khả dụng
     /// </summary>
     public const string TableNotAvailable = "Orders:TableNotAvailable";
+
+    /// <summary>
+    /// Validation OrderItem thất bại
+    /// </summary>
+    public const string OrderItemValidationFailed = "Orders:OrderItemValidationFailed";
+
+    /// <summary>
+    /// Bàn đã có đơn hàng khác
+    /// </summary>
+    public const string TableAlreadyHasOrder = "Orders:TableAlreadyHasOrder";
+
+    /// <summary>
+    /// Bàn không có đơn hàng để hoàn thành
+    /// </summary>
+    public const string TableHasNoOrder = "Orders:TableHasNoOrder";
+
+    /// <summary>
+    /// Không thể đặt trước bàn không Available
+    /// </summary>
+    public const string CannotReserveTable = "Orders:CannotReserveTable";
+
+    /// <summary>
+    /// Không thể hủy đặt trước bàn không Reserved
+    /// </summary>
+    public const string CannotCancelReservation = "Orders:CannotCancelReservation";
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Volo.Abp.DependencyInjection;
 using SmartRestaurant.Application.Contracts.Orders;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
+using SmartRestaurant.Application.Contracts.Common;
 using SmartRestaurant.HttpApi.Host.Hubs;
 using SmartRestaurant.Orders;
 
@@ -139,15 +140,6 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
     /// </summary>
     private static string GetStatusMessage(OrderStatus status)
     {
-        return status switch
-        {
-            OrderStatus.Pending => "đang chờ xác nhận",
-            OrderStatus.Confirmed => "đã được xác nhận",
-            OrderStatus.Preparing => "đang chuẩn bị",
-            OrderStatus.Ready => "sẵn sàng phục vụ",
-            OrderStatus.Served => "đã được phục vụ",
-            OrderStatus.Paid => "đã thanh toán",
-            _ => "trạng thái không xác định"
-        };
+        return GlobalEnums.GetOrderStatusDisplayName(status);
     }
 }

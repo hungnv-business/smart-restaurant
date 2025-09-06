@@ -144,6 +144,16 @@ public class SmartRestaurantDbContext :
                 .HasForeignKey(x => x.LayoutSectionId)
                 .IsRequired(false);
                 
+            b.HasOne(x => x.CurrentOrder)
+                .WithOne()
+                .HasForeignKey<Table>(x => x.CurrentOrderId)
+                .IsRequired(false);
+                
+            b.HasMany(x => x.Orders)
+                .WithOne(x => x.Table)
+                .HasForeignKey(x => x.TableId)
+                .IsRequired(false);
+                
             b.HasIndex(x => x.LayoutSectionId);
             b.HasIndex(x => new { x.LayoutSectionId, x.DisplayOrder });
             b.HasIndex(x => new { x.IsActive, x.DisplayOrder });
@@ -398,16 +408,9 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.Status).IsRequired();
             b.Property(x => x.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
             b.Property(x => x.Notes).HasMaxLength(500);
-            b.Property(x => x.ConfirmedTime);
-            b.Property(x => x.PreparingTime);
-            b.Property(x => x.ReadyTime);
-            b.Property(x => x.ServedTime);
             b.Property(x => x.PaidTime);
             
-            b.HasOne(x => x.Table)
-                .WithMany()
-                .HasForeignKey(x => x.TableId)
-                .IsRequired(false);
+            // Table relationship is configured in Table entity
                 
             b.HasIndex(x => x.OrderNumber).IsUnique();
             b.HasIndex(x => x.TableId);

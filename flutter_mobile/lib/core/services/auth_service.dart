@@ -1,17 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../constants/app_constants.dart';
 import '../models/auth_models.dart';
+import '../utils/jwt_helper.dart';
+import 'http_client_service.dart';
 
 /// Service xử lý authentication cho ứng dụng Quán bia
 class AuthService extends ChangeNotifier {
-  final Dio _dio;
+  late Dio _dio;
+  final HttpClientService _httpClientService;
   AuthResponse? _authResponse;
   UserInfo? _userInfo;
   bool _isLoggedIn = false;
   bool _isLoading = false;
+  DateTime? _tokenCreationTime;
 
-  AuthService() : _dio = Dio() {
+  AuthService() : _httpClientService = HttpClientService() {
     _setupDio();
   }
 
@@ -24,6 +30,8 @@ class AuthService extends ChangeNotifier {
 
   /// Setup Dio với base URL và interceptors
   void _setupDio() {
+    // Tạo riêng một Dio instance cho auth operations
+    _dio = Dio();
     _dio.options = BaseOptions(
       baseUrl: AppConstants.baseUrl,
       connectTimeout: const Duration(seconds: 10),
@@ -33,20 +41,9 @@ class AuthService extends ChangeNotifier {
         'Accept': 'application/json',
       },
     );
-
-    // Add auth interceptor để tự động thêm token
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          if (_authResponse?.accessToken != null && 
-              !options.path.contains('/connect/token')) {
-            options.headers['Authorization'] = 
-                'Bearer ${_authResponse!.accessToken}';
-          }
-          handler.next(options);
-        },
-      ),
-    );
+    
+    // Initialize HTTP client service với auth service reference
+    _httpClientService.initialize(this);
   }
 
   /// Đăng nhập với username và password
@@ -69,15 +66,23 @@ class AuthService extends ChangeNotifier {
 
       if (response.statusCode == 200 && response.data != null) {
         _authResponse = AuthResponse.fromJson(response.data);
+        _tokenCreationTime = DateTime.now();
         
-        // Tạo user info từ username (có thể call API khác để lấy thông tin chi tiết)
+        // Extract user info từ JWT access token
+        final userInfoFromJwt = JwtHelper.extractUserInfo(_authResponse!.accessToken);
+        
         _userInfo = UserInfo(
-          username: username,
-          displayName: username,
-          roles: ['staff'], // Default role
+          username: userInfoFromJwt?['username'] ?? username,
+          displayName: userInfoFromJwt?['display_name'] ?? username,
+          roles: userInfoFromJwt?['roles'] ?? ['staff'],
         );
 
         _isLoggedIn = true;
+        
+        print('✅ Login successful: ${_userInfo?.displayName} (${_userInfo?.roles.join(", ")})');
+        
+        // Lưu authentication state vào persistent storage
+        await _saveAuthState();
       } else {
         throw AuthException(
           message: 'Phản hồi không hợp lệ từ server',
@@ -188,12 +193,18 @@ class AuthService extends ChangeNotifier {
       _authResponse = null;
       _userInfo = null;
       _isLoggedIn = false;
+      _tokenCreationTime = null;
+      
+      // Xóa authentication state khỏi persistent storage
+      await _clearAuthState();
       
     } catch (e) {
       // Force logout even if API call fails
       _authResponse = null;
       _userInfo = null;
       _isLoggedIn = false;
+      _tokenCreationTime = null;
+      await _clearAuthState();
     } finally {
       _setLoading(false);
     }
@@ -222,6 +233,22 @@ class AuthService extends ChangeNotifier {
 
       if (response.statusCode == 200 && response.data != null) {
         _authResponse = AuthResponse.fromJson(response.data);
+        _tokenCreationTime = DateTime.now();
+        
+        // Update user info từ JWT token mới  
+        final userInfoFromJwt = JwtHelper.extractUserInfo(_authResponse!.accessToken);
+        if (userInfoFromJwt != null) {
+          _userInfo = UserInfo(
+            username: userInfoFromJwt['username'] ?? _userInfo?.username ?? '',
+            displayName: userInfoFromJwt['display_name'] ?? _userInfo?.displayName ?? '',
+            roles: userInfoFromJwt['roles'] ?? _userInfo?.roles ?? ['staff'],
+          );
+        }
+        
+        print('✅ Token refreshed successfully');
+        
+        // Lưu lại authentication state sau khi refresh
+        await _saveAuthState();
         
       } else {
         throw AuthException(
@@ -243,9 +270,66 @@ class AuthService extends ChangeNotifier {
   bool isTokenExpired() {
     if (_authResponse == null) return true;
     
-    // TODO: Implement proper token expiration check
-    // You might want to store the token creation time and compare
-    return false;
+    // Sử dụng JWT helper để kiểm tra expiration từ token payload
+    return JwtHelper.isTokenExpiredFromJwt(_authResponse!.accessToken);
+  }
+
+  /// Kiểm tra và load authentication state từ persistent storage
+  Future<void> checkSavedAuthState() async {
+    try {
+      _setLoading(true);
+      
+      final prefs = await SharedPreferences.getInstance();
+      final authDataJson = prefs.getString('auth_data');
+      final userDataJson = prefs.getString('user_data');
+      final tokenCreationTimeStr = prefs.getString('token_creation_time');
+      
+      if (authDataJson != null && userDataJson != null && tokenCreationTimeStr != null) {
+        _authResponse = AuthResponse.fromJson(jsonDecode(authDataJson));
+        _userInfo = UserInfo.fromJson(jsonDecode(userDataJson));
+        _tokenCreationTime = DateTime.parse(tokenCreationTimeStr);
+        _isLoggedIn = true;
+        
+        print('✅ AuthService: Restored authentication state from storage');
+      }
+    } catch (e) {
+      print('⚠️ AuthService: Error loading saved auth state: $e');
+      await _clearAuthState();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Lưu authentication state vào persistent storage
+  Future<void> _saveAuthState() async {
+    if (_authResponse == null || _userInfo == null) return;
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_data', jsonEncode(_authResponse!.toJson()));
+      await prefs.setString('user_data', jsonEncode(_userInfo!.toJson()));
+      if (_tokenCreationTime != null) {
+        await prefs.setString('token_creation_time', _tokenCreationTime!.toIso8601String());
+      }
+      
+      print('✅ AuthService: Saved authentication state to storage');
+    } catch (e) {
+      print('⚠️ AuthService: Error saving auth state: $e');
+    }
+  }
+
+  /// Xóa authentication state khỏi persistent storage
+  Future<void> _clearAuthState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_data');
+      await prefs.remove('user_data');
+      await prefs.remove('token_creation_time');
+      
+      print('✅ AuthService: Cleared authentication state from storage');
+    } catch (e) {
+      print('⚠️ AuthService: Error clearing auth state: $e');
+    }
   }
 
   /// Set loading state và notify listeners
@@ -259,6 +343,7 @@ class AuthService extends ChangeNotifier {
   @override
   void dispose() {
     _dio.close();
+    _httpClientService.dispose();
     super.dispose();
   }
 }

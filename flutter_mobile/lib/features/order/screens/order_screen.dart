@@ -1,6 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/enums/restaurant_enums.dart';
+import '../../../core/models/table_models.dart';
+import '../../../core/services/order_service.dart';
+import '../../../core/services/auth_service.dart';
+import '../widgets/table_screen_header.dart';
+import '../widgets/table_filters.dart';
+import '../widgets/section_column.dart';
+import '../widgets/empty_state_widget.dart';
 
-/// Màn hình Gọi món
+/// Màn hình Gọi món - Hiển thị danh sách bàn
 class OrderScreen extends StatefulWidget {
   const OrderScreen({Key? key}) : super(key: key);
 
@@ -9,186 +19,183 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  final List<String> _categories = [
-    'Tất cả',
-    'Khai vị',
-    'Món chính',
-    'Nước uống',
-    'Tráng miệng',
-  ];
-  
-  int _selectedCategoryIndex = 0;
+  List<ActiveTableDto> _allTables = [];
+  String _searchQuery = '';
+  TableStatus? _selectedStatusFilter;
+  Timer? _searchTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTables();
+    });
+  }
+
+  Future<void> _loadTables() async {
+    try {
+      final orderService = Provider.of<OrderService>(context, listen: false);
+      
+      // Gọi API với filters
+      final tables = await orderService.getActiveTables(
+        tableNameFilter: _searchQuery.isEmpty ? null : _searchQuery,
+        statusFilter: _selectedStatusFilter,
+      );
+      setState(() {
+        _allTables = tables;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải danh sách bàn: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Thử lại',
+              onPressed: _loadTables,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _debounceSearch() {
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 500), () {
+      _loadTables();
+    });
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    _debounceSearch();
+  }
+
+  void _onStatusFilterChanged(TableStatus? status) {
+    setState(() {
+      _selectedStatusFilter = status;
+    });
+    _loadTables();
+  }
+
+  /// Group bàn theo section
+  Map<String, List<ActiveTableDto>> get _groupedTables {
+    final Map<String, List<ActiveTableDto>> grouped = {};
+    
+    for (final table in _allTables) {
+      final sectionName = table.layoutSectionName ?? 'Không có khu vực';
+      if (!grouped.containsKey(sectionName)) {
+        grouped[sectionName] = [];
+      }
+      grouped[sectionName]!.add(table);
+    }
+    
+    // Sắp xếp bàn trong mỗi section theo displayOrder
+    for (final section in grouped.values) {
+      section.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+    }
+    
+    return grouped;
+  }
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // Header với tìm kiếm
-          Container(
+          const TableScreenHeader(),
+          Padding(
             padding: const EdgeInsets.all(16),
-            color: Theme.of(context).colorScheme.surface,
-            child: Column(
-              children: [
-                // Thanh tìm kiếm
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiếm món ăn...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.qr_code_scanner),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Quét QR code đang phát triển')),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Danh mục
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
-                    itemBuilder: (context, index) {
-                      final isSelected = index == _selectedCategoryIndex;
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(_categories[index]),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedCategoryIndex = index;
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+            child: TableFilters(
+              searchQuery: _searchQuery,
+              selectedStatusFilter: _selectedStatusFilter,
+              onSearchChanged: _onSearchChanged,
+              onStatusFilterChanged: _onStatusFilterChanged,
             ),
           ),
-          
-          // Danh sách món ăn
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: 12, // Demo items
-              itemBuilder: (context, index) {
-                return _buildFoodItem(context, index);
-              },
-            ),
-          ),
+          Expanded(child: _buildTableContent()),
         ],
       ),
-      
-      // Floating action button để xem giỏ hàng
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Giỏ hàng đang phát triển')),
-          );
-        },
-        icon: const Icon(Icons.shopping_cart),
-        label: const Text('Giỏ hàng (3)'),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _refreshTables,
+        child: const Icon(Icons.refresh),
       ),
     );
   }
 
-  Widget _buildFoodItem(BuildContext context, int index) {
-    final foods = [
-      {'name': 'Phở Bò Tái', 'price': '85.000₫', 'image': '🍜'},
-      {'name': 'Cơm Tấm Sài Gòn', 'price': '65.000₫', 'image': '🍚'},
-      {'name': 'Bánh Mì Thịt Nướng', 'price': '35.000₫', 'image': '🥖'},
-      {'name': 'Gỏi Cuốn Tôm Thịt', 'price': '45.000₫', 'image': '🌯'},
-      {'name': 'Bún Bò Huế', 'price': '75.000₫', 'image': '🍲'},
-      {'name': 'Chả Cá Lã Vọng', 'price': '120.000₫', 'image': '🐟'},
-      {'name': 'Cà Phê Sữa Đá', 'price': '25.000₫', 'image': '☕'},
-      {'name': 'Nước Mía', 'price': '15.000₫', 'image': '🧃'},
-      {'name': 'Chè Ba Màu', 'price': '30.000₫', 'image': '🍧'},
-      {'name': 'Bánh Flan', 'price': '35.000₫', 'image': '🍮'},
-      {'name': 'Nem Nướng Nha Trang', 'price': '55.000₫', 'image': '🍖'},
-      {'name': 'Bánh Xèo', 'price': '65.000₫', 'image': '🥞'},
-    ];
+  Widget _buildTableContent() {
+    return Consumer<OrderService>(
+      builder: (context, orderService, child) {
+        if (orderService.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    final food = foods[index % foods.length];
+        if (_allTables.isEmpty) {
+          return const EmptyStateWidget(hasNoTables: true);
+        }
 
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Hình ảnh món ăn
-          Expanded(
-            flex: 3,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: Center(
-                child: Text(
-                  food['image']!,
-                  style: const TextStyle(fontSize: 48),
-                ),
-              ),
+        return _buildTableGrid();
+      },
+    );
+  }
+
+  Widget _buildTableGrid() {
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final availableWidth = screenWidth - 32; // Trừ padding 16 mỗi bên
+        final sectionsCount = _groupedTables.length;
+        
+        // Tính width cho mỗi cột dựa trên số lượng sections
+        double columnWidth = 200; // Default width
+        if (sectionsCount > 0) {
+          final totalSpacing = (sectionsCount - 1) * 12; // Spacing giữa các cột
+          final maxColumnWidth = (availableWidth - totalSpacing) / sectionsCount;
+          columnWidth = maxColumnWidth > 150 ? maxColumnWidth : 200; // Min width 150
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _groupedTables.entries.toList().asMap().entries.map((mapEntry) {
+                final index = mapEntry.key;
+                final entry = mapEntry.value;
+                final isLast = index == _groupedTables.length - 1;
+                
+                return Container(
+                  width: columnWidth,
+                  margin: EdgeInsets.only(right: isLast ? 0 : 12),
+                  child: SectionColumn(
+                    sectionName: entry.key,
+                    tables: entry.value,
+                  ),
+                );
+              }).toList(),
             ),
           ),
-          
-          // Thông tin món ăn
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    food['name']!,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        food['price']!,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Đã thêm ${food['name']} vào giỏ hàng')),
-                          );
-                        },
-                        icon: const Icon(Icons.add_circle),
-                        iconSize: 24,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  void _refreshTables() {
+    _loadTables();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đã cập nhật danh sách bàn')),
     );
   }
 }

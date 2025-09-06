@@ -35,7 +35,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// Trạng thái hiện tại của đơn hàng
     /// </summary>
     [Required]
-    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+    public OrderStatus Status { get; private set; } = OrderStatus.Active;
 
     /// <summary>
     /// Tổng số tiền của đơn hàng (VND)
@@ -50,27 +50,12 @@ public class Order : FullAuditedAggregateRoot<Guid>
     public string? Notes { get; set; }
 
     /// <summary>
-    /// Thời gian đơn hàng được xác nhận
+    /// Thời gian tạo đơn hàng
     /// </summary>
-    public DateTime? ConfirmedTime { get; set; }
+    public DateTime CreatedTime { get; set; }
 
     /// <summary>
-    /// Thời gian bắt đầu chuẩn bị món
-    /// </summary>
-    public DateTime? PreparingTime { get; set; }
-
-    /// <summary>
-    /// Thời gian hoàn thành chuẩn bị
-    /// </summary>
-    public DateTime? ReadyTime { get; set; }
-
-    /// <summary>
-    /// Thời gian phục vụ khách hàng
-    /// </summary>
-    public DateTime? ServedTime { get; set; }
-
-    /// <summary>
-    /// Thời gian thanh toán
+    /// Thời gian thanh toán (kết thúc đơn hàng)
     /// </summary>
     public DateTime? PaidTime { get; set; }
 
@@ -103,67 +88,49 @@ public class Order : FullAuditedAggregateRoot<Guid>
         OrderType = orderType;
         TableId = tableId;
         Notes = notes;
-        Status = OrderStatus.Pending;
+        Status = OrderStatus.Active;
         TotalAmount = 0;
+        CreatedTime = DateTime.Now;
     }
 
     /// <summary>
-    /// Cập nhật trạng thái đơn hàng với validation logic kinh doanh
+    /// Đánh dấu đơn hàng đã thanh toán
+    /// Chỉ cho phép thanh toán khi tất cả món ăn đã phục vụ hoặc hủy
     /// </summary>
-    /// <param name="newStatus">Trạng thái mới</param>
-    public void UpdateStatus(OrderStatus newStatus)
+    public void MarkAsPaid()
     {
-        if (!CanTransitionTo(newStatus))
+        if (Status == OrderStatus.Paid)
         {
-            // Business Exception: Chuyển đổi trạng thái không hợp lệ theo quy tắc kinh doanh
-            throw new OrderStatusTransitionException(Status, newStatus);
+            throw OrderValidationException.OrderAlreadyPaid();
         }
 
-        var oldStatus = Status;
-        Status = newStatus;
-
-        // Cập nhật thời gian theo trạng thái
-        var now = DateTime.UtcNow;
-        switch (newStatus)
+        if (!IsCompleted())
         {
-            case OrderStatus.Confirmed:
-                ConfirmedTime = now;
-                break;
-            case OrderStatus.Preparing:
-                PreparingTime = now;
-                break;
-            case OrderStatus.Ready:
-                ReadyTime = now;
-                break;
-            case OrderStatus.Served:
-                ServedTime = now;
-                break;
-            case OrderStatus.Paid:
-                PaidTime = now;
-                break;
+            throw OrderValidationException.CannotPayWithIncompleteItems();
         }
 
-        // Thêm domain event để thông báo thay đổi trạng thái
-        AddLocalEvent(new OrderStatusChangedEvent(Id, oldStatus, newStatus));
+        Status = OrderStatus.Paid;
+        PaidTime = DateTime.Now;
     }
 
     /// <summary>
-    /// Kiểm tra xem có thể chuyển sang trạng thái mới không
+    /// Kiểm tra đơn hàng có đang active không
     /// </summary>
-    /// <param name="newStatus">Trạng thái đích</param>
-    /// <returns>True nếu có thể chuyển, False nếu không</returns>
-    public bool CanTransitionTo(OrderStatus newStatus)
+    public bool IsActive() => Status == OrderStatus.Active;
+
+    /// <summary>
+    /// Kiểm tra đơn hàng đã thanh toán chưa
+    /// </summary>
+    public bool IsPaid() => Status == OrderStatus.Paid;
+
+    /// <summary>
+    /// Kiểm tra đơn hàng đã hoàn tất (tất cả món đã phục vụ hoặc hủy)
+    /// </summary>
+    public bool IsCompleted()
     {
-        return Status switch
-        {
-            OrderStatus.Pending => newStatus == OrderStatus.Confirmed,
-            OrderStatus.Confirmed => newStatus == OrderStatus.Preparing,
-            OrderStatus.Preparing => newStatus == OrderStatus.Ready,
-            OrderStatus.Ready => newStatus == OrderStatus.Served,
-            OrderStatus.Served => newStatus == OrderStatus.Paid,
-            OrderStatus.Paid => false, // Không thể chuyển từ trạng thái cuối
-            _ => false
-        };
+        return OrderItems.All(item =>
+            item.Status == OrderItemStatus.Served ||
+            item.Status == OrderItemStatus.Canceled);
     }
 
     /// <summary>
@@ -172,14 +139,25 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <param name="orderItem">Món cần thêm</param>
     public void AddItem(OrderItem orderItem)
     {
-        if (Status != OrderStatus.Pending)
-        {
-            // Business Exception: Chỉ có thể sửa đổi đơn hàng ở trạng thái Pending
-            throw OrderValidationException.NotInPendingStatus();
-        }
-
         OrderItems.Add(orderItem);
         RecalculateTotalAmount();
+    }
+
+    /// <summary>
+    /// Thêm nhiều món vào đơn hàng
+    /// </summary>
+    /// <param name="orderItems">Danh sách món cần thêm</param>
+    public void AddItems(IEnumerable<OrderItem> orderItems)
+    {
+        if (Status != OrderStatus.Active)
+        {
+            throw OrderValidationException.CannotModifyNonActiveOrder();
+        }
+
+        foreach (var orderItem in orderItems)
+        {
+            AddItem(orderItem);
+        }
     }
 
     /// <summary>
@@ -188,10 +166,10 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <param name="orderItemId">ID của món cần xóa</param>
     public void RemoveItem(Guid orderItemId)
     {
-        if (Status != OrderStatus.Pending)
+        if (Status != OrderStatus.Active)
         {
-            // Business Exception: Chỉ có thể sửa đổi đơn hàng ở trạng thái Pending  
-            throw OrderValidationException.NotInPendingStatus();
+            // Business Exception: Chỉ có thể sửa đổi đơn hàng ở trạng thái Active  
+            throw new InvalidOperationException("Chỉ có thể sửa đổi đơn hàng ở trạng thái Active");
         }
 
         var item = OrderItems.FirstOrDefault(x => x.Id == orderItemId);
@@ -203,11 +181,35 @@ public class Order : FullAuditedAggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Hủy món trong đơn hàng
+    /// </summary>
+    /// <param name="orderItemId">ID của món cần hủy</param>
+    public void CancelItem(Guid orderItemId)
+    {
+        if (Status != OrderStatus.Active)
+        {
+            throw OrderValidationException.CannotCancelItemsInNonActiveOrder();
+        }
+
+        var item = OrderItems.FirstOrDefault(x => x.Id == orderItemId);
+        if (item == null)
+        {
+            throw OrderValidationException.OrderItemNotFound(orderItemId);
+        }
+
+        item.Cancel();
+        RecalculateTotalAmount();
+    }
+
+    /// <summary>
     /// Tính lại tổng tiền đơn hàng
     /// </summary>
     private void RecalculateTotalAmount()
     {
-        TotalAmount = OrderItems.Sum(item => item.UnitPrice * item.Quantity);
+        // Chỉ tính tiền những món không bị hủy
+        TotalAmount = OrderItems
+            .Where(item => item.Status != OrderItemStatus.Canceled)
+            .Sum(item => item.UnitPrice * item.Quantity);
     }
 
     /// <summary>

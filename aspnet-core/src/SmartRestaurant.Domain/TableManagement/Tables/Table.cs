@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using SmartRestaurant.TableManagement.LayoutSections;
+using SmartRestaurant.Orders;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SmartRestaurant.TableManagement.Tables
@@ -28,15 +30,25 @@ namespace SmartRestaurant.TableManagement.Tables
         /// <summary>ID khu vực mà bàn này thuộc về</summary>
         public Guid? LayoutSectionId { get; set; }
         
+        /// <summary>ID đơn hàng hiện tại đang phục vụ tại bàn (nếu có)</summary>
+        public Guid? CurrentOrderId { get; private set; }
+        
         // Navigation properties
         /// <summary>Khu vực mà bàn này thuộc về</summary>
         public virtual LayoutSection LayoutSection { get; set; }
+        
+        /// <summary>Đơn hàng hiện tại đang phục vụ tại bàn</summary>
+        public virtual Order? CurrentOrder { get; set; }
+        
+        /// <summary>Danh sách tất cả đơn hàng đã từng phục vụ tại bàn này</summary>
+        public virtual ICollection<Order> Orders { get; set; }
 
         /// <summary>
         /// Constructor mặc định cho EF Core
         /// </summary>
         protected Table()
         {
+            Orders = new HashSet<Order>();
         }
 
         /// <summary>
@@ -62,6 +74,7 @@ namespace SmartRestaurant.TableManagement.Tables
             Status = status;
             IsActive = isActive;
             LayoutSectionId = layoutSectionId;
+            Orders = new HashSet<Order>();
         }
 
         /// <summary>
@@ -90,5 +103,98 @@ namespace SmartRestaurant.TableManagement.Tables
         {
             Status = status;
         }
+
+        /// <summary>
+        /// Gán đơn hàng cho bàn và chuyển trạng thái sang Occupied
+        /// </summary>
+        /// <param name="orderId">ID của đơn hàng được gán</param>
+        /// <exception cref="OrderValidationException">Khi bàn không available hoặc đã có đơn hàng</exception>
+        public void AssignOrder(Guid orderId)
+        {
+            if (Status != TableStatus.Available)
+            {
+                throw OrderValidationException.CannotReserveTable(TableNumber);
+            }
+
+            if (CurrentOrderId.HasValue)
+            {
+                throw OrderValidationException.TableAlreadyHasOrder(TableNumber, CurrentOrderId.Value);
+            }
+
+            CurrentOrderId = orderId;
+            Status = TableStatus.Occupied;
+        }
+
+        /// <summary>
+        /// Kết thúc phục vụ đơn hàng tại bàn, chuyển về trạng thái Available
+        /// </summary>
+        /// <exception cref="OrderValidationException">Khi bàn không có đơn hàng nào</exception>
+        public void CompleteOrder()
+        {
+            if (!CurrentOrderId.HasValue)
+            {
+                throw OrderValidationException.TableHasNoOrder(TableNumber);
+            }
+
+            CurrentOrderId = null;
+            Status = TableStatus.Available;
+        }
+
+        /// <summary>
+        /// Đặt trước bàn với trạng thái Reserved
+        /// </summary>
+        /// <exception cref="OrderValidationException">Khi bàn không available</exception>
+        public void Reserve()
+        {
+            if (Status != TableStatus.Available)
+            {
+                throw OrderValidationException.CannotReserveTable(TableNumber);
+            }
+
+            Status = TableStatus.Reserved;
+        }
+
+        /// <summary>
+        /// Hủy đặt trước và chuyển bàn về Available
+        /// </summary>
+        /// <exception cref="OrderValidationException">Khi bàn không ở trạng thái Reserved</exception>
+        public void CancelReservation()
+        {
+            if (Status != TableStatus.Reserved)
+            {
+                throw OrderValidationException.CannotCancelReservation(TableNumber);
+            }
+
+            Status = TableStatus.Available;
+        }
+
+
+        /// <summary>
+        /// Kiểm tra bàn có đang trống không
+        /// </summary>
+        /// <returns>True nếu bàn Available và không có đơn hàng</returns>
+        public bool IsAvailable()
+        {
+            return Status == TableStatus.Available && !CurrentOrderId.HasValue;
+        }
+
+        /// <summary>
+        /// Kiểm tra bàn có đang phục vụ khách không
+        /// </summary>
+        /// <returns>True nếu bàn Occupied và có đơn hàng</returns>
+        public bool IsOccupied()
+        {
+            return Status == TableStatus.Occupied && CurrentOrderId.HasValue;
+        }
+
+        /// <summary>
+        /// Kiểm tra bàn có được đặt trước không
+        /// </summary>
+        /// <returns>True nếu bàn ở trạng thái Reserved</returns>
+        public bool IsReserved()
+        {
+            return Status == TableStatus.Reserved;
+        }
+
     }
 }

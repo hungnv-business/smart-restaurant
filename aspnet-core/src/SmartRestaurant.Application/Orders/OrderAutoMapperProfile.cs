@@ -29,14 +29,10 @@ public class OrderAutoMapperProfile : Profile
         CreateMap<CreateOrderDto, Order>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.OrderNumber, opt => opt.Ignore()) // Generated in service
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatus.Pending))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatus.Active))
             .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => 0))
             .ForMember(dest => dest.OrderItems, opt => opt.Ignore()) // Handled separately
             .ForMember(dest => dest.Table, opt => opt.Ignore())
-            .ForMember(dest => dest.ConfirmedTime, opt => opt.Ignore())
-            .ForMember(dest => dest.PreparingTime, opt => opt.Ignore())
-            .ForMember(dest => dest.ReadyTime, opt => opt.Ignore())
-            .ForMember(dest => dest.ServedTime, opt => opt.Ignore())
             .ForMember(dest => dest.PaidTime, opt => opt.Ignore());
 
         CreateMap<CreateOrderItemDto, OrderItem>()
