@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../constants/app_constants.dart';
 import '../enums/restaurant_enums.dart';
 import '../models/table_models.dart';
+import '../models/menu_models.dart';
 import 'http_client_service.dart';
 
 /// Service xử lý quản lý đơn hàng và bàn trong nhà hàng
@@ -148,6 +149,124 @@ class OrderService extends ChangeNotifier {
   /// Refresh danh sách bàn
   Future<void> refreshTables() async {
     await getActiveTables();
+  }
+
+  /// Lấy danh sách categories đang hoạt động từ API
+  /// Endpoint: GET /api/app/order/active-menu-categories
+  Future<List<MenuCategory>> getActiveMenuCategories() async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.get('/api/app/order/active-menu-categories');
+
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> data;
+        
+        // Handle ABP Framework response format: {"items": [...]}
+        if (response.data is Map<String, dynamic> && 
+            response.data.containsKey('items')) {
+          data = response.data['items'] as List<dynamic>;
+        } else if (response.data is List) {
+          data = response.data;
+        } else {
+          data = [response.data];
+        }
+            
+        final categories = data
+            .map((json) => MenuCategory.fromJson(json))
+            .toList();
+
+        print('✅ OrderService: Successfully loaded ${categories.length} menu categories');
+        for (final category in categories) {
+          print('🍽️ Category: ${category.displayName} (${category.id})');
+        }
+
+        return categories;
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi lấy danh mục',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException getting menu categories - ${e.message}');
+      final exception = _handleDioException(e, 'lấy danh mục món ăn');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi lấy danh mục món ăn: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(
+        message: message,
+        errorCode: 'UNKNOWN_ERROR',
+      );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Lấy danh sách món ăn với filtering cho việc tạo đơn hàng
+  /// Endpoint: GET /api/app/order/menu-items-for-order
+  Future<List<MenuItem>> getMenuItemsForOrder(GetMenuItemsForOrder input) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.get(
+        '/api/app/order/menu-items-for-order',
+        queryParameters: input.toQueryParams(),
+      );
+      
+      if (response.statusCode == 200 && response.data != null) {
+        List<dynamic> data;
+        
+        // Handle ABP Framework response format: {"items": [...]}
+        if (response.data is Map<String, dynamic> && 
+            response.data.containsKey('items')) {
+          data = response.data['items'] as List<dynamic>;
+        } else if (response.data is List) {
+          data = response.data;
+        } else {
+          data = [response.data];
+        }
+            
+        final menuItems = data
+            .map((json) => MenuItem.fromJson(json))
+            .toList();
+
+        return menuItems;
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi lấy danh sách món ăn',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      final exception = _handleDioException(e, 'lấy danh sách món ăn');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi lấy danh sách món ăn: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(
+        message: message,
+        errorCode: 'UNKNOWN_ERROR',
+      );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Fallback categories nếu API không thể gọi được
+  List<MenuCategory> getFallbackCategories() {
+    return const [
+      MenuCategory(id: 'all', displayName: 'Tất cả'),
+      MenuCategory(id: 'appetizer', displayName: 'Khai vị'),
+      MenuCategory(id: 'main', displayName: 'Món chính'),
+      MenuCategory(id: 'drink', displayName: 'Nước uống'),
+      MenuCategory(id: 'dessert', displayName: 'Tráng miệng'),
+    ];
   }
 
   /// Xử lý lỗi từ Dio

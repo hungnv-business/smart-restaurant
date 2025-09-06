@@ -138,21 +138,21 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         //     return await query.AnyAsync(GetCancellationToken(cancellationToken));
         // }
 
-        // /// <summary>
-        // /// Đếm số đơn hàng theo ngày
-        // /// </summary>
-        // public async Task<int> CountOrdersByDateAsync(
-        //     DateTime date,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var startOfDay = date.Date;
-        //     var endOfDay = startOfDay.AddDays(1);
+        /// <summary>
+        /// Đếm số đơn hàng theo ngày
+        /// </summary>
+        public async Task<int> CountOrdersByDateAsync(
+            DateTime date,
+            CancellationToken cancellationToken = default)
+        {
+            var startOfDay = date.Date;
+            var endOfDay = startOfDay.AddDays(1);
 
-        //     var dbSet = await GetDbSetAsync();
-        //     return await dbSet
-        //         .Where(o => o.CreationTime >= startOfDay && o.CreationTime < endOfDay)
-        //         .CountAsync(GetCancellationToken(cancellationToken));
-        // }
+            var dbSet = await GetDbSetAsync();
+            return await dbSet
+                .Where(o => o.CreationTime >= startOfDay && o.CreationTime < endOfDay)
+                .CountAsync(GetCancellationToken(cancellationToken));
+        }
 
         // /// <summary>
         // /// Lấy danh sách đơn hàng đang hoạt động (chưa thanh toán)

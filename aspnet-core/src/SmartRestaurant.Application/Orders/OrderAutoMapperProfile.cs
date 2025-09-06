@@ -1,6 +1,8 @@
 using AutoMapper;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
 using SmartRestaurant.Orders;
+using SmartRestaurant.MenuManagement.MenuItems;
+using SmartRestaurant.MenuManagement.MenuItems.Dto;
 
 namespace SmartRestaurant.Application.Orders;
 
@@ -43,5 +45,10 @@ public class OrderAutoMapperProfile : Profile
             .ForMember(dest => dest.MenuItem, opt => opt.Ignore())
             .ForMember(dest => dest.PreparationStartTime, opt => opt.Ignore())
             .ForMember(dest => dest.PreparationCompleteTime, opt => opt.Ignore());
+
+        // MenuItem mappings
+        CreateMap<MenuItem, MenuItemDto>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => 
+                src.Category != null ? src.Category.Name : null));
     }
 }

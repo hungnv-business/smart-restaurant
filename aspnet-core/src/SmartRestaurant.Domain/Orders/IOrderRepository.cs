@@ -79,15 +79,15 @@ public interface IOrderRepository : IRepository<Order, Guid>
     //     Guid? excludeOrderId = null,
     //     CancellationToken cancellationToken = default);
 
-    // /// <summary>
-    // /// Đếm số đơn hàng theo ngày
-    // /// </summary>
-    // /// <param name="date">Ngày cần đếm</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Số đơn hàng trong ngày</returns>
-    // Task<int> CountOrdersByDateAsync(
-    //     DateTime date,
-    //     CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Đếm số đơn hàng theo ngày
+    /// </summary>
+    /// <param name="date">Ngày cần đếm</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Số đơn hàng trong ngày</returns>
+    Task<int> CountOrdersByDateAsync(
+        DateTime date,
+        CancellationToken cancellationToken = default);
 
     // /// <summary>
     // /// Lấy danh sách đơn hàng đang hoạt động (chưa thanh toán)

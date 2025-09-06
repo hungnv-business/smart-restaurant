@@ -2,10 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using SmartRestaurant.EntityFrameworkCore.InventoryManagement.Ingredients;
 using SmartRestaurant.EntityFrameworkCore.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.EntityFrameworkCore.MenuManagement.MenuItems;
 using SmartRestaurant.EntityFrameworkCore.TableManagement.Tables;
 using SmartRestaurant.EntityFrameworkCore.TableManagement.LayoutSections;
 using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.InventoryManagement.PurchaseInvoices;
+using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.TableManagement.Tables;
 using SmartRestaurant.TableManagement.LayoutSections;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -51,6 +53,9 @@ public class SmartRestaurantEntityFrameworkCoreModule : AbpModule
                 /* Remove "includeAllEntities: true" to create
                  * default repositories only for aggregate roots */
             options.AddDefaultRepositories(includeAllEntities: true);
+            
+            // Đăng ký custom repositories
+            options.AddRepository<MenuItem, EfCoreMenuItemRepository>();
         });
 
         Configure<AbpDbContextOptions>(options =>

@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Services;
+using Volo.Abp.Domain.Repositories;
 using SmartRestaurant.TableManagement.Tables;
+using SmartRestaurant.MenuManagement.MenuItems;
+using SmartRestaurant.Application.Contracts.Orders.Dto;
 
 namespace SmartRestaurant.Orders;
 
@@ -11,62 +14,69 @@ namespace SmartRestaurant.Orders;
 public class OrderManager : DomainService
 {
     private readonly ITableRepository _tableRepository;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IMenuItemRepository _menuItemRepository;
 
-    public OrderManager(ITableRepository tableRepository)
+    public OrderManager(
+        ITableRepository tableRepository, 
+        IOrderRepository orderRepository,
+        IMenuItemRepository menuItemRepository)
     {
         _tableRepository = tableRepository;
+        _orderRepository = orderRepository;
+        _menuItemRepository = menuItemRepository;
     }
 
-    // /// <summary>
-    // /// Tạo đơn hàng mới với validation logic kinh doanh
-    // /// </summary>
-    // /// <param name="orderNumber">Số đơn hàng</param>
-    // /// <param name="orderType">Loại đơn hàng</param>
-    // /// <param name="tableId">ID bàn (nếu có)</param>
-    // /// <param name="notes">Ghi chú</param>
-    // /// <returns>Order mới được tạo</returns>
-    // public async Task<Order> CreateAsync(
-    //     string orderNumber,
-    //     OrderType orderType,
-    //     Guid? tableId = null,
-    //     string? notes = null)
-    // {
-    //     // Validate bàn nếu là đơn hàng ăn tại chỗ
-    //     if (orderType == OrderType.DineIn)
-    //     {
-    //         await ValidateTableAvailabilityAsync(tableId);
-    //     }
+    /// <summary>
+    /// Tạo đơn hàng mới với validation logic kinh doanh
+    /// </summary>
+    /// <param name="orderNumber">Số đơn hàng</param>
+    /// <param name="orderType">Loại đơn hàng</param>
+    /// <param name="tableId">ID bàn (nếu có)</param>
+    /// <param name="notes">Ghi chú</param>
+    /// <returns>Order mới được tạo</returns>
+    public async Task<Order> CreateAsync(
+        string orderNumber,
+        OrderType orderType,
+        Guid? tableId = null,
+        string? notes = null)
+    {
+        // Validate bàn nếu là đơn hàng ăn tại chỗ
+        if (orderType == OrderType.DineIn)
+        {
+            await ValidateTableAvailabilityAsync(tableId);
+        }
 
-    //     var order = new Order(
-    //         GuidGenerator.Create(),
-    //         orderNumber,
-    //         orderType,
-    //         tableId,
-    //         notes);
+        var order = new Order(
+            GuidGenerator.Create(),
+            orderNumber,
+            orderType,
+            tableId,
+            notes);
 
-    //     return order;
-    // }
+        return order;
+    }
 
-    // /// <summary>
-    // /// Validate tính khả dụng của bàn cho đơn hàng ăn tại chỗ
-    // /// </summary>
-    // /// <param name="tableId">ID bàn cần kiểm tra</param>
-    // public async Task ValidateTableAvailabilityAsync(Guid? tableId)
-    // {
-    //     if (tableId == null)
-    //     {
-    //         throw new ArgumentException("Đơn hàng ăn tại chỗ phải có bàn", nameof(tableId));
-    //     }
+    /// <summary>
+    /// Validate tính khả dụng của bàn cho đơn hàng ăn tại chỗ
+    /// </summary>
+    /// <param name="tableId">ID bàn cần kiểm tra</param>
+    public async Task ValidateTableAvailabilityAsync(Guid? tableId)
+    {
+        if (tableId == null)
+        {
+            throw new ArgumentException("Đơn hàng ăn tại chỗ phải có bàn", nameof(tableId));
+        }
 
-    //     var table = await _tableRepository.GetAsync(tableId.Value);
-    //     ArgumentNullException.ThrowIfNull(table, $"Không tìm thấy bàn với ID {tableId}");
+        var table = await _tableRepository.GetAsync(tableId.Value);
+        ArgumentNullException.ThrowIfNull(table, $"Không tìm thấy bàn với ID {tableId}");
 
-    //     // TODO: Kiểm tra trạng thái bàn khi Table entity có thuộc tính Status
-    //     // if (table.Status != TableStatus.Available)
-    //     // {
-    //     //     throw new InvalidOperationException($"Bàn {table.Name} không khả dụng");
-    //     // }
-    // }
+        // Kiểm tra trạng thái bàn
+        if (table.Status != TableStatus.Available && table.Status != TableStatus.Occupied)
+        {
+            throw new InvalidOperationException($"Bàn {table.TableNumber} không khả dụng");
+        }
+    }
 
     // /// <summary>
     // /// Tính tổng tiền đơn hàng dựa trên các OrderItem
@@ -131,48 +141,48 @@ public class OrderManager : DomainService
     //     // order.UpdateStatus(OrderStatus.Confirmed);
     // }
 
-    // /// <summary>
-    // /// Tạo OrderItem mới với validation
-    // /// </summary>
-    // /// <param name="orderId">ID đơn hàng</param>
-    // /// <param name="menuItemId">ID món ăn</param>
-    // /// <param name="menuItemName">Tên món ăn</param>
-    // /// <param name="quantity">Số lượng</param>
-    // /// <param name="unitPrice">Giá đơn vị</param>
-    // /// <param name="notes">Ghi chú</param>
-    // /// <returns>OrderItem mới</returns>
-    // public OrderItem CreateOrderItem(
-    //     Guid orderId,
-    //     Guid menuItemId,
-    //     string menuItemName,
-    //     int quantity,
-    //     decimal unitPrice,
-    //     string? notes = null)
-    // {
-    //     if (string.IsNullOrWhiteSpace(menuItemName))
-    //     {
-    //         throw new ArgumentException("Tên món ăn không được để trống", nameof(menuItemName));
-    //     }
+    /// <summary>
+    /// Tạo OrderItem mới với validation
+    /// </summary>
+    /// <param name="orderId">ID đơn hàng</param>
+    /// <param name="menuItemId">ID món ăn</param>
+    /// <param name="menuItemName">Tên món ăn</param>
+    /// <param name="quantity">Số lượng</param>
+    /// <param name="unitPrice">Giá đơn vị</param>
+    /// <param name="notes">Ghi chú</param>
+    /// <returns>OrderItem mới</returns>
+    public OrderItem CreateOrderItem(
+        Guid orderId,
+        Guid menuItemId,
+        string menuItemName,
+        int quantity,
+        decimal unitPrice,
+        string? notes = null)
+    {
+        if (string.IsNullOrWhiteSpace(menuItemName))
+        {
+            throw new ArgumentException("Tên món ăn không được để trống", nameof(menuItemName));
+        }
 
-    //     if (quantity <= 0)
-    //     {
-    //         throw new ArgumentException("Số lượng phải lớn hơn 0", nameof(quantity));
-    //     }
+        if (quantity <= 0)
+        {
+            throw new ArgumentException("Số lượng phải lớn hơn 0", nameof(quantity));
+        }
 
-    //     if (unitPrice < 0)
-    //     {
-    //         throw new ArgumentException("Giá không được âm", nameof(unitPrice));
-    //     }
+        if (unitPrice < 0)
+        {
+            throw new ArgumentException("Giá không được âm", nameof(unitPrice));
+        }
 
-    //     return new OrderItem(
-    //         GuidGenerator.Create(),
-    //         orderId,
-    //         menuItemId,
-    //         menuItemName.Trim(),
-    //         quantity,
-    //         unitPrice,
-    //         notes?.Trim());
-    // }
+        return new OrderItem(
+            GuidGenerator.Create(),
+            orderId,
+            menuItemId,
+            menuItemName.Trim(),
+            quantity,
+            unitPrice,
+            notes?.Trim());
+    }
 
     // /// <summary>
     // /// Thông báo đơn hàng mới cho bếp
@@ -231,28 +241,63 @@ public class OrderManager : DomainService
     //     // }
     // }
 
-    // /// <summary>
-    // /// Tạo số đơn hàng tự động theo ngày
-    // /// </summary>
-    // /// <returns>Số đơn hàng mới</returns>
-    // public async Task<string> GenerateOrderNumberAsync()
-    // {
-    //     var today = DateTime.UtcNow.Date;
-    //     var orderCount = await GetOrderCountByDateAsync(today);
-    //     var nextNumber = orderCount + 1;
-    //     
-    //     return $"ORD-{today:yyyyMMdd}-{nextNumber:D3}";
-    // }
+    /// <summary>
+    /// Tạo số đơn hàng tự động theo ngày
+    /// </summary>
+    /// <returns>Số đơn hàng mới</returns>
+    public async Task<string> GenerateOrderNumberAsync()
+    {
+        var today = DateTime.UtcNow.Date;
+        var orderCount = await GetOrderCountByDateAsync(today);
+        var nextNumber = orderCount + 1;
+        
+        return $"ORD-{today:yyyyMMdd}-{nextNumber:D3}";
+    }
 
-    // /// <summary>
-    // /// Đếm số đơn hàng theo ngày (cần implement trong repository)
-    // /// </summary>
-    // /// <param name="date">Ngày cần đếm</param>
-    // /// <returns>Số đơn hàng trong ngày</returns>
-    // private async Task<int> GetOrderCountByDateAsync(DateTime date)
-    // {
-    //     // TODO: Triển khai khi có IOrderRepository.CountOrdersByDateAsync
-    //     await Task.CompletedTask;
-    //     return 0;
-    // }
+    /// <summary>
+    /// Đếm số đơn hàng theo ngày (cần implement trong repository)
+    /// </summary>
+    /// <param name="date">Ngày cần đếm</param>
+    /// <returns>Số đơn hàng trong ngày</returns>
+    private async Task<int> GetOrderCountByDateAsync(DateTime date)
+    {
+        return await _orderRepository.CountOrdersByDateAsync(date);
+    }
+
+    /// <summary>
+    /// Validate toàn bộ input tạo đơn hàng với business rules và external dependencies
+    /// </summary>
+    /// <param name="input">Input tạo đơn hàng</param>
+    public async Task ValidateCreateOrderInputAsync(CreateOrderDto input)
+    {
+        // 1. Validate table availability nếu là DineIn
+        if (input.OrderType == OrderType.DineIn && input.TableId.HasValue)
+        {
+            await ValidateTableAvailabilityAsync(input.TableId);
+        }
+
+        // 2. Validate menu items exist và available, auto-fill price và name
+        foreach (var itemDto in input.OrderItems)
+        {
+            // Check availability và lấy menu item
+            if (!await _menuItemRepository.IsMenuItemAvailableAsync(itemDto.MenuItemId))
+            {
+                var unavailableItem = await _menuItemRepository.GetAsync(itemDto.MenuItemId);
+                throw new InvalidOperationException($"Món '{unavailableItem.Name}' hiện không có sẵn");
+            }
+            
+            var menuItem = await _menuItemRepository.GetAsync(itemDto.MenuItemId);
+
+            // Auto-update price and name if not provided
+            if (itemDto.UnitPrice <= 0)
+            {
+                itemDto.UnitPrice = menuItem.Price;
+            }
+
+            if (string.IsNullOrWhiteSpace(itemDto.MenuItemName))
+            {
+                itemDto.MenuItemName = menuItem.Name;
+            }
+        }
+    }
 }

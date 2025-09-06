@@ -1,6 +1,5 @@
 using System;
 using Volo.Abp.Application.Dtos;
-using SmartRestaurant.MenuManagement.MenuCategories.Dto;
 
 namespace SmartRestaurant.MenuManagement.MenuItems.Dto
 {
@@ -18,6 +17,16 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         
         public Guid CategoryId { get; set; }
         
-        public MenuCategoryDto? Category { get; set; }
+        public string? CategoryName { get; set; }
+        
+        /// <summary>
+        /// Số lượng đã bán ra (tổng từ tất cả orders đã hoàn thành)
+        /// </summary>
+        public int SoldQuantity { get; set; }
+        
+        /// <summary>
+        /// Món có phổ biến không (dựa trên số lượng bán)
+        /// </summary>
+        public bool IsPopular { get; set; }
     }
 }

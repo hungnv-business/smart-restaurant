@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
+using SmartRestaurant.Common.Dto;
+using SmartRestaurant.MenuManagement.MenuItems.Dto;
 
 namespace SmartRestaurant.Application.Contracts.Orders;
 
@@ -26,12 +28,12 @@ public interface IOrderAppService : IApplicationService
     // /// <returns>Chi tiết đơn hàng bao gồm các món</returns>
     // Task<OrderDto> GetAsync(Guid id);
 
-    // /// <summary>
-    // /// Tạo đơn hàng mới với validation business logic
-    // /// </summary>
-    // /// <param name="input">Thông tin đơn hàng mới</param>
-    // /// <returns>Đơn hàng đã tạo</returns>
-    // Task<OrderDto> CreateAsync(CreateOrderDto input);
+    /// <summary>
+    /// Tạo đơn hàng mới với validation business logic
+    /// </summary>
+    /// <param name="input">Thông tin đơn hàng mới</param>
+    /// <returns>Đơn hàng đã tạo</returns>
+    Task<OrderDto> CreateAsync(CreateOrderDto input);
 
     // /// <summary>
     // /// Cập nhật trạng thái đơn hàng theo workflow
@@ -117,4 +119,18 @@ public interface IOrderAppService : IApplicationService
     /// <param name="tableId">ID bàn cần xem chi tiết</param>
     /// <returns>Thông tin chi tiết bàn và đơn hàng</returns>
     Task<TableDetailsDto> GetTableDetailsAsync(Guid tableId);
+
+    /// <summary>
+    /// Lấy danh sách tất cả danh mục món ăn đang hoạt động
+    /// Dùng cho dropdown/selector khi tạo đơn hàng
+    /// </summary>
+    /// <returns>Danh sách danh mục món ăn sắp xếp theo DisplayOrder</returns>
+    Task<ListResultDto<GuidLookupItemDto>> GetActiveMenuCategoriesAsync();
+
+    /// <summary>
+    /// Lấy danh sách món ăn với filtering cho việc tạo đơn hàng
+    /// </summary>
+    /// <param name="input">Bộ lọc tìm kiếm món ăn</param>
+    /// <returns>Danh sách món ăn phù hợp với điều kiện lọc</returns>
+    Task<ListResultDto<MenuItemDto>> GetMenuItemsForOrderAsync(GetMenuItemsForOrderDto input);
 }

@@ -5,15 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Linq;
 using SmartRestaurant.Application.Contracts.Orders;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
-using SmartRestaurant.Application.Contracts.Common;
+using SmartRestaurant.Common.Dto;
 using SmartRestaurant.Orders;
-using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.TableManagement.Tables;
+using SmartRestaurant.MenuManagement.MenuCategories;
+using SmartRestaurant.MenuManagement.MenuCategories.Dto;
+using SmartRestaurant.MenuManagement.MenuItems;
+using SmartRestaurant.MenuManagement.MenuItems.Dto;
 
 namespace SmartRestaurant.Application.Orders;
 
@@ -25,23 +28,26 @@ namespace SmartRestaurant.Application.Orders;
 public class OrderAppService : ApplicationService, IOrderAppService
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IRepository<MenuItem, Guid> _menuItemRepository;
     private readonly ITableRepository _tableRepository;
     private readonly OrderManager _orderManager;
     private readonly IOrderNotificationService _notificationService;
+    private readonly IRepository<MenuCategory, Guid> _menuCategoryRepository;
+    private readonly IMenuItemRepository _menuItemRepository;
 
     public OrderAppService(
         IOrderRepository orderRepository,
-        IRepository<MenuItem, Guid> menuItemRepository,
         ITableRepository tableRepository,
         OrderManager orderManager,
-        IOrderNotificationService notificationService)
+        IOrderNotificationService notificationService,
+        IRepository<MenuCategory, Guid> menuCategoryRepository,
+        IMenuItemRepository menuItemRepository)
     {
         _orderRepository = orderRepository;
-        _menuItemRepository = menuItemRepository;
         _tableRepository = tableRepository;
         _orderManager = orderManager;
         _notificationService = notificationService;
+        _menuCategoryRepository = menuCategoryRepository;
+        _menuItemRepository = menuItemRepository;
     }
 
     // /// <summary>
@@ -180,49 +186,49 @@ public class OrderAppService : ApplicationService, IOrderAppService
     //     return await MapToOrderDtoAsync(order, includeOrderItems: true);
     // }
 
-    // /// <summary>
-    // /// Tạo đơn hàng mới với validation business logic
-    // /// </summary>
-    // public async Task<OrderDto> CreateAsync(CreateOrderDto input)
-    // {
-    //     // Validate business rules first
-    //     await ValidateCreateOrderInputAsync(input);
+    /// <summary>
+    /// Tạo đơn hàng mới với validation business logic
+    /// </summary>
+    public async Task<OrderDto> CreateAsync(CreateOrderDto input)
+    {
+        // Validate business rules và external dependencies trong domain manager
+        await _orderManager.ValidateCreateOrderInputAsync(input);
 
-    //     // Generate order number
-    //     var orderNumber = await _orderManager.GenerateOrderNumberAsync();
+        // Generate order number
+        var orderNumber = await _orderManager.GenerateOrderNumberAsync();
 
-    //     // Create order using domain service
-    //     var order = await _orderManager.CreateAsync(
-    //         orderNumber,
-    //         input.OrderType,
-    //         input.TableId,
-    //         input.Notes);
+        // Create order using domain service
+        var order = await _orderManager.CreateAsync(
+            orderNumber,
+            input.OrderType,
+            input.TableId,
+            input.Notes);
 
-    //     // Add order items
-    //     foreach (var itemDto in input.OrderItems)
-    //     {
-    //         var orderItem = _orderManager.CreateOrderItem(
-    //             order.Id,
-    //             itemDto.MenuItemId,
-    //             itemDto.MenuItemName,
-    //             itemDto.Quantity,
-    //             itemDto.UnitPrice,
-    //             itemDto.Notes);
+        // Add order items
+        foreach (var itemDto in input.OrderItems)
+        {
+            var orderItem = _orderManager.CreateOrderItem(
+                order.Id,
+                itemDto.MenuItemId,
+                itemDto.MenuItemName,
+                itemDto.Quantity,
+                itemDto.UnitPrice,
+                itemDto.Notes);
 
-    //         order.AddItem(orderItem);
-    //     }
+            order.AddItem(orderItem);
+        }
 
-    //     // Save to database
-    //     await _orderRepository.InsertAsync(order, autoSave: true);
+        // Save to database
+        await _orderRepository.InsertAsync(order, autoSave: true);
 
-    //     // Create DTO for notifications
-    //     var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
+        // Create DTO for notifications
+        var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
 
-    //     // Send real-time notifications  
-    //     await _notificationService.NotifyNewOrderAsync(orderDto);
+        // Send real-time notifications  
+        await _notificationService.NotifyNewOrderAsync(orderDto);
 
-    //     return orderDto;
-    // }
+        return orderDto;
+    }
 
     // /// <summary>
     // /// Cập nhật trạng thái đơn hàng theo workflow
@@ -401,7 +407,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 TableNumber = table.TableNumber,
                 DisplayOrder = table.DisplayOrder,
                 Status = table.Status,
-                StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
+                StatusDisplay = GetTableStatusDisplayName(table.Status),
                 LayoutSectionId = table.LayoutSectionId,
                 LayoutSectionName = table.LayoutSection?.SectionName ?? "",
                 HasActiveOrders = hasActiveOrders,
@@ -437,7 +443,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
             TableNumber = table.TableNumber,
             DisplayOrder = table.DisplayOrder,
             Status = table.Status,
-            StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
+            StatusDisplay = GetTableStatusDisplayName(table.Status),
             LayoutSectionId = table.LayoutSectionId,
             LayoutSectionName = table.LayoutSection?.SectionName ?? "",
             HasActiveOrders = activeOrders.Any(),
@@ -460,7 +466,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 Id = order.Id,
                 OrderNumber = order.OrderNumber,
                 Status = order.Status,
-                StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
+                StatusDisplay = GetTableStatusDisplayName(table.Status),
                 CreationTime = order.CreationTime,
                 ItemsCount = order.OrderItems?.Count ?? 0,
                 TotalAmount = order.TotalAmount,
@@ -476,110 +482,138 @@ public class OrderAppService : ApplicationService, IOrderAppService
         return dto;
     }
 
+    /// <summary>
+    /// Lấy danh sách tất cả danh mục món ăn đang hoạt động
+    /// </summary>
+    public async Task<ListResultDto<GuidLookupItemDto>> GetActiveMenuCategoriesAsync()
+    {
+        var categories = await _menuCategoryRepository.GetListAsync(
+            c => c.IsEnabled == true,
+            includeDetails: false);
+
+        // Sắp xếp theo DisplayOrder và map sang lookup DTO
+        var lookupDtos = categories
+            .OrderBy(c => c.DisplayOrder)
+            .Select(c => new GuidLookupItemDto { Id = c.Id, DisplayName = c.Name })
+            .ToList();
+
+        return new ListResultDto<GuidLookupItemDto>(lookupDtos);
+    }
+
+    /// <summary>
+    /// Lấy danh sách món ăn với filtering cho việc tạo đơn hàng
+    /// </summary>
+    public async Task<ListResultDto<MenuItemDto>> GetMenuItemsForOrderAsync(GetMenuItemsForOrderDto input)
+    {
+        // Sử dụng custom repository method với filtering được tối ưu
+        var menuItems = await _menuItemRepository.GetMenuItemsAsync(
+            categoryId: input.CategoryId,
+            onlyAvailable: input.OnlyAvailable ?? true,
+            nameFilter: input.NameFilter);
+
+        // Lấy dữ liệu bán hàng
+        var menuItemIds = menuItems.Select(m => m.Id).ToList();
+        var salesData = await _menuItemRepository.GetMenuItemSalesDataAsync(menuItemIds);
+
+        // Map sang DTO với CategoryName được tự động map từ navigation property
+        var menuItemDtos = ObjectMapper.Map<List<MenuItem>, List<MenuItemDto>>(menuItems);
+
+        // Tính toán số lượng bán và xác định món phổ biến
+        var totalSales = salesData.Values.Sum();
+        var averageSales = totalSales > 0 ? totalSales / (double)salesData.Count : 0;
+
+        foreach (var dto in menuItemDtos)
+        {
+            dto.SoldQuantity = salesData.GetValueOrDefault(dto.Id, 0);
+            // Món phổ biến nếu số lượng bán > average và >= 10 (có thể tùy chỉnh)
+            dto.IsPopular = dto.SoldQuantity >= averageSales && dto.SoldQuantity >= 10;
+        }
+
+        return new ListResultDto<MenuItemDto>(menuItemDtos);
+    }
+
     #region Private Helper Methods
 
-    #endregion
 
-    // /// <summary>
-    // /// Validate create order input với business rules
-    // /// </summary>
-    // private async Task ValidateCreateOrderInputAsync(CreateOrderDto input)
-    // {
-    //     // Validate table exists if DineIn
-    //     if (input.OrderType == OrderType.DineIn && input.TableId.HasValue)
-    //     {
-    //         await _orderManager.ValidateTableAvailabilityAsync(input.TableId.Value);
-    //     }
+    /// <summary>
+    /// Map Order entity to OrderDto
+    /// </summary>
+    private async Task<OrderDto> MapToOrderDtoAsync(Order order, bool includeOrderItems)
+    {
+        var dto = ObjectMapper.Map<Order, OrderDto>(order);
 
-    //     // Validate menu items exist and get current prices
-    //     foreach (var itemDto in input.OrderItems)
-    //     {
-    //         var menuItem = await _menuItemRepository.GetAsync(itemDto.MenuItemId);
-    //         if (!menuItem.IsAvailable)
-    //         {
-    //             throw new InvalidOperationException($"Món '{menuItem.Name}' hiện không có sẵn");
-    //         }
-
-    //         // Auto-update price and name if not provided
-    //         if (itemDto.UnitPrice <= 0)
-    //         {
-    //             itemDto.UnitPrice = menuItem.Price;
-    //         }
-
-    //         if (string.IsNullOrWhiteSpace(itemDto.MenuItemName))
-    //         {
-    //             itemDto.MenuItemName = menuItem.Name;
-    //         }
-    //     }
-    // }
-
-    // /// <summary>
-    // /// Map Order entity to OrderDto
-    // /// </summary>
-    // private async Task<OrderDto> MapToOrderDtoAsync(Order order, bool includeOrderItems)
-    // {
-    //     var dto = ObjectMapper.Map<Order, OrderDto>(order);
-
-    //     // Add computed properties
-    //     dto.StatusDisplay = GetStatusDisplayName(order.Status);
+        // Add computed properties
+        dto.StatusDisplay = GetStatusDisplayName(order.Status);
         
-    //     // Get table name if exists
-    //     if (order.TableId.HasValue)
-    //     {
-    //         var table = await _tableRepository.FirstOrDefaultAsync(x => x.Id == order.TableId.Value);
-    //         dto.TableName = table?.TableNumber;
-    //     }
+        // Get table name if exists
+        if (order.TableId.HasValue)
+        {
+            var tableRepo = (IRepository<Table, Guid>)_tableRepository;
+            var table = await tableRepo.FirstOrDefaultAsync(x => x.Id == order.TableId.Value);
+            dto.TableName = table?.TableNumber;
+        }
 
-    //     // Map order items if requested
-    //     if (includeOrderItems)
-    //     {
-    //         dto.OrderItems = order.OrderItems.Select(MapToOrderItemDto).ToList();
-    //     }
+        // Map order items if requested
+        if (includeOrderItems)
+        {
+            dto.OrderItems = order.OrderItems.Select(MapToOrderItemDto).ToList();
+        }
 
-    //     return dto;
-    // }
+        return dto;
+    }
 
-    // /// <summary>
-    // /// Map OrderItem entity to OrderItemDto
-    // /// </summary>
-    // private OrderItemDto MapToOrderItemDto(OrderItem orderItem)
-    // {
-    //     var dto = ObjectMapper.Map<OrderItem, OrderItemDto>(orderItem);
-    //     dto.StatusDisplay = GetOrderItemStatusDisplayName(orderItem.Status);
-    //     return dto;
-    // }
+    /// <summary>
+    /// Map OrderItem entity to OrderItemDto
+    /// </summary>
+    private OrderItemDto MapToOrderItemDto(OrderItem orderItem)
+    {
+        var dto = ObjectMapper.Map<OrderItem, OrderItemDto>(orderItem);
+        dto.StatusDisplay = GetOrderItemStatusDisplayName(orderItem.Status);
+        return dto;
+    }
 
-    // /// <summary>
-    // /// Get display name for OrderStatus
-    // /// </summary>
-    // private string GetStatusDisplayName(OrderStatus status)
-    // {
-    //     return status switch
-    //     {
-    //         OrderStatus.Pending => "Chờ xác nhận",
-    //         OrderStatus.Confirmed => "Đã xác nhận",
-    //         OrderStatus.Preparing => "Đang chuẩn bị",
-    //         OrderStatus.Ready => "Sẵn sàng",
-    //         OrderStatus.Served => "Đã phục vụ",
-    //         OrderStatus.Paid => "Đã thanh toán",
-    //         _ => status.ToString()
-    //     };
-    // }
+    /// <summary>
+    /// Get display name for OrderStatus
+    /// </summary>
+    private string GetStatusDisplayName(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Active => "Đang hoạt động",
+            OrderStatus.Paid => "Đã thanh toán",
+            _ => status.ToString()
+        };
+    }
 
-    // /// <summary>
-    // /// Get display name for OrderItemStatus
-    // /// </summary>
-    // private string GetOrderItemStatusDisplayName(OrderItemStatus status)
-    // {
-    //     return status switch
-    //     {
-    //         OrderItemStatus.Pending => "Chờ chuẩn bị",
-    //         OrderItemStatus.Preparing => "Đang chuẩn bị",
-    //         OrderItemStatus.Ready => "Đã hoàn thành",
-    //         OrderItemStatus.Served => "Đã phục vụ",
-    //         _ => status.ToString()
-    //     };
-    // }
+    /// <summary>
+    /// Get display name for OrderItemStatus
+    /// </summary>
+    private string GetOrderItemStatusDisplayName(OrderItemStatus status)
+    {
+        return status switch
+        {
+            OrderItemStatus.Pending => "Chờ chuẩn bị",
+            OrderItemStatus.Preparing => "Đang chuẩn bị",
+            OrderItemStatus.Ready => "Đã hoàn thành",
+            OrderItemStatus.Served => "Đã phục vụ",
+            OrderItemStatus.Canceled => "Đã huỷ",
+            _ => status.ToString()
+        };
+    }
 
-    // #endregion
+    /// <summary>
+    /// Get display name for TableStatus
+    /// </summary>
+    private string GetTableStatusDisplayName(TableStatus status)
+    {
+        return status switch
+        {
+            TableStatus.Available => "Trống",
+            TableStatus.Occupied => "Có khách", 
+            TableStatus.Reserved => "Đã đặt",
+            _ => status.ToString()
+        };
+    }
+
+    #endregion
 }
