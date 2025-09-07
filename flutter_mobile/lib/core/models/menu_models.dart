@@ -46,7 +46,7 @@ class MenuItem {
   final String id;
   final String name;
   final String? description;
-  final double price;
+  final int price;
   final bool isAvailable;
   final String? imageUrl;
   final String categoryId;
@@ -72,7 +72,7 @@ class MenuItem {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
-      price: (json['price'] as num).toDouble(),
+      price: (json['price'] as num).toInt(),
       isAvailable: json['isAvailable'] as bool? ?? true,
       imageUrl: json['imageUrl'] as String?,
       categoryId: json['categoryId'] as String,

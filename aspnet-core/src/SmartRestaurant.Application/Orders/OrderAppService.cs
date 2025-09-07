@@ -221,6 +221,9 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Save to database
         await _orderRepository.InsertAsync(order, autoSave: true);
 
+        var table = await _tableRepository.GetAsync(e => e.Id == input.TableId);
+        table.AssignOrder(order.Id);
+
         // Create DTO for notifications
         var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
 

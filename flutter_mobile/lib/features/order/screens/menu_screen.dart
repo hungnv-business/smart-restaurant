@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/table_models.dart';
 import '../../../core/models/menu_models.dart';
+import '../../../core/models/order_request_models.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../../../core/services/order_service.dart';
 import '../widgets/menu_item_card.dart';
+import '../widgets/cart_dialog.dart';
 
 /// Màn hình Menu món ăn cho bàn đã chọn
 class MenuScreen extends StatefulWidget {
-  final TableModel selectedTable;
+  final ActiveTableDto selectedTable;
 
   const MenuScreen({
     Key? key,
@@ -33,9 +35,15 @@ class _MenuScreenState extends State<MenuScreen> {
   String? _menuItemsError;
   
   int _selectedCategoryIndex = 0;
-  int _cartItemCount = 0;
   bool _onlyAvailable = true; // State cho checkbox
   String _searchQuery = ''; // Search query
+  
+  // Danh sách món trong giỏ hàng với thông tin đầy đủ
+  List<MenuItem> _cartItems = [];
+  List<int> _cartItemQuantities = [];
+  
+  // Getter để lấy số lượng item trong giỏ hàng
+  int get _cartItemCount => _cartItems.length;
 
   @override
   void initState() {
@@ -129,7 +137,7 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBar(
-        title: 'Menu - ${widget.selectedTable.name}',
+        title: 'Menu - ${widget.selectedTable.tableNumber}',
         actions: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -354,18 +362,130 @@ class _MenuScreenState extends State<MenuScreen> {
   
   void _onAddToCart(MenuItem menuItem) {
     setState(() {
-      _cartItemCount++;
+      // Kiểm tra xem món đã có trong giỏ hàng chưa
+      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
+      
+      if (existingIndex != -1) {
+        // Món đã có, tăng số lượng
+        _cartItemQuantities[existingIndex]++;
+      } else {
+        // Món chưa có, thêm mới
+        _cartItems.add(menuItem);
+        _cartItemQuantities.add(1);
+      }
     });
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã thêm ${menuItem.name} vào giỏ hàng cho ${widget.selectedTable.name}'),
+        content: Text('Đã thêm ${menuItem.name} vào giỏ hàng cho ${widget.selectedTable.tableNumber}'),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
+  }
+
+  void _increaseQuantity(int index) {
+    if (index >= 0 && index < _cartItemQuantities.length) {
+      setState(() {
+        _cartItemQuantities[index]++;
+      });
+    }
+  }
+
+  void _decreaseQuantity(int index) {
+    if (index >= 0 && index < _cartItemQuantities.length) {
+      setState(() {
+        if (_cartItemQuantities[index] > 1) {
+          _cartItemQuantities[index]--;
+        } else {
+          // Xóa món nếu số lượng = 0
+          _cartItems.removeAt(index);
+          _cartItemQuantities.removeAt(index);
+        }
+      });
+    }
+  }
+
+  int _calculateTotal() {
+    int total = 0;
+    for (int i = 0; i < _cartItems.length; i++) {
+      total += _cartItems[i].price * _cartItemQuantities[i];
+    }
+    return total;
+  }
+
+  /// Gửi đơn hàng lên API
+  Future<void> _submitOrder() async {
+    if (_cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Giỏ hàng trống, không thể gửi đơn hàng'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Tạo request từ cart items
+      final orderItems = <CreateOrderItemRequest>[];
+      for (int i = 0; i < _cartItems.length; i++) {
+        final menuItem = _cartItems[i];
+        final quantity = _cartItemQuantities[i];
+        
+        orderItems.add(CreateOrderItemRequest.fromMenuItem(
+          menuItemId: menuItem.id,
+          menuItemName: menuItem.name,
+          quantity: quantity,
+          unitPrice: menuItem.price,
+        ));
+      }
+
+      final orderRequest = CreateOrderRequest(
+        tableId: widget.selectedTable.id,
+        orderType: OrderRequestType.dineIn,
+        orderItems: orderItems,
+        notes: null,
+      );
+
+      // Gửi request
+      final response = await _orderService.createOrder(orderRequest);
+
+      // Clear cart sau khi thành công  
+      setState(() {
+        _cartItems.clear();
+        _cartItemQuantities.clear();
+      });
+
+      // Hiển thị thông báo thành công
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+
+    } catch (e) {
+      // Hiển thị thông báo lỗi
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Lỗi tạo đơn hàng: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Thử lại',
+              onPressed: () => _submitOrder(),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Widget? _buildFloatingActionButtons() {
@@ -390,140 +510,21 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   void _showCartBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Giỏ hàng - ${widget.selectedTable.name}',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Đóng'),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const Divider(),
-              
-              // Cart items (Demo)
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: _cartItemCount,
-                  itemBuilder: (context, index) => ListTile(
-                    leading: const Text('🍜', style: TextStyle(fontSize: 24)),
-                    title: Text('Món ăn ${index + 1}'),
-                    subtitle: const Text('85.000₫'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.remove_circle_outline),
-                        ),
-                        const Text('1'),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.add_circle_outline),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Bottom actions
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Tổng cộng:',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          '${_cartItemCount * 85}.000₫',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                _cartItemCount = 0;
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Xóa tất cả'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Đã gửi đơn hàng cho ${widget.selectedTable.name}'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            },
-                            child: const Text('Gửi đơn'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      builder: (context) => CartDialog(
+        selectedTable: widget.selectedTable,
+        cartItems: _cartItems,
+        cartItemQuantities: _cartItemQuantities,
+        onIncreaseQuantity: _increaseQuantity,
+        onDecreaseQuantity: _decreaseQuantity,
+        onClearCart: () {
+          setState(() {
+            _cartItems.clear();
+            _cartItemQuantities.clear();
+          });
+        },
+        onSubmitOrder: () => _submitOrder(),
       ),
     );
   }

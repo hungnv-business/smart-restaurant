@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/menu_models.dart';
+import '../../../shared/utils/price_formatter.dart';
 
 /// Widget hiển thị món ăn theo template V0 design
 class MenuItemCard extends StatelessWidget {
@@ -239,7 +240,7 @@ class MenuItemCard extends StatelessWidget {
       children: [
         // Price
         Text(
-          _formatPrice(menuItem.price),
+          PriceFormatter.format(menuItem.price),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: menuItem.isAvailable 
                 ? Theme.of(context).colorScheme.primary
@@ -298,10 +299,4 @@ class MenuItemCard extends StatelessWidget {
     );
   }
 
-  String _formatPrice(double price) {
-    return '${price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'), 
-      (Match m) => '${m[1]}.'
-    )} ₫';
-  }
 }

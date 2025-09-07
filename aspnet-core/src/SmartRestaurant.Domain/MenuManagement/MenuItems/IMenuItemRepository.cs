@@ -16,13 +16,11 @@ public interface IMenuItemRepository : IRepository<MenuItem, Guid>
     /// <param name="categoryId">ID danh mục (null để lấy tất cả)</param>
     /// <param name="onlyAvailable">Chỉ lấy món đang có sẵn</param>
     /// <param name="nameFilter">Tìm kiếm theo tên món</param>
-    /// <param name="includeSalesData">Có bao gồm dữ liệu bán hàng không</param>
     /// <returns>Danh sách món ăn</returns>
     Task<List<MenuItem>> GetMenuItemsAsync(
         Guid? categoryId = null,
         bool onlyAvailable = true,
-        string? nameFilter = null,
-        bool includeSalesData = false);
+        string? nameFilter = null);
 
     /// <summary>
     /// Lấy thống kê số lượng bán ra của các món ăn

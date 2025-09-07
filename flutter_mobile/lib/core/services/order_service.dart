@@ -4,6 +4,7 @@ import '../constants/app_constants.dart';
 import '../enums/restaurant_enums.dart';
 import '../models/table_models.dart';
 import '../models/menu_models.dart';
+import '../models/order_request_models.dart';
 import 'http_client_service.dart';
 
 /// Service xử lý quản lý đơn hàng và bàn trong nhà hàng
@@ -376,6 +377,52 @@ class OrderService extends ChangeNotifier {
     if (_lastError != null) {
       _lastError = null;
       notifyListeners();
+    }
+  }
+
+  /// === ORDER CREATION METHODS ===
+  
+  /// Tạo đơn hàng mới
+  /// Gửi request lên API POST /api/app/orders
+  Future<CreateOrderResponse> createOrder(CreateOrderRequest request) async {
+    // Validate request
+    final validationErrors = request.validate();
+    if (validationErrors.isNotEmpty) {
+      final errorMessage = 'Đơn hàng không hợp lệ:\n${validationErrors.join('\n')}';
+      throw OrderServiceException(
+        message: errorMessage,
+        errorCode: 'VALIDATION_ERROR',
+      );
+    }
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final response = await _dio.post(
+        '/api/app/order',
+        data: request.toJson(),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final orderResponse = CreateOrderResponse.fromJson(response.data);
+        return orderResponse;
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi tạo đơn hàng',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      final exception = _handleDioException(e, 'tạo đơn hàng');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi tạo đơn hàng: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
     }
   }
 

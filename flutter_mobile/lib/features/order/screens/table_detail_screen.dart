@@ -337,11 +337,10 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   void _navigateToMenu() {
-    final tableModel = TableModel.fromActiveTable(widget.table);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MenuScreen(selectedTable: tableModel),
+        builder: (context) => MenuScreen(selectedTable: widget.table),
       ),
     );
   }

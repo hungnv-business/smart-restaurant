@@ -25,8 +25,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     public async Task<List<MenuItem>> GetMenuItemsAsync(
         Guid? categoryId = null,
         bool onlyAvailable = true,
-        string? nameFilter = null,
-        bool includeSalesData = false)
+        string? nameFilter = null)
     {
         var dbSet = await GetDbSetAsync();
         
