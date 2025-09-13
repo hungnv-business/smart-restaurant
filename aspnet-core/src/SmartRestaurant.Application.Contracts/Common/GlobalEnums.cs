@@ -91,4 +91,58 @@ public static class GlobalEnums
     {
         return OrderTypes.TryGetValue(type, out var displayName) ? displayName : type.ToString();
     }
+
+    /// <summary>
+    /// Lấy màu sắc cho trạng thái order item
+    /// </summary>
+    /// <param name="status">Order item status</param>
+    /// <returns>Color string for UI</returns>
+    public static string GetOrderItemStatusColor(OrderItemStatus status)
+    {
+        return status switch
+        {
+            OrderItemStatus.Pending => "orange",
+            OrderItemStatus.Preparing => "orange", 
+            OrderItemStatus.Ready => "blue",
+            OrderItemStatus.Served => "success",
+            OrderItemStatus.Canceled => "error",
+            _ => "default"
+        };
+    }
+
+    /// <summary>
+    /// Lấy màu sắc cho trạng thái table
+    /// </summary>
+    /// <param name="status">Table status</param>
+    /// <returns>Color string for UI</returns>
+    public static string GetTableStatusColor(TableStatus status)
+    {
+        return status switch
+        {
+            TableStatus.Available => "success",
+            TableStatus.Occupied => "warning", 
+            TableStatus.Reserved => "info",
+            _ => "default"
+        };
+    }
+
+    /// <summary>
+    /// Kiểm tra xem order item có thể chỉnh sửa không
+    /// </summary>
+    /// <param name="status">Order item status</param>
+    /// <returns>True nếu có thể chỉnh sửa</returns>
+    public static bool CanEditOrderItem(OrderItemStatus status)
+    {
+        return status == OrderItemStatus.Pending;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem order item có thể xóa không
+    /// </summary>
+    /// <param name="status">Order item status</param>
+    /// <returns>True nếu có thể xóa</returns>
+    public static bool CanDeleteOrderItem(OrderItemStatus status)
+    {
+        return status == OrderItemStatus.Pending;
+    }
 }

@@ -149,44 +149,68 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Widget _buildTableGrid() {
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final screenWidth = constraints.maxWidth;
-        final availableWidth = screenWidth - 32; // Trừ padding 16 mỗi bên
         final sectionsCount = _groupedTables.length;
         
-        // Tính width cho mỗi cột dựa trên số lượng sections
-        double columnWidth = 200; // Default width
-        if (sectionsCount > 0) {
-          final totalSpacing = (sectionsCount - 1) * 12; // Spacing giữa các cột
-          final maxColumnWidth = (availableWidth - totalSpacing) / sectionsCount;
-          columnWidth = maxColumnWidth > 150 ? maxColumnWidth : 200; // Min width 150
+        if (sectionsCount == 0) {
+          return const SizedBox.shrink();
         }
-
+        
+        // Responsive padding
+        final horizontalPadding = screenWidth > 400 ? 20.0 : 16.0;
+        final verticalPadding = screenWidth > 400 ? 12.0 : 8.0;
+        
+        // Tính toán để fit 3 cột trên iPhone 15 Pro Max
+        final availableWidth = screenWidth - (horizontalPadding * 2);
+        final columnSpacing = screenWidth > 400 ? 12.0 : 8.0; // Giảm spacing
+        
+        // Tính column width để fit 3 cột
+        double columnWidth;
+        if (sectionsCount <= 3 && sectionsCount > 0) {
+          final totalSpacing = (sectionsCount - 1) * columnSpacing;
+          columnWidth = (availableWidth - totalSpacing) / sectionsCount;
+          
+          // Đảm bảo min width hợp lý cho 3 cột trên iPhone
+          final minWidth = screenWidth > 428 ? 120.0 : 105.0; // Giảm min width
+          columnWidth = columnWidth.clamp(minWidth, 140.0); // Max width 140
+        } else {
+          // Với > 3 sections, sử dụng scroll
+          columnWidth = screenWidth > 428 ? 130 : 115;
+        }
+        
+        final needsScroll = sectionsCount > 3 || 
+            (sectionsCount > 0 && (columnWidth * sectionsCount + (sectionsCount - 1) * columnSpacing) > availableWidth);
+        
+        final content = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _groupedTables.entries.toList().asMap().entries.map((mapEntry) {
+            final index = mapEntry.key;
+            final entry = mapEntry.value;
+            final isLast = index == _groupedTables.length - 1;
+            
+            return Container(
+              width: columnWidth,
+              margin: EdgeInsets.only(right: isLast ? 0 : columnSpacing),
+              child: SectionColumn(
+                sectionName: entry.key,
+                tables: entry.value,
+                onTableUpdated: _loadTables,
+                isCompact: true, // Thêm flag để compact layout
+              ),
+            );
+          }).toList(),
+        );
+        
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: _groupedTables.entries.toList().asMap().entries.map((mapEntry) {
-                final index = mapEntry.key;
-                final entry = mapEntry.value;
-                final isLast = index == _groupedTables.length - 1;
-                
-                return Container(
-                  width: columnWidth,
-                  margin: EdgeInsets.only(right: isLast ? 0 : 12),
-                  child: SectionColumn(
-                    sectionName: entry.key,
-                    tables: entry.value,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+          child: needsScroll 
+            ? SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: content,
+              )
+            : content,
         );
       },
     );

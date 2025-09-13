@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Volo.Abp;
 
 namespace SmartRestaurant.Orders;
@@ -87,6 +88,38 @@ public class OrderValidationException : BusinessException
         return new OrderValidationException($"Không tìm thấy món có ID: {itemId}");
     }
 
+    /// <summary>
+    /// Không tìm thấy món trong order
+    /// </summary>
+    public static OrderValidationException OrderItemNotFoundInOrder(Guid orderItemId, Guid orderId)
+    {
+        return new OrderValidationException($"Không tìm thấy món với ID {orderItemId} trong order {orderId}");
+    }
+
+    /// <summary>
+    /// Chỉ có thể xóa món khỏi order đang hoạt động
+    /// </summary>
+    public static OrderValidationException CannotRemoveItemFromInactiveOrder()
+    {
+        return new OrderValidationException("Chỉ có thể xóa món khỏi order đang hoạt động");
+    }
+
+    /// <summary>
+    /// Chỉ có thể xóa món ở trạng thái Pending
+    /// </summary>
+    public static OrderValidationException CannotRemoveNonPendingOrderItem(string menuItemName, OrderItemStatus status)
+    {
+        return new OrderValidationException($"Không thể xóa món '{menuItemName}' ở trạng thái {status}. Chỉ có thể xóa món ở trạng thái Pending");
+    }
+
+    /// <summary>
+    /// Không thể xóa món cuối cùng trong order
+    /// </summary>
+    public static OrderValidationException CannotRemoveLastOrderItem()
+    {
+        return new OrderValidationException("Không thể xóa món cuối cùng trong order. Vui lòng hủy toàn bộ order thay vì xóa món này");
+    }
+
     // Table validation exceptions
 
     /// <summary>
@@ -119,5 +152,137 @@ public class OrderValidationException : BusinessException
     public static OrderValidationException CannotCancelReservation(string tableNumber)
     {
         return new OrderValidationException($"Không thể hủy đặt trước bàn {tableNumber}. Bàn không ở trạng thái Reserved.");
+    }
+
+    /// <summary>
+    /// Không tìm thấy bàn với ID cụ thể
+    /// </summary>
+    public static OrderValidationException TableNotFound(Guid tableId)
+    {
+        return new OrderValidationException($"Không tìm thấy bàn với ID {tableId}");
+    }
+
+    /// <summary>
+    /// Bàn không khả dụng cho đơn hàng
+    /// </summary>
+    public static OrderValidationException TableNotAvailable(string tableNumber)
+    {
+        return new OrderValidationException($"Bàn {tableNumber} không khả dụng");
+    }
+
+    // OrderItem validation exceptions
+
+    /// <summary>
+    /// Tên món ăn không được để trống
+    /// </summary>
+    public static OrderValidationException MenuItemNameRequired()
+    {
+        return new OrderValidationException("Tên món ăn không được để trống");
+    }
+
+    /// <summary>
+    /// Số lượng phải lớn hơn 0
+    /// </summary>
+    public static OrderValidationException InvalidQuantity()
+    {
+        return new OrderValidationException("Số lượng phải lớn hơn 0");
+    }
+
+    /// <summary>
+    /// Giá không được âm
+    /// </summary>
+    public static OrderValidationException InvalidPrice()
+    {
+        return new OrderValidationException("Giá không được âm");
+    }
+
+    /// <summary>
+    /// Món ăn hiện không có sẵn
+    /// </summary>
+    public static OrderValidationException MenuItemNotAvailable(string menuItemName)
+    {
+        return new OrderValidationException($"Món '{menuItemName}' hiện không có sẵn");
+    }
+
+    /// <summary>
+    /// Không tìm thấy đơn hàng với ID cụ thể
+    /// </summary>
+    public static OrderValidationException OrderNotFound(Guid orderId)
+    {
+        return new OrderValidationException($"Không tìm thấy đơn hàng với ID: {orderId}");
+    }
+
+    /// <summary>
+    /// Chỉ có thể cập nhật số lượng món đang chờ chuẩn bị
+    /// </summary>
+    public static OrderValidationException CannotUpdateQuantityNonPendingItem()
+    {
+        return new OrderValidationException("Chỉ có thể chỉnh sửa số lượng món đang chờ chuẩn bị");
+    }
+
+    /// <summary>
+    /// Chỉ có thể thêm món vào order đang hoạt động
+    /// </summary>
+    public static OrderValidationException CannotAddItemsToInactiveOrder()
+    {
+        return new OrderValidationException("Chỉ có thể thêm món vào order đang hoạt động");
+    }
+
+    /// <summary>
+    /// Những món được chọn không khả dụng
+    /// </summary>
+    public static OrderValidationException MenuItemsNotAvailable(List<string> unavailableItems)
+    {
+        return new OrderValidationException($"Những món sau không khả dụng: {string.Join(", ", unavailableItems)}");
+    }
+
+    // Payment validation exceptions
+
+    /// <summary>
+    /// Không thể thanh toán order không ở trạng thái Active
+    /// </summary>
+    public static OrderValidationException CannotCompletePaymentForNonActiveOrder()
+    {
+        return new OrderValidationException("Chỉ có thể thanh toán order đang hoạt động (Active)");
+    }
+
+    /// <summary>
+    /// Không thể thêm payment vào order không ở trạng thái Active
+    /// </summary>
+    public static OrderValidationException CannotAddPaymentToNonActiveOrder()
+    {
+        return new OrderValidationException("Chỉ có thể thêm payment vào order đang hoạt động (Active)");
+    }
+
+    /// <summary>
+    /// Không thể thanh toán khi còn món chưa được phục vụ
+    /// </summary>
+    public static OrderValidationException CannotCompletePaymentWithUnservedItems(int unservedCount)
+    {
+        return new OrderValidationException($"Không thể thanh toán vì còn {unservedCount} món chưa được phục vụ hoặc hủy");
+    }
+
+    /// <summary>
+    /// Thanh toán tiền mặt yêu cầu số tiền khách đưa
+    /// </summary>
+    public static OrderValidationException CashPaymentRequiresCustomerMoney()
+    {
+        return new OrderValidationException("Thanh toán tiền mặt yêu cầu số tiền khách đưa");
+    }
+
+    /// <summary>
+    /// Số tiền thanh toán quá thấp
+    /// </summary>
+    public static OrderValidationException PaymentAmountTooLow(decimal orderTotal, decimal customerPayment)
+    {
+        return new OrderValidationException($"Số tiền thanh toán quá thấp. Hóa đơn: {orderTotal:C}, Khách trả: {customerPayment:C}. Vui lòng kiểm tra lại.");
+    }
+
+    /// <summary>
+    /// Phương thức thanh toán không được hỗ trợ
+    /// </summary>
+    public static OrderValidationException UnsupportedPaymentMethod(string paymentMethod)
+    {
+        return new OrderValidationException($"Phương thức thanh toán {paymentMethod} không được hỗ trợ");
     }
 }

@@ -12,6 +12,7 @@ class CartDialog extends StatefulWidget {
   final Function(int index) onDecreaseQuantity;
   final VoidCallback onClearCart;
   final VoidCallback onSubmitOrder;
+  final bool hasActiveOrder;
 
   const CartDialog({
     Key? key,
@@ -22,6 +23,7 @@ class CartDialog extends StatefulWidget {
     required this.onDecreaseQuantity,
     required this.onClearCart,
     required this.onSubmitOrder,
+    this.hasActiveOrder = false,
   }) : super(key: key);
 
   @override
@@ -195,7 +197,7 @@ class _CartDialogState extends State<CartDialog> {
                     Navigator.pop(context);
                     widget.onSubmitOrder();
                   },
-                  child: const Text('Gửi đơn'),
+                  child: Text(widget.hasActiveOrder ? 'Thêm món' : 'Gửi đơn'),
                 ),
               ),
             ],

@@ -650,15 +650,8 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsOptional")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("MenuItemId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("PreparationNotes")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("RequiredQuantity")
                         .HasColumnType("integer");
@@ -923,6 +916,71 @@ namespace SmartRestaurant.Migrations
                     b.HasIndex("OrderId", "Status");
 
                     b.ToTable("AppOrderItems", (string)null);
+                });
+
+            modelBuilder.Entity("SmartRestaurant.Orders.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<decimal>("CustomerMoney")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("PaymentTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("PaymentTime");
+
+                    b.HasIndex("PaymentMethod", "PaymentTime");
+
+                    b.ToTable("AppPayments", (string)null);
                 });
 
             modelBuilder.Entity("SmartRestaurant.TableManagement.LayoutSections.LayoutSection", b =>
@@ -2965,6 +3023,17 @@ namespace SmartRestaurant.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("SmartRestaurant.Orders.Payment", b =>
+                {
+                    b.HasOne("SmartRestaurant.Orders.Order", "Order")
+                        .WithMany("Payments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("SmartRestaurant.TableManagement.Tables.Table", b =>
                 {
                     b.HasOne("SmartRestaurant.Orders.Order", "CurrentOrder")
@@ -3152,6 +3221,8 @@ namespace SmartRestaurant.Migrations
             modelBuilder.Entity("SmartRestaurant.Orders.Order", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("SmartRestaurant.TableManagement.LayoutSections.LayoutSection", b =>

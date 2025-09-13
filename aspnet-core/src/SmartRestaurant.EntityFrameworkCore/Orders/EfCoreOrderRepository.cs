@@ -104,20 +104,20 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         //     return await query.FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
         // }
 
-        // /// <summary>
-        // /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
-        // /// </summary>
-        // public async Task<Order?> GetWithDetailsAsync(
-        //     Guid orderId,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     return await dbSet
-        //         .Include(o => o.OrderItems)
-        //         .ThenInclude(oi => oi.MenuItem)
-        //         .Where(o => o.Id == orderId)
-        //         .FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
-        // }
+        /// <summary>
+        /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
+        /// </summary>
+        public async Task<Order?> GetWithDetailsAsync(
+            Guid orderId,
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            return await dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.Id == orderId)
+                .FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
+        }
 
         // /// <summary>
         // /// Kiểm tra xem số đơn hàng đã tồn tại chưa
@@ -194,5 +194,21 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .OrderBy(o => o.CreationTime)
                 .ToListAsync(GetCancellationToken(cancellationToken));
         }
+
+
+        /// <summary>
+        /// Lấy đơn hàng với đầy đủ thông tin để thanh toán
+        /// </summary>
+        public async Task<Order?> GetOrderForPaymentAsync(
+            Guid orderId,
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            return await dbSet
+                .Include(o => o.OrderItems)
+                .Include(o => o.Table)
+                .FirstOrDefaultAsync(o => o.Id == orderId, GetCancellationToken(cancellationToken));
+        }
+
     }
 }

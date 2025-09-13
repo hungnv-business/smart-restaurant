@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -8,19 +8,29 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 import {
   MenuItemDto,
   CreateUpdateMenuItemDto,
+  MenuItemIngredientDto,
 } from '../../../../proxy/menu-management/menu-items/dto';
 import { MenuCategoryDto } from '../../../../proxy/menu-management/menu-categories/dto';
+import {
+  IngredientDto,
+  GetIngredientListRequestDto,
+} from '../../../../proxy/inventory-management/ingredients/dto';
 import { MenuItemService } from '../../../../proxy/menu-management/menu-items';
 import { MenuCategoryService } from '../../../../proxy/menu-management/menu-categories';
+import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 import { MenuItemFormData } from '../services/menu-item-form-dialog.service';
 import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
 import { take, finalize } from 'rxjs';
+import { GlobalService } from '@proxy/common';
+import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Component quản lý form tạo/chỉnh sửa món ăn trong hệ thống nhà hàng
@@ -45,6 +55,8 @@ import { take, finalize } from 'rxjs';
     DropdownModule,
     TextareaModule,
     ProgressSpinnerModule,
+    ButtonModule,
+    CardModule,
     ValidationErrorComponent,
     FormFooterActionsComponent,
   ],
@@ -61,7 +73,11 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
   /** Thông tin món ăn đang được chỉnh sửa */
   menuItem?: MenuItemDto;
   /** Danh sách các danh mục món ăn để lựa chọn */
-  categories: MenuCategoryDto[] = [];
+  menuCategories: GuidLookupItemDto[] = [];
+  /** Danh sách các danh mục nguyên liệu để lựa chọn */
+  ingredientCategories: GuidLookupItemDto[] = [];
+  /** Danh sách các nguyên liệu có sẵn */
+  ingredients: GuidLookupItemDto[] = [];
 
   /** Tham chiếu dialog và cấu hình */
   public ref = inject(DynamicDialogRef);
@@ -70,7 +86,7 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
   /** Các service được inject */
   private fb = inject(FormBuilder);
   private menuItemService = inject(MenuItemService);
-  private menuCategoryService = inject(MenuCategoryService);
+  private globalService = inject(GlobalService);
 
   /**
    * Khởi tạo component và tạo form
@@ -84,7 +100,8 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
    * Khởi tạo dữ liệu khi component được load
    */
   ngOnInit() {
-    this.loadCategories();
+    this.loadMenuCategories();
+    this.loadIngredientCCategories();
 
     const data = this.config.data;
     if (data) {
@@ -114,6 +131,7 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       price: formValue.price || 0, // Giá tiền VND
       imageUrl: formValue.imageUrl || '', // Đường dẫn hình ảnh (tùy chọn)
       isAvailable: formValue.isAvailable, // Trạng thái có sẵn
+      ingredients: formValue.ingredients || [], // Danh sách nguyên liệu
     };
 
     this.loading = true;
@@ -128,28 +146,84 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
   }
 
   /**
-   * Lấy danh sách tùy chọn danh mục cho dropdown
-   * @returns Mảng các option cho PrimeNG Dropdown
+   * Lấy FormArray của ingredients
    */
-  getCategoryOptions() {
-    return this.categories.map(category => ({
-      label: category.name, // Hiển thị: "Món chính", "Thức uống", etc.
-      value: category.id,   // Giá trị: UUID của danh mục
-    }));
+  get ingredientsFormArray(): FormArray {
+    return this.form.get('ingredients') as FormArray;
+  }
+
+  /**
+   * Thêm nguyên liệu mới vào form
+   */
+  addIngredient() {
+    const ingredientGroup = this.fb.group({
+      categoryId: ['', [Validators.required]],
+      ingredientId: ['', [Validators.required]],
+      requiredQuantity: [1, [Validators.required, Validators.min(1)]],
+      displayOrder: [0], // Giá trị mặc định, không hiển thị UI
+    });
+
+    this.ingredientsFormArray.push(ingredientGroup);
+  }
+
+  /**
+   * Xóa nguyên liệu khỏi form
+   */
+  removeIngredient(index: number) {
+    this.ingredientsFormArray.removeAt(index);
+  }
+
+  /**
+   * Xử lý khi thay đổi danh mục nguyên liệu
+   * Load danh sách nguyên liệu thuộc danh mục và reset các field liên quan
+   * @param categoryId - ID của danh mục được chọn
+   */
+  onCategoryChange(categoryId: string | null) {
+    if (categoryId) {
+      this.loadIngredientsByCategory(categoryId);
+    } else {
+      // Xóa danh sách nguyên liệu và reset form khi bỏ chọn danh mục
+      this.ingredients = [];
+    }
+  }
+
+  /**
+   * Tải danh sách nguyên liệu thuộc danh mục đã chọn
+   * @param categoryId - ID của danh mục nguyên liệu
+   * @private
+   */
+  private loadIngredientsByCategory(categoryId: string) {
+    this.globalService.getIngredientsByCategoryLookup(categoryId).subscribe({
+      next: ingredients => {
+        this.ingredients = ingredients;
+      },
+      error: error => {
+        console.error('Lỗi khi tải danh sách nguyên liệu:', error);
+      },
+    });
   }
 
   /**
    * Tải danh sách các danh mục món ăn từ server
    */
-  private loadCategories() {
-    const request: PagedAndSortedResultRequestDto = {
-      maxResultCount: 1000,
-      sorting: 'displayOrder',
-    };
-
-    this.menuCategoryService.getList(request).subscribe({
+  private loadMenuCategories() {
+    this.globalService.getMenuCategoriesLookup().subscribe({
       next: result => {
-        this.categories = result?.items || [];
+        this.menuCategories = result || [];
+      },
+      error: error => {
+        console.error('Error loading categories:', error);
+      },
+    });
+  }
+
+  /**
+   * Tải danh sách các danh mục nguyên liệu từ server
+   */
+  private loadIngredientCCategories() {
+    this.globalService.getIngredientCategoriesLookup().subscribe({
+      next: result => {
+        this.ingredientCategories = result || [];
       },
       error: error => {
         console.error('Error loading categories:', error);
@@ -194,6 +268,7 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       price: [0, [Validators.required, Validators.min(0)]],
       imageUrl: ['', [Validators.maxLength(500)]],
       isAvailable: [true],
+      ingredients: this.fb.array([]), // FormArray cho danh sách nguyên liệu
     });
   }
 

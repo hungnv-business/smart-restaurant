@@ -8,23 +8,29 @@ namespace SmartRestaurant.MenuManagement.MenuItems
 {
     /// <summary>
     /// Interface dịch vụ ứng dụng cho quản lý món ăn
-    /// Cung cấp đầy đủ chức năng CRUD và các thao tác đặc biệt
-    /// Kế thừa ICrudAppService để có sẵn các thao tác cơ bản
+    /// Cung cấp đầy đủ chức năng CRUD cho món ăn và các tính năng đặc biệt
+    /// Hỗ trợ quản lý nguyên liệu, trạng thái available và thống kê phổ biến
     /// </summary>
-    public interface IMenuItemAppService : 
-        ICrudAppService<
-            MenuItemDto,                      // DTO đầu ra
-            Guid,                            // Loại khóa chính
-            PagedAndSortedResultRequestDto,   // DTO phân trang và sắp xếp
-            CreateUpdateMenuItemDto>          // DTO tạo/cập nhật
+    public interface IMenuItemAppService : IApplicationService
     {
-        /// <summary>
-        /// Cập nhật trạng thái có sẵn của món ăn
-        /// Dùng để đánh dấu món còn hàng hay hết hàng
-        /// </summary>
-        /// <param name="id">ID của món ăn</param>
-        /// <param name="isAvailable">Trạng thái có sẵn mới</param>
-        /// <returns>Thông tin món ăn sau khi cập nhật</returns>
-        Task<MenuItemDto> UpdateAvailabilityAsync(Guid id, bool isAvailable);
+        /// <summary>Lấy danh sách món ăn với phân trang và filter (bao gồm nguyên liệu)</summary>
+        Task<PagedResultDto<MenuItemDto>> GetListAsync(GetMenuItemListRequestDto input);
+
+        /// <summary>Lấy chi tiết món ăn theo ID (bao gồm nguyên liệu)</summary>
+        Task<MenuItemDto> GetAsync(Guid id);
+
+        /// <summary>Tạo món ăn mới với nguyên liệu</summary>
+        Task CreateAsync(CreateUpdateMenuItemDto input);
+
+        /// <summary>Cập nhật món ăn và nguyên liệu</summary>
+        Task UpdateAsync(Guid id, CreateUpdateMenuItemDto input);
+
+        /// <summary>Xóa món ăn</summary>
+        Task DeleteAsync(Guid id);
+
+        // === Availability Management Methods ===
+
+        /// <summary>Cập nhật trạng thái có sẵn của món ăn</summary>
+        Task UpdateAvailabilityAsync(Guid id, bool isAvailable);
     }
 }

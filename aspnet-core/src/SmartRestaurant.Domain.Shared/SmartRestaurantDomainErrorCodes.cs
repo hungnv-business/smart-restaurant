@@ -34,6 +34,11 @@ public static class SmartRestaurantDomainErrorCodes
         /// Tên món ăn đã tồn tại trong cùng danh mục
         /// </summary>
         public const string NameAlreadyExistsInCategory = "SmartRestaurant:MenuItem:0002";
+
+        /// <summary>
+        /// Không thể xóa món ăn vì đang được sử dụng trong đơn hàng
+        /// </summary>
+        public const string HasDependencies = "SmartRestaurant:MenuItem:0003";
     }
 
     /// <summary>

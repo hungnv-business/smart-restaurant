@@ -3,7 +3,16 @@ class PriceFormatter {
   /// Format price to Vietnamese currency format
   /// Example: 85000 -> "85.000 ₫"
   static String format(int price) {
-    return '${price.toString().replaceAllMapped(
+    int priceInt;
+    if (price is double) {
+      priceInt = price.toInt();
+    } else if (price is int) {
+      priceInt = price;
+    } else {
+      priceInt = 0;
+    }
+    
+    return '${priceInt.toString().replaceAllMapped(
       RegExp(r'(\d)(?=(\d{3})+(?!\d))'), 
       (Match m) => '${m[1]}.'
     )} ₫';

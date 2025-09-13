@@ -111,12 +111,28 @@ public class OrderItem : FullAuditedEntity<Guid>
         decimal unitPrice,
         string? notes = null) : base(id)
     {
+        // Validate input parameters
+        if (string.IsNullOrWhiteSpace(menuItemName))
+        {
+            throw OrderValidationException.MenuItemNameRequired();
+        }
+
+        if (quantity <= 0)
+        {
+            throw OrderValidationException.InvalidQuantity();
+        }
+
+        if (unitPrice < 0)
+        {
+            throw OrderValidationException.InvalidPrice();
+        }
+
         OrderId = orderId;
         MenuItemId = menuItemId;
-        MenuItemName = menuItemName;
+        MenuItemName = menuItemName.Trim();
         Quantity = quantity;
         UnitPrice = unitPrice;
-        Notes = notes;
+        Notes = notes?.Trim();
         Status = OrderItemStatus.Pending;
         PendingTime = DateTime.UtcNow;
     }
@@ -134,7 +150,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// </summary>
     public void StartPreparation()
     {
-        if (Status != OrderItemStatus.Pending)
+        if (!IsPending())
         {
             throw OrderItemValidationException.CannotStartPreparationNonPendingItem();
         }
@@ -179,6 +195,11 @@ public class OrderItem : FullAuditedEntity<Guid>
         // TODO: Thêm domain event khi cần analytics và tracking
         // AddLocalEvent(new OrderItemServedEvent(Id, OrderId, MenuItemName));
     }
+
+    /// <summary>
+    /// Kiểm tra món ăn có đang ở trạng thái chờ xử lý không
+    /// </summary>
+    public bool IsPending() => Status == OrderItemStatus.Pending;
 
     /// <summary>
     /// Kiểm tra có thể chuyển sang trạng thái mới không
@@ -292,7 +313,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// </summary>
     public void Cancel()
     {
-        if (Status != OrderItemStatus.Pending)
+        if (!IsPending())
         {
             throw OrderItemValidationException.CannotCancelNonPendingItem(Status);
         }

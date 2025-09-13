@@ -13,7 +13,10 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
 import { DropdownModule } from 'primeng/dropdown';
-import { MenuItemDto } from '../../../../proxy/menu-management/menu-items/dto';
+import {
+  GetMenuItemListRequestDto,
+  MenuItemDto,
+} from '../../../../proxy/menu-management/menu-items/dto';
 import { MenuItemService } from '../../../../proxy/menu-management/menu-items';
 import { MenuCategoryService } from '../../../../proxy/menu-management/menu-categories';
 import { MenuCategoryDto } from '../../../../proxy/menu-management/menu-categories/dto';
@@ -195,10 +198,11 @@ export class MenuItemListComponent extends ComponentBase implements OnInit {
   private loadMenuItems() {
     this.loading = true;
 
-    const request: PagedAndSortedResultRequestDto = {
+    const request: GetMenuItemListRequestDto = {
       maxResultCount: 1000,
       skipCount: 0,
       sorting: 'name',
+      onlyAvailable: false,
     };
 
     this.menuItemService

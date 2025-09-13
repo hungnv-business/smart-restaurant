@@ -169,7 +169,7 @@ export class IngredientListComponent extends ComponentBase implements OnInit {
   // Load danh sách categories
   private async loadCategories() {
     try {
-      const categories = await this.globalService.getCategoriesLookup().toPromise();
+      const categories = await this.globalService.getMenuCategoriesLookup().toPromise();
       this.categories.set(categories || []);
     } catch (error) {
       console.error('Error loading categories:', error);

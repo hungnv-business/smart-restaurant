@@ -4,18 +4,24 @@ import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/table_models.dart';
 import '../../../core/models/menu_models.dart';
 import '../../../core/models/order_request_models.dart';
+import '../../../core/models/ingredient_verification_models.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../../../core/services/order_service.dart';
 import '../widgets/menu_item_card.dart';
 import '../widgets/cart_dialog.dart';
+import '../widgets/ingredient_verification_dialog.dart';
 
 /// Màn hình Menu món ăn cho bàn đã chọn
 class MenuScreen extends StatefulWidget {
   final ActiveTableDto selectedTable;
+  final bool hasActiveOrder;
+  final String? currentOrderId;
 
   const MenuScreen({
     Key? key,
     required this.selectedTable,
+    this.hasActiveOrder = false,
+    this.currentOrderId,
   }) : super(key: key);
 
   @override
@@ -326,17 +332,17 @@ class _MenuScreenState extends State<MenuScreen> {
         double childAspectRatio;
         
         if (constraints.maxWidth < 600) {
-          // Mobile: 2 columns - vừa phải cho description 2 dòng
+          // Mobile: 2 columns - tăng chiều cao để đủ chỗ cho content
           crossAxisCount = 2;
-          childAspectRatio = 0.85;
+          childAspectRatio = 0.9;
         } else if (constraints.maxWidth < 900) {
           // Tablet: 3 columns
           crossAxisCount = 3;
-          childAspectRatio = 0.9;
+          childAspectRatio = 1.0;
         } else {
           // Desktop: 4 columns
           crossAxisCount = 4;
-          childAspectRatio = 0.95;
+          childAspectRatio = 1.05;
         }
         
         return GridView.builder(
@@ -350,9 +356,19 @@ class _MenuScreenState extends State<MenuScreen> {
           itemCount: _menuItems.length,
           itemBuilder: (context, index) {
             final menuItem = _menuItems[index];
+            // Tìm số lượng hiện tại của món trong giỏ hàng
+            int currentQuantity = 0;
+            int cartIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
+            if (cartIndex != -1) {
+              currentQuantity = _cartItemQuantities[cartIndex];
+            }
+            
             return MenuItemCard(
               menuItem: menuItem,
+              quantity: currentQuantity,
               onAddToCart: () => _onAddToCart(menuItem),
+              onIncreaseQuantity: () => _onIncreaseQuantity(menuItem),
+              onDecreaseQuantity: () => _onDecreaseQuantity(menuItem),
             );
           },
         );
@@ -374,16 +390,38 @@ class _MenuScreenState extends State<MenuScreen> {
         _cartItemQuantities.add(1);
       }
     });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã thêm ${menuItem.name} vào giỏ hàng cho ${widget.selectedTable.tableNumber}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+  }
+
+  void _onIncreaseQuantity(MenuItem menuItem) {
+    setState(() {
+      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
+      
+      if (existingIndex != -1) {
+        // Món đã có, tăng số lượng
+        _cartItemQuantities[existingIndex]++;
+      } else {
+        // Món chưa có, thêm mới với số lượng 1
+        _cartItems.add(menuItem);
+        _cartItemQuantities.add(1);
+      }
+    });
+  }
+
+  void _onDecreaseQuantity(MenuItem menuItem) {
+    setState(() {
+      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
+      
+      if (existingIndex != -1) {
+        if (_cartItemQuantities[existingIndex] > 1) {
+          // Giảm số lượng
+          _cartItemQuantities[existingIndex]--;
+        } else {
+          // Xóa món nếu số lượng = 1
+          _cartItems.removeAt(existingIndex);
+          _cartItemQuantities.removeAt(existingIndex);
+        }
+      }
+    });
   }
 
   void _increaseQuantity(int index) {
@@ -416,7 +454,7 @@ class _MenuScreenState extends State<MenuScreen> {
     return total;
   }
 
-  /// Gửi đơn hàng lên API
+  /// Gửi đơn hàng lên API (tạo mới hoặc thêm món)
   Future<void> _submitOrder() async {
     if (_cartItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -429,7 +467,44 @@ class _MenuScreenState extends State<MenuScreen> {
     }
 
     try {
-      // Tạo request từ cart items
+      // Tạo order items từ cart để verify ingredients
+      final verificationItems = <OrderItemRequest>[];
+      for (int i = 0; i < _cartItems.length; i++) {
+        final menuItem = _cartItems[i];
+        final quantity = _cartItemQuantities[i];
+        
+        verificationItems.add(OrderItemRequest(
+          menuItemId: menuItem.id,
+          menuItemName: menuItem.name,
+          quantity: quantity,
+        ));
+      }
+
+      // Bước 1: Verify ingredients availability
+      final verificationRequest = VerifyIngredientsRequest(
+        items: verificationItems,
+      );
+
+      final verificationResult = await _orderService.verifyIngredientsAvailability(verificationRequest);
+
+      // Bước 2: Hiển thị dialog verification result
+      bool? userConfirmed;
+      if (mounted) {
+        userConfirmed = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => IngredientVerificationDialog(
+            verificationResult: verificationResult,
+          ),
+        );
+      }
+
+      // Nếu user cancel hoặc không confirm thì dừng
+      if (userConfirmed != true) {
+        return;
+      }
+
+      // Bước 3: Proceed với order creation/addition
       final orderItems = <CreateOrderItemRequest>[];
       for (int i = 0; i < _cartItems.length; i++) {
         final menuItem = _cartItems[i];
@@ -443,15 +518,60 @@ class _MenuScreenState extends State<MenuScreen> {
         ));
       }
 
-      final orderRequest = CreateOrderRequest(
-        tableId: widget.selectedTable.id,
-        orderType: OrderRequestType.dineIn,
-        orderItems: orderItems,
-        notes: null,
-      );
+      if (widget.hasActiveOrder) {
+        // THÊM MÓN VÀO ORDER HIỆN CÓ
+        if (widget.currentOrderId == null) {
+          throw Exception('Không tìm thấy orderId của bàn ${widget.selectedTable.tableNumber}');
+        }
+        
+        final addItemsRequest = AddItemsToOrderRequest(
+          items: orderItems,
+          additionalNotes: 'Gọi thêm từ mobile app',
+        );
+        
+        await _orderService.addItemsToOrder(widget.currentOrderId!, addItemsRequest);
+        
+        // Hiển thị thông báo thành công
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Đã thêm món vào đơn hàng cho ${widget.selectedTable.tableNumber}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        // TẠO ĐƠNAHAÀNG MỚI  
+        final orderRequest = CreateOrderRequest(
+          tableId: widget.selectedTable.id,
+          orderType: OrderRequestType.dineIn,
+          orderItems: orderItems,
+          notes: null,
+        );
 
-      // Gửi request
-      final response = await _orderService.createOrder(orderRequest);
+        final response = await _orderService.createOrder(orderRequest);
+        
+        // Hiển thị thông báo thành công
+        if (mounted) {
+          String message;
+          if (response != null) {
+            // API trả về response với orderNumber
+            message = '✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}';
+          } else {
+            // API chỉ trả về 204 No Content
+            message = '✅ Đã tạo đơn hàng thành công cho ${widget.selectedTable.tableNumber}';
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
 
       // Clear cart sau khi thành công  
       setState(() {
@@ -459,23 +579,18 @@ class _MenuScreenState extends State<MenuScreen> {
         _cartItemQuantities.clear();
       });
 
-      // Hiển thị thông báo thành công
+      // Navigate back về TableDetailScreen với result = true
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        Navigator.of(context).pop(true); // Trả về true để báo hiệu có thay đổi
       }
 
     } catch (e) {
       // Hiển thị thông báo lỗi
       if (mounted) {
+        final action = widget.hasActiveOrder ? 'thêm món' : 'tạo đơn hàng';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Lỗi tạo đơn hàng: ${e.toString()}'),
+            content: Text('❌ Lỗi $action: ${e.toString()}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
@@ -487,6 +602,7 @@ class _MenuScreenState extends State<MenuScreen> {
       }
     }
   }
+
 
   Widget? _buildFloatingActionButtons() {
     // Chỉ hiển thị nút giỏ hàng khi có món
@@ -525,6 +641,7 @@ class _MenuScreenState extends State<MenuScreen> {
           });
         },
         onSubmitOrder: () => _submitOrder(),
+        hasActiveOrder: widget.hasActiveOrder,
       ),
     );
   }

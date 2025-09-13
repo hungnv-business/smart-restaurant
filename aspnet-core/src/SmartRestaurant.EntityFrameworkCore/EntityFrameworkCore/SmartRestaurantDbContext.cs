@@ -57,6 +57,7 @@ public class SmartRestaurantDbContext :
     // Order Management
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Payment> Payments { get; set; }
     
     // Common
     public DbSet<Unit> Units { get; set; }
@@ -208,8 +209,6 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.MenuItemId).IsRequired();
             b.Property(x => x.IngredientId).IsRequired();
             b.Property(x => x.RequiredQuantity).IsRequired();
-            b.Property(x => x.IsOptional).IsRequired();
-            b.Property(x => x.PreparationNotes).HasMaxLength(500);
             b.Property(x => x.DisplayOrder).IsRequired();
             
             b.HasOne(x => x.MenuItem)
@@ -449,6 +448,30 @@ public class SmartRestaurantDbContext :
             b.HasIndex(x => x.OrderId);
             b.HasIndex(x => x.MenuItemId);
             b.HasIndex(x => new { x.OrderId, x.Status });
+        });
+        
+        // Configure Payment entity
+        builder.Entity<Payment>(b =>
+        {
+            b.ToTable(SmartRestaurantConsts.DbTablePrefix + "Payments", SmartRestaurantConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.Property(x => x.OrderId).IsRequired();
+            b.Property(x => x.PaymentTime).IsRequired();
+            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.CustomerMoney).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.PaymentMethod).IsRequired();
+            b.Property(x => x.Notes).HasMaxLength(500);
+            
+            b.HasOne(x => x.Order)
+                .WithMany(o => o.Payments)
+                .HasForeignKey(x => x.OrderId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            b.HasIndex(x => x.OrderId);
+            b.HasIndex(x => x.PaymentTime);
+            b.HasIndex(x => new { x.PaymentMethod, x.PaymentTime });
         });
     }
 }

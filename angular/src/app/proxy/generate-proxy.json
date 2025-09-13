@@ -874,6 +874,589 @@
       "rootPath": "app",
       "remoteServiceName": "Default",
       "controllers": {
+        "SmartRestaurant.Application.Orders.OrderAppService": {
+          "controllerName": "Order",
+          "controllerGroupName": "Order",
+          "isRemoteService": true,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "SmartRestaurant.Application.Orders.OrderAppService",
+          "interfaces": [
+            {
+              "type": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService",
+              "name": "IOrderAppService",
+              "methods": [
+                {
+                  "name": "CreateAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                      "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                    "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+                  }
+                },
+                {
+                  "name": "GetActiveTablesAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "tableNameFilter",
+                      "typeAsString": "System.String, System.Private.CoreLib",
+                      "type": "System.String",
+                      "typeSimple": "string",
+                      "isOptional": true,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "statusFilter",
+                      "typeAsString": "System.Nullable`1[[SmartRestaurant.TableStatus, SmartRestaurant.Domain.Shared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib",
+                      "type": "SmartRestaurant.TableStatus?",
+                      "typeSimple": "enum?",
+                      "isOptional": true,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto>"
+                  }
+                },
+                {
+                  "name": "GetTableDetailsAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "tableId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.Application.Contracts.Orders.Dto.TableDetailDto",
+                    "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.TableDetailDto"
+                  }
+                },
+                {
+                  "name": "GetActiveMenuCategoriesAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Common.Dto.GuidLookupItemDto>"
+                  }
+                },
+                {
+                  "name": "GetMenuItemsForOrderAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto",
+                      "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
+                  }
+                },
+                {
+                  "name": "AddItemsToOrderAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "orderId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                      "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                    "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+                  }
+                },
+                {
+                  "name": "RemoveOrderItemAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "orderId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "orderItemId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                    "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+                  }
+                },
+                {
+                  "name": "UpdateOrderItemQuantityAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "orderId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "orderItemId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                      "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                    "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+                  }
+                }
+              ]
+            }
+          ],
+          "actions": {
+            "CreateAsyncByInput": {
+              "uniqueName": "CreateAsyncByInput",
+              "name": "CreateAsync",
+              "httpMethod": "POST",
+              "url": "api/app/order",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "GetActiveTablesAsyncByTableNameFilterAndStatusFilter": {
+              "uniqueName": "GetActiveTablesAsyncByTableNameFilterAndStatusFilter",
+              "name": "GetActiveTablesAsync",
+              "httpMethod": "GET",
+              "url": "api/app/order/active-tables",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "tableNameFilter",
+                  "typeAsString": "System.String, System.Private.CoreLib",
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": true,
+                  "defaultValue": null
+                },
+                {
+                  "name": "statusFilter",
+                  "typeAsString": "System.Nullable`1[[SmartRestaurant.TableStatus, SmartRestaurant.Domain.Shared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib",
+                  "type": "SmartRestaurant.TableStatus?",
+                  "typeSimple": "enum?",
+                  "isOptional": true,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "tableNameFilter",
+                  "name": "tableNameFilter",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "statusFilter",
+                  "name": "statusFilter",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto>"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "GetTableDetailsAsyncByTableId": {
+              "uniqueName": "GetTableDetailsAsyncByTableId",
+              "name": "GetTableDetailsAsync",
+              "httpMethod": "GET",
+              "url": "api/app/order/table-details/{tableId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "tableId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "tableId",
+                  "name": "tableId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.Application.Contracts.Orders.Dto.TableDetailDto",
+                "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.TableDetailDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "GetActiveMenuCategoriesAsync": {
+              "uniqueName": "GetActiveMenuCategoriesAsync",
+              "name": "GetActiveMenuCategoriesAsync",
+              "httpMethod": "GET",
+              "url": "api/app/order/active-menu-categories",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.Common.Dto.GuidLookupItemDto>"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "GetMenuItemsForOrderAsyncByInput": {
+              "uniqueName": "GetMenuItemsForOrderAsyncByInput",
+              "name": "GetMenuItemsForOrderAsync",
+              "httpMethod": "GET",
+              "url": "api/app/order/menu-items-for-order",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "NameFilter",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "CategoryId",
+                  "jsonName": null,
+                  "type": "System.Guid?",
+                  "typeSimple": "string?",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "OnlyAvailable",
+                  "jsonName": null,
+                  "type": "System.Boolean?",
+                  "typeSimple": "boolean?",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                }
+              ],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "AddItemsToOrderAsyncByOrderIdAndInput": {
+              "uniqueName": "AddItemsToOrderAsyncByOrderIdAndInput",
+              "name": "AddItemsToOrderAsync",
+              "httpMethod": "POST",
+              "url": "api/app/order/items-to-order/{orderId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "orderId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "orderId",
+                  "name": "orderId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "RemoveOrderItemAsyncByOrderIdAndOrderItemId": {
+              "uniqueName": "RemoveOrderItemAsyncByOrderIdAndOrderItemId",
+              "name": "RemoveOrderItemAsync",
+              "httpMethod": "DELETE",
+              "url": "api/app/order/order-item",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "orderId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "orderItemId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "orderId",
+                  "name": "orderId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "orderItemId",
+                  "name": "orderItemId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "UpdateOrderItemQuantityAsyncByOrderIdAndOrderItemIdAndInput": {
+              "uniqueName": "UpdateOrderItemQuantityAsyncByOrderIdAndOrderItemIdAndInput",
+              "name": "UpdateOrderItemQuantityAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/order/order-item-quantity",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "orderId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "orderItemId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "orderId",
+                  "name": "orderId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "orderItemId",
+                  "name": "orderItemId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "input",
+                  "jsonName": null,
+                  "type": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                  "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "Body",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto",
+                "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            }
+          }
+        },
         "SmartRestaurant.Common.GlobalAppService": {
           "controllerName": "Global",
           "controllerGroupName": "Global",
@@ -903,7 +1486,15 @@
                   }
                 },
                 {
-                  "name": "GetCategoriesLookupAsync",
+                  "name": "GetIngredientCategoriesLookupAsync",
+                  "parametersOnMethod": [],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                    "typeSimple": "[SmartRestaurant.Common.Dto.GuidLookupItemDto]"
+                  }
+                },
+                {
+                  "name": "GetMenuCategoriesLookupAsync",
                   "parametersOnMethod": [],
                   "returnValue": {
                     "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
@@ -961,11 +1552,26 @@
               "allowAnonymous": null,
               "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
             },
-            "GetCategoriesLookupAsync": {
-              "uniqueName": "GetCategoriesLookupAsync",
-              "name": "GetCategoriesLookupAsync",
+            "GetIngredientCategoriesLookupAsync": {
+              "uniqueName": "GetIngredientCategoriesLookupAsync",
+              "name": "GetIngredientCategoriesLookupAsync",
               "httpMethod": "GET",
-              "url": "api/app/global/categories-lookup",
+              "url": "api/app/global/ingredient-categories-lookup",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.Common.Dto.GuidLookupItemDto>",
+                "typeSimple": "[SmartRestaurant.Common.Dto.GuidLookupItemDto]"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
+            },
+            "GetMenuCategoriesLookupAsync": {
+              "uniqueName": "GetMenuCategoriesLookupAsync",
+              "name": "GetMenuCategoriesLookupAsync",
+              "httpMethod": "GET",
+              "url": "api/app/global/menu-categories-lookup",
               "supportedVersions": [],
               "parametersOnMethod": [],
               "parameters": [],
@@ -1536,6 +2142,64 @@
                     "type": "System.Void",
                     "typeSimple": "System.Void"
                   }
+                },
+                {
+                  "name": "GetPurchaseUnitsAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "ingredientId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Collections.Generic.List<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto>",
+                    "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]"
+                  }
+                },
+                {
+                  "name": "ConvertQuantityAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "ingredientId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "fromUnitId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "toUnitId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "quantity",
+                      "typeAsString": "System.Int32, System.Private.CoreLib",
+                      "type": "System.Int32",
+                      "typeSimple": "number",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Int32",
+                    "typeSimple": "number"
+                  }
                 }
               ]
             }
@@ -1802,6 +2466,140 @@
               "returnValue": {
                 "type": "System.Void",
                 "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
+            },
+            "GetPurchaseUnitsAsyncByIngredientId": {
+              "uniqueName": "GetPurchaseUnitsAsyncByIngredientId",
+              "name": "GetPurchaseUnitsAsync",
+              "httpMethod": "GET",
+              "url": "api/app/ingredient/purchase-units/{ingredientId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "ingredientId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "ingredientId",
+                  "name": "ingredientId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Collections.Generic.List<SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto>",
+                "typeSimple": "[SmartRestaurant.InventoryManagement.Ingredients.Dto.IngredientPurchaseUnitDto]"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
+            },
+            "ConvertQuantityAsyncByIngredientIdAndFromUnitIdAndToUnitIdAndQuantity": {
+              "uniqueName": "ConvertQuantityAsyncByIngredientIdAndFromUnitIdAndToUnitIdAndQuantity",
+              "name": "ConvertQuantityAsync",
+              "httpMethod": "POST",
+              "url": "api/app/ingredient/convert-quantity",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "ingredientId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "fromUnitId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "toUnitId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "quantity",
+                  "typeAsString": "System.Int32, System.Private.CoreLib",
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "ingredientId",
+                  "name": "ingredientId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "fromUnitId",
+                  "name": "fromUnitId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "toUnitId",
+                  "name": "toUnitId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "quantity",
+                  "name": "quantity",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Int32",
+                "typeSimple": "number"
               },
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.InventoryManagement.Ingredients.IIngredientAppService"
@@ -2668,28 +3466,20 @@
               "name": "IMenuItemAppService",
               "methods": [
                 {
-                  "name": "UpdateAvailabilityAsync",
+                  "name": "GetListAsync",
                   "parametersOnMethod": [
                     {
-                      "name": "id",
-                      "typeAsString": "System.Guid, System.Private.CoreLib",
-                      "type": "System.Guid",
-                      "typeSimple": "string",
-                      "isOptional": false,
-                      "defaultValue": null
-                    },
-                    {
-                      "name": "isAvailable",
-                      "typeAsString": "System.Boolean, System.Private.CoreLib",
-                      "type": "System.Boolean",
-                      "typeSimple": "boolean",
+                      "name": "input",
+                      "typeAsString": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto, SmartRestaurant.Application.Contracts",
+                      "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto",
+                      "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto",
                       "isOptional": false,
                       "defaultValue": null
                     }
                   ],
                   "returnValue": {
-                    "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                    "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
+                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
                   }
                 },
                 {
@@ -2710,23 +3500,6 @@
                   }
                 },
                 {
-                  "name": "GetListAsync",
-                  "parametersOnMethod": [
-                    {
-                      "name": "input",
-                      "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
-                      "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                      "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                      "isOptional": false,
-                      "defaultValue": null
-                    }
-                  ],
-                  "returnValue": {
-                    "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
-                    "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
-                  }
-                },
-                {
                   "name": "CreateAsync",
                   "parametersOnMethod": [
                     {
@@ -2739,8 +3512,8 @@
                     }
                   ],
                   "returnValue": {
-                    "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                    "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
                   }
                 },
                 {
@@ -2764,8 +3537,8 @@
                     }
                   ],
                   "returnValue": {
-                    "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                    "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
                   }
                 },
                 {
@@ -2784,11 +3557,170 @@
                     "type": "System.Void",
                     "typeSimple": "System.Void"
                   }
+                },
+                {
+                  "name": "UpdateAvailabilityAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "isAvailable",
+                      "typeAsString": "System.Boolean, System.Private.CoreLib",
+                      "type": "System.Boolean",
+                      "typeSimple": "boolean",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
                 }
               ]
             }
           ],
           "actions": {
+            "GetListAsyncByInput": {
+              "uniqueName": "GetListAsyncByInput",
+              "name": "GetListAsync",
+              "httpMethod": "GET",
+              "url": "api/app/menu-item",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "input",
+                  "typeAsString": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto, SmartRestaurant.Application.Contracts",
+                  "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto",
+                  "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "input",
+                  "name": "Filter",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "CategoryId",
+                  "jsonName": null,
+                  "type": "System.Guid?",
+                  "typeSimple": "string?",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "OnlyAvailable",
+                  "jsonName": null,
+                  "type": "System.Boolean",
+                  "typeSimple": "boolean",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "Sorting",
+                  "jsonName": null,
+                  "type": "System.String",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "SkipCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                },
+                {
+                  "nameOnMethod": "input",
+                  "name": "MaxResultCount",
+                  "jsonName": null,
+                  "type": "System.Int32",
+                  "typeSimple": "number",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": "input"
+                }
+              ],
+              "returnValue": {
+                "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
+                "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
+            },
+            "GetAsyncById": {
+              "uniqueName": "GetAsyncById",
+              "name": "GetAsync",
+              "httpMethod": "GET",
+              "url": "api/app/menu-item/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
+                "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
+            },
             "CreateAsyncByInput": {
               "uniqueName": "CreateAsyncByInput",
               "name": "CreateAsync",
@@ -2820,11 +3752,11 @@
                 }
               ],
               "returnValue": {
-                "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+                "type": "System.Void",
+                "typeSimple": "System.Void"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.ICreateAppService<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,SmartRestaurant.MenuManagement.MenuItems.Dto.CreateUpdateMenuItemDto>"
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
             },
             "UpdateAsyncByIdAndInput": {
               "uniqueName": "UpdateAsyncByIdAndInput",
@@ -2877,11 +3809,48 @@
                 }
               ],
               "returnValue": {
-                "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
+                "type": "System.Void",
+                "typeSimple": "System.Void"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IUpdateAppService<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,System.Guid,SmartRestaurant.MenuManagement.MenuItems.Dto.CreateUpdateMenuItemDto>"
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
+            },
+            "DeleteAsyncById": {
+              "uniqueName": "DeleteAsyncById",
+              "name": "DeleteAsync",
+              "httpMethod": "DELETE",
+              "url": "api/app/menu-item/{id}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
             },
             "UpdateAvailabilityAsyncByIdAndIsAvailable": {
               "uniqueName": "UpdateAvailabilityAsyncByIdAndIsAvailable",
@@ -2934,146 +3903,11 @@
                 }
               ],
               "returnValue": {
-                "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
-              },
-              "allowAnonymous": false,
-              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
-            },
-            "DeleteAsyncById": {
-              "uniqueName": "DeleteAsyncById",
-              "name": "DeleteAsync",
-              "httpMethod": "DELETE",
-              "url": "api/app/menu-item/{id}",
-              "supportedVersions": [],
-              "parametersOnMethod": [
-                {
-                  "name": "id",
-                  "typeAsString": "System.Guid, System.Private.CoreLib",
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null
-                }
-              ],
-              "parameters": [
-                {
-                  "nameOnMethod": "id",
-                  "name": "id",
-                  "jsonName": null,
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": [],
-                  "bindingSourceId": "Path",
-                  "descriptorName": ""
-                }
-              ],
-              "returnValue": {
                 "type": "System.Void",
                 "typeSimple": "System.Void"
               },
               "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IDeleteAppService<System.Guid>"
-            },
-            "GetAsyncById": {
-              "uniqueName": "GetAsyncById",
-              "name": "GetAsync",
-              "httpMethod": "GET",
-              "url": "api/app/menu-item/{id}",
-              "supportedVersions": [],
-              "parametersOnMethod": [
-                {
-                  "name": "id",
-                  "typeAsString": "System.Guid, System.Private.CoreLib",
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null
-                }
-              ],
-              "parameters": [
-                {
-                  "nameOnMethod": "id",
-                  "name": "id",
-                  "jsonName": null,
-                  "type": "System.Guid",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": [],
-                  "bindingSourceId": "Path",
-                  "descriptorName": ""
-                }
-              ],
-              "returnValue": {
-                "type": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto",
-                "typeSimple": "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto"
-              },
-              "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
-            },
-            "GetListAsyncByInput": {
-              "uniqueName": "GetListAsyncByInput",
-              "name": "GetListAsync",
-              "httpMethod": "GET",
-              "url": "api/app/menu-item",
-              "supportedVersions": [],
-              "parametersOnMethod": [
-                {
-                  "name": "input",
-                  "typeAsString": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto, Volo.Abp.Ddd.Application.Contracts",
-                  "type": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                  "typeSimple": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
-                  "isOptional": false,
-                  "defaultValue": null
-                }
-              ],
-              "parameters": [
-                {
-                  "nameOnMethod": "input",
-                  "name": "Sorting",
-                  "jsonName": null,
-                  "type": "System.String",
-                  "typeSimple": "string",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": null,
-                  "bindingSourceId": "ModelBinding",
-                  "descriptorName": "input"
-                },
-                {
-                  "nameOnMethod": "input",
-                  "name": "SkipCount",
-                  "jsonName": null,
-                  "type": "System.Int32",
-                  "typeSimple": "number",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": null,
-                  "bindingSourceId": "ModelBinding",
-                  "descriptorName": "input"
-                },
-                {
-                  "nameOnMethod": "input",
-                  "name": "MaxResultCount",
-                  "jsonName": null,
-                  "type": "System.Int32",
-                  "typeSimple": "number",
-                  "isOptional": false,
-                  "defaultValue": null,
-                  "constraintTypes": null,
-                  "bindingSourceId": "ModelBinding",
-                  "descriptorName": "input"
-                }
-              ],
-              "returnValue": {
-                "type": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>",
-                "typeSimple": "Volo.Abp.Application.Dtos.PagedResultDto<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto>"
-              },
-              "allowAnonymous": false,
-              "implementFrom": "Volo.Abp.Application.Services.IReadOnlyAppService<SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemDto,System.Guid,Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto>"
+              "implementFrom": "SmartRestaurant.MenuManagement.MenuItems.IMenuItemAppService"
             }
           }
         },
@@ -6883,6 +7717,969 @@
     }
   },
   "types": {
+    "SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto": {
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.TableStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "StatusDisplay",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "HasActiveOrders",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderStatusDisplay",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PendingItemsCount",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.AddItemsToOrderDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Items",
+          "jsonName": null,
+          "type": "[SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderItemDto]",
+          "typeSimple": "[SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderItemDto]",
+          "isRequired": true,
+          "minLength": 1,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "AdditionalNotes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": 0,
+          "maxLength": 500,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderType",
+          "jsonName": null,
+          "type": "SmartRestaurant.Orders.OrderType",
+          "typeSimple": "enum",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Notes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": 0,
+          "maxLength": 500,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderItems",
+          "jsonName": null,
+          "type": "[SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderItemDto]",
+          "typeSimple": "[SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderItemDto]",
+          "isRequired": true,
+          "minLength": 1,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.CreateOrderItemDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "MenuItemId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "MenuItemName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": 0,
+          "maxLength": 200,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Quantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "2147483647",
+          "regex": null
+        },
+        {
+          "name": "UnitPrice",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "0",
+          "maximum": "1,7976931348623157E+308",
+          "regex": null
+        },
+        {
+          "name": "Notes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": 0,
+          "maxLength": 300,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.GetMenuItemsForOrderDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "NameFilter",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CategoryId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OnlyAvailable",
+          "jsonName": null,
+          "type": "System.Boolean?",
+          "typeSimple": "boolean?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.OrderDto": {
+      "baseType": "Volo.Abp.Application.Dtos.FullAuditedEntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "OrderNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TableId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TableName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderType",
+          "jsonName": null,
+          "type": "SmartRestaurant.Orders.OrderType",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.Orders.OrderStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "StatusDisplay",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalAmount",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Notes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ConfirmedTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PreparingTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ReadyTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ServedTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PaidTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderItems",
+          "jsonName": null,
+          "type": "[SmartRestaurant.Application.Contracts.Orders.Dto.OrderItemDto]",
+          "typeSimple": "[SmartRestaurant.Application.Contracts.Orders.Dto.OrderItemDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ItemCount",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ElapsedMinutes",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.OrderItemDto": {
+      "baseType": "Volo.Abp.Application.Dtos.FullAuditedEntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "OrderId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "MenuItemId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "MenuItemName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Quantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UnitPrice",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalPrice",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Notes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.Orders.OrderItemStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "StatusDisplay",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PreparationStartTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PreparationCompleteTime",
+          "jsonName": null,
+          "type": "System.DateTime?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PreparationDurationMinutes",
+          "jsonName": null,
+          "type": "System.Int32?",
+          "typeSimple": "number?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.TableDetailDto": {
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TableNumber",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "LayoutSectionName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.TableStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "StatusDisplay",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderSummary",
+          "jsonName": null,
+          "type": "SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderSummaryDto",
+          "typeSimple": "SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderSummaryDto",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OrderItems",
+          "jsonName": null,
+          "type": "[SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderItemDto]",
+          "typeSimple": "[SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderItemDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderItemDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Id",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "MenuItemName",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Quantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "UnitPrice",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalPrice",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Status",
+          "jsonName": null,
+          "type": "SmartRestaurant.Orders.OrderItemStatus",
+          "typeSimple": "enum",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CanEdit",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CanDelete",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "SpecialRequest",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.TableOrderSummaryDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "TotalItemsCount",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "PendingServeCount",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "TotalAmount",
+          "jsonName": null,
+          "type": "System.Decimal",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Application.Contracts.Orders.Dto.UpdateOrderItemQuantityDto": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "NewQuantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "2147483647",
+          "regex": null
+        },
+        {
+          "name": "Notes",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": 0,
+          "maxLength": 200,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
     "SmartRestaurant.Common.Dto.GuidLookupItemDto": {
       "baseType": null,
       "isEnum": false,
@@ -8278,6 +10075,63 @@
           "minimum": null,
           "maximum": null,
           "regex": null
+        },
+        {
+          "name": "Ingredients",
+          "jsonName": null,
+          "type": "[SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemIngredientDto]",
+          "typeSimple": "[SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemIngredientDto]",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.MenuManagement.MenuItems.Dto.GetMenuItemListRequestDto": {
+      "baseType": "Volo.Abp.Application.Dtos.PagedAndSortedResultRequestDto",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "Filter",
+          "jsonName": null,
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "CategoryId",
+          "jsonName": null,
+          "type": "System.Guid?",
+          "typeSimple": "string?",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "OnlyAvailable",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
         }
       ]
     },
@@ -8361,10 +10215,34 @@
           "regex": null
         },
         {
-          "name": "Category",
+          "name": "CategoryName",
           "jsonName": null,
-          "type": "SmartRestaurant.MenuManagement.MenuCategories.Dto.MenuCategoryDto",
-          "typeSimple": "SmartRestaurant.MenuManagement.MenuCategories.Dto.MenuCategoryDto",
+          "type": "System.String",
+          "typeSimple": "string",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "SoldQuantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "IsPopular",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
           "isRequired": false,
           "minLength": null,
           "maxLength": null,
@@ -8373,6 +10251,101 @@
           "regex": null
         }
       ]
+    },
+    "SmartRestaurant.MenuManagement.MenuItems.Dto.MenuItemIngredientDto": {
+      "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid?>",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": [
+        {
+          "name": "IngredientId",
+          "jsonName": null,
+          "type": "System.Guid",
+          "typeSimple": "string",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "RequiredQuantity",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": true,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "1",
+          "maximum": "2147483647",
+          "regex": null
+        },
+        {
+          "name": "DisplayOrder",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": "0",
+          "maximum": "2147483647",
+          "regex": null
+        }
+      ]
+    },
+    "SmartRestaurant.Orders.OrderItemStatus": {
+      "baseType": "System.Enum",
+      "isEnum": true,
+      "enumNames": [
+        "Pending",
+        "Preparing",
+        "Ready",
+        "Served",
+        "Canceled"
+      ],
+      "enumValues": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "genericArguments": null,
+      "properties": null
+    },
+    "SmartRestaurant.Orders.OrderStatus": {
+      "baseType": "System.Enum",
+      "isEnum": true,
+      "enumNames": [
+        "Active",
+        "Paid"
+      ],
+      "enumValues": [
+        0,
+        1
+      ],
+      "genericArguments": null,
+      "properties": null
+    },
+    "SmartRestaurant.Orders.OrderType": {
+      "baseType": "System.Enum",
+      "isEnum": true,
+      "enumNames": [
+        "DineIn",
+        "Takeaway",
+        "Delivery"
+      ],
+      "enumValues": [
+        0,
+        1,
+        2
+      ],
+      "genericArguments": null,
+      "properties": null
     },
     "SmartRestaurant.TableManagement.LayoutSections.Dto.CreateLayoutSectionDto": {
       "baseType": null,
@@ -9007,17 +10980,50 @@
       "enumNames": [
         "Available",
         "Occupied",
-        "Reserved",
-        "Cleaning"
+        "Reserved"
       ],
       "enumValues": [
         0,
         1,
-        2,
-        3
+        2
       ],
       "genericArguments": null,
       "properties": null
+    },
+    "System.Nullable<T0>": {
+      "baseType": "System.ValueType",
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": [
+        "T"
+      ],
+      "properties": [
+        {
+          "name": "HasValue",
+          "jsonName": null,
+          "type": "System.Boolean",
+          "typeSimple": "boolean",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "Value",
+          "jsonName": null,
+          "type": "T",
+          "typeSimple": "T",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        }
+      ]
     },
     "Volo.Abp.Account.ChangePasswordInput": {
       "baseType": null,

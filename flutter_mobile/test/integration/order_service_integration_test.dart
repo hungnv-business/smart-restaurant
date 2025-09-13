@@ -41,8 +41,8 @@ void main() {
           if (table.hasActiveOrders) {
             print('   📋 Has active orders');
           }
-          if (table.pendingServeOrdersCount > 0) {
-            print('   ⏳ ${table.pendingServeOrdersCount} items pending serve');
+          if (table.pendingItemsCount > 0) {
+            print('   ⏳ ${table.pendingItemsCount} items pending serve');
           }
         }
         
@@ -104,7 +104,8 @@ void main() {
           'status': testCase['status'],
           'statusDisplay': 'Test Status',
           'hasActiveOrders': false,
-          'pendingServeOrdersCount': 0,
+          'pendingItemsCount': 0,
+          'orderStatusDisplay': 'Trống',
         };
 
         final table = ActiveTableDto.fromJson(mockTableData);

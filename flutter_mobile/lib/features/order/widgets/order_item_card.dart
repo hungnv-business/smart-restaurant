@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/utils/price_formatter.dart';
 
 /// Widget hiển thị thông tin một món trong đơn hàng
 class OrderItemCard extends StatelessWidget {
@@ -6,6 +7,11 @@ class OrderItemCard extends StatelessWidget {
   final int quantity;
   final int unitPrice;
   final String status;
+  final Color? statusColor;
+  final String? totalPrice;
+  final String? specialRequest;
+  final bool hasMissingIngredients;
+  final String? missingIngredientsMessage; // Thêm field cho displayMessage
   final VoidCallback? onEdit;
   final VoidCallback? onRemove;
 
@@ -15,6 +21,11 @@ class OrderItemCard extends StatelessWidget {
     required this.quantity,
     required this.unitPrice,
     required this.status,
+    this.statusColor,
+    this.totalPrice,
+    this.specialRequest,
+    this.hasMissingIngredients = false,
+    this.missingIngredientsMessage,
     this.onEdit,
     this.onRemove,
   }) : super(key: key);
@@ -38,13 +49,23 @@ class OrderItemCard extends StatelessWidget {
     };
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
+      margin: EdgeInsets.zero, // Bỏ margin vì đã có trong ListView
+      elevation: 1, // Giảm elevation
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8), // Giảm border radius
+        side: BorderSide(
+          color: hasMissingIngredients 
+              ? Colors.orange 
+              : Colors.transparent,
+          width: hasMissingIngredients ? 1.5 : 0,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12), // Giảm padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Main content row
             Row(
               children: [
                 // Món ăn info
@@ -52,102 +73,141 @@ class OrderItemCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Tên món
                       Text(
                         itemName,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Số lượng: $quantity',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      const SizedBox(height: 2),
+                      
+                      // Số lượng và status inline
+                      Row(
+                        children: [
+                          Text(
+                            'SL: $quantity',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Status compact
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: statusColors[status]?.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                color: statusColors[status] ?? Colors.grey,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      
+                      // Warning thiếu nguyên liệu
+                      if (hasMissingIngredients) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning,
+                              size: 14,
+                              color: Colors.orange[700],
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                missingIngredientsMessage?.isNotEmpty == true
+                                    ? '${missingIngredientsMessage!}'
+                                    : 'Thiếu nguyên liệu',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.orange[700],
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      
+                      // Ghi chú nếu có (compact)
+                      if (specialRequest != null && specialRequest!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          specialRequest!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.amber[800],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 
-                // Giá
+                const SizedBox(width: 12),
+                
+                // Giá và actions
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '${unitPrice * quantity}đ',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      PriceFormatter.format(unitPrice * quantity),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                    Text(
-                      '${unitPrice}đ/món',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // Status và actions
-            Row(
-              children: [
-                // Status chip
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColors[status]?.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: statusColors[status] ?? Colors.grey,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        statusIcons[status] ?? Icons.help,
-                        size: 14,
-                        color: statusColors[status] ?? Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        status,
-                        style: TextStyle(
-                          color: statusColors[status] ?? Colors.grey,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    
+                    // Action buttons compact
+                    if (status == 'Chờ chuẩn bị') ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: onEdit,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.edit,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          InkWell(
+                            onTap: onRemove,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.delete,
+                                size: 16,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                
-                const Spacer(),
-                
-                // Action buttons (chỉ hiển thị với những món chưa phục vụ)
-                if (status == 'Chờ chuẩn bị') ...[
-                  IconButton(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit, size: 20),
-                    tooltip: 'Sửa món',
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                  ),
-                  IconButton(
-                    onPressed: onRemove,
-                    icon: const Icon(Icons.delete, size: 20),
-                    color: Colors.red,
-                    tooltip: 'Xóa món',
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
               ],
             ),
           ],

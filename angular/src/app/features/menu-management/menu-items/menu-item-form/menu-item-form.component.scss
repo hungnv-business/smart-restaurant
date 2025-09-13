@@ -15,9 +15,13 @@ img {
   }
 }
 
-// Form layout responsive adjustments
-@media (max-width: 640px) {
-  .flex-col.sm\\:flex-row {
-    flex-direction: column;
+// Ingredient card styles
+.ingredient-card {
+  ::ng-deep .p-card-body {
+    padding: 1rem;
+  }
+
+  ::ng-deep .p-card-content {
+    padding: 0;
   }
 }

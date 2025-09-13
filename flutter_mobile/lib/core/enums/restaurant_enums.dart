@@ -27,6 +27,13 @@ enum OrderType {
   delivery,     // Giao hàng - Nhà hàng giao món đến địa chỉ khách hàng (2)
 }
 
+/// Phương thức thanh toán (sync với backend PaymentMethod enum)
+enum PaymentMethod {
+  transfer,     // Chuyển khoản QR (0)
+  cash,         // Tiền mặt (1)
+  debt,         // Nợ (2)
+}
+
 /// Extension để hiển thị trạng thái bàn bằng tiếng Việt
 extension TableStatusExtension on TableStatus {
   String get displayName {
@@ -128,6 +135,31 @@ extension OrderTypeExtension on OrderType {
         return 0xFFFF9800; // Orange
       case OrderType.delivery:
         return 0xFF2196F3; // Blue
+    }
+  }
+}
+
+/// Extension để hiển thị phương thức thanh toán bằng tiếng Việt
+extension PaymentMethodExtension on PaymentMethod {
+  String get displayName {
+    switch (this) {
+      case PaymentMethod.transfer:
+        return 'Chuyển khoản QR';
+      case PaymentMethod.cash:
+        return 'Tiền mặt';
+      case PaymentMethod.debt:
+        return 'Nợ';
+    }
+  }
+
+  int get colorValue {
+    switch (this) {
+      case PaymentMethod.transfer:
+        return 0xFFFF9800; // Orange
+      case PaymentMethod.cash:
+        return 0xFF4CAF50; // Green
+      case PaymentMethod.debt:
+        return 0xFFF44336; // Red
     }
   }
 }

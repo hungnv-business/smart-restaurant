@@ -6,7 +6,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace SmartRestaurant.InventoryManagement.IngredientCategories;
 
-public class IngredientCategoryDataSeedContributor : IDataSeedContributor, ITransientDependency
+public class IngredientCategoryDataSeedContributor : ITransientDependency
 {
     private readonly IRepository<IngredientCategory, Guid> _ingredientCategoryRepository;
 
@@ -31,6 +31,6 @@ public class IngredientCategoryDataSeedContributor : IDataSeedContributor, ITran
             new IngredientCategory { Name = "Đồ uống", Description = "Nước ngọt, bia và các loại đồ uống", DisplayOrder = 5, IsActive = true }
         };
 
-        await _ingredientCategoryRepository.InsertManyAsync(categories);
+        await _ingredientCategoryRepository.InsertManyAsync(categories, autoSave: true);
     }
 }

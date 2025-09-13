@@ -5,6 +5,7 @@ import '../enums/restaurant_enums.dart';
 import '../models/table_models.dart';
 import '../models/menu_models.dart';
 import '../models/order_request_models.dart';
+import '../models/ingredient_verification_models.dart';
 import 'http_client_service.dart';
 
 /// Service xử lý quản lý đơn hàng và bàn trong nhà hàng
@@ -144,12 +145,56 @@ class OrderService extends ChangeNotifier {
 
   /// Lấy danh sách bàn có món chờ phục vụ
   List<ActiveTableDto> getTablesWithPendingOrders() {
-    return _activeTables.where((table) => table.pendingServeOrdersCount > 0).toList();
+    return _activeTables.where((table) => table.pendingItemsCount > 0).toList();
   }
 
   /// Refresh danh sách bàn
   Future<void> refreshTables() async {
     await getActiveTables();
+  }
+
+  /// Lấy chi tiết bàn với đầy đủ thông tin đơn hàng
+  /// Endpoint: GET /api/app/order/table-details/{tableId}
+  Future<TableDetailDto> getTableDetails(String tableId) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.get('/api/app/order/table-details/$tableId');
+
+      if (response.statusCode == 200 && response.data != null) {
+        final tableDetail = TableDetailDto.fromJson(response.data);
+        
+        print('✅ OrderService: Successfully loaded table details for ${tableDetail.tableNumber}');
+        print('🪑 Table ${tableDetail.tableNumber} - ${tableDetail.orderSummary?.totalItemsCount ?? 0} items');
+        print('📋 Order items: ${tableDetail.orderItems.length}');
+        
+        return tableDetail;
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi lấy chi tiết bàn',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException getting table details - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'lấy chi tiết bàn');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi lấy chi tiết bàn: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(
+        message: message,
+        errorCode: 'UNKNOWN_ERROR',
+      );
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Lấy danh sách categories đang hoạt động từ API
@@ -384,17 +429,7 @@ class OrderService extends ChangeNotifier {
   
   /// Tạo đơn hàng mới
   /// Gửi request lên API POST /api/app/orders
-  Future<CreateOrderResponse> createOrder(CreateOrderRequest request) async {
-    // Validate request
-    final validationErrors = request.validate();
-    if (validationErrors.isNotEmpty) {
-      final errorMessage = 'Đơn hàng không hợp lệ:\n${validationErrors.join('\n')}';
-      throw OrderServiceException(
-        message: errorMessage,
-        errorCode: 'VALIDATION_ERROR',
-      );
-    }
-
+  Future<CreateOrderResponse?> createOrder(CreateOrderRequest request) async {
     _setLoading(true);
     _clearError();
 
@@ -405,15 +440,27 @@ class OrderService extends ChangeNotifier {
       );
       
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Success with response body
         final orderResponse = CreateOrderResponse.fromJson(response.data);
+        print('✅ OrderService: Successfully created order with response data');
         return orderResponse;
+      } else if (response.statusCode == 204) {
+        // Success but no content - API chỉ trả về 204 No Content
+        print('✅ OrderService: Successfully created order (204 No Content)');
+        // Trả về null vì không có dữ liệu từ server
+        return null;
       } else {
         throw OrderServiceException(
-          message: 'Phản hồi không hợp lệ từ server khi tạo đơn hàng',
+          message: 'Phản hồi không hợp lệ từ server khi tạo đơn hàng (${response.statusCode})',
           statusCode: response.statusCode,
         );
       }
     } on DioException catch (e) {
+      print('❌ OrderService: DioException creating order - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
       final exception = _handleDioException(e, 'tạo đơn hàng');
       _setError(exception.message);
       throw exception;
@@ -421,6 +468,241 @@ class OrderService extends ChangeNotifier {
       final message = 'Lỗi không xác định khi tạo đơn hàng: ${e.toString()}';
       _setError(message);
       throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Thêm món vào order hiện có của bàn  
+  /// Gửi request lên API POST /api/app/order/{orderId}/add-items
+  Future<void> addItemsToOrder(String orderId, AddItemsToOrderRequest request) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final response = await _dio.post(
+        '/api/app/order/items-to-order/$orderId',
+        data: request.toJson(),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+        print('✅ OrderService: Successfully added items to order $orderId');
+        return; // Void method, không trả về gì
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi thêm món',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException adding items to order - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'thêm món vào order');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi thêm món vào order: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Xóa món ăn khỏi order
+  /// Gửi request lên API DELETE /api/app/order/order-item
+  Future<void> removeOrderItem(String orderId, String orderItemId) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final response = await _dio.delete(
+        '/api/app/order/order-item',
+        queryParameters: {
+          'orderId': orderId,
+          'orderItemId': orderItemId,
+        },
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ OrderService: Successfully removed order item $orderItemId from order $orderId');
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi xóa món',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException removing order item - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'xóa món khỏi order');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi xóa món khỏi order: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Cập nhật số lượng món trong order
+  /// Gửi request lên API PUT /api/app/order/order-item-quantity
+  Future<void> updateOrderItemQuantity(String orderId, String orderItemId, int newQuantity, {String? notes}) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final response = await _dio.put(
+        '/api/app/order/order-item-quantity',
+        queryParameters: {
+          'orderId': orderId,
+          'orderItemId': orderItemId,
+        },
+        data: {
+          'newQuantity': newQuantity,
+          if (notes != null && notes.isNotEmpty) 'notes': notes,
+        },
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ OrderService: Successfully updated quantity for order item $orderItemId to $newQuantity');
+        return; // Void method, không trả về gì
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi cập nhật số lượng',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException updating quantity - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'cập nhật số lượng món');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi cập nhật số lượng: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Kiểm tra tồn kho nguyên liệu cho các món trong order
+  /// Endpoint: POST /api/app/order/verify-ingredients-availability
+  Future<IngredientAvailabilityResult> verifyIngredientsAvailability(VerifyIngredientsRequest request) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.post(
+        '/api/app/order/verify-ingredients-availability',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final result = IngredientAvailabilityResult.fromJson(response.data);
+        
+        print('✅ OrderService: Successfully verified ingredients for ${request.items.length} items');
+        print('🧾 Verification result: ${result.shortSummary}');
+        if (result.hasMissingIngredients) {
+          print('⚠️ Missing ingredients found: ${result.missingIngredients.length} issues');
+          for (final missing in result.missingIngredients) {
+            print('   - ${missing.menuItemName}: ${missing.displayMessage}');
+          }
+        }
+
+        return result;
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi kiểm tra nguyên liệu',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException verifying ingredients - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'kiểm tra tồn kho nguyên liệu');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi kiểm tra nguyên liệu: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(
+        message: message,
+        errorCode: 'UNKNOWN_ERROR',
+      );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Xử lý thanh toán đơn hàng
+  /// Endpoint: POST /api/app/order/process-payment
+  Future<void> processPayment({
+    required String orderId,
+    required PaymentMethod paymentMethod,
+    required int customerMoney,
+    String? notes,
+  }) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.post(
+        '/api/app/order/process-payment',
+        data: {
+          'orderId': orderId,
+          'paymentMethod': paymentMethod.index,
+          'customerMoney': customerMoney,
+          'notes': notes ?? '',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ OrderService: Successfully processed payment for order $orderId');
+        print('💳 Payment method: ${paymentMethod.displayName}');
+        print('💰 Customer money: $customerMoney');
+        if (notes != null && notes.isNotEmpty) {
+          print('📝 Notes: $notes');
+        }
+        return; // Void method
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi xử lý thanh toán',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException processing payment - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'xử lý thanh toán');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi xử lý thanh toán: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(
+        message: message,
+        errorCode: 'UNKNOWN_ERROR',
+      );
     } finally {
       _setLoading(false);
     }

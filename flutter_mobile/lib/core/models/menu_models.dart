@@ -53,6 +53,9 @@ class MenuItem {
   final String? categoryName;
   final int soldQuantity;
   final bool isPopular;
+  final int maximumQuantityAvailable;
+  final bool isOutOfStock;
+  final bool hasLimitedStock;
 
   const MenuItem({
     required this.id,
@@ -65,6 +68,9 @@ class MenuItem {
     this.categoryName,
     this.soldQuantity = 0,
     this.isPopular = false,
+    this.maximumQuantityAvailable = 0,
+    this.isOutOfStock = false,
+    this.hasLimitedStock = false,
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
@@ -79,6 +85,9 @@ class MenuItem {
       categoryName: json['categoryName'] as String?,
       soldQuantity: json['soldQuantity'] as int? ?? 0,
       isPopular: json['isPopular'] as bool? ?? false,
+      maximumQuantityAvailable: json['maximumQuantityAvailable'] as int? ?? 0,
+      isOutOfStock: json['isOutOfStock'] as bool? ?? false,
+      hasLimitedStock: json['hasLimitedStock'] as bool? ?? false,
     );
   }
 
@@ -94,6 +103,9 @@ class MenuItem {
       'categoryName': categoryName,
       'soldQuantity': soldQuantity,
       'isPopular': isPopular,
+      'maximumQuantityAvailable': maximumQuantityAvailable,
+      'isOutOfStock': isOutOfStock,
+      'hasLimitedStock': hasLimitedStock,
     };
   }
 
@@ -109,8 +121,33 @@ class MenuItem {
 
   @override
   String toString() {
-    return 'MenuItem{id: $id, name: $name, price: $price, isAvailable: $isAvailable}';
+    return 'MenuItem{id: $id, name: $name, price: $price, isAvailable: $isAvailable, stock: $maximumQuantityAvailable}';
   }
+  
+  /// Getter để kiểm tra món có thể order được không
+  bool get canOrder => isAvailable && !isOutOfStock;
+  
+  /// Getter để lấy stock status text
+  String get stockStatusText {
+    if (isOutOfStock) return 'Hết hàng';
+    if (hasLimitedStock) return 'Còn ${maximumQuantityAvailable} phần';
+    if (maximumQuantityAvailable == 2147483647) return 'Còn hàng'; // int.maxValue từ backend
+    return 'Còn ${maximumQuantityAvailable} phần';
+  }
+  
+  /// Getter để lấy màu stock status
+  StockStatusColor get stockStatusColor {
+    if (isOutOfStock) return StockStatusColor.outOfStock;
+    if (hasLimitedStock) return StockStatusColor.limited;
+    return StockStatusColor.available;
+  }
+}
+
+/// Enum cho màu stock status
+enum StockStatusColor {
+  available, // Xanh lá
+  limited,   // Vàng/Cam
+  outOfStock // Đỏ
 }
 
 /// Model cho filter khi lấy danh sách món ăn (tương ứng GetMenuItemsForOrderDto)

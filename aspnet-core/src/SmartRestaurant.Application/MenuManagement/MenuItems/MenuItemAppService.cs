@@ -1,136 +1,133 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using SmartRestaurant.Common;
-using SmartRestaurant.MenuManagement.MenuCategories;
-using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.MenuManagement.MenuItems.Dto;
 using SmartRestaurant.Permissions;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Domain.Entities;
+using SmartRestaurant.MenuManagement.MenuItemIngredients;
 
 namespace SmartRestaurant.MenuManagement.MenuItems
 {
     /// <summary>
-    /// Application Service cho MenuItem - Level 1 CRUD Pattern
-    /// Kế thừa CrudAppService của ABP để có sẵn các operations: GetList, Get, Create, Update, Delete
-    /// Chỉ cần override khi cần business logic đặc biệt
+    /// Application Service cho MenuItem - Manual Implementation
+    /// Không kế thừa CrudAppService, implement tất cả methods thủ công
     /// </summary>
     [Authorize(SmartRestaurantPermissions.Menu.Items.Default)]
-    public class MenuItemAppService : 
-        CrudAppService<
-            MenuItem,                         // Domain Entity
-            MenuItemDto,                      // Output DTO  
-            Guid,                            // Primary Key Type
-            PagedAndSortedResultRequestDto,   // GetList Input (có sẵn paging/sorting)
-            CreateUpdateMenuItemDto>,         // Create/Update Input DTO
-        IMenuItemAppService
+    public class MenuItemAppService : ApplicationService, IMenuItemAppService
     {
-        private readonly IRepository<MenuCategory, Guid> _categoryRepository;
+        private readonly IMenuItemRepository _menuItemRepository;
+        private readonly MenuItemManager _menuItemManager;
 
         public MenuItemAppService(
-            IRepository<MenuItem, Guid> repository,
-            IRepository<MenuCategory, Guid> categoryRepository)
-            : base(repository)
+            IMenuItemRepository menuItemRepository,
+            MenuItemManager menuItemManager)
         {
-            _categoryRepository = categoryRepository;
-            
-            // Cấu hình permissions cho từng operation
-            GetPolicyName = SmartRestaurantPermissions.Menu.Items.Default;
-            GetListPolicyName = SmartRestaurantPermissions.Menu.Items.Default;
-            CreatePolicyName = SmartRestaurantPermissions.Menu.Items.Create;
-            UpdatePolicyName = SmartRestaurantPermissions.Menu.Items.Edit;
-            DeletePolicyName = SmartRestaurantPermissions.Menu.Items.Delete;
-        }
-
-        protected override async Task<IQueryable<MenuItem>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
-        {
-            // ABP tự động include navigation properties khi cần thiết thông qua AutoMapper
-            return await base.CreateFilteredQueryAsync(input);
+            _menuItemRepository = menuItemRepository;
+            _menuItemManager = menuItemManager;
         }
 
         /// <summary>
-        /// Override CreateAsync để thêm business logic: validate category exists và name unique
+        /// Lấy danh sách món ăn với phân trang và filter
         /// </summary>
-        public override async Task<MenuItemDto> CreateAsync(CreateUpdateMenuItemDto input)
+        public virtual async Task<PagedResultDto<MenuItemDto>> GetListAsync(GetMenuItemListRequestDto input)
         {
-            // Chuẩn hóa dữ liệu đầu vào để tránh khoảng trắng thừa
-            input.Name = StringUtility.NormalizeString(input.Name);
-            input.Description = StringUtility.NormalizeStringNullable(input.Description);
-            
-            // Business validation: validate category exists
-            await ValidateCategoryExistsAsync(input.CategoryId);
-            
-            // Business validation: validate name uniqueness trong cùng category
-            await ValidateNameNotExistsAsync(input.Name, input.CategoryId);
+            var items = await _menuItemRepository.GetListWithDetailsAsync(
+                input.SkipCount,
+                input.MaxResultCount,
+                input.Sorting ?? "Name",
+                input.Filter,
+                input.CategoryId,
+                input.OnlyAvailable);
 
-            return await base.CreateAsync(input);
+            var totalCount = await _menuItemRepository.GetCountAsync(
+                input.Filter,
+                input.CategoryId,
+                input.OnlyAvailable);
+
+            var itemDtos = ObjectMapper.Map<List<MenuItem>, List<MenuItemDto>>(items);
+
+            return new PagedResultDto<MenuItemDto>(totalCount, itemDtos);
         }
 
         /// <summary>
-        /// Override UpdateAsync để thêm business validation
+        /// Lấy thông tin chi tiết một món ăn theo ID
         /// </summary>
-        public override async Task<MenuItemDto> UpdateAsync(Guid id, CreateUpdateMenuItemDto input)
+        public virtual async Task<MenuItemDto> GetAsync(Guid id)
         {
-            // Chuẩn hóa dữ liệu đầu vào
-            input.Name = StringUtility.NormalizeString(input.Name);
-            input.Description = StringUtility.NormalizeStringNullable(input.Description);
-            
-            // Business validation: validate category exists
-            await ValidateCategoryExistsAsync(input.CategoryId);
-            
-            // Business validation: validate name uniqueness (exclude current item)
-            await ValidateNameNotExistsAsync(input.Name, input.CategoryId, id);
+            var menuItem = await _menuItemRepository.GetWithDetailsAsync(id);
 
-            return await base.UpdateAsync(id, input);
-        }
+            if (menuItem is null)
+            {
+                throw new EntityNotFoundException(typeof(MenuItem), id);
+            }
 
-        /// <summary>
-        /// Cập nhật trạng thái có sẵn của món ăn (còn hàng/hết hàng)
-        /// </summary>
-        [Authorize(SmartRestaurantPermissions.Menu.Items.UpdateAvailability)]
-        public async Task<MenuItemDto> UpdateAvailabilityAsync(Guid id, bool isAvailable)
-        {
-            var menuItem = await Repository.GetAsync(id);
-            menuItem.IsAvailable = isAvailable;
-            
-            await Repository.UpdateAsync(menuItem);
-            
             return ObjectMapper.Map<MenuItem, MenuItemDto>(menuItem);
         }
 
-        private async Task ValidateCategoryExistsAsync(Guid categoryId)
+        /// <summary>
+        /// Tạo mới một món ăn
+        /// </summary>
+        [Authorize(SmartRestaurantPermissions.Menu.Items.Create)]
+        public virtual async Task CreateAsync(CreateUpdateMenuItemDto input)
         {
-            var categoryExists = await _categoryRepository.AnyAsync(x => x.Id == categoryId);
-                
-            if (!categoryExists)
-            {
-                throw new MenuItemCategoryNotFoundException(categoryId);
-            }
+            var ingredients = this.ObjectMapper.Map<List<MenuItemIngredientDto>, List<MenuItemIngredient>>(input.Ingredients);
+
+            // Sử dụng MenuItemManager để tạo MenuItem
+            var menuItem = await _menuItemManager.CreateAsync(
+                input.Name,
+                input.Description,
+                input.Price,
+                input.IsAvailable,
+                input.ImageUrl,
+                input.CategoryId,
+                ingredients);
+
+            // Lưu vào database
+            await _menuItemRepository.InsertAsync(menuItem, autoSave: true);
         }
 
         /// <summary>
-        /// Private helper: Validate name uniqueness trong category - business rule của MenuItem
+        /// Cập nhật thông tin món ăn
         /// </summary>
-        private async Task ValidateNameNotExistsAsync(string name, Guid categoryId, Guid? excludeId = null)
+        [Authorize(SmartRestaurantPermissions.Menu.Items.Edit)]
+        public virtual async Task UpdateAsync(Guid id, CreateUpdateMenuItemDto input)
         {
-            if (StringUtility.IsNullOrWhiteSpaceNormalized(name))
-            {
-                return;
-            }
+            var ingredients = this.ObjectMapper.Map<List<MenuItemIngredientDto>, List<MenuItemIngredient>>(input.Ingredients);
+            // Sử dụng MenuItemManager để cập nhật với pattern ExamsManager
+            await _menuItemManager.UpdateAsync(
+                id,
+                input.Name,
+                input.Description,
+                input.Price,
+                input.IsAvailable,
+                input.ImageUrl,
+                input.CategoryId,
+                ingredients);
+        }
 
-            // Kiểm tra trùng tên trong cùng category không phân biệt hoa thường và khoảng trắng
-            var existingMenuItems = await Repository.GetListAsync(x => x.CategoryId == categoryId);
-            var duplicateMenuItem = existingMenuItems.FirstOrDefault(m => 
-                (excludeId == null || m.Id != excludeId) && 
-                StringUtility.AreNormalizedEqual(m.Name, name));
+        /// <summary>
+        /// Xóa một món ăn
+        /// </summary>
+        [Authorize(SmartRestaurantPermissions.Menu.Items.Delete)]
+        public virtual async Task DeleteAsync(Guid id)
+        {
+            // Sử dụng MenuItemManager để validation và xử lý business logic
+            await _menuItemManager.DeleteAsync(id);
+        }
 
-            if (duplicateMenuItem != null)
-            {
-                throw new MenuItemNameAlreadyExistsInCategoryException(name, categoryId);
-            }
+        /// <summary>
+        /// Cập nhật trạng thái có sẵn của món ăn
+        /// </summary>
+        [Authorize(SmartRestaurantPermissions.Menu.Items.UpdateAvailability)]
+        public virtual async Task UpdateAvailabilityAsync(Guid id, bool isAvailable)
+        {
+            var menuItem = await _menuItemRepository.GetAsync(id);
+
+            // Sử dụng MenuItemManager để cập nhật availability
+            await _menuItemManager.UpdateAvailabilityAsync(menuItem, isAvailable);
         }
     }
 }

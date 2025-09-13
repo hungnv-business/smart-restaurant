@@ -28,5 +28,21 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         /// Món có phổ biến không (dựa trên số lượng bán)
         /// </summary>
         public bool IsPopular { get; set; }
+
+        /// <summary>
+        /// Số lượng tối đa có thể làm được dựa vào tồn kho nguyên liệu
+        /// int.MaxValue nếu không có giới hạn
+        /// </summary>
+        public int MaximumQuantityAvailable { get; set; }
+
+        /// <summary>
+        /// Món có hết hàng không (không thể làm được)
+        /// </summary>
+        public bool IsOutOfStock { get; set; }
+
+        /// <summary>
+        /// Có tồn kho hạn chế không (< 10 phần)
+        /// </summary>
+        public bool HasLimitedStock { get; set; }
     }
 }

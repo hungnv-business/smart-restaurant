@@ -9,10 +9,10 @@ export class GlobalService {
   apiName = 'Default';
   
 
-  getCategoriesLookup = (config?: Partial<Rest.Config>) =>
+  getIngredientCategoriesLookup = (config?: Partial<Rest.Config>) =>
     this.restService.request<any, GuidLookupItemDto[]>({
       method: 'GET',
-      url: '/api/app/global/categories-lookup',
+      url: '/api/app/global/ingredient-categories-lookup',
     },
     { apiName: this.apiName,...config });
   
@@ -21,6 +21,14 @@ export class GlobalService {
     this.restService.request<any, GuidLookupItemDto[]>({
       method: 'GET',
       url: `/api/app/global/ingredients-by-category-lookup/${categoryId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  getMenuCategoriesLookup = (config?: Partial<Rest.Config>) =>
+    this.restService.request<any, GuidLookupItemDto[]>({
+      method: 'GET',
+      url: '/api/app/global/menu-categories-lookup',
     },
     { apiName: this.apiName,...config });
   

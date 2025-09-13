@@ -31,19 +31,7 @@ public class MenuItemIngredient : Entity<Guid>
     [Range(0, int.MaxValue, ErrorMessage = "Số lượng nguyên liệu phải lớn hơn hoặc bằng 0")]
     public int RequiredQuantity { get; set; } = 1;
 
-    /// <summary>
-    /// Nguyên liệu có tùy chọn hay bắt buộc
-    /// - false: Bắt buộc (ví dụ: thịt bò trong phở bò)
-    /// - true: Tùy chọn (ví dụ: hành lá, rau thơm)
-    /// </summary>
-    public bool IsOptional { get; set; } = false;
 
-    /// <summary>
-    /// Ghi chú về cách sử dụng nguyên liệu trong món này
-    /// Ví dụ: "Cắt lát mỏng", "Thái hạt lựu", "Ướp gia vị 30 phút"
-    /// </summary>
-    [StringLength(500)]
-    public string? PreparationNotes { get; set; }
 
     /// <summary>
     /// Thứ tự hiển thị nguyên liệu trong công thức (để sắp xếp theo độ quan trọng)
@@ -73,15 +61,11 @@ public class MenuItemIngredient : Entity<Guid>
         Guid menuItemId,
         Guid ingredientId,
         int requiredQuantity,
-        bool isOptional = false,
-        string? preparationNotes = null,
         int displayOrder = 0) : base(id)
     {
         MenuItemId = menuItemId;
         IngredientId = ingredientId;
         RequiredQuantity = requiredQuantity;
-        IsOptional = isOptional;
-        PreparationNotes = preparationNotes;
         DisplayOrder = displayOrder;
     }
 
@@ -100,20 +84,20 @@ public class MenuItemIngredient : Entity<Guid>
     }
 
     /// <summary>
-    /// Cập nhật ghi chú chuẩn bị
+    /// Cập nhật toàn bộ thông tin MenuItemIngredient
     /// </summary>
-    /// <param name="notes">Ghi chú mới</param>
-    public void UpdatePreparationNotes(string? notes)
+    /// <param name="ingredientId">ID nguyên liệu mới</param>
+    /// <param name="requiredQuantity">Số lượng cần thiết mới</param>
+    /// <param name="displayOrder">Thứ tự hiển thị mới</param>
+    public void UpdateEntity(Guid ingredientId, int requiredQuantity, int displayOrder)
     {
-        PreparationNotes = notes?.Trim();
-    }
+        if (requiredQuantity < 0)
+        {
+            throw new ArgumentException("Số lượng nguyên liệu không thể âm", nameof(requiredQuantity));
+        }
 
-    /// <summary>
-    /// Đánh dấu nguyên liệu là tùy chọn hoặc bắt buộc
-    /// </summary>
-    /// <param name="isOptional">True nếu tùy chọn, False nếu bắt buộc</param>
-    public void SetOptional(bool isOptional)
-    {
-        IsOptional = isOptional;
+        IngredientId = ingredientId;
+        RequiredQuantity = requiredQuantity;
+        DisplayOrder = displayOrder;
     }
 }

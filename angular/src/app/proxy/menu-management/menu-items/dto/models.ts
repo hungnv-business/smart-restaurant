@@ -1,14 +1,4 @@
-import type { FullAuditedEntityDto } from '@abp/ng.core';
-import type { MenuCategoryDto } from '../../menu-categories/dto/models';
-
-export interface CreateUpdateMenuItemDto {
-  name: string;
-  description?: string;
-  price: number;
-  isAvailable: boolean;
-  imageUrl?: string;
-  categoryId: string;
-}
+import type { EntityDto, FullAuditedEntityDto, PagedAndSortedResultRequestDto } from '@abp/ng.core';
 
 export interface MenuItemDto extends FullAuditedEntityDto<string> {
   name?: string;
@@ -17,5 +7,29 @@ export interface MenuItemDto extends FullAuditedEntityDto<string> {
   isAvailable: boolean;
   imageUrl?: string;
   categoryId?: string;
-  category: MenuCategoryDto;
+  categoryName?: string;
+  soldQuantity: number;
+  isPopular: boolean;
+}
+
+export interface CreateUpdateMenuItemDto {
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable: boolean;
+  imageUrl?: string;
+  categoryId: string;
+  ingredients: MenuItemIngredientDto[];
+}
+
+export interface GetMenuItemListRequestDto extends PagedAndSortedResultRequestDto {
+  filter?: string;
+  categoryId?: string;
+  onlyAvailable: boolean;
+}
+
+export interface MenuItemIngredientDto extends EntityDto<string> {
+  ingredientId: string;
+  requiredQuantity: number;
+  displayOrder: number;
 }

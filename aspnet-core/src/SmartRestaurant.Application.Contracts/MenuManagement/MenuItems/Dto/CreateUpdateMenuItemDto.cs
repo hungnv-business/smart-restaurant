@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartRestaurant.MenuManagement.MenuItems.Dto
@@ -23,5 +24,10 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         
         [Required]
         public Guid CategoryId { get; set; }
+        
+        /// <summary>
+        /// Danh sách nguyên liệu cho món ăn
+        /// </summary>
+        public List<MenuItemIngredientDto> Ingredients { get; set; } = [];
     }
 }

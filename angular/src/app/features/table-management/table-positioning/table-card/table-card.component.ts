@@ -85,8 +85,6 @@ export class TableCardComponent extends ComponentBase {
         return 'danger';
       case TableStatus.Reserved: // Bàn đã đặt - màu vàng
         return 'warning';
-      case TableStatus.Cleaning: // Bàn đang dọn dẹp - màu xanh dương
-        return 'info';
       default:
         return 'info';
     }

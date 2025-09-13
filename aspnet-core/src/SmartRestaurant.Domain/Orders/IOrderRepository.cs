@@ -57,15 +57,15 @@ public interface IOrderRepository : IRepository<Order, Guid>
     //     bool includeOrderItems = false,
     //     CancellationToken cancellationToken = default);
 
-    // /// <summary>
-    // /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
-    // /// </summary>
-    // /// <param name="orderId">ID đơn hàng</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Đơn hàng với đầy đủ thông tin</returns>
-    // Task<Order?> GetWithDetailsAsync(
-    //     Guid orderId,
-    //     CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
+    /// </summary>
+    /// <param name="orderId">ID đơn hàng</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Đơn hàng với đầy đủ thông tin</returns>
+    Task<Order?> GetWithDetailsAsync(
+        Guid orderId,
+        CancellationToken cancellationToken = default);
 
     // /// <summary>
     // /// Kiểm tra xem số đơn hàng đã tồn tại chưa
@@ -110,4 +110,16 @@ public interface IOrderRepository : IRepository<Order, Guid>
         Guid tableId,
         bool includeOrderItems = false,
         CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// Lấy đơn hàng với đầy đủ thông tin để thanh toán
+    /// </summary>
+    /// <param name="orderId">ID đơn hàng</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Đơn hàng với OrderItems và Table (nếu có)</returns>
+    Task<Order?> GetOrderForPaymentAsync(
+        Guid orderId,
+        CancellationToken cancellationToken = default);
+
 }

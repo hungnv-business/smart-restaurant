@@ -159,6 +159,61 @@ class CreateOrderRequest {
   }
 }
 
+/// DTO cho việc thêm món vào order hiện có
+/// Tương ứng với AddItemsToOrderDto.cs
+class AddItemsToOrderRequest {
+  /// Danh sách món muốn thêm vào order
+  final List<CreateOrderItemRequest> items;
+  
+  /// Ghi chú chung cho lần gọi thêm này
+  final String? additionalNotes;
+
+  const AddItemsToOrderRequest({
+    required this.items,
+    this.additionalNotes,
+  });
+
+  /// Convert sang JSON để gửi lên API
+  Map<String, dynamic> toJson() {
+    return {
+      'items': items.map((item) => item.toJson()).toList(),
+      if (additionalNotes != null && additionalNotes!.isNotEmpty) 
+        'additionalNotes': additionalNotes,
+    };
+  }
+
+  /// Validate business rules
+  List<String> validate() {
+    final errors = <String>[];
+    
+    if (items.isEmpty) {
+      errors.add('Phải có ít nhất 1 món để thêm vào order');
+    }
+    
+    // Validate từng món
+    for (int i = 0; i < items.length; i++) {
+      final item = items[i];
+      
+      if (item.quantity <= 0) {
+        errors.add('Số lượng món thứ ${i + 1} phải lớn hơn 0');
+      }
+      
+      if (item.unitPrice < 0) {
+        errors.add('Giá món thứ ${i + 1} không được âm');
+      }
+      
+      if (item.menuItemName.isEmpty) {
+        errors.add('Tên món thứ ${i + 1} không được rỗng');
+      }
+    }
+    
+    return errors;
+  }
+
+  /// Check if request is valid
+  bool get isValid => validate().isEmpty;
+}
+
 /// Response từ API sau khi tạo đơn hàng thành công
 class CreateOrderResponse {
   final String orderId;

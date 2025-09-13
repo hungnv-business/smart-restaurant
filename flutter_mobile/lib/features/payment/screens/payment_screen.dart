@@ -293,6 +293,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+              leading: const Icon(Icons.qr_code),
+              title: const Text('Chuyển khoản QR'),
+              onTap: () {
+                Navigator.pop(context);
+                _processPayment(context, payment, 'Chuyển khoản QR');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.money),
               title: const Text('Tiền mặt'),
               onTap: () {
@@ -301,19 +309,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.credit_card),
-              title: const Text('Thẻ tín dụng'),
+              leading: const Icon(Icons.credit_card_off),
+              title: const Text('Nợ'),
               onTap: () {
                 Navigator.pop(context);
-                _processPayment(context, payment, 'Thẻ tín dụng');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.qr_code),
-              title: const Text('QR Code / Chuyển khoản'),
-              onTap: () {
-                Navigator.pop(context);
-                _processPayment(context, payment, 'QR Code');
+                _processPayment(context, payment, 'Nợ');
               },
             ),
           ],

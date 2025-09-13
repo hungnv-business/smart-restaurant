@@ -6,6 +6,7 @@ using SmartRestaurant.Common.Dto;
 using SmartRestaurant.Application.Contracts.Common;
 using SmartRestaurant.InventoryManagement.IngredientCategories;
 using SmartRestaurant.InventoryManagement.Ingredients;
+using SmartRestaurant.MenuManagement.MenuCategories;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
@@ -19,6 +20,7 @@ namespace SmartRestaurant.Common
         private readonly IRepository<Unit> _unitRepository;
         private readonly IRepository<IngredientCategory> _ingredientCategoryRepository;
         private readonly IRepository<Ingredient, Guid> _ingredientRepository;
+        private readonly IRepository<MenuCategory, Guid> _menuCategoryRepository;
 
         /// <summary>
         /// Constructor - khởi tạo service với các repository cần thiết
@@ -26,14 +28,17 @@ namespace SmartRestaurant.Common
         /// <param name="unitRepository">Repository cho đơn vị đo lường</param>
         /// <param name="ingredientCategoryRepository">Repository cho danh mục nguyên liệu</param>
         /// <param name="ingredientRepository">Repository cho nguyên liệu</param>
+        /// <param name="menuCategoryRepository">Repository cho danh mục món ăn</param>
         public GlobalAppService(
             IRepository<Unit> unitRepository,
             IRepository<IngredientCategory> ingredientCategoryRepository,
-            IRepository<Ingredient, Guid> ingredientRepository)
+            IRepository<Ingredient, Guid> ingredientRepository,
+            IRepository<MenuCategory, Guid> menuCategoryRepository)
         {
             _unitRepository = unitRepository;
             _ingredientCategoryRepository = ingredientCategoryRepository;
             _ingredientRepository = ingredientRepository;
+            _menuCategoryRepository = menuCategoryRepository;
         }
 
         public Task<List<IntLookupItemDto>> GetTableStatusLookupAsync()
@@ -71,9 +76,26 @@ namespace SmartRestaurant.Common
         /// Master data cho filter, không cần authorization
         /// </summary>
         /// <returns>Danh sách ingredient categories active được sắp xếp theo DisplayOrder</returns>
-        public async Task<List<GuidLookupItemDto>> GetCategoriesLookupAsync()
+        public async Task<List<GuidLookupItemDto>> GetIngredientCategoriesLookupAsync()
         {
             var categories = await _ingredientCategoryRepository.GetListAsync(c => c.IsActive);
+            var orderedCategories = categories.OrderBy(c => c.DisplayOrder).ToList();
+
+            return orderedCategories.Select(c => new GuidLookupItemDto
+            {
+                Id = c.Id,
+                DisplayName = c.Name
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Lấy tất cả menu categories active để sử dụng trong dropdowns
+        /// Master data cho filter, không cần authorization
+        /// </summary>
+        /// <returns>Danh sách menu categories active được sắp xếp theo DisplayOrder</returns>
+        public async Task<List<GuidLookupItemDto>> GetMenuCategoriesLookupAsync()
+        {
+            var categories = await _menuCategoryRepository.GetListAsync(c => c.IsEnabled);
             var orderedCategories = categories.OrderBy(c => c.DisplayOrder).ToList();
 
             return orderedCategories.Select(c => new GuidLookupItemDto
