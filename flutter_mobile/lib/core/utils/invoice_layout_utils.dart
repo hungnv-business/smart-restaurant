@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import '../models/table_models.dart';
+import '../enums/restaurant_enums.dart';
 import '../utils/price_formatter.dart';
 import '../services/auth_service.dart';
 import 'thermal_printer_image_utils.dart';
@@ -125,16 +126,20 @@ class InvoiceLayoutUtils {
 
     currentY += 8;
 
-    // === TABLE 4 CỘT VỚI VIỀN ===
-    currentY = layoutHelper.drawOrderTable(tableDetail.orderItems, currentY);
+    // === TABLE 4 CỘT VỚI VIỀN - CHỈ HIỂN THỊ MÓN ĐÃ PHỤC VỤ ===
+    final servedItems = tableDetail.orderItems.where((item) => 
+      item.status == OrderItemStatus.served
+    ).toList();
+    currentY = layoutHelper.drawOrderTable(servedItems, currentY);
 
-    // === TỔNG TIỀN ===
-    if (tableDetail.orderSummary?.totalAmount != null) {
+    // === TỔNG TIỀN CHỈ CHO CÁC MÓN ĐÃ PHỤC VỤ ===
+    final servedTotal = servedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
+    if (servedTotal > 0) {
       final totalAmountStr = PriceFormatter.formatWithoutSymbol(
-        tableDetail.orderSummary!.totalAmount.toInt(),
+        servedTotal.toInt(),
       );
       final totalAmountInWords = NumberToWordsUtils.numberToWords(
-        tableDetail.orderSummary!.totalAmount.toInt(),
+        servedTotal.toInt(),
       );
 
       currentY += 12;

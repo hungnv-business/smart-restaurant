@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../models/table_models.dart';
+import '../enums/restaurant_enums.dart';
 
 /// Utilities cho tạo QR code thanh toán sử dụng VietQR API
 class QRPaymentUtils {
@@ -111,16 +112,20 @@ class QRPaymentUtils {
     return payload;
   }
 
-  /// Tạo EMVCo QR data cho thanh toán bàn
+  /// Tạo EMVCo QR data cho thanh toán bàn (chỉ tính món đã phục vụ)
   static String buildPaymentQRData(TableDetailDto tableDetail) {
-    final totalAmount = tableDetail.orderSummary?.totalAmount ?? 0;
+    // Chỉ tính tổng tiền các món đã phục vụ
+    final servedItems = tableDetail.orderItems.where((item) => 
+      item.status == OrderItemStatus.served
+    ).toList();
+    final servedTotal = servedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
     final tableNumber = tableDetail.tableNumber;
 
     return buildVietQRData(
       bankBin: '970407', // Techcombank BIN
       accountNo: '19035669437012',
       // accountName: 'NGUYEN VAN HUNG',
-      amount: totalAmount.toInt(),
+      amount: servedTotal.toInt(),
       addInfo: 'Thanh toan Ban $tableNumber - Cho Doc Quan',
     );
   }

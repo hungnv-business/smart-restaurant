@@ -69,9 +69,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             tooltip: 'Tải lại',
           ),
           IconButton(
-            onPressed: _printInvoice,
-            icon: const Icon(Icons.print),
-            tooltip: 'In hóa đơn',
+            onPressed: _canPrintInvoice() ? _printInvoice : null,
+            icon: Icon(
+              Icons.print,
+              color: _canPrintInvoice() ? null : Colors.grey,
+            ),
+            tooltip: _canPrintInvoice() 
+                ? 'In hóa đơn' 
+                : 'Không có món nào đã phục vụ',
           ),
         ],
       ),
@@ -538,8 +543,30 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     }
   }
 
+  /// Kiểm tra xem có thể in hóa đơn không (có món đã phục vụ)
+  bool _canPrintInvoice() {
+    if (_tableDetail == null) return false;
+    
+    final servedItems = _tableDetail!.orderItems.where((item) => 
+      item.status == OrderItemStatus.served
+    ).toList();
+    
+    return servedItems.isNotEmpty;
+  }
+
   void _printInvoice() async {
     if (_tableDetail == null) return;
+    
+    // Kiểm tra lại có món đã phục vụ không
+    if (!_canPrintInvoice()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có món nào đã phục vụ để in hóa đơn'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     try {
       // Hiển thị loading
