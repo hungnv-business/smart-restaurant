@@ -69,9 +69,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             tooltip: 'Tải lại',
           ),
           IconButton(
-            onPressed: _showTableInfo,
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Thông tin bàn',
+            onPressed: _printInvoice,
+            icon: const Icon(Icons.print),
+            tooltip: 'In hóa đơn',
           ),
         ],
       ),
@@ -472,23 +472,6 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           
           const SizedBox(width: 8),
           
-          // Nút in hóa đơn (nếu có đơn hàng)
-          if (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty)
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _printInvoice,
-                icon: const Icon(Icons.print, size: 16),
-                label: const Text('In hóa đơn'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-              ),
-            ),
-          
-          const SizedBox(width: 8),
           
           // Nút thanh toán (nếu có đơn hàng)
           if (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty)

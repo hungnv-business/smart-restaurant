@@ -8,7 +8,7 @@ class TableCard extends StatelessWidget {
   final ActiveTableDto table;
   final VoidCallback? onTableUpdated; // Callback khi bàn cập nhật
   final bool isCompact;
-  
+
   const TableCard({
     Key? key,
     required this.table,
@@ -18,15 +18,16 @@ class TableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canOrder = table.status == TableStatus.available || 
-                     table.status == TableStatus.occupied;
+    final canOrder =
+        table.status == TableStatus.available ||
+        table.status == TableStatus.occupied;
 
     final borderRadius = isCompact ? 8.0 : 12.0;
-    final cardPadding = isCompact 
-        ? const EdgeInsets.all(12) 
+    final cardPadding = isCompact
+        ? const EdgeInsets.all(12)
         : const EdgeInsets.all(16);
     final spacing = isCompact ? 8.0 : 12.0;
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -69,7 +70,7 @@ class TableCard extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final tablePadding = isCompact 
+    final tablePadding = isCompact
         ? const EdgeInsets.symmetric(horizontal: 6, vertical: 3)
         : const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
     final dotSize = isCompact ? 10.0 : 12.0;
@@ -82,7 +83,7 @@ class TableCard extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: const Color(0xFF4CAF50),
           );
-    
+
     return Row(
       children: [
         // Table number với background
@@ -92,14 +93,11 @@ class TableCard extends StatelessWidget {
             color: const Color(0xFF4CAF50).withOpacity(0.1),
             borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
           ),
-          child: Text(
-            table.tableNumber,
-            style: textStyle,
-          ),
+          child: Text(table.tableNumber, style: textStyle),
         ),
-        
+
         const Spacer(),
-        
+
         // Status indicator dot
         Container(
           width: dotSize,
@@ -121,11 +119,11 @@ class TableCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context) {
-    final badgePadding = isCompact 
+    final badgePadding = isCompact
         ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
         : const EdgeInsets.symmetric(horizontal: 10, vertical: 6);
     final fontSize = isCompact ? 11.0 : 12.0;
-    
+
     return Container(
       padding: badgePadding,
       decoration: BoxDecoration(
@@ -154,20 +152,16 @@ class TableCard extends StatelessWidget {
     // Chỉ hiển thị tổng số món đang chờ/phục vụ
     final totalItems = table.pendingItemsCount;
     if (totalItems == 0) return const SizedBox.shrink();
-    
+
     final iconSize = isCompact ? 16.0 : 18.0;
     final fontSize = isCompact ? 11.0 : 12.0;
-    
+
     return Row(
       children: [
-        Icon(
-          Icons.schedule,
-          size: iconSize,
-          color: Colors.orange,
-        ),
+        Icon(Icons.schedule, size: iconSize, color: Colors.orange),
         const SizedBox(width: 4),
         Text(
-          '$totalItems món',
+          '$totalItems món chờ',
           style: TextStyle(
             color: Colors.orange,
             fontSize: fontSize,
@@ -178,7 +172,6 @@ class TableCard extends StatelessWidget {
     );
   }
 
-
   bool _hasOrderInfo() {
     return table.hasActiveOrders || table.pendingItemsCount > 0;
   }
@@ -186,11 +179,9 @@ class TableCard extends StatelessWidget {
   void _navigateToMenu(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => TableDetailScreen(table: table),
-      ),
+      MaterialPageRoute(builder: (context) => TableDetailScreen(table: table)),
     );
-    
+
     // Nếu có result (tức là có thay đổi), gọi callback
     if (result == true && onTableUpdated != null) {
       onTableUpdated!();
