@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/table_models.dart';
 import '../../../core/services/order_service.dart';
+import '../../../core/services/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../widgets/order_item_card.dart';
 import '../widgets/edit_quantity_dialog.dart';
@@ -599,19 +600,36 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Future<void> _printInvoiceLocally() async {
-    // TODO: Implement local printing using flutter printing packages
-    // For now, simulate printing delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // This will be implemented with packages like:
-    // - printing: for PDF generation and printing
-    // - pdf: for creating PDF documents
-    // - esc_pos_utils + esc_pos_printer: for thermal printer support
-    
-    print('🖨️ Printing invoice for table ${_tableDetail?.tableNumber}');
-    print('📄 Order items: ${_tableDetail?.orderItems.length}');
-    print('💰 Total amount: ${_tableDetail?.orderSummary?.totalAmount}');
+    if (_tableDetail == null) return;
+
+    try {
+      final networkPrinter = NetworkThermalPrinterService();
+      
+      // Khởi tạo service
+      await networkPrinter.initialize();
+      
+      // Kiểm tra kết nối hiện tại
+      bool isConnected = await networkPrinter.checkConnection();
+      
+      if (!isConnected) {
+        // Hiển thị dialog hỏi cấu hình máy in
+        await _showPrinterConfigurationDialog();
+        
+        // Kiểm tra lại kết nối sau khi cấu hình
+        isConnected = await networkPrinter.checkConnection();
+        if (!isConnected) {
+          throw Exception('Chưa cấu hình kết nối với máy in Xprinter T80W');
+        }
+      }
+      
+      // In hóa đơn
+      await networkPrinter.printInvoice(_tableDetail!);
+      
+    } catch (e) {
+      rethrow; // Để _printInvoice() xử lý error
+    }
   }
+
 
   void _showPaymentOptions() {
     showModalBottomSheet(
@@ -1105,6 +1123,46 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _showPrinterConfigurationDialog() async {
+    final shouldConfigure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cấu hình máy in'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Chưa kết nối với máy in Xprinter T80W.'),
+            SizedBox(height: 8),
+            Text('Bạn có muốn cấu hình kết nối WiFi không?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Bỏ qua'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Cấu hình'),
+          ),
+        ],
+      ),
+    );
+    
+    if (shouldConfigure == true) {
+      // Hiển thị thông báo tạm thời
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chức năng cấu hình máy in sẽ được thêm sau'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
   }
 }
 

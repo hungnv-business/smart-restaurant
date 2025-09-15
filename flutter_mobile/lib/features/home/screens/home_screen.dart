@@ -6,6 +6,8 @@ import '../../auth/screens/login_screen.dart';
 import '../../order/screens/order_screen.dart';
 import '../../takeaway/screens/takeaway_screen.dart';
 import '../../payment/screens/payment_screen.dart';
+import '../../settings/screens/network_printer_settings_screen.dart';
+import '../../settings/screens/settings_screen.dart';
 
 /// Màn hình chính với bottom navigation cho 3 tab
 class HomeScreen extends StatefulWidget {
@@ -55,6 +57,18 @@ class _HomeScreenState extends State<HomeScreen> {
               // Xử lý thông báo
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Thông báo đang phát triển')),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.print),
+            tooltip: 'Cài đặt máy in',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NetworkPrinterSettingsScreen(),
+                ),
               );
             },
           ),

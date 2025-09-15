@@ -62,6 +62,16 @@ dependencies:
   
   # Icons
   cupertino_icons: ^1.0.8
+  
+  # Network Printing (WiFi) - simplified
+  esc_pos_utils: ^1.1.0
+  network_info_plus: ^6.0.0
+  
+  # Image processing for Vietnamese printing (compatible with esc_pos_utils)
+  image: ^3.3.0
+  
+  # QR Code generation for payment
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
