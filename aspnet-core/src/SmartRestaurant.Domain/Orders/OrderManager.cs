@@ -119,7 +119,7 @@ public class OrderManager : DomainService
     public async Task RemoveOrderItemAsync(Order order, Guid orderItemId)
     {
         // Validate order phải ở trạng thái Active
-        if (!order.IsActive())
+        if (!order.IsServing())
         {
             throw OrderValidationException.CannotRemoveItemFromInactiveOrder();
         }
@@ -172,7 +172,7 @@ public class OrderManager : DomainService
     // /// <param name="order">Đơn hàng cần validate</param>
     // public void ValidateOrderForConfirmation(Order order)
     // {
-    //     if (order.Status != OrderStatus.Active)
+    //     if (order.Status != OrderStatus.Serving)
     //     {
     //         // Business Exception: Chỉ có thể xác nhận đơn hàng ở trạng thái Pending
     //         throw OrderValidationException.CannotConfirmNonPendingOrder();
@@ -211,7 +211,7 @@ public class OrderManager : DomainService
     //     
     //     // Chuyển trạng thái
     //     // Với OrderStatus đơn giản, không cần thay đổi status khi confirm
-    //     // order.UpdateStatus(OrderStatus.Confirmed);
+    //     // order.UpdateStatus(OrderStatus.Serving);
     // }
 
     // /// <summary>
@@ -254,7 +254,7 @@ public class OrderManager : DomainService
     // /// <param name="order">Đơn hàng cần hoàn thành</param>
     // public void CompleteOrderService(Order order)
     // {
-    //     if (order.Status != OrderStatus.Active)
+    //     if (order.Status != OrderStatus.Serving)
     //     {
     //         // Business Exception: Chỉ có thể hoàn thành phục vụ khi đơn hàng đang Active
     //         throw new InvalidOperationException("Chỉ có thể hoàn thành phục vụ khi đơn hàng đang Active");
@@ -341,7 +341,7 @@ public class OrderManager : DomainService
     public async Task UpdateOrderItemQuantityAsync(Order order, Guid orderItemId, int newQuantity, string? notes = null)
     {
         // Validate order phải ở trạng thái Active
-        if (!order.IsActive())
+        if (!order.IsServing())
         {
             throw OrderValidationException.CannotModifyNonActiveOrder();
         }
@@ -411,7 +411,7 @@ public class OrderManager : DomainService
     public async Task AddItemsToOrderAsync(Order order, List<Guid> menuItemIds, List<CreateOrderItemDto> items, string? additionalNotes = null)
     {
         // Validate order phải ở trạng thái Active
-        if (!order.IsActive())
+        if (!order.IsServing())
         {
             throw OrderValidationException.CannotAddItemsToInactiveOrder();
         }
@@ -496,7 +496,7 @@ public class OrderManager : DomainService
     {
         // 1. Lấy order cần thanh toán với đầy đủ thông tin
         var activeOrder = await _orderRepository.GetOrderForPaymentAsync(orderId) ?? throw OrderValidationException.OrderNotFound(orderId);
-        if (!activeOrder.IsActive())
+        if (!activeOrder.IsServing())
         {
             throw OrderValidationException.CannotCompletePaymentForNonActiveOrder();
         }
@@ -608,6 +608,7 @@ public class OrderManager : DomainService
             Logger.LogWarning(ex, "Không thể cộng lại stock cho món {MenuItemId} số lượng {Quantity}", menuItemId, quantity);
         }
     }
+
 
     #endregion
 }

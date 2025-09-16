@@ -26,6 +26,16 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         public Guid CategoryId { get; set; }
         
         /// <summary>
+        /// Món ăn có thể nấu nhanh không (ví dụ: rau, đồ áp chảo)
+        /// </summary>
+        public bool IsQuickCook { get; set; } = false;
+        
+        /// <summary>
+        /// Món ăn có cần phải nấu không (false = đồ có sẵn như bia, nước ngọt)
+        /// </summary>
+        public bool RequiresCooking { get; set; } = true;
+        
+        /// <summary>
         /// Danh sách nguyên liệu cho món ăn
         /// </summary>
         public List<MenuItemIngredientDto> Ingredients { get; set; } = [];

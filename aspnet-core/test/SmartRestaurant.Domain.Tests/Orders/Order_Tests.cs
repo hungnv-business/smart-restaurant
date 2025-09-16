@@ -13,7 +13,7 @@ namespace SmartRestaurant.Domain.Tests.Orders
     /// Unit tests cho Order Entity
     /// Kiểm thử business logic và domain rules
     /// </summary>
-    public sealed class Order_Tests : SmartRestaurantDomainTestBase
+    public sealed class Order_Tests : SmartRestaurantDomainTestBase<SmartRestaurantDomainTestModule>
     {
         private readonly IGuidGenerator _guidGenerator;
 

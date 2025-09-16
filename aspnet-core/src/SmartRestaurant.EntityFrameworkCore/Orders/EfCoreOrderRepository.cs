@@ -72,8 +72,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         // {
         //     var dbSet = await GetDbSetAsync();
         //     var query = dbSet.Where(o => 
-        //         o.Status == OrderStatus.Confirmed || 
-        //         o.Status == OrderStatus.Preparing);
+        //         o.Status == OrderStatus.Serving);
 
         //     if (includeOrderItems)
         //     {
@@ -208,6 +207,37 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .Include(o => o.OrderItems)
                 .Include(o => o.Table)
                 .FirstOrDefaultAsync(o => o.Id == orderId, GetCancellationToken(cancellationToken));
+        }
+
+        /// <summary>
+        /// Lấy đơn hàng chứa OrderItem cụ thể
+        /// </summary>
+        public async Task<Order?> GetByOrderItemIdAsync(
+            Guid orderItemId,
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            return await dbSet
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderItems.Any(oi => oi.Id == orderItemId), 
+                    GetCancellationToken(cancellationToken));
+        }
+
+        /// <summary>
+        /// Lấy tất cả đơn hàng đang hoạt động (Serving) với đầy đủ thông tin
+        /// Bao gồm: OrderItems, MenuItem, và Table để phục vụ Kitchen Priority Dashboard
+        /// </summary>
+        public async Task<List<Order>> GetActiveOrdersWithDetailsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            return await dbSet
+                .Where(o => o.Status == OrderStatus.Serving)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem) // Include MenuItem cho mỗi OrderItem
+                .Include(o => o.Table) // Include Table information
+                .OrderBy(o => o.CreationTime)
+                .ToListAsync(GetCancellationToken(cancellationToken));
         }
 
     }

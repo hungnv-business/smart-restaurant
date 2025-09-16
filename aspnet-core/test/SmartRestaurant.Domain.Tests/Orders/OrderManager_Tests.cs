@@ -20,7 +20,7 @@ namespace SmartRestaurant.Domain.Tests.Orders
     /// Unit tests cho OrderManager Domain Service
     /// Kiểm thử tất cả business logic và validation rules
     /// </summary>
-    public sealed class OrderManager_Tests : SmartRestaurantDomainTestBase
+    public sealed class OrderManager_Tests : SmartRestaurantDomainTestBase<SmartRestaurantDomainTestModule>
     {
         private readonly OrderManager _orderManager;
         private readonly ITableRepository _tableRepository;

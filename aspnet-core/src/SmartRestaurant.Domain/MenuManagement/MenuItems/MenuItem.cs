@@ -43,6 +43,12 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         [Required]
         public Guid CategoryId { get; set; }
 
+        /// <summary>Món ăn có thể nấu nhanh không (ví dụ: rau, đồ áp chảo)</summary>
+        public bool IsQuickCook { get; set; }
+
+        /// <summary>Món ăn có cần phải nấu không (false = đồ có sẵn như bia, nước ngọt)</summary>
+        public bool RequiresCooking { get; set; }
+
 
         // Navigation properties
         /// <summary>Danh mục menu chứa món ăn này</summary>
@@ -76,6 +82,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
         /// <param name="isAvailable">Tình trạng có sẵn</param>
         /// <param name="imageUrl">URL hình ảnh món ăn</param>
         /// <param name="categoryId">ID danh mục chứa món ăn</param>
+        /// <param name="isQuickCook">Món ăn có thể nấu nhanh không</param>
+        /// <param name="requiresCooking">Món ăn có cần phải nấu không</param>
         public MenuItem(
             Guid id,
             string name,
@@ -83,7 +91,9 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             decimal price,
             bool isAvailable,
             string? imageUrl,
-            Guid categoryId) : base(id)
+            Guid categoryId,
+            bool isQuickCook = false,
+            bool requiresCooking = true) : base(id)
         {
             Name = name;
             Description = description;
@@ -91,6 +101,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             IsAvailable = isAvailable;
             ImageUrl = imageUrl;
             CategoryId = categoryId;
+            IsQuickCook = isQuickCook;
+            RequiresCooking = requiresCooking;
 
             // Initialize collections
             Ingredients = new List<MenuItemIngredient>();
@@ -196,6 +208,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             bool isAvailable,
             string? imageUrl,
             [NotNull] Guid categoryId,
+            bool isQuickCook,
+            bool requiresCooking,
             IEnumerable<MenuItemIngredient> ingredients)
         {
             Check.NotNull(guidGenerator, nameof(guidGenerator));
@@ -208,6 +222,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             IsAvailable = isAvailable;
             ImageUrl = imageUrl;
             CategoryId = categoryId;
+            IsQuickCook = isQuickCook;
+            RequiresCooking = requiresCooking;
 
             // Xóa nguyên liệu
             var currentIds = this.Ingredients.Select(e => e.Id).ToList();

@@ -37,7 +37,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// Trạng thái hiện tại của đơn hàng
     /// </summary>
     [Required]
-    public OrderStatus Status { get; private set; } = OrderStatus.Active;
+    public OrderStatus Status { get; private set; } = OrderStatus.Serving;
 
     /// <summary>
     /// Tổng số tiền của đơn hàng (VND)
@@ -95,7 +95,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
         OrderType = orderType;
         TableId = tableId;
         Notes = notes;
-        Status = OrderStatus.Active;
+        Status = OrderStatus.Serving;
         TotalAmount = 0;
         CreatedTime = DateTime.Now;
     }
@@ -121,9 +121,14 @@ public class Order : FullAuditedAggregateRoot<Guid>
     }
 
     /// <summary>
-    /// Kiểm tra đơn hàng có đang active không
+    /// Kiểm tra đơn hàng có đang phục vụ không (chưa thanh toán)
     /// </summary>
-    public bool IsActive() => Status == OrderStatus.Active;
+    public bool IsServing() => Status == OrderStatus.Serving;
+
+    /// <summary>
+    /// Kiểm tra đây có phải đơn hàng mang về/giao hàng không (không có bàn)
+    /// </summary>
+    public bool IsTakeaway => OrderType == OrderType.Takeaway || OrderType == OrderType.Delivery;
 
     /// <summary>
     /// Kiểm tra đơn hàng đã thanh toán chưa
@@ -136,8 +141,8 @@ public class Order : FullAuditedAggregateRoot<Guid>
     public bool IsCompleted()
     {
         return OrderItems.All(item =>
-            item.Status == OrderItemStatus.Served ||
-            item.Status == OrderItemStatus.Canceled);
+            item.IsServed() ||
+            item.IsCanceled());
     }
 
     /// <summary>
@@ -175,7 +180,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <param name="orderItems">Danh sách món cần thêm</param>
     public void AddItems(IGuidGenerator guidGenerator, IEnumerable<OrderItem> orderItems)
     {
-        if (!IsActive())
+        if (!IsServing())
         {
             throw OrderValidationException.CannotModifyNonActiveOrder();
         }
@@ -192,7 +197,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <param name="orderItemId">ID của món cần xóa</param>
     public void RemoveItem(Guid orderItemId)
     {
-        if (!IsActive())
+        if (!IsServing())
         {
             // Business Exception: Chỉ có thể sửa đổi đơn hàng ở trạng thái Active  
             throw OrderValidationException.CannotModifyNonActiveOrder();
@@ -212,7 +217,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <param name="orderItemId">ID của món cần hủy</param>
     public void CancelItem(Guid orderItemId)
     {
-        if (!IsActive())
+        if (!IsServing())
         {
             throw OrderValidationException.CannotCancelItemsInNonActiveOrder();
         }
@@ -235,7 +240,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     {
         // Chỉ tính tiền những món không bị hủy
         TotalAmount = OrderItems
-            .Where(item => item.Status != OrderItemStatus.Canceled)
+            .Where(item => !item.IsCanceled())
             .Sum(item => item.UnitPrice * item.Quantity);
     }
 
@@ -277,7 +282,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// </summary>
     public void CompletePayment()
     {
-        if (!IsActive())
+        if (!IsServing())
         {
             throw OrderValidationException.CannotCompletePaymentForNonActiveOrder();
         }
@@ -313,7 +318,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <returns>True nếu có thể thanh toán</returns>
     public bool CanCompletePayment()
     {
-        if (!IsActive()) return false;
+        if (!IsServing()) return false;
 
         // Tất cả món phải đã được phục vụ hoặc hủy (không còn món unserved)
         return GetUnservedItems().Count == 0;
@@ -326,8 +331,21 @@ public class Order : FullAuditedAggregateRoot<Guid>
     public List<OrderItem> GetUnservedItems()
     {
         return OrderItems.Where(oi =>
-            oi.Status != OrderItemStatus.Served &&
-            oi.Status != OrderItemStatus.Canceled).ToList();
+            !oi.IsServed() &&
+            !oi.IsCanceled()).ToList();
+    }
+
+    /// <summary>
+    /// Lấy danh sách món cần nấu cho bếp
+    /// Chỉ bao gồm các món có RequiresCooking = true và chưa hoàn thành
+    /// </summary>
+    /// <returns>Danh sách món cần nấu</returns>
+    public List<OrderItem> GetCookingItems()
+    {
+        return OrderItems.Where(oi =>
+            oi.MenuItem?.RequiresCooking == true &&
+            !oi.IsServed() &&
+            !oi.IsCanceled()).ToList();
     }
 
     /// <summary>
@@ -346,7 +364,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
         PaymentMethod paymentMethod,
         string? notes = null)
     {
-        if (!IsActive())
+        if (!IsServing())
         {
             throw OrderValidationException.CannotAddPaymentToNonActiveOrder();
         }

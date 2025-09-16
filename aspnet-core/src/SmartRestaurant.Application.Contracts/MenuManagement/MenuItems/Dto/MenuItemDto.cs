@@ -20,6 +20,16 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         public string? CategoryName { get; set; }
         
         /// <summary>
+        /// Món ăn có thể nấu nhanh không
+        /// </summary>
+        public bool IsQuickCook { get; set; }
+        
+        /// <summary>
+        /// Món ăn có cần phải nấu không
+        /// </summary>
+        public bool RequiresCooking { get; set; }
+        
+        /// <summary>
         /// Số lượng đã bán ra (tổng từ tất cả orders đã hoàn thành)
         /// </summary>
         public int SoldQuantity { get; set; }

@@ -8,10 +8,10 @@ namespace SmartRestaurant.Orders;
 public enum OrderStatus
 {
     /// <summary>
-    /// Đang hoạt động - Đơn hàng đang được phục vụ (mặc định khi tạo)
+    /// Đang phục vụ - Đơn hàng đang được phục vụ (mặc định khi tạo)
     /// </summary>
-    [Description("Đang hoạt động")]
-    Active = 0,
+    [Description("Đang phục vụ")]
+    Serving = 0,
 
     /// <summary>
     /// Đã thanh toán - Khách hàng đã ăn xong và thanh toán (đơn hàng hoàn thành)

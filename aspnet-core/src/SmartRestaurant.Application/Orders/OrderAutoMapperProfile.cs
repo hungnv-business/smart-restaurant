@@ -31,7 +31,7 @@ public class OrderAutoMapperProfile : Profile
         CreateMap<CreateOrderDto, Order>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.OrderNumber, opt => opt.Ignore()) // Generated in service
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatus.Active))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatus.Serving))
             .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => 0))
             .ForMember(dest => dest.OrderItems, opt => opt.Ignore()) // Handled separately
             .ForMember(dest => dest.Table, opt => opt.Ignore())

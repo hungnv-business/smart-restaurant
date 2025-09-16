@@ -83,6 +83,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
                 input.IsAvailable,
                 input.ImageUrl,
                 input.CategoryId,
+                input.IsQuickCook,
+                input.RequiresCooking,
                 ingredients);
 
             // Lưu vào database
@@ -105,6 +107,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
                 input.IsAvailable,
                 input.ImageUrl,
                 input.CategoryId,
+                input.IsQuickCook,
+                input.RequiresCooking,
                 ingredients);
         }
 

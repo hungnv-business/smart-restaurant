@@ -122,4 +122,23 @@ public interface IOrderRepository : IRepository<Order, Guid>
         Guid orderId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Lấy đơn hàng chứa OrderItem cụ thể
+    /// </summary>
+    /// <param name="orderItemId">ID của OrderItem</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Đơn hàng chứa OrderItem (nếu có)</returns>
+    Task<Order?> GetByOrderItemIdAsync(
+        Guid orderItemId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lấy tất cả đơn hàng đang hoạt động (Serving) với đầy đủ thông tin
+    /// Bao gồm: OrderItems, MenuItem, và Table để phục vụ Kitchen Priority Dashboard
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Danh sách đơn hàng đang hoạt động với đầy đủ relations</returns>
+    Task<List<Order>> GetActiveOrdersWithDetailsAsync(
+        CancellationToken cancellationToken = default);
+
 }

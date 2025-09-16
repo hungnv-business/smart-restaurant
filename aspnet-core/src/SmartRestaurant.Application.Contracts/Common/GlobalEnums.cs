@@ -29,7 +29,7 @@ public static class GlobalEnums
     private static readonly ReadOnlyDictionary<OrderStatus, string> SortedOrderStatus = new(
         new Dictionary<OrderStatus, string>
         {
-            { OrderStatus.Active, "Đang hoạt động" },
+            { OrderStatus.Serving, "Đang phục vụ" },
             { OrderStatus.Paid, "Đã thanh toán" }
         });
 

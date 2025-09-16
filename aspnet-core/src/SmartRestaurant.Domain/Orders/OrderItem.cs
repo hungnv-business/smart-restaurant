@@ -167,7 +167,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// </summary>
     public void MarkAsReady()
     {
-        if (Status != OrderItemStatus.Preparing)
+        if (!IsPreparing())
         {
             throw OrderItemValidationException.CannotMarkReadyNonPreparingItem();
         }
@@ -184,7 +184,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// </summary>
     public void MarkAsServed()
     {
-        if (Status != OrderItemStatus.Ready)
+        if (!IsReady())
         {
             throw OrderItemValidationException.CannotServeNonReadyItem();
         }
@@ -200,6 +200,26 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// Kiểm tra món ăn có đang ở trạng thái chờ xử lý không
     /// </summary>
     public bool IsPending() => Status == OrderItemStatus.Pending;
+
+    /// <summary>
+    /// Kiểm tra món ăn có đang được chuẩn bị không
+    /// </summary>
+    public bool IsPreparing() => Status == OrderItemStatus.Preparing;
+
+    /// <summary>
+    /// Kiểm tra món ăn có đã sẵn sàng phục vụ không
+    /// </summary>
+    public bool IsReady() => Status == OrderItemStatus.Ready;
+
+    /// <summary>
+    /// Kiểm tra món ăn có đã được phục vụ không
+    /// </summary>
+    public bool IsServed() => Status == OrderItemStatus.Served;
+
+    /// <summary>
+    /// Kiểm tra món ăn có bị hủy không
+    /// </summary>
+    public bool IsCanceled() => Status == OrderItemStatus.Canceled;
 
     /// <summary>
     /// Kiểm tra có thể chuyển sang trạng thái mới không
@@ -324,4 +344,5 @@ public class OrderItem : FullAuditedEntity<Guid>
         // TODO: Thêm domain event khi cần thông báo hủy món
         // AddLocalEvent(new OrderItemCancelledEvent(Id, OrderId, MenuItemName));
     }
+
 }

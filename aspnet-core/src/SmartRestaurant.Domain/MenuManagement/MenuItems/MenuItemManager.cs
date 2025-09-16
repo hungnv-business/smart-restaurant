@@ -40,6 +40,8 @@ public class MenuItemManager : DomainService
         bool isAvailable,
         string? imageUrl,
         [NotNull] Guid categoryId,
+        bool isQuickCook,
+        bool requiresCooking,
         IEnumerable<MenuItemIngredient> ingredients)
     {
         Check.NotNull(name, nameof(name));
@@ -61,7 +63,9 @@ public class MenuItemManager : DomainService
             price,
             isAvailable,
             imageUrl,
-            categoryId);
+            categoryId,
+            isQuickCook,
+            requiresCooking);
 
         menuItem.AddMenuItemIngredients(GuidGenerator, ingredients);
         return menuItem;
@@ -78,6 +82,8 @@ public class MenuItemManager : DomainService
         bool isAvailable,
         string? imageUrl,
         [NotNull] Guid categoryId,
+        bool isQuickCook,
+        bool requiresCooking,
         IEnumerable<MenuItemIngredient> ingredients)
     {
         Check.NotNull(id, nameof(id));
@@ -104,6 +110,8 @@ public class MenuItemManager : DomainService
             isAvailable,
             imageUrl,
             categoryId,
+            isQuickCook,
+            requiresCooking,
             ingredients);
 
         Logger.LogInformation("Updated MenuItem: {Id} - {Name}", menuItem.Id, name);

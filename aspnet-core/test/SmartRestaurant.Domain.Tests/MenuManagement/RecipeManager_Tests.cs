@@ -18,7 +18,7 @@ namespace SmartRestaurant.Domain.Tests.MenuManagement
     /// Unit tests cho RecipeManager Domain Service
     /// Kiểm thử logic tính toán nguyên liệu và inventory management
     /// </summary>
-    public sealed class RecipeManager_Tests : SmartRestaurantDomainTestBase
+    public sealed class RecipeManager_Tests : SmartRestaurantDomainTestBase<SmartRestaurantDomainTestModule>
     {
         private readonly RecipeManager _recipeManager;
         private readonly IMenuItemRepository _menuItemRepository;
