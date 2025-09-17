@@ -1,7 +1,7 @@
 import { mapEnumToOptions } from '@abp/ng.core';
 
 export enum OrderStatus {
-  Active = 0,
+  Serving = 0,
   Paid = 1,
 }
 

@@ -40,7 +40,8 @@ public static class GlobalEnums
             { OrderItemStatus.Pending, "Chờ chuẩn bị" },
             { OrderItemStatus.Preparing, "Đang chuẩn bị" },
             { OrderItemStatus.Ready, "Đã hoàn thành" },
-            { OrderItemStatus.Served, "Đã phục vụ" }
+            { OrderItemStatus.Served, "Đã phục vụ" },
+            { OrderItemStatus.Canceled, "Đã hủy" }
         });
 
     // Order Type mappings

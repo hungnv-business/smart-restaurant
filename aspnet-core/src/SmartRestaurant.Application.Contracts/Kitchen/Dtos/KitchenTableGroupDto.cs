@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using SmartRestaurant.Orders;
 
 namespace SmartRestaurant.Kitchen.Dtos
@@ -53,43 +51,9 @@ namespace SmartRestaurant.Kitchen.Dtos
         public int HighestPriority { get; set; }
         
         /// <summary>
-        /// Thời gian gọi món sớm nhất trong nhóm (dùng để tính thời gian chờ)
-        /// </summary>
-        public DateTime EarliestOrderTime { get; set; }
-        
-        /// <summary>
         /// Danh sách tất cả món cần nấu trong nhóm này
         /// Đã được sắp xếp theo priority giảm dần (món ưu tiên cao nhất lên đầu)
         /// </summary>
         public List<KitchenOrderItemDto> OrderItems { get; set; } = [];
-        
-        /// <summary>
-        /// Tổng thời gian chờ lâu nhất trong nhóm (phút)
-        /// </summary>
-        public int MaxWaitingMinutes => OrderItems.Count > 0 
-            ? OrderItems.Max(x => x.WaitingMinutes) 
-            : 0;
-        
-        /// <summary>
-        /// Urgency level của bàn dựa trên thời gian chờ lâu nhất
-        /// </summary>
-        public string TableUrgencyLevel => MaxWaitingMinutes switch
-        {
-            > 30 => "Critical",
-            > 15 => "High", 
-            > 5 => "Medium",
-            _ => "Normal"
-        };
-        
-        /// <summary>
-        /// Màu hiển thị urgency cho bàn
-        /// </summary>
-        public string TableUrgencyColor => TableUrgencyLevel switch
-        {
-            "Critical" => "red",
-            "High" => "orange",
-            "Medium" => "yellow", 
-            _ => "green"
-        };
     }
 }

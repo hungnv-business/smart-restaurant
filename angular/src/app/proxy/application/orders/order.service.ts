@@ -2,7 +2,7 @@ import { RestService, Rest } from '@abp/ng.core';
 import type { ListResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 import type { GuidLookupItemDto } from '../../common/dto/models';
-import type { ActiveTableDto, AddItemsToOrderDto, CreateOrderDto, GetMenuItemsForOrderDto, OrderDto, TableDetailDto, UpdateOrderItemQuantityDto } from '../contracts/orders/dto/models';
+import type { ActiveTableDto, AddItemsToOrderDto, CreateOrderDto, GetMenuItemsForOrderDto, IngredientAvailabilityResultDto, OrderForPaymentDto, PaymentRequestDto, TableDetailDto, UpdateOrderItemQuantityDto, VerifyIngredientsRequestDto } from '../contracts/orders/dto/models';
 import type { MenuItemDto } from '../../menu-management/menu-items/dto/models';
 import type { TableStatus } from '../../table-status.enum';
 
@@ -14,7 +14,7 @@ export class OrderService {
   
 
   addItemsToOrder = (orderId: string, input: AddItemsToOrderDto, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, OrderDto>({
+    this.restService.request<any, void>({
       method: 'POST',
       url: `/api/app/order/items-to-order/${orderId}`,
       body: input,
@@ -23,7 +23,7 @@ export class OrderService {
   
 
   create = (input: CreateOrderDto, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, OrderDto>({
+    this.restService.request<any, void>({
       method: 'POST',
       url: '/api/app/order',
       body: input,
@@ -39,7 +39,7 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
-  getActiveTables = (tableNameFilter?: string, statusFilter?: enum, config?: Partial<Rest.Config>) =>
+  getActiveTables = (tableNameFilter?: string, statusFilter?: TableStatus, config?: Partial<Rest.Config>) =>
     this.restService.request<any, ListResultDto<ActiveTableDto>>({
       method: 'GET',
       url: '/api/app/order/active-tables',
@@ -57,6 +57,14 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
+  getOrderForPayment = (orderId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, OrderForPaymentDto>({
+      method: 'GET',
+      url: `/api/app/order/order-for-payment/${orderId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   getTableDetails = (tableId: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, TableDetailDto>({
       method: 'GET',
@@ -65,8 +73,17 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
+  processPayment = (input: PaymentRequestDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'POST',
+      url: '/api/app/order/process-payment',
+      body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
   removeOrderItem = (orderId: string, orderItemId: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, OrderDto>({
+    this.restService.request<any, void>({
       method: 'DELETE',
       url: '/api/app/order/order-item',
       params: { orderId, orderItemId },
@@ -75,10 +92,19 @@ export class OrderService {
   
 
   updateOrderItemQuantity = (orderId: string, orderItemId: string, input: UpdateOrderItemQuantityDto, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, OrderDto>({
+    this.restService.request<any, void>({
       method: 'PUT',
       url: '/api/app/order/order-item-quantity',
       params: { orderId, orderItemId },
+      body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  verifyIngredientsAvailability = (input: VerifyIngredientsRequestDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, IngredientAvailabilityResultDto>({
+      method: 'POST',
+      url: '/api/app/order/verify-ingredients-availability',
       body: input,
     },
     { apiName: this.apiName,...config });

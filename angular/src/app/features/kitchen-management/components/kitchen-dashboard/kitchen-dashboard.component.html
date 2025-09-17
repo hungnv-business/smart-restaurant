@@ -1,0 +1,99 @@
+<div class="kitchen-dashboard p-4 min-h-[calc(100vh-200px)]">
+  <!-- Header -->
+  <div class="kitchen-header mb-4">
+    <div class="flex justify-content-between items-center mb-3">
+      <div>
+        <h1 class="text-2xl font-bold text-900 m-0">Màn hình bếp</h1>
+        <p class="text-600 mt-1 mb-0">Theo dõi và quản lý đơn hàng trong bếp</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="grid">
+      @for (skeleton of [1,2,3,4,5,6]; track skeleton) {
+        <div class="col-12 md:col-6 lg:col-4">
+          <p-card>
+            <p-skeleton height="4rem" styleClass="mb-3"></p-skeleton>
+            <p-skeleton height="2rem" styleClass="mb-3"></p-skeleton>
+            <p-skeleton height="1.5rem" styleClass="mb-2"></p-skeleton>
+            <p-skeleton height="1.5rem"></p-skeleton>
+          </p-card>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Main Content -->
+  @else {
+    @if (pendingTableGroups().length === 0 && preparingTableGroups().length === 0 && readyTableGroups().length === 0) {
+      <!-- Empty State -->
+      <div class="text-center p-6">
+        <i class="pi pi-check-circle text-6xl text-green-500 mb-4"></i>
+        <h3 class="text-xl font-bold text-900 mb-2">Tuyệt vời! Không có món nào cần nấu</h3>
+        <p class="text-600 mb-4">Tất cả các món đã được chuẩn bị xong hoặc chưa có đơn hàng mới.</p>
+        <p-button 
+          label="Làm Mới" 
+          icon="pi pi-refresh"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onRefresh()">
+        </p-button>
+      </div>
+    } @else {
+      <!-- 3-Column Status Layout -->
+      <div class="flex flex-col md:flex-row gap-4 h-auto md:h-[calc(100vh-320px)]">
+        <!-- Đơn Mới Column - chiếm 2 phần -->
+        <app-kitchen-status-column
+          title="Đơn Mới"
+          icon="pi pi-plus-circle"
+          [status]="OrderItemStatus.Pending"
+          [tableGroups]="pendingTableGroups()"
+          theme="blue"
+          badgeSeverity="info"
+          (statusUpdate)="onStatusUpdate($event)"
+          class="flex-2">
+        </app-kitchen-status-column>
+
+        <!-- Đang Làm Column - chiếm 1 phần -->
+        <app-kitchen-status-column
+          title="Đang Làm"
+          icon="pi pi-cog"
+          [status]="OrderItemStatus.Preparing"
+          [tableGroups]="preparingTableGroups()"
+          theme="orange"
+          badgeSeverity="warning"
+          (statusUpdate)="onStatusUpdate($event)"
+          class="flex-1">
+        </app-kitchen-status-column>
+
+        <!-- Sẵn Sàng Column - chiếm 1 phần -->
+        <app-kitchen-status-column
+          title="Sẵn Sàng"
+          icon="pi pi-check-circle"
+          [status]="OrderItemStatus.Ready"
+          [tableGroups]="readyTableGroups()"
+          theme="green"
+          badgeSeverity="success"
+          (statusUpdate)="onStatusUpdate($event)"
+          class="flex-1">
+        </app-kitchen-status-column>
+      </div>
+    }
+  }
+
+  <!-- Refreshing Indicator -->
+  @if (refreshing()) {
+    <div class="fixed top-0 right-0 z-5 m-3">
+      <div class="flex items-center gap-2 p-2 bg-blue-100 border-round border-1 border-blue-300">
+        <p-progressSpinner 
+          [style]="{'width': '20px', 'height': '20px'}"
+          strokeWidth="4">
+        </p-progressSpinner>
+        <span class="text-sm text-blue-800">Đang cập nhật...</span>
+      </div>
+    </div>
+  }
+</div>

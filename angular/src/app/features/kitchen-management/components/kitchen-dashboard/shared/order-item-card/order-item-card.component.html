@@ -1,0 +1,85 @@
+<div
+  class="order-item-card mb-0 p-2 border-round shadow-1 transition-all duration-200 relative"
+  [ngClass]="getPriorityClass()"
+>
+  <!-- Card Header với tên món full width -->
+  <div class="mb-1">
+    <h4
+      class="text-base font-bold text-900 m-0 line-height-1 white-space-nowrap overflow-hidden text-overflow-ellipsis mb-1"
+    >
+      {{ orderItem.menuItemName }}
+    </h4>
+    @if (orderItem.isQuickCook) {
+      <p-tag
+        value="Nấu Nhanh"
+        severity="success"
+        icon="pi pi-bolt"
+        [rounded]="true"
+        styleClass="text-xs"
+      >
+      </p-tag>
+    }
+  </div>
+
+  <!-- Quantity badge position absolute căn giữa toàn bộ card -->
+  <div class="absolute right-2" style="top: 50%; transform: translateY(-50%);">
+    <p-badge
+      [value]="orderItem.quantity.toString() + 'x'"
+      severity="info"
+      badgeSize="xlarge"
+      styleClass="text-base font-bold"
+    >
+    </p-badge>
+  </div>
+
+  <!-- Status và Time Info -->
+  <div class="flex justify-content-between items-center mb-1">
+    <div class="flex items-center gap-2 text-sm" [ngClass]="getTimeDisplayClass()">
+      <i class="pi pi-clock"></i>
+      <span class="font-medium">{{ currentWaitingTime() }}</span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-2">
+    @switch (orderItem.status || OrderItemStatus.Pending) {
+      @case (OrderItemStatus.Pending) {
+        <p-button
+          label="Bắt Đầu"
+          icon="pi pi-play"
+          size="small"
+          (onClick)="startPreparation()"
+          severity="warn"
+        >
+        </p-button>
+      }
+
+      @case (OrderItemStatus.Preparing) {
+        <p-button
+          label="Hoàn Thành"
+          icon="pi pi-check"
+          size="small"
+          (onClick)="markAsReady()"
+          severity="success"
+        >
+        </p-button>
+      }
+
+      @case (OrderItemStatus.Ready) {
+        <div class="w-full">
+          <span class="text-green-600 font-medium">
+            <i class="pi pi-check-circle mr-2"></i>
+            Chờ phục vụ
+          </span>
+        </div>
+      }
+
+      @default {
+        <div class="w-full">
+          <span class="text-600"> Trạng thái không xác định </span>
+        </div>
+      }
+    }
+  </div>
+</div>
+<p-confirmDialog></p-confirmDialog>

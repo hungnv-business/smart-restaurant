@@ -130,22 +130,22 @@ export class AppMenu extends ComponentBase implements OnInit {
         ],
       },
 
-      // Kitchen & Service
+      // Kitchen Management
       {
-        label: 'Bếp & Phục vụ',
-        icon: 'pi pi-fw pi-wrench',
+        label: 'Quản lý Bếp',
+        icon: 'pi pi-fw pi-home',
         visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT),
         items: [
           {
-            label: 'Bếp & Phục vụ',
-            icon: 'pi pi-fw pi-cog',
-            routerLink: ['/kitchen'],
+            label: 'Bảng Điều Khiển Bếp',
+            icon: 'pi pi-fw pi-desktop',
+            routerLink: ['/kitchen-management/dashboard'],
             visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT),
           },
           {
             label: 'Cập nhật trạng thái món',
             icon: 'pi pi-fw pi-refresh',
-            routerLink: ['/kitchen/status'],
+            routerLink: ['/kitchen-management/dashboard'],
             visible: this.hasPermission(PERMISSIONS.RESTAURANT.KITCHEN.UPDATE_STATUS),
           },
         ],

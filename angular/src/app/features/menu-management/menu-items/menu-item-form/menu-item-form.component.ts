@@ -132,6 +132,8 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       imageUrl: formValue.imageUrl || '', // Đường dẫn hình ảnh (tùy chọn)
       isAvailable: formValue.isAvailable, // Trạng thái có sẵn
       ingredients: formValue.ingredients || [], // Danh sách nguyên liệu
+      isQuickCook: formValue.isQuickCook || false, // Món nấu nhanh
+      requiresCooking: formValue.requiresCooking || true, // Cần nấu
     };
 
     this.loading = true;
@@ -269,6 +271,8 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       imageUrl: ['', [Validators.maxLength(500)]],
       isAvailable: [true],
       ingredients: this.fb.array([]), // FormArray cho danh sách nguyên liệu
+      isQuickCook: [false], // Món nấu nhanh
+      requiresCooking: [true], // Cần nấu
     });
   }
 
@@ -284,6 +288,8 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       price: menuItem.price ?? 0,
       imageUrl: menuItem.imageUrl ?? '',
       isAvailable: menuItem.isAvailable ?? true,
+      isQuickCook: menuItem.isQuickCook ?? false,
+      requiresCooking: menuItem.requiresCooking ?? true,
     });
 
     this.form.markAsPristine();

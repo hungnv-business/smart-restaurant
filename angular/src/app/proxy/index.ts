@@ -1,9 +1,10 @@
 import * as Application from './application';
 import * as Common from './common';
 import * as InventoryManagement from './inventory-management';
+import * as Kitchen from './kitchen';
 import * as MenuManagement from './menu-management';
 import * as Orders from './orders';
 import * as TableManagement from './table-management';
 import * as Volo from './volo';
 export * from './table-status.enum';
-export { Application, Common, InventoryManagement, MenuManagement, Orders, TableManagement, Volo };
+export { Application, Common, InventoryManagement, Kitchen, MenuManagement, Orders, TableManagement, Volo };

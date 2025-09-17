@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+.order-item-card {
+  transition: all 0.2s ease-in-out;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  // Priority Classes - chỉ border-left màu, background giữ trắng
+  &.priority-critical {
+    border-left: 4px solid #ef4444; // red-500
+  }
+
+  &.priority-high {
+    border-left: 4px solid #f97316; // orange-500
+  }
+
+  &.priority-medium {
+    border-left: 4px solid #eab308; // yellow-500
+  }
+
+  &.priority-normal {
+    border-left: 4px solid #d1d5db; // gray-300
+  }
+}
+
+// Animation cho waiting time khi urgent
+.text-red-600 {
+  animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+// Button styles
+::ng-deep {
+  .p-button-outlined {
+    border-width: 1px;
+  }
+  
+  .p-button-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}

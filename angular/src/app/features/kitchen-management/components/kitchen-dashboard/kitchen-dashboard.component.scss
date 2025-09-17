@@ -1,0 +1,39 @@
+// Sử dụng Tailwind CSS classes - chỉ giữ lại những CSS không thể thay thế bằng Tailwind
+
+// Custom flex ratios cho columns
+.flex-2 {
+  flex: 2;
+}
+
+// Custom scrollbar cho order items (không có trong Tailwind)
+.kitchen-dashboard {
+  .order-items-column {
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+      
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+  }
+}
+
+// Animation cho urgent time (không có trong Tailwind default)
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.text-red-600.animate-pulse-urgent {
+  animation: pulse-urgent 2s infinite;
+}

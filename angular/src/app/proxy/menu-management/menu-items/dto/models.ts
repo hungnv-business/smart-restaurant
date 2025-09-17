@@ -8,8 +8,13 @@ export interface MenuItemDto extends FullAuditedEntityDto<string> {
   imageUrl?: string;
   categoryId?: string;
   categoryName?: string;
+  isQuickCook: boolean;
+  requiresCooking: boolean;
   soldQuantity: number;
   isPopular: boolean;
+  maximumQuantityAvailable: number;
+  isOutOfStock: boolean;
+  hasLimitedStock: boolean;
 }
 
 export interface CreateUpdateMenuItemDto {
@@ -19,6 +24,8 @@ export interface CreateUpdateMenuItemDto {
   isAvailable: boolean;
   imageUrl?: string;
   categoryId: string;
+  isQuickCook: boolean;
+  requiresCooking: boolean;
   ingredients: MenuItemIngredientDto[];
 }
 

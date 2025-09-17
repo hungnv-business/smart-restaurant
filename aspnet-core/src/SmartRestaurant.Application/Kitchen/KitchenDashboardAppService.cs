@@ -82,10 +82,10 @@ namespace SmartRestaurant.Kitchen
                 QuickCookItemsCount = cookingItems.Count(item => item.IsQuickCook),
                 EmptyTablesCount = tableGroups.Count(group => group.Count() <= 1),
                 AverageWaitingTime = cookingItems.Count > 0
-                    ? cookingItems.Average(item => item.WaitingMinutes)
+                    ? cookingItems.Average(item => (DateTime.UtcNow - item.OrderTime).TotalMinutes)
                     : 0,
-                HighPriorityItemsCount = cookingItems.Count(item => item.WaitingMinutes > 20),
-                CriticalItemsCount = cookingItems.Count(item => item.WaitingMinutes > 30),
+                HighPriorityItemsCount = cookingItems.Count(item => (DateTime.UtcNow - item.OrderTime).TotalMinutes > 20),
+                CriticalItemsCount = cookingItems.Count(item => (DateTime.UtcNow - item.OrderTime).TotalMinutes > 30),
                 HighestPriorityScore = cookingItems.Count > 0 ? cookingItems.Max(item => item.PriorityScore) : 0,
                 LongestWaitingTable = cookingItems.Count > 0
                     ? tableGroups.OrderByDescending(group => group.Min(item => item.OrderTime))

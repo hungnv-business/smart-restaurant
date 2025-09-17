@@ -68,9 +68,15 @@ export const appRoutes: Routes = [
             },
           },
           {
-            path: 'kitchen',
-            redirectTo: 'dashboard', // Placeholder - will be implemented in story for kitchen
-            data: { permission: PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT },
+            path: 'kitchen-management',
+            loadChildren: () =>
+              import('./features/kitchen-management/kitchen-management.routes').then(
+                m => m.KITCHEN_MANAGEMENT_ROUTES,
+              ),
+            data: {
+              breadcrumb: 'Quản lý Bếp',
+              permission: PERMISSIONS.RESTAURANT.KITCHEN.DEFAULT,
+            },
           },
           {
             path: 'reports',

@@ -3,6 +3,7 @@ import type { TableStatus } from '../../../../table-status.enum';
 import type { OrderType } from '../../../../orders/order-type.enum';
 import type { OrderStatus } from '../../../../orders/order-status.enum';
 import type { OrderItemStatus } from '../../../../orders/order-item-status.enum';
+import type { PaymentMethod } from './payment-method.enum';
 
 export interface ActiveTableDto extends EntityDto<string> {
   tableNumber?: string;
@@ -42,23 +43,37 @@ export interface GetMenuItemsForOrderDto {
   onlyAvailable?: boolean;
 }
 
-export interface OrderDto extends FullAuditedEntityDto<string> {
+export interface IngredientAvailabilityResultDto {
+  isAvailable: boolean;
+  missingIngredients: MissingIngredientDto[];
+  totalItemsCount: number;
+  unavailableItemsCount: number;
+  summaryMessage?: string;
+  unavailableMenuItems: string[];
+}
+
+export interface MissingIngredientDto {
+  menuItemId?: string;
+  menuItemName?: string;
+  ingredientId?: string;
+  ingredientName?: string;
+  requiredQuantity: number;
+  currentStock: number;
+  unit?: string;
+  shortageAmount: number;
+  displayMessage?: string;
+}
+
+export interface OrderForPaymentDto {
+  id?: string;
   orderNumber?: string;
-  tableId?: string;
-  tableName?: string;
   orderType?: OrderType;
   status?: OrderStatus;
-  statusDisplay?: string;
   totalAmount: number;
   notes?: string;
-  confirmedTime?: string;
-  preparingTime?: string;
-  readyTime?: string;
-  servedTime?: string;
-  paidTime?: string;
+  creationTime?: string;
+  tableInfo?: string;
   orderItems: OrderItemDto[];
-  itemCount: number;
-  elapsedMinutes: number;
 }
 
 export interface OrderItemDto extends FullAuditedEntityDto<string> {
@@ -74,6 +89,13 @@ export interface OrderItemDto extends FullAuditedEntityDto<string> {
   preparationStartTime?: string;
   preparationCompleteTime?: string;
   preparationDurationMinutes?: number;
+}
+
+export interface PaymentRequestDto {
+  orderId?: string;
+  paymentMethod?: PaymentMethod;
+  customerMoney?: number;
+  notes?: string;
 }
 
 export interface TableDetailDto extends EntityDto<string> {
@@ -96,6 +118,8 @@ export interface TableOrderItemDto {
   canEdit: boolean;
   canDelete: boolean;
   specialRequest?: string;
+  hasMissingIngredients: boolean;
+  missingIngredients: MissingIngredientDto[];
 }
 
 export interface TableOrderSummaryDto {
@@ -107,4 +131,8 @@ export interface TableOrderSummaryDto {
 export interface UpdateOrderItemQuantityDto {
   newQuantity: number;
   notes?: string;
+}
+
+export interface VerifyIngredientsRequestDto {
+  items: CreateOrderItemDto[];
 }

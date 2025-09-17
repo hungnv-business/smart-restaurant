@@ -111,7 +111,7 @@ namespace SmartRestaurant.Kitchen
             {
                 // DINE-IN: Priority dựa trên "mức độ đói" của bàn
                 var servedDishesCount = await GetServedDishesCountAsync(tableId);
-                
+
                 if (servedDishesCount == 0)
                 {
                     // Bàn trống (0 món đã phục vụ): Khách đói, ưu tiên cao nhất
@@ -127,7 +127,7 @@ namespace SmartRestaurant.Kitchen
                 // servedDishesCount >= 2: Bàn đã có nhiều món, không bonus (+0 điểm)
                 else
                 {
-                    Logger.LogDebug("OrderItem {OrderItemId}: Bàn đã có {ServedCount} món, không bonus", 
+                    Logger.LogDebug("OrderItem {OrderItemId}: Bàn đã có {ServedCount} món, không bonus",
                         orderItemId, servedDishesCount);
                 }
             }
@@ -137,15 +137,15 @@ namespace SmartRestaurant.Kitchen
             var waitingMinutes = (int)(DateTime.UtcNow - orderTime).TotalMinutes;
             var fifoBonus = Math.Max(0, waitingMinutes); // Đảm bảo không âm
             totalScore += fifoBonus;
-            
-            Logger.LogDebug("OrderItem {OrderItemId}: FIFO time bonus +{FifoBonus} điểm ({WaitingMinutes} phút chờ)", 
+
+            Logger.LogDebug("OrderItem {OrderItemId}: FIFO time bonus +{FifoBonus} điểm ({WaitingMinutes} phút chờ)",
                 orderItemId, fifoBonus, waitingMinutes);
 
             // ========== LOGGING KẾT QUẢ CUỐI CÙNG ==========
             var orderType = tableId == Guid.Empty ? "Takeaway/Delivery" : "Dine-In";
             var quickCookBonus = isQuickCook ? 100 : 0;
             var tableBonus = totalScore - quickCookBonus - fifoBonus;
-            
+
             Logger.LogInformation(
                 "✅ Priority calculated for OrderItem {OrderItemId} ({OrderType}): " +
                 "Total={Total} điểm (QuickCook={QuickCook} + TableBonus={TableBonus} + FIFO={FIFO})",
@@ -200,7 +200,7 @@ namespace SmartRestaurant.Kitchen
             {
                 // Lấy các món cần nấu từ Order domain method
                 var cookingItems = order.GetCookingItems();
-                
+
                 foreach (var orderItem in cookingItems)
                 {
                     var menuItem = orderItem.MenuItem;
@@ -226,32 +226,31 @@ namespace SmartRestaurant.Kitchen
                     {
                         // Đơn hàng mang về hoặc delivery
                         var orderTypeText = order.OrderType == OrderType.Takeaway ? "Mang về" : "Giao hàng";
-                        tableNumber = $"{orderTypeText} #{order.OrderNumber}";
+                        tableNumber = $"{orderTypeText}";
                     }
 
                     var priorityScore = await CalculateAdvancedPriorityScoreAsync(
-                        orderItem.Id, 
+                        orderItem.Id,
                         order.TableId ?? Guid.Empty, // Dùng Empty cho takeaway
-                        menuItem.IsQuickCook, 
-                        menuItem.RequiresCooking, 
+                        menuItem.IsQuickCook,
+                        menuItem.RequiresCooking,
                         order.CreationTime);
 
                     result.Add(new KitchenOrderItemDto
                     {
+                        Id = orderItem.Id,
                         OrderId = order.Id,
-                        OrderItemId = orderItem.Id,
                         TableNumber = tableNumber,
                         MenuItemName = menuItem.Name,
                         Quantity = orderItem.Quantity,
-                        OrderTime = order.CreationTime,
+                        OrderTime = orderItem.CreationTime,
                         IsQuickCook = menuItem.IsQuickCook,
                         RequiresCooking = menuItem.RequiresCooking,
                         IsEmptyTablePriority = isEmptyTablePriority,
                         ServedDishesCount = servedDishesCount,
                         PriorityScore = priorityScore,
                         Status = orderItem.Status,
-                        OrderType = order.OrderType,
-                        WaitingMinutes = (int)(DateTime.UtcNow - order.CreationTime).TotalMinutes
+                        OrderType = order.OrderType
                     });
                 }
             }
@@ -260,7 +259,7 @@ namespace SmartRestaurant.Kitchen
             var sortedResult = result.OrderByDescending(x => x.PriorityScore).ToList();
 
             Logger.LogInformation("Found {Count} cooking items with priority scores", sortedResult.Count);
-            
+
             return sortedResult;
         }
 
@@ -292,13 +291,13 @@ namespace SmartRestaurant.Kitchen
         public async Task<int> GetServedDishesCountAsync(Guid tableId)
         {
             var orders = await _orderRepository.GetListAsync(o => o.TableId == tableId);
-            
+
             var servedCount = orders
                 .SelectMany(o => o.OrderItems)
                 .Count(oi => oi.IsServed());
 
             Logger.LogDebug("Table {TableId} has {ServedCount} served dishes", tableId, servedCount);
-            
+
             return servedCount;
         }
 
@@ -355,7 +354,7 @@ namespace SmartRestaurant.Kitchen
             // Khởi tạo result dictionary với tất cả bàn = 0 món đã phục vụ
             // Đảm bảo mọi bàn đều có entry, kể cả bàn chưa có order nào
             var result = tableIds.ToDictionary(tableId => tableId, tableId => 0);
-            
+
             // Duyệt qua từng order và cộng dồn số món đã phục vụ cho mỗi bàn
             foreach (var order in orders)
             {
@@ -363,20 +362,20 @@ namespace SmartRestaurant.Kitchen
                 {
                     // Đếm số OrderItems có status = Served trong order này
                     var servedCount = order.OrderItems.Count(oi => oi.IsServed());
-                    
+
                     // Cộng dồn vào tổng của bàn (vì 1 bàn có thể có nhiều orders)
                     result[order.TableId.Value] += servedCount;
-                    
+
                     if (servedCount > 0)
                     {
-                        Logger.LogDebug("Table {TableId} has {ServedCount} served dishes in order {OrderId}", 
+                        Logger.LogDebug("Table {TableId} has {ServedCount} served dishes in order {OrderId}",
                             order.TableId.Value, servedCount, order.Id);
                     }
                 }
             }
 
             Logger.LogDebug("Batch calculated served dishes for {TableCount} tables", tableIds.Count);
-            
+
             return result;
         }
 
@@ -409,101 +408,101 @@ namespace SmartRestaurant.Kitchen
         {
             // Lấy thông tin MenuItem từ database
             var menuItem = await _menuItemRepository.GetAsync(menuItemId);
-            
+
             // Trả về thuộc tính IsQuickCook của MenuItem
             return menuItem.IsQuickCook;
         }
 
 
         /// <summary>
-        /// Lấy dữ liệu Kitchen Dashboard được nhóm theo bàn (Table-Grouped View)
+        /// Lấy dữ liệu Kitchen Dashboard được nhóm theo đơn hàng (Order-Grouped View)
         /// 
         /// Mục đích:
-        /// - Tổ chức món ăn theo từng bàn để bếp dễ quản lý
-        /// - Mỗi bàn hiển thị tất cả món cần nấu của bàn đó
-        /// - Sắp xếp bàn theo độ ưu tiên và thời gian
+        /// - Tổ chức món ăn theo từng đơn hàng để bếp dễ quản lý
+        /// - Mỗi đơn hàng hiển thị tất cả món cần nấu của đơn đó
+        /// - Sắp xếp đơn hàng theo độ ưu tiên
         /// - Cung cấp view tổng quan cho Kitchen Dashboard UI
         /// 
         /// Thuật toán nhóm:
         /// 1. Lấy tất cả món cần nấu đã được prioritized
-        /// 2. Group theo (TableNumber + OrderType) để tách biệt:
-        ///    - Bàn ăn tại chỗ: "B01", "B02", etc.
-        ///    - Đơn mang về: "Mang về #001", "Giao hàng #002", etc.
-        /// 3. Tính thống kê cho mỗi nhóm bàn
-        /// 4. Sắp xếp bàn theo priority (bàn urgent lên đầu)
+        /// 2. Group theo OrderId (1 order = 1 nhóm món):
+        ///    - Đơn ăn tại chỗ: có TableId, hiển thị "B01", "B02"
+        ///    - Đơn mang về: không có TableId, hiển thị "Mang về #001", "Giao hàng #002"
+        /// 3. Tính thống kê cho mỗi đơn hàng
+        /// 4. Sắp xếp đơn hàng theo priority (đơn urgent lên đầu)
         /// 
         /// Sắp xếp Logic:
-        /// - Bàn có món ưu tiên cao nhất lên đầu (HighestPriority DESC)
-        /// - Cùng priority thì bàn gọi trước lên đầu (EarliestOrderTime ASC)
-        /// - Trong mỗi bàn: món priority cao lên đầu, cùng priority thì FIFO
+        /// - Đơn hàng có món ưu tiên cao nhất lên đầu (HighestPriority DESC)
+        /// - Trong mỗi đơn hàng: món priority cao lên đầu, cùng priority thì FIFO
         /// 
         /// Kết quả cho Kitchen Dashboard:
-        /// - View dễ nhìn: mỗi card = 1 bàn với danh sách món
-        /// - Bàn urgent (đỏ) hiển thị đầu tiên
-        /// - Thông tin đầy đủ: số món, thời gian chờ, loại đơn hàng
+        /// - View dễ nhìn: mỗi card = 1 đơn hàng với danh sách món
+        /// - Đơn hàng urgent (đỏ) hiển thị đầu tiên
+        /// - Thông tin đầy đủ: số món, loại đơn hàng (dine-in/takeaway)
         /// </summary>
         /// <returns>
         /// Danh sách KitchenTableGroupDto đã được sắp xếp theo priority:
-        /// - Mỗi item = 1 bàn/đơn hàng với thông tin tổng hợp
-        /// - Chứa danh sách món cần nấu của bàn đó (đã sắp xếp)
-        /// - Bao gồm metadata: tổng món, highest priority, earliest time
+        /// - Mỗi item = 1 đơn hàng với thông tin tổng hợp
+        /// - Chứa danh sách món cần nấu của đơn hàng đó (đã sắp xếp)
+        /// - Bao gồm metadata: tổng món, highest priority
         /// </returns>
         public async Task<List<KitchenTableGroupDto>> GetKitchenDashboardGroupedAsync()
         {
-            Logger.LogInformation("Getting kitchen dashboard data grouped by table");
+            Logger.LogInformation("Getting kitchen dashboard data grouped by order");
 
             // Bước 1: Lấy tất cả món cần nấu với priority đã được tính sẵn
             var orderItems = await GetPriorizedOrderItemsAsync();
 
-            // Bước 2: Group theo bàn (TableNumber + OrderType để tách biệt dine-in vs takeaway)
-            var groupedByTable = orderItems
-                .GroupBy(item => new { item.TableNumber, item.OrderType })
-                .Select(group => new KitchenTableGroupDto
+            // Bước 2: Group theo OrderId (1 order = 1 nhóm món cần nấu)
+            var groupedByOrder = orderItems
+                .GroupBy(item => item.OrderId)
+                .Select(group =>
                 {
-                    // Thông tin cơ bản của bàn/đơn hàng
-                    TableNumber = group.Key.TableNumber,
-                    IsTakeaway = group.Key.OrderType == OrderType.Takeaway || group.Key.OrderType == OrderType.Delivery,
-                    OrderType = group.Key.OrderType,
-                    
-                    // Thống kê tổng hợp cho bàn này
-                    TotalItems = group.Count(), // Tổng số món cần nấu
-                    HighestPriority = group.Max(x => x.PriorityScore), // Điểm ưu tiên cao nhất
-                    EarliestOrderTime = group.Min(x => x.OrderTime), // Thời gian gọi món sớm nhất
-                    
-                    // Danh sách món cần nấu của bàn này (đã sắp xếp)
-                    OrderItems = group
-                        .OrderByDescending(x => x.PriorityScore) // Món urgent lên đầu
-                        .ThenBy(x => x.OrderTime) // Cùng priority thì FIFO (công bằng)
-                        .Select(item => new KitchenOrderItemDto
-                        {
-                            // Copy toàn bộ thông tin từ item gốc
-                            OrderId = item.OrderId,
-                            OrderItemId = item.OrderItemId,
-                            TableNumber = item.TableNumber,
-                            MenuItemName = item.MenuItemName,
-                            Quantity = item.Quantity,
-                            OrderTime = item.OrderTime,
-                            IsQuickCook = item.IsQuickCook,
-                            RequiresCooking = item.RequiresCooking,
-                            IsEmptyTablePriority = item.IsEmptyTablePriority,
-                            ServedDishesCount = item.ServedDishesCount,
-                            PriorityScore = item.PriorityScore,
-                            Status = item.Status,
-                            OrderType = item.OrderType,
-                            // Real-time calculation: thời gian chờ hiện tại
-                            WaitingMinutes = (int)(DateTime.UtcNow - item.OrderTime).TotalMinutes
-                        })
-                        .ToList()
+                    var firstItem = group.First();
+
+                    return new KitchenTableGroupDto
+                    {
+                        // Thông tin cơ bản của đơn hàng
+                        TableNumber = firstItem.TableNumber,
+                        IsTakeaway = firstItem.OrderType != OrderType.DineIn,
+                        OrderType = firstItem.OrderType,
+
+                        // Thống kê tổng hợp cho đơn hàng này
+                        TotalItems = group.Count(), // Tổng số món cần nấu
+                        HighestPriority = group.Max(x => x.PriorityScore), // Điểm ưu tiên cao nhất
+
+                        // Danh sách món cần nấu của đơn hàng này (đã sắp xếp)
+                        OrderItems = group
+                            .OrderByDescending(x => x.PriorityScore) // Món urgent lên đầu
+                            .ThenBy(x => x.OrderTime) // Cùng priority thì FIFO (công bằng)
+                            .Select(item => new KitchenOrderItemDto
+                            {
+                                // Copy toàn bộ thông tin từ item gốc
+                                Id = item.Id,
+                                OrderId = item.OrderId,
+                                TableNumber = item.TableNumber,
+                                MenuItemName = item.MenuItemName,
+                                Quantity = item.Quantity,
+                                OrderTime = item.OrderTime,
+                                IsQuickCook = item.IsQuickCook,
+                                RequiresCooking = item.RequiresCooking,
+                                IsEmptyTablePriority = item.IsEmptyTablePriority,
+                                ServedDishesCount = item.ServedDishesCount,
+                                PriorityScore = item.PriorityScore,
+                                Status = item.Status,
+                                OrderType = item.OrderType
+                            })
+                            .ToList()
+                    };
                 })
-                // Bước 3: Sắp xếp các bàn theo độ ưu tiên
-                .OrderByDescending(table => table.HighestPriority) // Bàn có món urgent nhất lên đầu
-                .ThenBy(table => table.EarliestOrderTime) // Cùng priority thì bàn gọi trước lên đầu
+                // Bước 3: Sắp xếp các đơn hàng theo độ ưu tiên
+                .OrderByDescending(order => order.HighestPriority) // Đơn hàng có món urgent nhất lên đầu
                 .ToList();
 
-            Logger.LogInformation("Grouped {ItemCount} items into {TableCount} tables", 
-                orderItems.Count, groupedByTable.Count);
+            Logger.LogInformation("Grouped {ItemCount} items into {OrderCount} orders",
+                orderItems.Count, groupedByOrder.Count);
 
-            return groupedByTable;
+            return groupedByOrder;
         }
 
         /// <summary>
@@ -532,16 +531,16 @@ namespace SmartRestaurant.Kitchen
         {
             // Kiểm tra bếp chỉ được phép cập nhật 3 trạng thái này
             // Served phải do nhân viên phục vụ thực hiện, không phải bếp
-            if (status != OrderItemStatus.Preparing && 
-                status != OrderItemStatus.Ready && 
+            if (status != OrderItemStatus.Preparing &&
+                status != OrderItemStatus.Ready &&
                 status != OrderItemStatus.Canceled)
             {
-                Logger.LogWarning("Kitchen attempted to update OrderItem {OrderItemId} to invalid status {Status}", 
+                Logger.LogWarning("Kitchen attempted to update OrderItem {OrderItemId} to invalid status {Status}",
                     orderItemId, status);
                 throw OrderValidationException.UnsupportedStatusTransition(status);
             }
 
-            Logger.LogInformation("Kitchen đang cập nhật trạng thái OrderItem {OrderItemId} thành {Status}", 
+            Logger.LogInformation("Kitchen đang cập nhật trạng thái OrderItem {OrderItemId} thành {Status}",
                 orderItemId, status);
 
             // Tìm đơn hàng chứa món ăn này
@@ -556,7 +555,7 @@ namespace SmartRestaurant.Kitchen
             var orderItem = targetOrder.OrderItems.FirstOrDefault(oi => oi.Id == orderItemId);
             if (orderItem == null)
             {
-                Logger.LogWarning("Không tìm thấy OrderItem {OrderItemId} trong Order {OrderId}", 
+                Logger.LogWarning("Không tìm thấy OrderItem {OrderItemId} trong Order {OrderId}",
                     orderItemId, targetOrder.Id);
                 throw OrderValidationException.OrderItemNotFound(orderItemId);
             }
@@ -565,7 +564,7 @@ namespace SmartRestaurant.Kitchen
             // VD: không thể chuyển từ Ready → Pending hoặc Served → Preparing
             if (!orderItem.CanTransitionTo(status))
             {
-                Logger.LogWarning("Không thể chuyển OrderItem {OrderItemId} từ {CurrentStatus} sang {NewStatus}", 
+                Logger.LogWarning("Không thể chuyển OrderItem {OrderItemId} từ {CurrentStatus} sang {NewStatus}",
                     orderItemId, orderItem.Status, status);
                 throw OrderValidationException.InvalidStatusTransition(orderItem.Status, status);
             }
@@ -577,21 +576,21 @@ namespace SmartRestaurant.Kitchen
                 case OrderItemStatus.Preparing:
                     // Bắt đầu nấu món, ghi lại thời gian bắt đầu
                     orderItem.StartPreparation();
-                    Logger.LogDebug("OrderItem {OrderItemId} bắt đầu được chuẩn bị lúc {Time}", 
+                    Logger.LogDebug("OrderItem {OrderItemId} bắt đầu được chuẩn bị lúc {Time}",
                         orderItemId, DateTime.UtcNow);
                     break;
-                    
+
                 case OrderItemStatus.Ready:
                     // Món đã nấu xong, chờ phục vụ mang ra
                     orderItem.MarkAsReady();
-                    Logger.LogDebug("OrderItem {OrderItemId} đã sẵn sàng lúc {Time}", 
+                    Logger.LogDebug("OrderItem {OrderItemId} đã sẵn sàng lúc {Time}",
                         orderItemId, DateTime.UtcNow);
                     break;
-                    
+
                 case OrderItemStatus.Canceled:
                     // Hủy món (thường do hết nguyên liệu, khách đổi ý, v.v.)
                     orderItem.Cancel();
-                    Logger.LogInformation("OrderItem {OrderItemId} đã được hủy bởi bếp lúc {Time}", 
+                    Logger.LogInformation("OrderItem {OrderItemId} đã được hủy bởi bếp lúc {Time}",
                         orderItemId, DateTime.UtcNow);
                     break;
             }
@@ -599,7 +598,7 @@ namespace SmartRestaurant.Kitchen
             // Lưu thay đổi vào database
             await _orderRepository.UpdateAsync(targetOrder);
 
-            Logger.LogInformation("Kitchen đã cập nhật thành công OrderItem {OrderItemId} từ {OldStatus} sang {NewStatus}", 
+            Logger.LogInformation("Kitchen đã cập nhật thành công OrderItem {OrderItemId} từ {OldStatus} sang {NewStatus}",
                 orderItemId, orderItem.Status, status);
         }
     }
