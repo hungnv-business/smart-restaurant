@@ -708,6 +708,44 @@ class OrderService extends ChangeNotifier {
     }
   }
 
+  /// Đánh dấu món đã phục vụ
+  /// Endpoint: POST /api/app/order/mark-order-item-served/{orderItemId}
+  Future<void> markOrderItemServed(String orderItemId) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _dio.post(
+        '/api/app/order/mark-order-item-served/$orderItemId',
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('✅ OrderService: Successfully marked order item $orderItemId as served');
+        return; // Void method
+      } else {
+        throw OrderServiceException(
+          message: 'Phản hồi không hợp lệ từ server khi đánh dấu món đã phục vụ',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ OrderService: DioException marking item served - ${e.message}');
+      if (e.response != null) {
+        print('📄 Response status: ${e.response!.statusCode}');
+        print('📄 Response data: ${e.response!.data}');
+      }
+      final exception = _handleDioException(e, 'đánh dấu món đã phục vụ');
+      _setError(exception.message);
+      throw exception;
+    } catch (e) {
+      final message = 'Lỗi không xác định khi đánh dấu món đã phục vụ: ${e.toString()}';
+      _setError(message);
+      throw OrderServiceException(message: message, errorCode: 'UNKNOWN_ERROR');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   @override
   void dispose() {
     // Không close _dio ở đây vì nó được quản lý bởi HttpClientService

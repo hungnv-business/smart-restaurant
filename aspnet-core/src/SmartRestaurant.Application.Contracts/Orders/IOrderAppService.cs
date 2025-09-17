@@ -102,4 +102,11 @@ public interface IOrderAppService : IApplicationService
     /// <param name="input">Thông tin thanh toán</param>
     /// <returns>Kết quả thanh toán với thông tin hóa đơn</returns>
     Task ProcessPaymentAsync(PaymentRequestDto input);
+
+    /// <summary>
+    /// Cập nhật trạng thái món sang "Đã phục vụ" từ mobile app
+    /// Chỉ cho phép khi món ở trạng thái "Ready" (đã hoàn thành)
+    /// </summary>
+    /// <param name="orderItemId">ID của món cần đánh dấu đã phục vụ</param>
+    Task MarkOrderItemServedAsync(Guid orderItemId);
 }

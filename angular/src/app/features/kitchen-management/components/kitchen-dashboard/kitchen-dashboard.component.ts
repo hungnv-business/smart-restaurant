@@ -18,6 +18,7 @@ import { OrderItemStatus } from '../../../../proxy/orders/order-item-status.enum
 
 // Custom Services  
 import { KitchenSignalRService, KitchenUpdateEvent } from '../../services/kitchen-signalr.service';
+import { NotificationSoundService } from '../../services/notification-sound.service';
 
 // Components
 import { KitchenStatusColumnComponent } from './kitchen-status-column/kitchen-status-column.component';
@@ -62,11 +63,13 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     private kitchenDashboardService: KitchenDashboardService,
     private kitchenSignalRService: KitchenSignalRService,
     private messageService: MessageService,
+    private notificationSoundService: NotificationSoundService,
   ) {}
 
   ngOnInit(): void {
     this.loadData();
     this.setupSignalR();
+    this.initializeNotificationSound();
   }
 
   ngOnDestroy(): void {
@@ -123,7 +126,6 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
         this.signalRConnectionState.set(state);
-        console.log('SignalR connection state:', state);
       });
 
     // Listen to kitchen updates
@@ -138,7 +140,6 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     // Establish connection
     this.kitchenSignalRService.connect()
       .catch(error => {
-        console.error('Failed to connect to SignalR:', error);
         this.messageService.add({
           severity: 'warn',
           summary: 'Kết Nối Real-time',
@@ -148,35 +149,101 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle SignalR updates
+   * Khởi tạo notification sound service
    */
-  private handleSignalRUpdate(update: KitchenUpdateEvent): void {
-    console.log('Received SignalR update:', update);
+  private async initializeNotificationSound(): Promise<void> {
+    try {
+      await this.notificationSoundService.initialize();
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  /**
+   * Handle SignalR updates từ mobile
+   */
+  private async handleSignalRUpdate(update: KitchenUpdateEvent): Promise<void> {
     this.lastUpdate.set(new Date());
 
     switch (update.type) {
-      case 'ORDER_STATUS_CHANGED':
-        this.messageService.add({
-          severity: 'info',
-          summary: 'Cập Nhật Trạng Thái',
-          detail: update.message || 'Trạng thái món ăn đã thay đổi'
-        });
-        // Refresh data để lấy thông tin mới nhất
-        this.loadData();
-        break;
-
       case 'NEW_ORDER_RECEIVED':
+        // Phát âm thanh và đọc message
+        const newOrderMessage = update.message || 'Có đơn hàng mới cần chuẩn bị';
+        await this.notificationSoundService.playNotification('newOrder', newOrderMessage);
+        
+        // Hiển thị thông báo đơn hàng mới
         this.messageService.add({
           severity: 'success',
-          summary: 'Đơn Hàng Mới',
-          detail: update.message || 'Có đơn hàng mới cần chuẩn bị'
+          summary: 'Đơn Hàng Mới Từ Mobile',
+          detail: newOrderMessage,
+          life: 5000
         });
-        // Refresh data để hiển thị đơn mới
+        
         this.loadData();
         break;
 
-      case 'ITEM_PRIORITY_UPDATED':
-        // Auto refresh để cập nhật priority mới
+      case 'ORDER_ITEM_QUANTITY_UPDATED':
+        // Phát âm thanh và đọc message với thông tin chi tiết
+        const updateMessage = update.message || `${update.tableName || 'Mang về'} đã cập nhật ${update.menuItemName} thành ${update.newQuantity} món`;
+        await this.notificationSoundService.playNotification('newOrder', updateMessage);
+        
+        // Hiển thị thông báo cập nhật số lượng
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Cập Nhật Số Lượng',
+          detail: updateMessage,
+          life: 4000
+        });
+        
+        this.loadData();
+        break;
+
+      case 'ORDER_ITEMS_ADDED':
+        // Phát âm thanh và đọc message với thông tin chi tiết
+        const addMessage = update.message || `${update.tableName || 'Mang về'} đã thêm ${update.addedItemsDetail}`;
+        await this.notificationSoundService.playNotification('newOrder', addMessage);
+        
+        // Hiển thị thông báo thêm món
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Thêm Món Mới',
+          detail: addMessage,
+          life: 5000
+        });
+        
+        this.loadData();
+        break;
+
+      case 'ORDER_ITEM_REMOVED':
+        // Phát âm thanh và đọc message với số lượng chi tiết
+        const removeMessage = update.message || `${update.tableName || 'Mang về'} đã xóa ${update.quantity} món ${update.menuItemName}`;
+        await this.notificationSoundService.playNotification('newOrder', removeMessage);
+        
+        // Hiển thị thông báo xóa món
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Xóa Món',
+          detail: removeMessage,
+          life: 4000
+        });
+        
+        this.loadData();
+        break;
+
+      case 'ORDER_ITEM_SERVED':
+        // Phát âm thanh và đọc message
+        const servedMessage = update.message || `Đơn ${update.orderNumber} đã được phục vụ`;
+        await this.notificationSoundService.playNotification('newOrder', servedMessage);
+        
+        // Hiển thị thông báo đã phục vụ
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Món Đã Phục Vụ',
+          detail: servedMessage,
+          life: 3000
+        });
+        
+        // Reload data để cập nhật danh sách
         this.loadData();
         break;
     }
@@ -261,6 +328,116 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
    */
   trackByTableNumber(index: number, group: KitchenTableGroupDto): string {
     return group.tableNumber || index.toString();
+  }
+
+  /**
+   * Bật/tắt âm thanh thông báo
+   */
+  toggleNotificationSound(): void {
+    const currentConfig = this.notificationSoundService.getConfig();
+    this.notificationSoundService.setEnabled(!currentConfig.enabled);
+    
+    const status = !currentConfig.enabled ? 'bật' : 'tắt';
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Cài Đặt Âm Thanh',
+      detail: `Đã ${status} âm thanh thông báo`,
+      life: 2000
+    });
+  }
+
+  /**
+   * Test âm thanh
+   */
+  async testNotificationSound(): Promise<void> {
+    try {
+      await this.notificationSoundService.testSound('newOrder');
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Test Âm Thanh',
+        detail: 'Đã phát âm thanh test',
+        life: 2000
+      });
+    } catch (error) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Lỗi Âm Thanh',
+        detail: 'Không thể phát âm thanh',
+        life: 3000
+      });
+    }
+  }
+
+  /**
+   * Kiểm tra trạng thái âm thanh
+   */
+  isSoundEnabled(): boolean {
+    return this.notificationSoundService.getConfig().enabled;
+  }
+
+  /**
+   * Bật/tắt text-to-speech
+   */
+  toggleSpeech(): void {
+    const currentConfig = this.notificationSoundService.getConfig();
+    this.notificationSoundService.setSpeechEnabled(!currentConfig.speechEnabled);
+    
+    const status = !currentConfig.speechEnabled ? 'bật' : 'tắt';
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Cài Đặt Giọng Đọc',
+      detail: `Đã ${status} giọng đọc thông báo`,
+      life: 2000
+    });
+  }
+
+  /**
+   * Test giọng đọc
+   */
+  async testSpeech(): Promise<void> {
+    try {
+      await this.notificationSoundService.testSpeech();
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Test Giọng Đọc',
+        detail: 'Đã test giọng đọc tiếng Việt',
+        life: 2000
+      });
+    } catch (error) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Lỗi Giọng Đọc',
+        detail: 'Không thể test giọng đọc',
+        life: 3000
+      });
+    }
+  }
+
+  /**
+   * Kiểm tra trạng thái speech
+   */
+  isSpeechEnabled(): boolean {
+    return this.notificationSoundService.getConfig().speechEnabled;
+  }
+
+  /**
+   * Kiểm tra hỗ trợ speech
+   */
+  isSpeechSupported(): boolean {
+    return this.notificationSoundService.isSpeechSupported();
+  }
+
+  /**
+   * Dừng tất cả âm thanh và speech
+   */
+  stopAllSounds(): void {
+    this.notificationSoundService.stopAll();
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Dừng Âm Thanh',
+      detail: 'Đã dừng tất cả âm thanh và giọng đọc',
+      life: 2000
+    });
   }
 
 }

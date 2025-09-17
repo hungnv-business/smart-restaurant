@@ -4,142 +4,164 @@ using Microsoft.AspNetCore.SignalR;
 using Volo.Abp.DependencyInjection;
 using SmartRestaurant.Application.Contracts.Orders;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
-using SmartRestaurant.Application.Contracts.Common;
 using SmartRestaurant.HttpApi.Host.Hubs;
 using SmartRestaurant.Orders;
 
 namespace SmartRestaurant.HttpApi.Host.Services;
 
 /// <summary>
-/// Implementation của IOrderNotificationService sử dụng SignalR
-/// Gửi thông báo thời gian thực về trạng thái đơn hàng
+/// Đơn giản hóa OrderNotificationService - chỉ gửi thông báo đến Kitchen khi có order mới từ mobile
 /// </summary>
 public class OrderNotificationService : IOrderNotificationService, ITransientDependency
 {
     private readonly IHubContext<KitchenHub> _kitchenHubContext;
-    private readonly IHubContext<OrderStatusHub> _orderStatusHubContext;
-    private readonly IHubContext<TableManagementHub> _tableManagementHubContext;
 
-    public OrderNotificationService(
-        IHubContext<KitchenHub> kitchenHubContext,
-        IHubContext<OrderStatusHub> orderStatusHubContext,
-        IHubContext<TableManagementHub> tableManagementHubContext)
+    public OrderNotificationService(IHubContext<KitchenHub> kitchenHubContext)
     {
         _kitchenHubContext = kitchenHubContext;
-        _orderStatusHubContext = orderStatusHubContext;
-        _tableManagementHubContext = tableManagementHubContext;
     }
 
     public async Task NotifyNewOrderAsync(OrderDto orderDto)
     {
-        // Thông báo đến nhân viên phục vụ
-        await _orderStatusHubContext.Clients.Group("Waitstaff").SendAsync("NewOrderCreated", new
+        try
         {
-            Order = orderDto,
-            CreatedAt = DateTime.UtcNow,
-            Message = $"Đơn hàng mới #{orderDto.OrderNumber} đã được tạo"
-        });
-
-        // Nếu có bàn, thông báo đến nhóm bàn cụ thể
-        if (orderDto.TableId.HasValue)
+            Console.WriteLine($"🔔 OrderNotificationService: Sending notification for order #{orderDto.OrderNumber}");
+            
+            // Chỉ gửi thông báo đến bếp khi có order mới từ mobile
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("NewOrderReceived", new
+            {
+                Order = orderDto,
+                NotifiedAt = DateTime.UtcNow,
+                Message = $"Có đơn hàng mới từ {orderDto.TableName}"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent notification for order #{orderDto.OrderNumber}");
+        }
+        catch (Exception ex)
         {
-            await _orderStatusHubContext.Clients.Group($"Table_{orderDto.TableId.Value}")
-                .SendAsync("NewOrderCreated", new
-                {
-                    Order = orderDto,
-                    CreatedAt = DateTime.UtcNow,
-                    Message = $"Đơn hàng mới #{orderDto.OrderNumber} cho bàn {orderDto.TableName}"
-                });
+            Console.WriteLine($"❌ OrderNotificationService: Error sending notification - {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
 
+    // Đơn giản hóa - không cần các method khác, chỉ cần NotifyNewOrderAsync
     public async Task NotifyOrderStatusChangedAsync(Guid orderId, string orderNumber, OrderStatus newStatus, Guid? tableId = null)
     {
-        var statusMessage = GetStatusMessage(newStatus);
-        var updateInfo = new
-        {
-            OrderId = orderId,
-            OrderNumber = orderNumber,
-            Status = newStatus,
-            StatusDisplay = statusMessage,
-            UpdatedAt = DateTime.UtcNow,
-            Message = $"Đơn hàng #{orderNumber} {statusMessage}"
-        };
-
-        // Thông báo đến tất cả nhân viên
-        await _orderStatusHubContext.Clients.Group("Waitstaff").SendAsync("OrderStatusChanged", updateInfo);
-
-        // Nếu có bàn, thông báo đến nhóm bàn cụ thể
-        if (tableId.HasValue)
-        {
-            await _orderStatusHubContext.Clients.Group($"Table_{tableId.Value}").SendAsync("OrderStatusChanged", updateInfo);
-        }
+        // Không thực hiện gì - đã đơn giản hóa
+        await Task.CompletedTask;
     }
 
     public async Task NotifyOrderReadyAsync(OrderDto orderDto)
     {
-        var notificationInfo = new
-        {
-            Order = orderDto,
-            ReadyAt = DateTime.UtcNow,
-            Message = $"Đơn hàng #{orderDto.OrderNumber} sẵn sàng phục vụ!",
-            Priority = "High" // Đánh dấu ưu tiên cao
-        };
-
-        await _orderStatusHubContext.Clients.Group("Waitstaff").SendAsync("OrderReady", notificationInfo);
-
-        // Thông báo riêng cho bàn nếu có
-        if (orderDto.TableId.HasValue)
-        {
-            await _orderStatusHubContext.Clients.Group($"Table_{orderDto.TableId.Value}")
-                .SendAsync("OrderReady", notificationInfo);
-        }
+        // Không thực hiện gì - đã đơn giản hóa
+        await Task.CompletedTask;
     }
 
-    public async Task NotifyOrderServedAsync(Guid orderId, string orderNumber, Guid? tableId = null)
+    public async Task NotifyOrderServedAsync(OrderItemServedNotificationDto dto)
     {
-        var servedInfo = new
+        try
         {
-            OrderId = orderId,
-            OrderNumber = orderNumber,
-            ServedAt = DateTime.UtcNow,
-            Message = $"Đơn hàng #{orderNumber} đã được phục vụ"
-        };
-
-        await _orderStatusHubContext.Clients.Group("Waitstaff").SendAsync("OrderServed", servedInfo);
-
-        if (tableId.HasValue)
+            Console.WriteLine($"🔔 OrderNotificationService: Sending order served notification for {dto.TableName}");
+            
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemServed", new
+            {
+                dto.OrderId,
+                dto.OrderNumber,
+                dto.MenuItemName,
+                dto.Quantity,
+                dto.TableName,
+                dto.TableId,
+                ServedAt = DateTime.UtcNow,
+                Message = $"{dto.TableName} {dto.Quantity} {dto.MenuItemName} đã được phục vụ"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent order served notification for {dto.TableName}");
+        }
+        catch (Exception ex)
         {
-            await _orderStatusHubContext.Clients.Group($"Table_{tableId.Value}").SendAsync("OrderServed", servedInfo);
+            Console.WriteLine($"❌ OrderNotificationService: Error sending order served notification - {ex.Message}");
         }
     }
 
     public async Task NotifyKitchenNewOrderAsync(OrderDto orderDto)
     {
-        await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("NewOrderReceived", new
-        {
-            Order = orderDto,
-            NotifiedAt = DateTime.UtcNow,
-            Message = $"Đơn hàng mới #{orderDto.OrderNumber} cần chuẩn bị"
-        });
+        // Gọi lại NotifyNewOrderAsync để tránh duplicate code
+        await NotifyNewOrderAsync(orderDto);
     }
 
     public async Task NotifyOrderItemStatusUpdatedAsync(Guid orderItemId, int newStatus)
     {
-        // Phát sóng cập nhật trạng thái đến tất cả client trong nhóm Kitchen
-        await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemStatusUpdated", new
-        {
-            OrderItemId = orderItemId,
-            Status = newStatus,
-            UpdatedAt = DateTime.UtcNow
-        });
+        // Không thực hiện gì - đã đơn giản hóa
+        await Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Lấy thông điệp trạng thái tiếng Việt
-    /// </summary>
-    private static string GetStatusMessage(OrderStatus status)
+    public async Task NotifyOrderItemQuantityUpdatedAsync(OrderItemQuantityUpdateNotificationDto dto)
     {
-        return GlobalEnums.GetOrderStatusDisplayName(status);
+        try
+        {
+            Console.WriteLine($"🔔 OrderNotificationService: Sending quantity update notification for table {dto.TableName}");
+            
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemQuantityUpdated", new
+            {
+                dto.TableName,
+                dto.OrderItemId,
+                dto.MenuItemName,
+                dto.NewQuantity,
+                UpdatedAt = DateTime.UtcNow,
+                Message = $"{dto.TableName} đã cập nhật {dto.MenuItemName} thành {dto.NewQuantity}"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent quantity update notification for table {dto.TableName}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderNotificationService: Error sending quantity update notification - {ex.Message}");
+        }
+    }
+
+    public async Task NotifyOrderItemsAddedAsync(OrderItemsAddedNotificationDto dto)
+    {
+        try
+        {
+            Console.WriteLine($"🔔 OrderNotificationService: Sending add items notification for table {dto.TableName}");
+            
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemsAdded", new
+            {
+                dto.TableName,
+                dto.AddedItemsDetail,
+                AddedAt = DateTime.UtcNow,
+                Message = $"{dto.TableName} đã thêm {dto.AddedItemsDetail}"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent add items notification for table {dto.TableName}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderNotificationService: Error sending add items notification - {ex.Message}");
+        }
+    }
+
+    public async Task NotifyOrderItemRemovedAsync(OrderItemRemovedNotificationDto dto)
+    {
+        try
+        {
+            Console.WriteLine($"🔔 OrderNotificationService: Sending remove item notification for table {dto.TableName}");
+            
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemRemoved", new
+            {
+                dto.TableName,
+                dto.OrderItemId,
+                dto.MenuItemName,
+                dto.Quantity,
+                RemovedAt = DateTime.UtcNow,
+                Message = $"{dto.TableName} đã xóa {dto.Quantity} {dto.MenuItemName}"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent remove item notification for table {dto.TableName}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderNotificationService: Error sending remove item notification - {ex.Message}");
+        }
     }
 }

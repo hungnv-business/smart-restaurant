@@ -33,12 +33,10 @@ public interface IOrderNotificationService
     Task NotifyOrderReadyAsync(OrderDto orderDto);
 
     /// <summary>
-    /// Thông báo đơn hàng đã được phục vụ
+    /// Thông báo món ăn đã được phục vụ
     /// </summary>
-    /// <param name="orderId">ID đơn hàng</param>
-    /// <param name="orderNumber">Số đơn hàng</param>
-    /// <param name="tableId">ID bàn (optional)</param>
-    Task NotifyOrderServedAsync(Guid orderId, string orderNumber, Guid? tableId = null);
+    /// <param name="dto">Thông tin chi tiết về món ăn đã được phục vụ</param>
+    Task NotifyOrderServedAsync(OrderItemServedNotificationDto dto);
 
     /// <summary>
     /// Thông báo đơn hàng mới đến bếp
@@ -52,4 +50,22 @@ public interface IOrderNotificationService
     /// <param name="orderItemId">ID món ăn trong đơn hàng</param>
     /// <param name="newStatus">Trạng thái mới</param>
     Task NotifyOrderItemStatusUpdatedAsync(Guid orderItemId, int newStatus);
+
+    /// <summary>
+    /// Thông báo cập nhật số lượng món ăn từ mobile
+    /// </summary>
+    /// <param name="dto">Thông tin chi tiết về món ăn được cập nhật</param>
+    Task NotifyOrderItemQuantityUpdatedAsync(OrderItemQuantityUpdateNotificationDto dto);
+
+    /// <summary>
+    /// Thông báo thêm món vào order hiện có từ mobile
+    /// </summary>
+    /// <param name="dto">Thông tin chi tiết về các món đã thêm</param>
+    Task NotifyOrderItemsAddedAsync(OrderItemsAddedNotificationDto dto);
+
+    /// <summary>
+    /// Thông báo xóa món khỏi order từ mobile
+    /// </summary>
+    /// <param name="dto">Thông tin chi tiết về món đã xóa</param>
+    Task NotifyOrderItemRemovedAsync(OrderItemRemovedNotificationDto dto);
 }

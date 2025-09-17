@@ -7,8 +7,10 @@ using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.MenuManagement.MenuItemIngredients;
 using SmartRestaurant.InventoryManagement.Ingredients;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
+using SmartRestaurant.Orders;
 using Shouldly;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.Guids;
 using Xunit;
 using NSubstitute;
 
@@ -23,18 +25,27 @@ namespace SmartRestaurant.Domain.Tests.MenuManagement
         private readonly RecipeManager _recipeManager;
         private readonly IMenuItemRepository _menuItemRepository;
         private readonly IRepository<MenuItemIngredient, Guid> _menuItemIngredientRepository;
+        private readonly IIngredientRepository _ingredientRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly IngredientManager _ingredientManager;
+        private readonly IGuidGenerator _guidGenerator;
 
         public RecipeManager_Tests()
         {
             _menuItemRepository = Substitute.For<IMenuItemRepository>();
             _menuItemIngredientRepository = Substitute.For<IRepository<MenuItemIngredient, Guid>>();
+            _ingredientRepository = Substitute.For<IIngredientRepository>();
+            _orderRepository = Substitute.For<IOrderRepository>();
             _ingredientManager = Substitute.For<IngredientManager>();
+            _guidGenerator = Substitute.For<IGuidGenerator>();
 
             _recipeManager = new RecipeManager(
-                _menuItemRepository,
                 _menuItemIngredientRepository,
-                _ingredientManager);
+                _ingredientRepository,
+                _menuItemRepository,
+                _orderRepository,
+                _ingredientManager,
+                _guidGenerator);
         }
 
         #region Ingredient Availability Tests

@@ -8,10 +8,9 @@ using SmartRestaurant.Application.Contracts.Orders.Dto;
 namespace SmartRestaurant.HttpApi.Host.Hubs;
 
 /// <summary>
-/// SignalR Hub cho cập nhật đơn hàng bếp thời gian thực
-/// Sử dụng để thông báo cho nhân viên bếp về đơn hàng mới và cập nhật trạng thái
+/// SignalR Hub đơn giản cho thông báo đơn hàng mới từ mobile đến bếp
 /// </summary>
-[Authorize]
+// [Authorize] // Tạm thời bỏ authorize để test
 public class KitchenHub : Hub
 {
     private readonly ILogger<KitchenHub> _logger;
@@ -22,66 +21,26 @@ public class KitchenHub : Hub
     }
 
     /// <summary>
-    /// Join nhóm kitchen để nhận thông báo đơn hàng
+    /// Join nhóm kitchen để nhận thông báo đơn hàng mới
     /// </summary>
     public async Task JoinKitchenGroup()
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, "Kitchen");
+        _logger.LogInformation("Client {ConnectionId} joined Kitchen group", Context.ConnectionId);
+        Console.WriteLine($"👥 KitchenHub: Client {Context.ConnectionId} joined Kitchen group");
     }
 
-    /// <summary>
-    /// Leave nhóm kitchen
-    /// </summary>
-    public async Task LeaveKitchenGroup()
-    {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Kitchen");
-    }
 
     /// <summary>
-    /// Cập nhật trạng thái món ăn trong đơn hàng
-    /// </summary>
-    /// <param name="orderItemId">ID món ăn trong đơn hàng</param>
-    /// <param name="newStatus">Trạng thái mới</param>
-    public async Task UpdateOrderItemStatus(Guid orderItemId, int newStatus)
-    {
-        // Phát sóng cập nhật trạng thái đến tất cả client trong nhóm Kitchen
-        await Clients.Group("Kitchen").SendAsync("OrderItemStatusUpdated", new
-        {
-            OrderItemId = orderItemId,
-            Status = newStatus,
-            UpdatedAt = DateTime.UtcNow,
-            UpdatedBy = Context.User?.Identity?.Name
-        });
-    }
-
-    /// <summary>
-    /// Thông báo đơn hàng mới đến bếp
-    /// </summary>
-    /// <param name="orderDto">Thông tin đơn hàng mới</param>
-    public async Task NotifyNewOrder(OrderDto orderDto)
-    {
-        await Clients.Group("Kitchen").SendAsync("NewOrderReceived", new
-        {
-            Order = orderDto,
-            NotifiedAt = DateTime.UtcNow,
-            Message = $"Đơn hàng mới #{orderDto.OrderNumber} cần chuẩn bị"
-        });
-    }
-
-    /// <summary>
-    /// Xử lý khi client kết nối
+    /// Xử lý khi client kết nối - tự động join Kitchen group
     /// </summary>
     public override async Task OnConnectedAsync()
     {
-        // Log connection để debug
         _logger.LogInformation("Kitchen client connected: {ConnectionId}", Context.ConnectionId);
+        Console.WriteLine($"🔗 KitchenHub: Client {Context.ConnectionId} connected");
         
-        // Tự động join nhóm Kitchen nếu user có quyền
-        if (Context.User?.IsInRole("Kitchen") == true || 
-            Context.User?.IsInRole("KitchenManager") == true)
-        {
-            await JoinKitchenGroup();
-        }
+        // Tự động join Kitchen group cho tất cả user đã đăng nhập
+        await JoinKitchenGroup();
         
         await base.OnConnectedAsync();
     }

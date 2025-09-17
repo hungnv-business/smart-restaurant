@@ -112,6 +112,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         {
             var dbSet = await GetDbSetAsync();
             return await dbSet
+                .Include(o => o.Table)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
                 .Where(o => o.Id == orderId)
@@ -218,6 +219,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         {
             var dbSet = await GetDbSetAsync();
             return await dbSet
+                .Include(o => o.Table)
                 .Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.OrderItems.Any(oi => oi.Id == orderItemId), 
                     GetCancellationToken(cancellationToken));

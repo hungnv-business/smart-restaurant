@@ -1,10 +1,92 @@
 <div class="kitchen-dashboard p-4 min-h-[calc(100vh-200px)]">
   <!-- Header -->
   <div class="kitchen-header mb-4">
-    <div class="flex justify-content-between items-center mb-3">
-      <div>
+    <div class="card flex justify-between items-center mb-3">
+      <div class="">
         <h1 class="text-2xl font-bold text-900 m-0">Màn hình bếp</h1>
         <p class="text-600 mt-1 mb-0">Theo dõi và quản lý đơn hàng trong bếp</p>
+      </div>
+      
+      <!-- Sound Control Panel -->
+      <div class="flex align-items-center gap-2">
+        <!-- Connection Status -->
+        <div class="flex align-items-center gap-1 text-sm">
+          @if (signalRConnectionState() === 'connected') {
+            <span class="pi pi-wifi text-green-500" title="Kết nối real-time"></span>
+            <span class="text-green-600">Online</span>
+          } @else if (signalRConnectionState() === 'connecting') {
+            <span class="pi pi-spin pi-spinner text-orange-500" title="Đang kết nối lại..."></span>
+            <span class="text-orange-600">Đang kết nối...</span>
+          } @else {
+            <span class="pi pi-wifi text-red-500" title="Mất kết nối real-time"></span>  
+            <span class="text-red-600">Offline</span>
+          }
+        </div>
+
+        <!-- Sound Toggle Button -->
+        <p-button 
+          [icon]="isSoundEnabled() ? 'pi pi-volume-up' : 'pi pi-volume-off'"
+          [severity]="isSoundEnabled() ? 'success' : 'secondary'"
+          [outlined]="true"
+          size="small"
+          [title]="isSoundEnabled() ? 'Tắt âm thanh thông báo' : 'Bật âm thanh thông báo'"
+          (click)="toggleNotificationSound()">
+        </p-button>
+
+        <!-- Speech Toggle Button -->
+        @if (isSpeechSupported()) {
+          <p-button 
+            [icon]="isSpeechEnabled() ? 'pi pi-microphone' : 'pi pi-microphone-slash'"
+            [severity]="isSpeechEnabled() ? 'success' : 'secondary'"
+            [outlined]="true"
+            size="small"
+            [title]="isSpeechEnabled() ? 'Tắt giọng đọc thông báo' : 'Bật giọng đọc thông báo'"
+            (click)="toggleSpeech()">
+          </p-button>
+        }
+
+        <!-- Test Sound Button -->
+        <p-button 
+          icon="pi pi-bell"
+          severity="info"
+          [outlined]="true"
+          size="small"
+          title="Test âm thanh và giọng đọc"
+          (click)="testNotificationSound()">
+        </p-button>
+
+        <!-- Test Speech Button -->
+        @if (isSpeechSupported()) {
+          <p-button 
+            icon="pi pi-comment"
+            severity="help"
+            [outlined]="true"
+            size="small"
+            title="Test chỉ giọng đọc"
+            (click)="testSpeech()">
+          </p-button>
+        }
+
+        <!-- Stop All Button -->
+        <p-button 
+          icon="pi pi-stop"
+          severity="danger"
+          [outlined]="true"
+          size="small"
+          title="Dừng tất cả âm thanh và giọng đọc"
+          (click)="stopAllSounds()">
+        </p-button>
+
+        <!-- Refresh Button -->
+        <p-button 
+          icon="pi pi-refresh"
+          [loading]="refreshing()"
+          severity="secondary"
+          [outlined]="true"
+          size="small"
+          title="Làm mới dữ liệu"
+          (click)="onRefresh()">
+        </p-button>
       </div>
     </div>
 

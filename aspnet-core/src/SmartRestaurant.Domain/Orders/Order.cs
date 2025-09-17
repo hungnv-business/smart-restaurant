@@ -349,6 +349,19 @@ public class Order : FullAuditedAggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Lấy tên hiển thị của bàn cho thông báo
+    /// </summary>
+    /// <returns>Tên bàn hoặc "Mang về" nếu không phải đơn hàng ăn tại chỗ</returns>
+    public string GetTableDisplayName()
+    {
+        if (OrderType == OrderType.DineIn && Table != null)
+        {
+            return $"{Table.TableNumber}";
+        }
+        return "Mang về";
+    }
+
+    /// <summary>
     /// Thêm Payment vào đơn hàng với business validation
     /// </summary>
     /// <param name="guidGenerator">GUID generator</param>

@@ -407,6 +407,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       missingIngredientsMessage: missingMessage,
       onEdit: item.canEdit ? () => _editOrderItem(index) : null,
       onRemove: item.canDelete ? () => _removeOrderItem(index) : null,
+      onServe: item.status == OrderItemStatus.ready ? () => _markOrderItemServed(item.id) : null,
     );
   }
 
@@ -924,6 +925,54 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
     final orderItem = _tableDetail!.orderItems[index];
     _showEditQuantityDialog(orderItem, index);
+  }
+
+  /// Đánh dấu món đã phục vụ
+  void _markOrderItemServed(String orderItemId) async {
+    try {
+      // Hiển thị loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final orderService = Provider.of<OrderService>(context, listen: false);
+      await orderService.markOrderItemServed(orderItemId);
+
+      // Đóng loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      // Hiển thị thông báo thành công
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Đã đánh dấu món phục vụ thành công'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Reload dữ liệu
+      await _loadTableDetails();
+    } catch (e) {
+      // Đóng loading dialog nếu vẫn mở
+      if (mounted) Navigator.of(context).pop();
+
+      // Hiển thị lỗi
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Lỗi đánh dấu phục vụ: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   /// Hiển thị dialog sửa số lượng món

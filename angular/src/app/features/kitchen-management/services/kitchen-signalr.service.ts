@@ -4,12 +4,23 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface KitchenUpdateEvent {
-  type: 'ORDER_STATUS_CHANGED' | 'NEW_ORDER_RECEIVED' | 'ITEM_PRIORITY_UPDATED';
-  orderItemId?: string;
+  type: 'NEW_ORDER_RECEIVED' | 'ORDER_ITEM_QUANTITY_UPDATED' | 'ORDER_ITEMS_ADDED' | 'ORDER_ITEM_REMOVED' | 'ORDER_ITEM_SERVED';
+  order?: any;
   orderId?: string;
-  tableNumber?: string;
-  status?: number;
+  orderNumber?: string;
+  tableId?: string;
+  tableName?: string;
+  orderItemId?: string;
+  menuItemName?: string;
+  newQuantity?: number;
+  addedItemsDetail?: string;
+  quantity?: number;
   message?: string;
+  notifiedAt?: Date;
+  updatedAt?: Date;
+  addedAt?: Date;
+  removedAt?: Date;
+  servedAt?: Date;
 }
 
 @Injectable({
@@ -19,12 +30,23 @@ export class KitchenSignalRService implements OnDestroy {
   private hubConnection: HubConnection | null = null;
   private connectionState$ = new BehaviorSubject<'disconnected' | 'connecting' | 'connected'>('disconnected');
   private kitchenUpdates$ = new BehaviorSubject<KitchenUpdateEvent | null>(null);
+  
+  // Reconnect logic
+  private reconnectAttempts = 0;
+  private readonly maxReconnectAttempts = 10;
+  private reconnectTimeouts = [1000, 2000, 5000, 10000, 30000]; // ms
+  private reconnectTimer: any = null;
 
   constructor() {
     // Initialize connection will be called manually when needed
   }
 
   ngOnDestroy(): void {
+    // Clear reconnect timer
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.disconnect();
   }
 
@@ -32,7 +54,7 @@ export class KitchenSignalRService implements OnDestroy {
    * Khởi tạo SignalR connection
    */
   private initializeConnection(): void {
-    const hubUrl = `${environment.apis.default.url}/hubs/kitchen-priority`;
+    const hubUrl = `${environment.apis.default.url}/signalr-hubs/kitchen`;
     
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
@@ -59,55 +81,80 @@ export class KitchenSignalRService implements OnDestroy {
     // Connection state events
     this.hubConnection.onreconnecting(() => {
       this.connectionState$.next('connecting');
-      console.log('Kitchen SignalR: Đang kết nối lại...');
     });
 
     this.hubConnection.onreconnected(() => {
       this.connectionState$.next('connected');
-      console.log('Kitchen SignalR: Đã kết nối lại thành công');
-      this.joinKitchenGroup();
+      this.reconnectAttempts = 0; // Reset attempts
     });
 
-    this.hubConnection.onclose(() => {
+    this.hubConnection.onclose(async (error) => {
       this.connectionState$.next('disconnected');
-      console.log('Kitchen SignalR: Kết nối đã đóng');
+      
+      // Bắt đầu quá trình reconnect
+      this.startReconnectProcess();
     });
 
-    // Kitchen-specific events
-    this.hubConnection.on('OrderStatusChanged', (data: any) => {
-      console.log('Kitchen SignalR: Order status changed', data);
-      this.kitchenUpdates$.next({
-        type: 'ORDER_STATUS_CHANGED',
-        orderItemId: data.orderItemId,
-        orderId: data.orderId,
-        tableNumber: data.tableNumber,
-        status: data.status,
-        message: `Trạng thái món "${data.menuItemName}" đã thay đổi`
-      });
-    });
-
+    // Lắng nghe sự kiện đơn hàng mới từ mobile
     this.hubConnection.on('NewOrderReceived', (data: any) => {
-      console.log('Kitchen SignalR: New order received', data);
       this.kitchenUpdates$.next({
         type: 'NEW_ORDER_RECEIVED',
-        orderId: data.orderId,
-        tableNumber: data.tableNumber,
-        message: `Có đơn hàng mới từ bàn ${data.tableNumber}`
+        order: data.Order || data.order,
+        message: data.Message || data.message,
+        notifiedAt: new Date(data.NotifiedAt || data.notifiedAt)
       });
     });
 
-    this.hubConnection.on('ItemPriorityUpdated', (data: any) => {
-      console.log('Kitchen SignalR: Item priority updated', data);
+    // Lắng nghe sự kiện cập nhật số lượng món từ mobile
+    this.hubConnection.on('OrderItemQuantityUpdated', (data: any) => {
       this.kitchenUpdates$.next({
-        type: 'ITEM_PRIORITY_UPDATED',
-        orderItemId: data.orderItemId,
-        message: `Độ ưu tiên món đã được cập nhật`
+        type: 'ORDER_ITEM_QUANTITY_UPDATED',
+        tableName: data.TableName || data.tableName,
+        orderItemId: data.OrderItemId || data.orderItemId,
+        menuItemName: data.MenuItemName || data.menuItemName,
+        newQuantity: data.NewQuantity || data.newQuantity,
+        message: data.Message || data.message,
+        updatedAt: new Date(data.UpdatedAt || data.updatedAt)
       });
     });
 
-    // Generic message handler
-    this.hubConnection.on('ReceiveMessage', (user: string, message: string) => {
-      console.log('Kitchen SignalR: Generic message', { user, message });
+    // Lắng nghe sự kiện thêm món vào order từ mobile
+    this.hubConnection.on('OrderItemsAdded', (data: any) => {
+      this.kitchenUpdates$.next({
+        type: 'ORDER_ITEMS_ADDED',
+        tableName: data.TableName || data.tableName,
+        addedItemsDetail: data.AddedItemsDetail || data.addedItemsDetail,
+        message: data.Message || data.message,
+        addedAt: new Date(data.AddedAt || data.addedAt)
+      });
+    });
+
+    // Lắng nghe sự kiện xóa món khỏi order từ mobile
+    this.hubConnection.on('OrderItemRemoved', (data: any) => {
+      this.kitchenUpdates$.next({
+        type: 'ORDER_ITEM_REMOVED',
+        tableName: data.TableName || data.tableName,
+        orderItemId: data.OrderItemId || data.orderItemId,
+        menuItemName: data.MenuItemName || data.menuItemName,
+        quantity: data.Quantity || data.quantity,
+        message: data.Message || data.message,
+        removedAt: new Date(data.RemovedAt || data.removedAt)
+      });
+    });
+
+    // Lắng nghe sự kiện món đã được phục vụ từ mobile
+    this.hubConnection.on('OrderItemServed', (data: any) => {
+      this.kitchenUpdates$.next({
+        type: 'ORDER_ITEM_SERVED',
+        orderId: data.OrderId || data.orderId,
+        orderNumber: data.OrderNumber || data.orderNumber,
+        menuItemName: data.MenuItemName || data.menuItemName,
+        quantity: data.Quantity || data.quantity,
+        tableName: data.TableName || data.tableName,
+        tableId: data.TableId || data.tableId,
+        message: data.Message || data.message,
+        servedAt: new Date(data.ServedAt || data.servedAt)
+      });
     });
   }
 
@@ -127,13 +174,8 @@ export class KitchenSignalRService implements OnDestroy {
       this.connectionState$.next('connecting');
       await this.hubConnection!.start();
       this.connectionState$.next('connected');
-      console.log('Kitchen SignalR: Đã kết nối thành công');
-      
-      // Join kitchen group sau khi kết nối thành công
-      await this.joinKitchenGroup();
     } catch (error) {
       this.connectionState$.next('disconnected');
-      console.error('Kitchen SignalR: Lỗi kết nối', error);
       throw error;
     }
   }
@@ -145,28 +187,12 @@ export class KitchenSignalRService implements OnDestroy {
     if (this.hubConnection) {
       try {
         await this.hubConnection.stop();
-        console.log('Kitchen SignalR: Đã ngắt kết nối');
       } catch (error) {
-        console.error('Kitchen SignalR: Lỗi ngắt kết nối', error);
+        // Silent error handling
       }
     }
   }
 
-  /**
-   * Join kitchen group để nhận updates
-   */
-  private async joinKitchenGroup(): Promise<void> {
-    if (this.hubConnection?.state === 'Connected') {
-      try {
-        // Hub tự động join vào "AllKitchens" group khi connect
-        // Có thể join vào station cụ thể nếu cần
-        await this.hubConnection.invoke('JoinKitchenStation', 'General');
-        console.log('Kitchen SignalR: Đã tham gia kitchen group');
-      } catch (error) {
-        console.error('Kitchen SignalR: Lỗi tham gia kitchen group', error);
-      }
-    }
-  }
 
   /**
    * Observable cho connection state
@@ -194,5 +220,44 @@ export class KitchenSignalRService implements OnDestroy {
    */
   get currentConnectionState(): 'disconnected' | 'connecting' | 'connected' {
     return this.connectionState$.value;
+  }
+
+  /**
+   * Bắt đầu quá trình reconnect với exponential backoff
+   */
+  private startReconnectProcess(): void {
+    // Clear any existing reconnect timer
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    // Reset attempts nếu đã vượt quá max
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      this.reconnectAttempts = 0;
+      return;
+    }
+
+    // Tính thời gian delay
+    const timeoutIndex = Math.min(this.reconnectAttempts, this.reconnectTimeouts.length - 1);
+    const delay = this.reconnectTimeouts[timeoutIndex];
+    
+    this.reconnectTimer = setTimeout(async () => {
+      this.reconnectAttempts++;
+      this.connectionState$.next('connecting');
+      
+      try {
+        await this.connect();
+        // Reset attempts nếu kết nối thành công
+        this.reconnectAttempts = 0;
+      } catch (error) {
+        // Thử lại nếu chưa đạt max attempts
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.startReconnectProcess();
+        } else {
+          this.connectionState$.next('disconnected');
+        }
+      }
+    }, delay);
   }
 }

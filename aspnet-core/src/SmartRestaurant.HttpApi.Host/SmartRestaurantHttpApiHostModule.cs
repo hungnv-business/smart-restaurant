@@ -30,7 +30,6 @@ using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
 using SmartRestaurant.HttpApi.Host.Hubs;
-using SmartRestaurant.Hubs;
 
 namespace SmartRestaurant;
 
@@ -235,11 +234,8 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints(endpoints =>
         {
-            // Cấu hình SignalR Hub endpoints
+            // Chỉ cấu hình KitchenHub đơn giản cho thông báo order mới
             endpoints.MapHub<KitchenHub>("/signalr-hubs/kitchen");
-            endpoints.MapHub<TableManagementHub>("/signalr-hubs/table-management");
-            endpoints.MapHub<OrderStatusHub>("/signalr-hubs/order-status");
-            endpoints.MapHub<KitchenPriorityHub>("/hubs/kitchen-priority");
         });
     }
 }

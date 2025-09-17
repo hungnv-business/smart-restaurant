@@ -14,6 +14,7 @@ class OrderItemCard extends StatelessWidget {
   final String? missingIngredientsMessage; // Thêm field cho displayMessage
   final VoidCallback? onEdit;
   final VoidCallback? onRemove;
+  final VoidCallback? onServe; // Callback cho nút phục vụ
 
   const OrderItemCard({
     Key? key,
@@ -28,6 +29,7 @@ class OrderItemCard extends StatelessWidget {
     this.missingIngredientsMessage,
     this.onEdit,
     this.onRemove,
+    this.onServe,
   }) : super(key: key);
 
   @override
@@ -204,6 +206,30 @@ class OrderItemCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                    
+                    // Nút Phục vụ khi món đã sẵn sàng
+                    if (status == 'Đã hoàn thành' && onServe != null) ...[
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: onServe,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Phục vụ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ],

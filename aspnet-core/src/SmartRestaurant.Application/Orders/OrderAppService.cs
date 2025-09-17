@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp.Linq;
 using SmartRestaurant.Application.Contracts.Orders;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
 using SmartRestaurant.Application.Contracts.Common;
@@ -15,12 +13,10 @@ using SmartRestaurant.Common.Dto;
 using SmartRestaurant.Orders;
 using SmartRestaurant.TableManagement.Tables;
 using SmartRestaurant.MenuManagement.MenuCategories;
-using SmartRestaurant.MenuManagement.MenuCategories.Dto;
 using SmartRestaurant.MenuManagement.MenuItems;
 using SmartRestaurant.MenuManagement.MenuItems.Dto;
 using SmartRestaurant.MenuManagement;
 using Microsoft.Extensions.Logging;
-using Volo.Abp;
 
 namespace SmartRestaurant.Application.Orders;
 
@@ -82,8 +78,12 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Create DTO for notifications
         var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
 
+        Console.WriteLine($"📱 OrderAppService: Created order #{orderDto.OrderNumber}, sending notification...");
+        
         // Send real-time notifications  
         await _notificationService.NotifyNewOrderAsync(orderDto);
+        
+        Console.WriteLine($"✅ OrderAppService: Notification sent for order #{orderDto.OrderNumber}");
     }
 
 
@@ -316,9 +316,33 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Lấy order hiện có với order items
         var order = await _orderRepository.GetWithDetailsAsync(orderId) ?? throw OrderValidationException.OrderNotFound(orderId);
 
+        Console.WriteLine($"📱 OrderAppService: Adding {input.Items.Count} items to order #{order.OrderNumber}");
+
         // Sử dụng OrderManager để xử lý business logic
         var menuItemIds = input.Items.Select(i => i.MenuItemId).ToList();
         await _orderManager.AddItemsToOrderAsync(order, menuItemIds, input.Items, input.AdditionalNotes);
+
+        Console.WriteLine($"✅ OrderAppService: Added items to order #{order.OrderNumber}, sending notification...");
+
+        // Tạo thông báo chi tiết về các món đã thêm
+        var menuItems = await _menuItemRepository.GetListAsync();
+        var addedItemsDetails = input.Items
+            .GroupBy(item => menuItems.FirstOrDefault(m => m.Id == item.MenuItemId)?.Name ?? "Unknown")
+            .Select(group => $"{group.Sum(x => x.Quantity)} {group.Key}")
+            .ToList();
+        var addedItemsDetail = string.Join(", ", addedItemsDetails);
+
+        // Lấy tên hiển thị của bàn
+        var tableName = order.GetTableDisplayName();
+
+        // Gửi thông báo realtime về việc thêm món
+        await _notificationService.NotifyOrderItemsAddedAsync(new OrderItemsAddedNotificationDto
+        {
+            TableName = tableName,
+            AddedItemsDetail = addedItemsDetail
+        });
+
+        Console.WriteLine($"✅ OrderAppService: Add items notification sent for order #{order.OrderNumber}");
     }
 
     /// <summary>
@@ -329,8 +353,29 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Lấy order hiện có với order items
         var order = await _orderRepository.GetWithDetailsAsync(orderId) ?? throw OrderValidationException.OrderNotFound(orderId);
 
+        // Lấy thông tin món ăn trước khi xóa để gửi notification
+        var orderItem = order.OrderItems.FirstOrDefault(x => x.Id == orderItemId);
+        var menuItemName = orderItem?.MenuItemName ?? "Unknown";
+        var quantity = orderItem?.Quantity ?? 1;
+        
+        Console.WriteLine($"📱 OrderAppService: Removing item {menuItemName} from order #{order.OrderNumber}");
+
         // Sử dụng domain service để xử lý business logic
         await _orderManager.RemoveOrderItemAsync(order, orderItemId);
+        
+        Console.WriteLine($"✅ OrderAppService: Removed item from order #{order.OrderNumber}, sending notification...");
+
+        // Lấy tên hiển thị của bàn
+        var tableName = order.GetTableDisplayName();
+
+        // Gửi thông báo realtime về việc xóa món
+        await _notificationService.NotifyOrderItemRemovedAsync(new OrderItemRemovedNotificationDto
+        {
+            TableName = tableName,
+            OrderItemId = orderItemId,
+            MenuItemName = menuItemName,
+            Quantity = quantity
+        });
     }
 
     /// <summary>
@@ -341,8 +386,30 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Lấy order hiện có với order items
         var order = await _orderRepository.GetWithDetailsAsync(orderId) ?? throw OrderValidationException.OrderNotFound(orderId);
 
+        // Lấy thông tin món ăn để gửi notification
+        var orderItem = order.OrderItems.FirstOrDefault(x => x.Id == orderItemId);
+        var menuItemName = orderItem?.MenuItemName ?? "Unknown";
+
+        Console.WriteLine($"📱 OrderAppService: Updating quantity for order #{order.OrderNumber}, item {menuItemName} to {input.NewQuantity}");
+
         // Sử dụng OrderManager để xử lý business logic
         await _orderManager.UpdateOrderItemQuantityAsync(order, orderItemId, input.NewQuantity, input.Notes);
+
+        Console.WriteLine($"✅ OrderAppService: Updated quantity for order #{order.OrderNumber}, sending notification...");
+
+        // Lấy tên hiển thị của bàn
+        var tableName = order.GetTableDisplayName();
+
+        // Gửi thông báo realtime về việc cập nhật số lượng
+        await _notificationService.NotifyOrderItemQuantityUpdatedAsync(new OrderItemQuantityUpdateNotificationDto
+        {
+            TableName = tableName,
+            OrderItemId = orderItemId,
+            MenuItemName = menuItemName,
+            NewQuantity = input.NewQuantity
+        });
+
+        Console.WriteLine($"✅ OrderAppService: Quantity update notification sent for order #{order.OrderNumber}");
     }
 
     /// <summary>
@@ -427,7 +494,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
             TotalAmount = order.TotalAmount,
             Notes = order.Notes,
             CreationTime = order.CreationTime,
-            TableInfo = order.Table?.TableNumber,
+            TableInfo = order.GetTableDisplayName(),
             OrderItems = ObjectMapper.Map<List<OrderItem>, List<OrderItemDto>>(order.OrderItems.ToList())
         };
     }
@@ -486,4 +553,52 @@ public class OrderAppService : ApplicationService, IOrderAppService
         return dto;
     }
     #endregion
+
+    /// <summary>
+    /// Cập nhật trạng thái món sang "Đã phục vụ" từ mobile app
+    /// Chỉ cho phép khi món ở trạng thái "Ready" (đã hoàn thành)
+    /// </summary>
+    /// <param name="orderItemId">ID của món cần đánh dấu đã phục vụ</param>
+    public async Task MarkOrderItemServedAsync(Guid orderItemId)
+    {
+        Logger.LogInformation("📱 OrderAppService: Marking order item {OrderItemId} as served", orderItemId);
+
+        // Tìm order item và order tương ứng
+        var order = await _orderRepository.GetByOrderItemIdAsync(orderItemId);
+        if (order == null)
+        {
+            throw new EntityNotFoundException(typeof(Order), orderItemId);
+        }
+
+        var orderItem = order.OrderItems.FirstOrDefault(oi => oi.Id == orderItemId);
+        if (orderItem == null)
+        {
+            throw new EntityNotFoundException(typeof(OrderItem), orderItemId);
+        }
+
+        // Cập nhật trạng thái
+        orderItem.MarkAsServed();
+
+        // Lưu thay đổi
+        await _orderRepository.UpdateAsync(order);
+
+        // Lấy tên hiển thị của bàn
+        var tableName = order.GetTableDisplayName();
+        
+        // Thông báo món ăn đã phục vụ cho bếp qua SignalR
+        await _notificationService.NotifyOrderServedAsync(new OrderItemServedNotificationDto
+        {
+            OrderId = order.Id,
+            OrderNumber = order.OrderNumber,
+            MenuItemName = orderItem.MenuItemName,
+            Quantity = orderItem.Quantity,
+            TableName = tableName,
+            TableId = order.TableId
+        });
+
+        Logger.LogInformation("✅ OrderAppService: Successfully marked order item {OrderItemId} as served", orderItemId);
+        
+        // Log thông tin phục vụ thành công
+        Console.WriteLine($"🍽️ OrderAppService: Món {orderItem.MenuItemName} đã được đánh dấu phục vụ cho {tableName}");
+    }
 }
