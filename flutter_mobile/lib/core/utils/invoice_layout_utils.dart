@@ -3,13 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img;
+import 'package:flutter_mobile/core/utils/emvco_vietqr_builder.dart';
 import '../models/table_models.dart';
 import '../enums/restaurant_enums.dart';
 import '../utils/price_formatter.dart';
 import '../services/auth_service.dart';
 import 'thermal_printer_image_utils.dart';
-import 'qr_payment_utils.dart';
 import 'number_to_words_utils.dart';
 
 /// Utilities cho layout hóa đơn máy in nhiệt
@@ -51,7 +50,7 @@ class InvoiceLayoutUtils {
 
     // === HEADER - THEO TEMPLATE ===
     currentY = layoutHelper.drawText(
-      'CHỖ DỘC QUÁN',
+      'CHỢ DỘC QUÁN',
       fontSize: 24,
       isBold: true,
       textAlign: TextAlign.center,
@@ -127,13 +126,16 @@ class InvoiceLayoutUtils {
     currentY += 8;
 
     // === TABLE 4 CỘT VỚI VIỀN - CHỈ HIỂN THỊ MÓN ĐÃ PHỤC VỤ ===
-    final servedItems = tableDetail.orderItems.where((item) => 
-      item.status == OrderItemStatus.served
-    ).toList();
+    final servedItems = tableDetail.orderItems
+        .where((item) => item.status == OrderItemStatus.served)
+        .toList();
     currentY = layoutHelper.drawOrderTable(servedItems, currentY);
 
     // === TỔNG TIỀN CHỈ CHO CÁC MÓN ĐÃ PHỤC VỤ ===
-    final servedTotal = servedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
+    final servedTotal = servedItems.fold<double>(
+      0,
+      (sum, item) => sum + item.totalPrice,
+    );
     if (servedTotal > 0) {
       final totalAmountStr = PriceFormatter.formatWithoutSymbol(
         servedTotal.toInt(),
@@ -207,16 +209,18 @@ class InvoiceLayoutUtils {
 
     try {
       // Tạo QR data EMVCo thủ công
-      final qrData = QRPaymentUtils.buildPaymentQRData(tableDetail);
+      final qrData = EmvcoVietQrBuilder.buildPaymentQRData(tableDetail);
 
       // Tạo QR code từ data EMVCo (không cần API)
       final qrBytes = await ThermalPrinterImageUtils.generateQRFromData(qrData);
 
       if (qrBytes.isNotEmpty) {
-        // Tính toán 80% width của hóa đơn (576px * 2 = 1152px total width)
-        final qrWidth = (helper.imageWidth * 0.8).toInt(); // ~920px
+        // Tính toán kích thước QR phù hợp với khổ giấy 80mm (576px)
+        // Sử dụng 65% độ rộng canvas để QR vừa phải và rõ nét trên giấy nhiệt
+        final qrWidth = (helper.imageWidth * 0.65)
+            .toInt(); // ~374px cho canvas 576px
 
-        // Prepare QR for printing - kích thước 80% width
+        // Prepare QR for printing - kích thước 65% width phù hợp giấy 80mm
         final preparedQR = await ThermalPrinterImageUtils.prepareQRForPrint(
           qrBytes,
           targetWidth: qrWidth,
@@ -227,13 +231,13 @@ class InvoiceLayoutUtils {
           final qrUIImage =
               await ThermalPrinterImageUtils.convertBytesToUIImage(preparedQR);
 
-          // Vẽ QR code căn giữa với kích thước 80% width
+          // Vẽ QR code căn giữa với kích thước 65% width phù hợp giấy 80mm
           ThermalPrinterImageUtils.drawQRCentered(
             canvas: helper.canvas,
             qrImage: qrUIImage,
             canvasWidth: helper.imageWidth.toDouble(),
             currentY: currentY,
-            qrSize: qrWidth.toDouble(), // 80% width của hóa đơn
+            qrSize: qrWidth.toDouble(), // 65% width phù hợp giấy 80mm
           );
 
           currentY += qrWidth.toDouble() + 20; // QR height + padding
@@ -243,19 +247,19 @@ class InvoiceLayoutUtils {
       // Continue without QR nếu có lỗi
     }
 
-    currentY = helper.drawText(
-      'Quét mã để thanh toán',
-      fontSize: 10,
-      textAlign: TextAlign.center,
-      currentY: currentY,
-    );
+    // currentY = helper.drawText(
+    //   'Quét mã để thanh toán',
+    //   fontSize: 10,
+    //   textAlign: TextAlign.center,
+    //   currentY: currentY,
+    // );
 
-    currentY = helper.drawText(
-      'Techcombank - NGUYEN VAN HUNG',
-      fontSize: 9,
-      textAlign: TextAlign.center,
-      currentY: currentY,
-    );
+    // currentY = helper.drawText(
+    //   'Techcombank - NGUYEN VAN HUNG',
+    //   fontSize: 9,
+    //   textAlign: TextAlign.center,
+    //   currentY: currentY,
+    // );
 
     currentY += 12;
     return currentY;

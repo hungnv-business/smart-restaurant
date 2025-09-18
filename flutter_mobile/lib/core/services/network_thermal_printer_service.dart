@@ -10,7 +10,6 @@ import 'package:image/image.dart' as img;
 import '../models/table_models.dart';
 import '../enums/restaurant_enums.dart';
 import '../utils/price_formatter.dart';
-import '../utils/qr_payment_utils.dart';
 import '../utils/thermal_printer_image_utils.dart';
 import '../utils/invoice_layout_utils.dart';
 import 'auth_service.dart';
@@ -212,7 +211,8 @@ class NetworkThermalPrinterService {
       }
 
       // Convert thành monochrome cho thermal printer
-      final processedImage = ThermalPrinterImageUtils.processImageForThermalPrinter(image);
+      final processedImage =
+          ThermalPrinterImageUtils.processImageForThermalPrinter(image);
 
       // Tạo ESC/POS commands cho image
       List<int> bytes = [];
@@ -225,13 +225,10 @@ class NetworkThermalPrinterService {
 
       // Gửi dữ liệu đến máy in qua WiFi
       await _sendToPrinter(bytes);
-
-      
     } catch (e) {
       throw NetworkPrinterException('Lỗi khi in hóa đơn: $e');
     }
   }
-
 
   /// In test page để kiểm tra máy in
   Future<void> printTestPage() async {
@@ -290,7 +287,7 @@ class NetworkThermalPrinterService {
   Future<void> _sendToPrinter(List<int> bytes) async {
     const int maxRetries = 3;
     const int chunkSize = 1024; // Gửi theo từng chunk nhỏ
-    
+
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       Socket? socket;
       try {
@@ -306,32 +303,34 @@ class NetworkThermalPrinterService {
 
         // Gửi dữ liệu theo chunks để tránh buffer overflow
         for (int i = 0; i < bytes.length; i += chunkSize) {
-          final end = (i + chunkSize < bytes.length) ? i + chunkSize : bytes.length;
+          final end = (i + chunkSize < bytes.length)
+              ? i + chunkSize
+              : bytes.length;
           final chunk = bytes.sublist(i, end);
-          
+
           socket.add(chunk);
           await socket.flush();
-          
+
           // Đợi một chút giữa các chunks
           await Future.delayed(const Duration(milliseconds: 50));
         }
 
         // Đợi máy in xử lý hoàn toàn
         await Future.delayed(const Duration(seconds: 2));
-        
+
         // Verify data was sent successfully
         await _verifyPrintCompletion(socket);
-        
+
         return; // Success, exit retry loop
-        
       } catch (e) {
         if (attempt == maxRetries) {
-          throw NetworkPrinterException('Lỗi gửi dữ liệu sau $maxRetries lần thử: $e');
+          throw NetworkPrinterException(
+            'Lỗi gửi dữ liệu sau $maxRetries lần thử: $e',
+          );
         }
-        
+
         // Đợi trước khi thử lại
         await Future.delayed(Duration(seconds: attempt));
-        
       } finally {
         try {
           await socket?.close();
@@ -349,23 +348,26 @@ class NetworkThermalPrinterService {
       final statusCommand = [0x10, 0x04, 0x01]; // DLE EOT n=1 (printer status)
       socket.add(statusCommand);
       await socket.flush();
-      
+
       // Đợi response (với timeout ngắn)
       final response = await socket.first.timeout(
         const Duration(seconds: 2),
         onTimeout: () => throw Exception('Printer status timeout'),
       );
-      
+
       // Kiểm tra status byte
       if (response.isNotEmpty) {
         final status = response[0];
-        if ((status & 0x08) != 0) {  // Paper out
+        if ((status & 0x08) != 0) {
+          // Paper out
           throw NetworkPrinterException('Máy in hết giấy');
         }
-        if ((status & 0x20) != 0) {  // Cover open
+        if ((status & 0x20) != 0) {
+          // Cover open
           throw NetworkPrinterException('Nắp máy in đang mở');
         }
-        if ((status & 0x40) != 0) {  // Feed button
+        if ((status & 0x40) != 0) {
+          // Feed button
           throw NetworkPrinterException('Máy in đang bận');
         }
       }
@@ -381,10 +383,9 @@ class NetworkThermalPrinterService {
       final bufferCommand = [0x10, 0x04, 0x02]; // DLE EOT n=2 (buffer status)
       socket.add(bufferCommand);
       await socket.flush();
-      
+
       // Đợi buffer được xử lý
       await Future.delayed(const Duration(milliseconds: 500));
-      
     } catch (e) {
       // Log error
     }
@@ -415,7 +416,6 @@ class NetworkThermalPrinterService {
       // Log error
     }
   }
-
 
   /// Cleanup resources
   void dispose() {
