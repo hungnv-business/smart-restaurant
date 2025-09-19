@@ -1,34 +1,11 @@
 /// Models cho Order Requests - tương ứng với backend DTOs
 /// Dùng để gửi request tạo đơn hàng lên API
 
-/// Enum loại đơn hàng tương ứng với backend OrderType
-enum OrderRequestType {
-  /// Ăn tại chỗ - Khách hàng ăn tại nhà hàng
-  dineIn(0, 'Ăn tại chỗ'),
-  
-  /// Mang về - Khách hàng đặt món mang về  
-  takeaway(1, 'Mang về'),
-  
-  /// Giao hàng - Nhà hàng giao món đến địa chỉ khách hàng
-  delivery(2, 'Giao hàng');
-
-  const OrderRequestType(this.value, this.displayName);
-  
-  final int value;
-  final String displayName;
-  
-  /// Convert từ int về OrderRequestType
-  static OrderRequestType fromValue(int value) {
-    return OrderRequestType.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => OrderRequestType.dineIn,
-    );
-  }
-}
+import '../enums/restaurant_enums.dart';
 
 /// DTO cho việc tạo OrderItem trong đơn hàng
 /// Tương ứng với CreateOrderItemDto.cs
-class CreateOrderItemRequest {
+class CreateOrderItemDto {
   /// ID của món ăn từ menu
   final String menuItemId;
   
@@ -44,7 +21,7 @@ class CreateOrderItemRequest {
   /// Ghi chú riêng cho món này (ví dụ: "Không cay", "Thêm hành")
   final String? notes;
 
-  const CreateOrderItemRequest({
+  const CreateOrderItemDto({
     required this.menuItemId,
     required this.menuItemName,
     required this.quantity,
@@ -64,14 +41,14 @@ class CreateOrderItemRequest {
   }
 
   /// Tạo từ MenuItem và quantity
-  factory CreateOrderItemRequest.fromMenuItem({
+  factory CreateOrderItemDto.fromMenuItem({
     required String menuItemId,
     required String menuItemName, 
     required int quantity,
     required int unitPrice,
     String? notes,
   }) {
-    return CreateOrderItemRequest(
+    return CreateOrderItemDto(
       menuItemId: menuItemId,
       menuItemName: menuItemName,
       quantity: quantity,
@@ -83,22 +60,22 @@ class CreateOrderItemRequest {
 
 /// DTO cho việc tạo đơn hàng mới  
 /// Tương ứng với CreateOrderDto.cs
-class CreateOrderRequest {
+class CreateOrderDto {
   /// ID của bàn (bắt buộc cho DineIn, nullable cho Takeaway/Delivery)
   final String? tableId;
   
   /// Loại đơn hàng - mặc định là ăn tại chỗ
-  final OrderRequestType orderType;
+  final OrderType orderType;
   
   /// Ghi chú chung của khách hàng hoặc nhân viên
   final String? notes;
   
   /// Danh sách món được đặt (tối thiểu 1 món)
-  final List<CreateOrderItemRequest> orderItems;
+  final List<CreateOrderItemDto> orderItems;
 
-  const CreateOrderRequest({
+  const CreateOrderDto({
     this.tableId,
-    this.orderType = OrderRequestType.dineIn,
+    this.orderType = OrderType.dineIn,
     this.notes,
     required this.orderItems,
   });
@@ -107,7 +84,7 @@ class CreateOrderRequest {
   Map<String, dynamic> toJson() {
     return {
       if (tableId != null && tableId!.isNotEmpty) 'tableId': tableId,
-      'orderType': orderType.value,
+      'orderType': orderType.index,
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
       'orderItems': orderItems.map((item) => item.toJson()).toList(),
     };
@@ -118,7 +95,7 @@ class CreateOrderRequest {
     final errors = <String>[];
     
     // Validate DineIn requires table
-    if (orderType == OrderRequestType.dineIn && (tableId == null || tableId!.isEmpty)) {
+    if (orderType == OrderType.dineIn && (tableId == null || tableId!.isEmpty)) {
       errors.add('Đơn hàng ăn tại chỗ phải có bàn');
     }
     
@@ -161,14 +138,14 @@ class CreateOrderRequest {
 
 /// DTO cho việc thêm món vào order hiện có
 /// Tương ứng với AddItemsToOrderDto.cs
-class AddItemsToOrderRequest {
+class AddItemsToOrderDto {
   /// Danh sách món muốn thêm vào order
-  final List<CreateOrderItemRequest> items;
+  final List<CreateOrderItemDto> items;
   
   /// Ghi chú chung cho lần gọi thêm này
   final String? additionalNotes;
 
-  const AddItemsToOrderRequest({
+  const AddItemsToOrderDto({
     required this.items,
     this.additionalNotes,
   });
@@ -215,21 +192,21 @@ class AddItemsToOrderRequest {
 }
 
 /// Response từ API sau khi tạo đơn hàng thành công
-class CreateOrderResponse {
+class CreateOrderResponseDto {
   final String orderId;
   final String orderNumber;
   final DateTime createdAt;
   final int totalAmount;
 
-  const CreateOrderResponse({
+  const CreateOrderResponseDto({
     required this.orderId,
     required this.orderNumber,
     required this.createdAt,
     required this.totalAmount,
   });
 
-  factory CreateOrderResponse.fromJson(Map<String, dynamic> json) {
-    return CreateOrderResponse(
+  factory CreateOrderResponseDto.fromJson(Map<String, dynamic> json) {
+    return CreateOrderResponseDto(
       orderId: json['id'] as String? ?? '',
       orderNumber: json['orderNumber'] as String? ?? '',
       createdAt: json['createdAt'] != null 
@@ -241,3 +218,8 @@ class CreateOrderResponse {
     );
   }
 }
+
+// Type aliases for backward compatibility
+typedef OrderItemRequest = CreateOrderItemDto;
+typedef CreateOrderItemRequest = CreateOrderItemDto;
+typedef OrderRequestType = OrderType;

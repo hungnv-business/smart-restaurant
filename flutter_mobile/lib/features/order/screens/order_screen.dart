@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/table_models.dart';
 import '../../../core/services/order_service.dart';
-import '../../../core/services/auth_service.dart';
 import '../widgets/table_screen_header.dart';
 import '../widgets/table_filters.dart';
 import '../widgets/section_column.dart';
@@ -12,7 +11,7 @@ import '../widgets/empty_state_widget.dart';
 
 /// Màn hình Gọi món - Hiển thị danh sách bàn
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({Key? key}) : super(key: key);
+  const OrderScreen({super.key});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -36,14 +35,13 @@ class _OrderScreenState extends State<OrderScreen> {
     try {
       final orderService = Provider.of<OrderService>(context, listen: false);
       
-      // Gọi API với filters
-      final tables = await orderService.getActiveTables(
+      // Gọi API với filters - OrderService sẽ tự động notify listeners
+      await orderService.getActiveTables(
         tableNameFilter: _searchQuery.isEmpty ? null : _searchQuery,
         statusFilter: _selectedStatusFilter,
       );
-      setState(() {
-        _allTables = tables;
-      });
+      
+      // Không cần setState ở đây vì Consumer<OrderService> sẽ tự động rebuild
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,8 +137,19 @@ class _OrderScreenState extends State<OrderScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (_allTables.isEmpty) {
+        // Sử dụng data từ OrderService thay vì local state
+        final tables = orderService.activeTables;
+        if (tables.isEmpty) {
           return const EmptyStateWidget(hasNoTables: true);
+        }
+
+        // Cập nhật local state để sync với OrderService
+        if (_allTables != tables) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              _allTables = tables;
+            });
+          });
         }
 
         return _buildTableGrid();
@@ -217,9 +226,21 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _refreshTables() {
-    _loadTables();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã cập nhật danh sách bàn')),
-    );
+    _loadTables().then((_) {
+      if (mounted) {
+        final orderService = Provider.of<OrderService>(context, listen: false);
+        final tableCount = orderService.activeTables.length;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã cập nhật danh sách bàn ($tableCount bàn)')),
+        );
+      }
+    }).catchError((error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Lỗi khi cập nhật danh sách bàn')),
+        );
+      }
+    });
   }
 }

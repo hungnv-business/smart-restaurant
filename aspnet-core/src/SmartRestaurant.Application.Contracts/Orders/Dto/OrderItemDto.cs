@@ -32,12 +32,12 @@ public class OrderItemDto : FullAuditedEntityDto<Guid>
     /// <summary>
     /// Giá đơn vị tại thời điểm đặt hàng (VND)
     /// </summary>
-    public decimal UnitPrice { get; set; }
+    public int UnitPrice { get; set; }
 
     /// <summary>
     /// Tổng tiền của món này
     /// </summary>
-    public decimal TotalPrice => UnitPrice * Quantity;
+    public int TotalPrice => UnitPrice * Quantity;
 
     /// <summary>
     /// Ghi chú riêng cho món này

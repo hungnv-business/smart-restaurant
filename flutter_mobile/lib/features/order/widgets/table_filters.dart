@@ -52,7 +52,7 @@ class TableFilters extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
-            label: 'Có sẵn',
+            label: TableStatus.available.displayName,
             isSelected: selectedStatusFilter == TableStatus.available,
             onSelected: (selected) {
               onStatusFilterChanged(selected ? TableStatus.available : null);
@@ -60,7 +60,7 @@ class TableFilters extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
-            label: 'Đang sử dụng',
+            label: TableStatus.occupied.displayName,
             isSelected: selectedStatusFilter == TableStatus.occupied,
             onSelected: (selected) {
               onStatusFilterChanged(selected ? TableStatus.occupied : null);
@@ -68,7 +68,7 @@ class TableFilters extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
-            label: 'Đã đặt trước',
+            label: TableStatus.reserved.displayName,
             isSelected: selectedStatusFilter == TableStatus.reserved,
             onSelected: (selected) {
               onStatusFilterChanged(selected ? TableStatus.reserved : null);

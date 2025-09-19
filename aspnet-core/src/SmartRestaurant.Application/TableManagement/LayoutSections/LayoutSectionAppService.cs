@@ -120,5 +120,23 @@ namespace SmartRestaurant.TableManagement.LayoutSections
             var maxOrder = await _repository.MaxAsync(x => x.DisplayOrder);
             return maxOrder + 1;
         }
+
+        /// <summary>
+        /// Cập nhật trạng thái kích hoạt của khu vực bố cục
+        /// Cho phép nhanh chóng bật/tắt khu vực mà không cần cập nhật toàn bộ thông tin
+        /// </summary>
+        /// <param name="id">ID của khu vực cần cập nhật trạng thái</param>
+        /// <param name="isActive">Trạng thái mới (true = kích hoạt, false = vô hiệu hóa)</param>
+        /// <returns>Thông tin khu vực sau khi cập nhật trạng thái</returns>
+        [Authorize(SmartRestaurantPermissions.Tables.LayoutSection.Edit)]
+        public async Task<LayoutSectionDto> UpdateStatusAsync(Guid id, bool isActive)
+        {
+            var section = await _repository.GetAsync(id);
+            section.IsActive = isActive;
+            
+            await _repository.UpdateAsync(section, autoSave: true);
+            
+            return ObjectMapper.Map<LayoutSection, LayoutSectionDto>(section);
+        }
     }
 }

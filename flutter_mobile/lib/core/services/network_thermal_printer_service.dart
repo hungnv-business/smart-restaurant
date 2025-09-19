@@ -1,15 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image/image.dart' as img;
 import '../models/table_models.dart';
-import '../enums/restaurant_enums.dart';
-import '../utils/price_formatter.dart';
 import '../utils/thermal_printer_image_utils.dart';
 import '../utils/invoice_layout_utils.dart';
 import 'auth_service.dart';

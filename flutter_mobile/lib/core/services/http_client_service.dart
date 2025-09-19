@@ -55,7 +55,6 @@ class HttpClientService {
         responseHeader: false,
         responseBody: true,
         error: true,
-        logPrint: (obj) => print('🌐 HTTP: $obj'),
       ));
     }
   }

@@ -57,7 +57,6 @@ class _NetworkPrinterSettingsScreenState extends State<NetworkPrinterSettingsScr
       _checkCurrentConnection();
       
     } catch (e) {
-      print('Error initializing printer: $e');
     }
   }
 
@@ -68,7 +67,6 @@ class _NetworkPrinterSettingsScreenState extends State<NetworkPrinterSettingsScr
         _isConnected = isConnected;
       });
     } catch (e) {
-      print('Error checking connection: $e');
     }
   }
 

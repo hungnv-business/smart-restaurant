@@ -25,7 +25,7 @@ public class OrderSummaryDto : EntityDto<Guid>
     public int ItemsCount { get; set; }
     
     /// <summary>Tổng tiền đơn hàng</summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
     
     /// <summary>Ghi chú đơn hàng</summary>
     public string? Notes { get; set; }

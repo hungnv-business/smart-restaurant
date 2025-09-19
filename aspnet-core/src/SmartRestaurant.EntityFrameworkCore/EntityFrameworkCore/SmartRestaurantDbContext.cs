@@ -185,7 +185,7 @@ public class SmartRestaurantDbContext :
             
             b.Property(x => x.Name).IsRequired().HasMaxLength(200);
             b.Property(x => x.Description).HasMaxLength(1000);
-            b.Property(x => x.Price).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.Price).IsRequired().HasColumnType("integer");
             b.Property(x => x.IsAvailable).IsRequired();
             b.Property(x => x.ImageUrl).HasMaxLength(500);
             b.Property(x => x.CategoryId).IsRequired();
@@ -255,7 +255,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.Name).IsRequired().HasMaxLength(128);
             b.Property(x => x.Description).HasMaxLength(512);
             b.Property(x => x.UnitId).IsRequired();
-            b.Property(x => x.CostPerUnit).HasColumnType("decimal(18,2)");
+            b.Property(x => x.CostPerUnit).HasColumnType("integer");
             b.Property(x => x.SupplierInfo).HasMaxLength(512);
             b.Property(x => x.CurrentStock).IsRequired();
             b.Property(x => x.IsStockTrackingEnabled).IsRequired();
@@ -405,7 +405,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.TableId);
             b.Property(x => x.OrderType).IsRequired();
             b.Property(x => x.Status).IsRequired();
-            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("integer");
             b.Property(x => x.Notes).HasMaxLength(500);
             b.Property(x => x.PaidTime);
             
@@ -428,7 +428,7 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.MenuItemId).IsRequired();
             b.Property(x => x.MenuItemName).IsRequired().HasMaxLength(200);
             b.Property(x => x.Quantity).IsRequired();
-            b.Property(x => x.UnitPrice).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.UnitPrice).IsRequired().HasColumnType("integer");
             b.Property(x => x.Notes).HasMaxLength(300);
             b.Property(x => x.Status).IsRequired();
             b.Property(x => x.PreparationStartTime);
@@ -458,8 +458,8 @@ public class SmartRestaurantDbContext :
             
             b.Property(x => x.OrderId).IsRequired();
             b.Property(x => x.PaymentTime).IsRequired();
-            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
-            b.Property(x => x.CustomerMoney).IsRequired().HasColumnType("decimal(18,2)");
+            b.Property(x => x.TotalAmount).IsRequired().HasColumnType("integer");
+            b.Property(x => x.CustomerMoney).IsRequired().HasColumnType("integer");
             b.Property(x => x.PaymentMethod).IsRequired();
             b.Property(x => x.Notes).HasMaxLength(500);
             

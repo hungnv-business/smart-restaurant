@@ -9,7 +9,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         
         public string? Description { get; set; }
         
-        public decimal Price { get; set; }
+        public int Price { get; set; }
         
         public bool IsAvailable { get; set; }
         

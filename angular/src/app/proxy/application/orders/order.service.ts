@@ -39,7 +39,7 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
-  getActiveTables = (tableNameFilter?: string, statusFilter?: TableStatus, config?: Partial<Rest.Config>) =>
+  getActiveTables = (tableNameFilter?: string, statusFilter?: enum, config?: Partial<Rest.Config>) =>
     this.restService.request<any, ListResultDto<ActiveTableDto>>({
       method: 'GET',
       url: '/api/app/order/active-tables',
@@ -69,6 +69,14 @@ export class OrderService {
     this.restService.request<any, TableDetailDto>({
       method: 'GET',
       url: `/api/app/order/table-details/${tableId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  markOrderItemServed = (orderItemId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'POST',
+      url: `/api/app/order/mark-order-item-served/${orderItemId}`,
     },
     { apiName: this.apiName,...config });
   

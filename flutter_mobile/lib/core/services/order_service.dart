@@ -1,29 +1,80 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../constants/app_constants.dart';
 import '../enums/restaurant_enums.dart';
 import '../models/table_models.dart';
 import '../models/menu_models.dart';
 import '../models/order_request_models.dart';
 import '../models/ingredient_verification_models.dart';
+import '../models/notification_models.dart';
 import 'http_client_service.dart';
+import 'signalr_service.dart';
+import 'notification_service.dart';
 
 /// Service xử lý quản lý đơn hàng và bàn trong nhà hàng
 class OrderService extends ChangeNotifier {
   late Dio _dio;
   final HttpClientService _httpClientService;
+  final SignalRService? _signalRService;
+  final NotificationService? _notificationService;
+  
   List<ActiveTableDto> _activeTables = [];
   bool _isLoading = false;
   String? _lastError;
+  bool _autoRefreshEnabled = true;
+  bool _isDisposed = false;
 
-  OrderService({required String? accessToken}) : _httpClientService = HttpClientService() {
+  OrderService({
+    required String? accessToken, 
+    SignalRService? signalRService,
+    NotificationService? notificationService,
+  }) : _httpClientService = HttpClientService(),
+       _signalRService = signalRService,
+       _notificationService = notificationService {
     _dio = _httpClientService.dio;
+    _setupNotificationListeners();
   }
 
   // Getters
   List<ActiveTableDto> get activeTables => _activeTables;
   bool get isLoading => _isLoading;
   String? get lastError => _lastError;
+  bool get autoRefreshEnabled => _autoRefreshEnabled;
+
+  /// Setup notification listeners để auto-refresh data
+  void _setupNotificationListeners() {
+    _signalRService?.notifications.listen((notification) {
+      if (_autoRefreshEnabled) {
+        _handleNotificationForAutoRefresh(notification);
+      }
+      
+      // Show notification nếu có NotificationService
+      _notificationService?.showNotificationFromSignalR(notification);
+    });
+  }
+
+  /// Xử lý notification để auto-refresh data
+  void _handleNotificationForAutoRefresh(BaseNotification notification) {
+    switch (notification.type) {
+      case NotificationType.newOrder:
+      case NotificationType.orderItemServed:
+      case NotificationType.orderItemQuantityUpdated:
+      case NotificationType.orderItemsAdded:
+      case NotificationType.orderItemRemoved:
+      case NotificationType.orderItemStatusUpdated:
+      case NotificationType.other:
+        refreshTables();
+        break;
+    }
+  }
+
+  /// Enable/disable auto-refresh từ notifications
+  void setAutoRefreshEnabled(bool enabled) {
+    if (_autoRefreshEnabled != enabled) {
+      _autoRefreshEnabled = enabled;
+      notifyListeners();
+    }
+  }
 
 
   /// Lấy danh sách tất cả bàn active từ API
@@ -70,10 +121,9 @@ class OrderService extends ChangeNotifier {
         _activeTables.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
 
         // Debug logging
-        print('✅ OrderService: Successfully loaded ${_activeTables.length} tables');
-        for (final table in _activeTables) {
-          print('🪑 Table ${table.tableNumber} (${table.status.displayName}) in ${table.layoutSectionName ?? "No section"}');
-        }
+
+        // Notify listeners để trigger UI rebuild
+        notifyListeners();
 
         return _activeTables;
       } else {
@@ -83,10 +133,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'lấy danh sách bàn');
       _setError(exception.message);
@@ -150,6 +197,9 @@ class OrderService extends ChangeNotifier {
 
   /// Refresh danh sách bàn
   Future<void> refreshTables() async {
+    if (_isDisposed) {
+      return;
+    }
     await getActiveTables();
   }
 
@@ -165,9 +215,6 @@ class OrderService extends ChangeNotifier {
       if (response.statusCode == 200 && response.data != null) {
         final tableDetail = TableDetailDto.fromJson(response.data);
         
-        print('✅ OrderService: Successfully loaded table details for ${tableDetail.tableNumber}');
-        print('🪑 Table ${tableDetail.tableNumber} - ${tableDetail.orderSummary?.totalItemsCount ?? 0} items');
-        print('📋 Order items: ${tableDetail.orderItems.length}');
         
         return tableDetail;
       } else {
@@ -177,10 +224,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException getting table details - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'lấy chi tiết bàn');
       _setError(exception.message);
@@ -223,10 +267,6 @@ class OrderService extends ChangeNotifier {
             .map((json) => MenuCategory.fromJson(json))
             .toList();
 
-        print('✅ OrderService: Successfully loaded ${categories.length} menu categories');
-        for (final category in categories) {
-          print('🍽️ Category: ${category.displayName} (${category.id})');
-        }
 
         return categories;
       } else {
@@ -236,7 +276,6 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException getting menu categories - ${e.message}');
       final exception = _handleDioException(e, 'lấy danh mục món ăn');
       _setError(exception.message);
       throw exception;
@@ -429,7 +468,7 @@ class OrderService extends ChangeNotifier {
   
   /// Tạo đơn hàng mới
   /// Gửi request lên API POST /api/app/orders
-  Future<CreateOrderResponse?> createOrder(CreateOrderRequest request) async {
+  Future<CreateOrderResponseDto?> createOrder(CreateOrderDto request) async {
     _setLoading(true);
     _clearError();
 
@@ -441,12 +480,10 @@ class OrderService extends ChangeNotifier {
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Success with response body
-        final orderResponse = CreateOrderResponse.fromJson(response.data);
-        print('✅ OrderService: Successfully created order with response data');
+        final orderResponse = CreateOrderResponseDto.fromJson(response.data);
         return orderResponse;
       } else if (response.statusCode == 204) {
         // Success but no content - API chỉ trả về 204 No Content
-        print('✅ OrderService: Successfully created order (204 No Content)');
         // Trả về null vì không có dữ liệu từ server
         return null;
       } else {
@@ -456,10 +493,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException creating order - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'tạo đơn hàng');
       _setError(exception.message);
@@ -475,7 +509,7 @@ class OrderService extends ChangeNotifier {
 
   /// Thêm món vào order hiện có của bàn  
   /// Gửi request lên API POST /api/app/order/{orderId}/add-items
-  Future<void> addItemsToOrder(String orderId, AddItemsToOrderRequest request) async {
+  Future<void> addItemsToOrder(String orderId, AddItemsToOrderDto request) async {
     _setLoading(true);
     _clearError();
 
@@ -486,7 +520,6 @@ class OrderService extends ChangeNotifier {
       );
       
       if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
-        print('✅ OrderService: Successfully added items to order $orderId');
         return; // Void method, không trả về gì
       } else {
         throw OrderServiceException(
@@ -495,10 +528,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException adding items to order - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'thêm món vào order');
       _setError(exception.message);
@@ -528,7 +558,6 @@ class OrderService extends ChangeNotifier {
       );
       
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('✅ OrderService: Successfully removed order item $orderItemId from order $orderId');
       } else {
         throw OrderServiceException(
           message: 'Phản hồi không hợp lệ từ server khi xóa món',
@@ -536,10 +565,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException removing order item - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'xóa món khỏi order');
       _setError(exception.message);
@@ -573,7 +599,6 @@ class OrderService extends ChangeNotifier {
       );
       
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('✅ OrderService: Successfully updated quantity for order item $orderItemId to $newQuantity');
         return; // Void method, không trả về gì
       } else {
         throw OrderServiceException(
@@ -582,10 +607,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException updating quantity - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'cập nhật số lượng món');
       _setError(exception.message);
@@ -601,7 +623,7 @@ class OrderService extends ChangeNotifier {
 
   /// Kiểm tra tồn kho nguyên liệu cho các món trong order
   /// Endpoint: POST /api/app/order/verify-ingredients-availability
-  Future<IngredientAvailabilityResult> verifyIngredientsAvailability(VerifyIngredientsRequest request) async {
+  Future<IngredientAvailabilityResultDto> verifyIngredientsAvailability(VerifyIngredientsRequestDto request) async {
     try {
       _setLoading(true);
       _clearError();
@@ -612,16 +634,8 @@ class OrderService extends ChangeNotifier {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final result = IngredientAvailabilityResult.fromJson(response.data);
+        final result = IngredientAvailabilityResultDto.fromJson(response.data);
         
-        print('✅ OrderService: Successfully verified ingredients for ${request.items.length} items');
-        print('🧾 Verification result: ${result.shortSummary}');
-        if (result.hasMissingIngredients) {
-          print('⚠️ Missing ingredients found: ${result.missingIngredients.length} issues');
-          for (final missing in result.missingIngredients) {
-            print('   - ${missing.menuItemName}: ${missing.displayMessage}');
-          }
-        }
 
         return result;
       } else {
@@ -631,10 +645,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException verifying ingredients - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'kiểm tra tồn kho nguyên liệu');
       _setError(exception.message);
@@ -674,12 +685,6 @@ class OrderService extends ChangeNotifier {
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('✅ OrderService: Successfully processed payment for order $orderId');
-        print('💳 Payment method: ${paymentMethod.displayName}');
-        print('💰 Customer money: $customerMoney');
-        if (notes != null && notes.isNotEmpty) {
-          print('📝 Notes: $notes');
-        }
         return; // Void method
       } else {
         throw OrderServiceException(
@@ -688,10 +693,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException processing payment - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'xử lý thanh toán');
       _setError(exception.message);
@@ -720,7 +722,6 @@ class OrderService extends ChangeNotifier {
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('✅ OrderService: Successfully marked order item $orderItemId as served');
         return; // Void method
       } else {
         throw OrderServiceException(
@@ -729,10 +730,7 @@ class OrderService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
-      print('❌ OrderService: DioException marking item served - ${e.message}');
       if (e.response != null) {
-        print('📄 Response status: ${e.response!.statusCode}');
-        print('📄 Response data: ${e.response!.data}');
       }
       final exception = _handleDioException(e, 'đánh dấu món đã phục vụ');
       _setError(exception.message);
@@ -748,6 +746,7 @@ class OrderService extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     // Không close _dio ở đây vì nó được quản lý bởi HttpClientService
     super.dispose();
   }

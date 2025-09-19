@@ -17,7 +17,10 @@ class AppConstants {
   static const String paymentRoute = '/payment';
   
   // API endpoints
-  static const String baseUrl = 'https://localhost:44346';
+  // Thay đổi URL này thành IP của máy chạy backend
+  // Ví dụ: static const String baseUrl = 'https://192.168.1.100:44346';
+  // Hoặc domain name: static const String baseUrl = 'https://your-backend-domain.com';
+  static const String baseUrl = 'https://localhost:44346'; // TODO: Update this URL
   
   // Storage keys
   static const String tokenKey = 'auth_token';

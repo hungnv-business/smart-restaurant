@@ -15,6 +15,7 @@ export interface ActiveTableDto extends EntityDto<string> {
   hasActiveOrders: boolean;
   orderStatusDisplay?: string;
   pendingItemsCount: number;
+  readyItemsCount: number;
 }
 
 export interface AddItemsToOrderDto {

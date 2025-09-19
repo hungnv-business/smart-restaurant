@@ -42,11 +42,11 @@ class SectionColumn extends StatelessWidget {
         : Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
         
     final countStyle = isCompact
-        ? Theme.of(context).textTheme.bodySmall?.copyWith(
+        ? Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           )
-        : Theme.of(context).textTheme.bodyMedium?.copyWith(
+        : Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           );
@@ -59,11 +59,12 @@ class SectionColumn extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Flexible(
+          Expanded(
             child: Text(
               sectionName,
               style: titleStyle,
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),

@@ -54,7 +54,7 @@ class NumberToWordsUtils {
     ];
 
     if (number < 10) {
-      return '${units[number]} đồng';
+      return '$units[number] đồng';
     }
 
     if (number < 100) {
@@ -128,7 +128,7 @@ class NumberToWordsUtils {
 
   /// Format số tiền kèm đơn vị VND
   static String formatCurrencyWithUnit(int amount) {
-    return '${formatCurrency(amount)} VND';
+    return '$formatCurrency(amount) VND';
   }
 
   /// Chuyển số thành chữ không có đơn vị tiền tệ

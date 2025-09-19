@@ -32,28 +32,69 @@ class _MenuScreenState extends State<MenuScreen> {
   final OrderService _orderService = OrderService(accessToken: null);
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
-  
+
   List<MenuCategory> _categories = [];
   List<MenuItem> _menuItems = [];
   bool _isLoadingCategories = true;
   bool _isLoadingMenuItems = false;
   String? _categoriesError;
   String? _menuItemsError;
-  
+
   int _selectedCategoryIndex = 0;
   bool _onlyAvailable = true; // State cho checkbox
   String _searchQuery = ''; // Search query
-  
+
   // Danh sách món trong giỏ hàng với thông tin đầy đủ
   List<MenuItem> _cartItems = [];
   List<int> _cartItemQuantities = [];
-  
+  List<String> _cartItemNotes = []; // Ghi chú cho từng món
+
   // Getter để lấy số lượng item trong giỏ hàng
   int get _cartItemCount => _cartItems.length;
+
+  // Helper method để đồng bộ hóa các arrays
+  void _syncCartArrays() {
+    final itemCount = _cartItems.length;
+
+    // Đồng bộ quantities array
+    if (_cartItemQuantities.length < itemCount) {
+      final missingCount = itemCount - _cartItemQuantities.length;
+      _cartItemQuantities.addAll(List.generate(missingCount, (_) => 1));
+    } else if (_cartItemQuantities.length > itemCount) {
+      _cartItemQuantities = _cartItemQuantities.take(itemCount).toList();
+    }
+
+    // Đồng bộ notes array
+    if (_cartItemNotes.length < itemCount) {
+      final missingCount = itemCount - _cartItemNotes.length;
+      _cartItemNotes.addAll(List.generate(missingCount, (_) => ''));
+    } else if (_cartItemNotes.length > itemCount) {
+      _cartItemNotes = _cartItemNotes.take(itemCount).toList();
+    }
+
+    // Debug validation
+    assert(
+      _cartItems.length == _cartItemQuantities.length,
+      'Cart arrays out of sync: items=${_cartItems.length}, quantities=${_cartItemQuantities.length}',
+    );
+    assert(
+      _cartItems.length == _cartItemNotes.length,
+      'Cart arrays out of sync: items=${_cartItems.length}, notes=${_cartItemNotes.length}',
+    );
+  }
+
+  // Helper method an toàn để lấy quantity của một món
+  int _getItemQuantity(String menuItemId) {
+    final cartIndex = _cartItems.indexWhere((item) => item.id == menuItemId);
+    if (cartIndex == -1) return 0;
+    if (cartIndex >= _cartItemQuantities.length) return 0;
+    return _cartItemQuantities[cartIndex];
+  }
 
   @override
   void initState() {
     super.initState();
+    _syncCartArrays(); // Đảm bảo đồng bộ từ đầu
     _loadCategories();
   }
 
@@ -89,7 +130,7 @@ class _MenuScreenState extends State<MenuScreen> {
         _isLoadingCategories = false;
         _categoriesError = null;
       });
-      
+
       // Load menu items sau khi load categories thành công
       await _loadMenuItems();
     } catch (e) {
@@ -97,7 +138,8 @@ class _MenuScreenState extends State<MenuScreen> {
       setState(() {
         _categories = _orderService.getFallbackCategories();
         _isLoadingCategories = false;
-        _categoriesError = 'Không thể tải danh mục từ server. Sử dụng danh mục mặc định.';
+        _categoriesError =
+            'Không thể tải danh mục từ server. Sử dụng danh mục mặc định.';
       });
     }
   }
@@ -108,23 +150,24 @@ class _MenuScreenState extends State<MenuScreen> {
         _isLoadingMenuItems = true;
         _menuItemsError = null;
       });
-      
+
       // Xác định categoryId dựa trên selected index
       String? categoryId;
-      if (_selectedCategoryIndex > 0 && _selectedCategoryIndex < _categories.length) {
+      if (_selectedCategoryIndex > 0 &&
+          _selectedCategoryIndex < _categories.length) {
         final selectedCategory = _categories[_selectedCategoryIndex];
         // Nếu không phải "Tất cả", sử dụng categoryId
         if (selectedCategory.id != 'all') {
           categoryId = selectedCategory.id;
         }
       }
-      
+
       final filter = GetMenuItemsForOrder(
         categoryId: categoryId,
         onlyAvailable: _onlyAvailable,
         nameFilter: _searchQuery.isEmpty ? null : _searchQuery,
       );
-      
+
       final menuItems = await _orderService.getMenuItemsForOrder(filter);
       setState(() {
         _menuItems = menuItems;
@@ -167,7 +210,7 @@ class _MenuScreenState extends State<MenuScreen> {
         children: [
           // Header với tìm kiếm
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             color: Theme.of(context).colorScheme.surface,
             child: Column(
               children: [
@@ -191,15 +234,17 @@ class _MenuScreenState extends State<MenuScreen> {
                       icon: const Icon(Icons.refresh),
                       tooltip: 'Cập nhật menu',
                       style: IconButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
                         foregroundColor: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
                 ),
-                
-                const SizedBox(height: 16),
-                
+
+                const SizedBox(height: 8),
+
                 // Danh mục
                 _isLoadingCategories
                     ? const Center(child: CircularProgressIndicator())
@@ -215,12 +260,19 @@ class _MenuScreenState extends State<MenuScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.warning, size: 16, color: Colors.orange),
+                                  const Icon(
+                                    Icons.warning,
+                                    size: 16,
+                                    color: Colors.orange,
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _categoriesError!,
-                                      style: const TextStyle(fontSize: 12, color: Colors.orange),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.orange,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -232,7 +284,8 @@ class _MenuScreenState extends State<MenuScreen> {
                               scrollDirection: Axis.horizontal,
                               itemCount: _categories.length,
                               itemBuilder: (context, index) {
-                                final isSelected = index == _selectedCategoryIndex;
+                                final isSelected =
+                                    index == _selectedCategoryIndex;
                                 return Container(
                                   margin: const EdgeInsets.only(right: 8),
                                   child: FilterChip(
@@ -252,22 +305,30 @@ class _MenuScreenState extends State<MenuScreen> {
                           // Checkbox món khả dụng
                           Row(
                             children: [
-                              Checkbox(
-                                value: _onlyAvailable,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _onlyAvailable = value ?? true;
-                                  });
-                                  _loadMenuItems(); // Load lại món ăn khi thay đổi filter
-                                },
+                              Transform.translate(
+                                offset: const Offset(-12, 0),
+                                child: Checkbox(
+                                  value: _onlyAvailable,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _onlyAvailable = value ?? true;
+                                    });
+                                    _loadMenuItems(); // Load lại món ăn khi thay đổi filter
+                                  },
+                                ),
                               ),
-                              const Text('Chỉ hiển thị món khả dụng'),
+                              Transform.translate(
+                                offset: const Offset(-20, 0),
+                                child: const Text('Chỉ hiển thị món khả dụng'),
+                              ),
                               const Spacer(),
                               if (_isLoadingMenuItems)
                                 const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                             ],
                           ),
@@ -276,14 +337,11 @@ class _MenuScreenState extends State<MenuScreen> {
               ],
             ),
           ),
-          
           // Danh sách món ăn
-          Expanded(
-            child: _buildMenuItemsList(),
-          ),
+          Expanded(child: _buildMenuItemsList()),
         ],
       ),
-      
+
       // Floating action button - chỉ giỏ hàng
       floatingActionButton: _buildFloatingActionButtons(),
     );
@@ -293,7 +351,7 @@ class _MenuScreenState extends State<MenuScreen> {
     if (_isLoadingMenuItems) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_menuItemsError != null) {
       return Center(
         child: Column(
@@ -311,7 +369,7 @@ class _MenuScreenState extends State<MenuScreen> {
         ),
       );
     }
-    
+
     if (_menuItems.isEmpty) {
       return const Center(
         child: Column(
@@ -324,13 +382,13 @@ class _MenuScreenState extends State<MenuScreen> {
         ),
       );
     }
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Responsive breakpoints like Bootstrap
         int crossAxisCount;
         double childAspectRatio;
-        
+
         if (constraints.maxWidth < 600) {
           // Mobile: 2 columns - tăng chiều cao để đủ chỗ cho content
           crossAxisCount = 2;
@@ -344,9 +402,9 @@ class _MenuScreenState extends State<MenuScreen> {
           crossAxisCount = 4;
           childAspectRatio = 1.05;
         }
-        
+
         return GridView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: childAspectRatio,
@@ -357,12 +415,8 @@ class _MenuScreenState extends State<MenuScreen> {
           itemBuilder: (context, index) {
             final menuItem = _menuItems[index];
             // Tìm số lượng hiện tại của món trong giỏ hàng
-            int currentQuantity = 0;
-            int cartIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
-            if (cartIndex != -1) {
-              currentQuantity = _cartItemQuantities[cartIndex];
-            }
-            
+            final currentQuantity = _getItemQuantity(menuItem.id);
+
             return MenuItemCard(
               menuItem: menuItem,
               quantity: currentQuantity,
@@ -375,73 +429,147 @@ class _MenuScreenState extends State<MenuScreen> {
       },
     );
   }
-  
+
   void _onAddToCart(MenuItem menuItem) {
     setState(() {
-      // Kiểm tra xem món đã có trong giỏ hàng chưa
-      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
-      
-      if (existingIndex != -1) {
-        // Món đã có, tăng số lượng
-        _cartItemQuantities[existingIndex]++;
-      } else {
-        // Món chưa có, thêm mới
-        _cartItems.add(menuItem);
-        _cartItemQuantities.add(1);
+      try {
+        // Kiểm tra xem món đã có trong giỏ hàng chưa
+        int existingIndex = _cartItems.indexWhere(
+          (item) => item.id == menuItem.id,
+        );
+
+        if (existingIndex != -1) {
+          // Món đã có, đảm bảo index hợp lệ trước khi tăng
+          _syncCartArrays(); // Đồng bộ trước
+          if (existingIndex < _cartItemQuantities.length) {
+            _cartItemQuantities[existingIndex]++;
+          }
+        } else {
+          // Món chưa có, thêm mới
+          _cartItems.add(menuItem);
+          _cartItemQuantities.add(1);
+          _cartItemNotes.add(''); // Thêm ghi chú rỗng
+        }
+        _syncCartArrays(); // Đồng bộ sau
+      } catch (e) {
+        // Fallback: reset tất cả arrays về trạng thái an toàn
+        _syncCartArrays();
       }
     });
   }
 
   void _onIncreaseQuantity(MenuItem menuItem) {
     setState(() {
-      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
-      
-      if (existingIndex != -1) {
-        // Món đã có, tăng số lượng
-        _cartItemQuantities[existingIndex]++;
-      } else {
-        // Món chưa có, thêm mới với số lượng 1
-        _cartItems.add(menuItem);
-        _cartItemQuantities.add(1);
+      try {
+        int existingIndex = _cartItems.indexWhere(
+          (item) => item.id == menuItem.id,
+        );
+
+        if (existingIndex != -1) {
+          // Món đã có, đảm bảo index hợp lệ trước khi tăng
+          _syncCartArrays(); // Đồng bộ trước
+          if (existingIndex < _cartItemQuantities.length) {
+            _cartItemQuantities[existingIndex]++;
+          }
+        } else {
+          // Món chưa có, thêm mới với số lượng 1
+          _cartItems.add(menuItem);
+          _cartItemQuantities.add(1);
+          _cartItemNotes.add(''); // Thêm ghi chú rỗng
+        }
+        _syncCartArrays(); // Đồng bộ sau
+      } catch (e) {
+        // Fallback: reset tất cả arrays về trạng thái an toàn
+        _syncCartArrays();
       }
     });
   }
 
   void _onDecreaseQuantity(MenuItem menuItem) {
     setState(() {
-      int existingIndex = _cartItems.indexWhere((item) => item.id == menuItem.id);
-      
-      if (existingIndex != -1) {
-        if (_cartItemQuantities[existingIndex] > 1) {
-          // Giảm số lượng
-          _cartItemQuantities[existingIndex]--;
-        } else {
-          // Xóa món nếu số lượng = 1
-          _cartItems.removeAt(existingIndex);
-          _cartItemQuantities.removeAt(existingIndex);
+      try {
+        int existingIndex = _cartItems.indexWhere(
+          (item) => item.id == menuItem.id,
+        );
+
+        if (existingIndex != -1) {
+          _syncCartArrays(); // Đồng bộ trước
+
+          if (existingIndex < _cartItemQuantities.length &&
+              _cartItemQuantities[existingIndex] > 1) {
+            // Giảm số lượng
+            _cartItemQuantities[existingIndex]--;
+          } else {
+            // Xóa món nếu số lượng = 1 hoặc <= 0
+            _cartItems.removeAt(existingIndex);
+            if (existingIndex < _cartItemQuantities.length) {
+              _cartItemQuantities.removeAt(existingIndex);
+            }
+            if (existingIndex < _cartItemNotes.length) {
+              _cartItemNotes.removeAt(existingIndex);
+            }
+          }
         }
+        _syncCartArrays(); // Đồng bộ sau
+      } catch (e) {
+        // Fallback: reset tất cả arrays về trạng thái an toàn
+        _syncCartArrays();
       }
     });
   }
 
   void _increaseQuantity(int index) {
-    if (index >= 0 && index < _cartItemQuantities.length) {
-      setState(() {
-        _cartItemQuantities[index]++;
-      });
+    if (index < 0 || index >= _cartItems.length) {
+      return;
     }
+
+    setState(() {
+      _syncCartArrays(); // Đảm bảo đồng bộ trước
+
+      if (index < _cartItemQuantities.length) {
+        _cartItemQuantities[index]++;
+      }
+
+      _syncCartArrays(); // Đồng bộ sau
+    });
   }
 
   void _decreaseQuantity(int index) {
-    if (index >= 0 && index < _cartItemQuantities.length) {
-      setState(() {
-        if (_cartItemQuantities[index] > 1) {
-          _cartItemQuantities[index]--;
-        } else {
-          // Xóa món nếu số lượng = 0
-          _cartItems.removeAt(index);
+    if (index < 0 || index >= _cartItems.length) {
+      return;
+    }
+
+    setState(() {
+      _syncCartArrays(); // Đảm bảo đồng bộ trước
+
+      if (index < _cartItemQuantities.length &&
+          _cartItemQuantities[index] > 1) {
+        _cartItemQuantities[index]--;
+      } else {
+        // Xóa món nếu số lượng = 1 hoặc <= 0
+        _cartItems.removeAt(index);
+        if (index < _cartItemQuantities.length) {
           _cartItemQuantities.removeAt(index);
         }
+        if (index < _cartItemNotes.length) {
+          _cartItemNotes.removeAt(index);
+        }
+
+        // Đóng dialog nếu cart trống
+        if (_cartItems.isEmpty) {
+          Navigator.of(context).pop();
+        }
+      }
+      _syncCartArrays(); // Đồng bộ sau
+    });
+  }
+
+  void _updateItemNote(int index, String note) {
+    if (index >= 0 &&
+        index < _cartItemNotes.length &&
+        index < _cartItems.length) {
+      setState(() {
+        _cartItemNotes[index] = note;
       });
     }
   }
@@ -468,24 +596,27 @@ class _MenuScreenState extends State<MenuScreen> {
 
     try {
       // Tạo order items từ cart để verify ingredients
-      final verificationItems = <OrderItemRequest>[];
+      final verificationItems = <VerifyOrderItemDto>[];
       for (int i = 0; i < _cartItems.length; i++) {
         final menuItem = _cartItems[i];
         final quantity = _cartItemQuantities[i];
-        
-        verificationItems.add(OrderItemRequest(
-          menuItemId: menuItem.id,
-          menuItemName: menuItem.name,
-          quantity: quantity,
-        ));
+
+        verificationItems.add(
+          VerifyOrderItemDto(
+            menuItemId: menuItem.id,
+            menuItemName: menuItem.name,
+            quantity: quantity,
+          ),
+        );
       }
 
       // Bước 1: Verify ingredients availability
-      final verificationRequest = VerifyIngredientsRequest(
+      final verificationRequest = VerifyIngredientsRequestDto(
         items: verificationItems,
       );
 
-      final verificationResult = await _orderService.verifyIngredientsAvailability(verificationRequest);
+      final verificationResult = await _orderService
+          .verifyIngredientsAvailability(verificationRequest);
 
       // Bước 2: Hiển thị dialog verification result
       bool? userConfirmed;
@@ -505,64 +636,77 @@ class _MenuScreenState extends State<MenuScreen> {
       }
 
       // Bước 3: Proceed với order creation/addition
-      final orderItems = <CreateOrderItemRequest>[];
+      final orderItems = <CreateOrderItemDto>[];
       for (int i = 0; i < _cartItems.length; i++) {
         final menuItem = _cartItems[i];
         final quantity = _cartItemQuantities[i];
-        
-        orderItems.add(CreateOrderItemRequest.fromMenuItem(
-          menuItemId: menuItem.id,
-          menuItemName: menuItem.name,
-          quantity: quantity,
-          unitPrice: menuItem.price,
-        ));
+        final note = _cartItemNotes[i];
+
+        orderItems.add(
+          CreateOrderItemDto.fromMenuItem(
+            menuItemId: menuItem.id,
+            menuItemName: menuItem.name,
+            quantity: quantity,
+            unitPrice: menuItem.price,
+            notes: note.isNotEmpty ? note : null,
+          ),
+        );
       }
 
       if (widget.hasActiveOrder) {
         // THÊM MÓN VÀO ORDER HIỆN CÓ
         if (widget.currentOrderId == null) {
-          throw Exception('Không tìm thấy orderId của bàn ${widget.selectedTable.tableNumber}');
+          throw Exception(
+            'Không tìm thấy orderId của bàn ${widget.selectedTable.tableNumber}',
+          );
         }
-        
-        final addItemsRequest = AddItemsToOrderRequest(
+
+        final addItemsRequest = AddItemsToOrderDto(
           items: orderItems,
-          additionalNotes: 'Gọi thêm từ mobile app',
+          additionalNotes: '',
         );
-        
-        await _orderService.addItemsToOrder(widget.currentOrderId!, addItemsRequest);
-        
+
+        await _orderService.addItemsToOrder(
+          widget.currentOrderId!,
+          addItemsRequest,
+        );
+
         // Hiển thị thông báo thành công
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('✅ Đã thêm món vào đơn hàng cho ${widget.selectedTable.tableNumber}'),
+              content: Text(
+                '✅ Đã thêm món vào đơn hàng cho ${widget.selectedTable.tableNumber}',
+              ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
             ),
           );
         }
       } else {
-        // TẠO ĐƠNAHAÀNG MỚI  
-        final orderRequest = CreateOrderRequest(
+        // TẠO ĐƠNAHAÀNG MỚI
+        final orderRequest = CreateOrderDto(
           tableId: widget.selectedTable.id,
-          orderType: OrderRequestType.dineIn,
+          orderType: OrderType.dineIn,
           orderItems: orderItems,
           notes: null,
         );
 
         final response = await _orderService.createOrder(orderRequest);
-        
+
         // Hiển thị thông báo thành công
         if (mounted) {
           String message;
           if (response != null) {
             // API trả về response với orderNumber
-            message = '✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}';
+            message =
+                '✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}';
           } else {
             // API chỉ trả về 204 No Content
-            message = '✅ Đã tạo đơn hàng thành công cho ${widget.selectedTable.tableNumber}';
+            message =
+                '✅ Đã tạo đơn hàng thành công cho ${widget.selectedTable.tableNumber}';
           }
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),
@@ -573,17 +717,17 @@ class _MenuScreenState extends State<MenuScreen> {
         }
       }
 
-      // Clear cart sau khi thành công  
+      // Clear cart sau khi thành công
       setState(() {
         _cartItems.clear();
         _cartItemQuantities.clear();
+        _cartItemNotes.clear();
       });
 
       // Navigate back về TableDetailScreen với result = true
       if (mounted) {
         Navigator.of(context).pop(true); // Trả về true để báo hiệu có thay đổi
       }
-
     } catch (e) {
       // Hiển thị thông báo lỗi
       if (mounted) {
@@ -603,7 +747,6 @@ class _MenuScreenState extends State<MenuScreen> {
     }
   }
 
-
   Widget? _buildFloatingActionButtons() {
     // Chỉ hiển thị nút giỏ hàng khi có món
     if (_cartItemCount > 0) {
@@ -620,28 +763,42 @@ class _MenuScreenState extends State<MenuScreen> {
 
   void _refreshMenu() {
     _loadCategories();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã cập nhật menu')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Đã cập nhật menu')));
   }
 
   void _showCartBottomSheet(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => CartDialog(
-        selectedTable: widget.selectedTable,
-        cartItems: _cartItems,
-        cartItemQuantities: _cartItemQuantities,
-        onIncreaseQuantity: _increaseQuantity,
-        onDecreaseQuantity: _decreaseQuantity,
-        onClearCart: () {
-          setState(() {
-            _cartItems.clear();
-            _cartItemQuantities.clear();
-          });
-        },
-        onSubmitOrder: () => _submitOrder(),
-        hasActiveOrder: widget.hasActiveOrder,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => CartDialog(
+          selectedTable: widget.selectedTable,
+          cartItems: _cartItems,
+          cartItemQuantities: _cartItemQuantities,
+          onIncreaseQuantity: (index) {
+            _increaseQuantity(index);
+            setDialogState(() {}); // Update dialog state
+          },
+          onDecreaseQuantity: (index) {
+            _decreaseQuantity(index);
+            setDialogState(() {}); // Update dialog state
+          },
+          onClearCart: () {
+            setState(() {
+              _cartItems.clear();
+              _cartItemQuantities.clear();
+              _cartItemNotes.clear();
+            });
+            Navigator.pop(context); // Close dialog when cart is cleared
+          },
+          onSubmitOrder: () => _submitOrder(),
+          onUpdateNote: (index, note) {
+            _updateItemNote(index, note);
+            setDialogState(() {}); // Update dialog state
+          },
+          hasActiveOrder: widget.hasActiveOrder,
+        ),
       ),
     );
   }

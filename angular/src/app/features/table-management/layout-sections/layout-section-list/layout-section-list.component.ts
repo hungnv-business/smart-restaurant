@@ -160,15 +160,10 @@ export class LayoutSectionListComponent extends ComponentBase implements OnInit 
 
   toggleActive(section: LayoutSectionDto): void {
     const previousState = section.isActive;
-    const updateDto: UpdateLayoutSectionDto = {
-      sectionName: section.sectionName!,
-      description: section.description,
-      displayOrder: section.displayOrder,
-      isActive: !section.isActive,
-    };
+    const newState = !section.isActive;
 
     this.layoutSectionService
-      .update(section.id!, updateDto)
+      .updateStatus(section.id!, newState)
       .pipe(takeUntil(this.destroyed$))
       .subscribe({
         next: updatedSection => {

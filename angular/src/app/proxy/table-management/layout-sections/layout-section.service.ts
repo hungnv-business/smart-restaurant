@@ -57,6 +57,15 @@ export class LayoutSectionService {
       body: input,
     },
     { apiName: this.apiName,...config });
+  
+
+  updateStatus = (id: string, isActive: boolean, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, LayoutSectionDto>({
+      method: 'PUT',
+      url: `/api/app/layout-section/${id}/status`,
+      params: { isActive },
+    },
+    { apiName: this.apiName,...config });
 
   constructor(private restService: RestService) {}
 }

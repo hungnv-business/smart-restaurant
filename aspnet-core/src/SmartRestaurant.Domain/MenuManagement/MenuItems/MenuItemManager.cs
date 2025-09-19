@@ -36,7 +36,7 @@ public class MenuItemManager : DomainService
     public async Task<MenuItem> CreateAsync(
         [NotNull] string name,
         string? description,
-        decimal price,
+        int price,
         bool isAvailable,
         string? imageUrl,
         [NotNull] Guid categoryId,
@@ -78,7 +78,7 @@ public class MenuItemManager : DomainService
         [NotNull] Guid id,
         [NotNull] string name,
         string? description,
-        decimal price,
+        int price,
         bool isAvailable,
         string? imageUrl,
         [NotNull] Guid categoryId,

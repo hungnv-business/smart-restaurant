@@ -16,7 +16,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _checkAuthState();
+    // Delay auth check until after the build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthState();
+    });
   }
 
   /// Kiểm tra authentication state khi khởi động ứng dụng
@@ -32,7 +35,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
         await authService.refreshToken();
       } catch (e) {
         // Nếu refresh token thất bại, logout
-        print('⚠️ Token refresh failed: $e');
         await authService.logout();
       }
     }

@@ -2,10 +2,10 @@
 /// Tương ứng với DTOs từ backend SmartRestaurant
 
 /// Request model cho verify ingredients
-class VerifyIngredientsRequest {
-  final List<OrderItemRequest> items;
+class VerifyIngredientsRequestDto {
+  final List<VerifyOrderItemDto> items;
 
-  const VerifyIngredientsRequest({
+  const VerifyIngredientsRequestDto({
     required this.items,
   });
 
@@ -16,14 +16,14 @@ class VerifyIngredientsRequest {
   }
 }
 
-/// Model cho một item trong order (tương ứng CreateOrderItemDto)
-class OrderItemRequest {
+/// Model cho một item trong verify ingredients request
+class VerifyOrderItemDto {
   final String menuItemId;
   final String menuItemName;
   final int quantity;
   final String? notes;
 
-  const OrderItemRequest({
+  const VerifyOrderItemDto({
     required this.menuItemId,
     required this.menuItemName,
     required this.quantity,
@@ -41,7 +41,7 @@ class OrderItemRequest {
 }
 
 /// Model cho nguyên liệu thiếu
-class MissingIngredient {
+class MissingIngredientDto {
   final String menuItemId;
   final String menuItemName;
   final String ingredientId;
@@ -52,7 +52,7 @@ class MissingIngredient {
   final int shortageAmount;
   final String displayMessage;
 
-  const MissingIngredient({
+  const MissingIngredientDto({
     required this.menuItemId,
     required this.menuItemName,
     required this.ingredientId,
@@ -64,8 +64,8 @@ class MissingIngredient {
     required this.displayMessage,
   });
 
-  factory MissingIngredient.fromJson(Map<String, dynamic> json) {
-    return MissingIngredient(
+  factory MissingIngredientDto.fromJson(Map<String, dynamic> json) {
+    return MissingIngredientDto(
       menuItemId: json['menuItemId'] as String,
       menuItemName: json['menuItemName'] as String,
       ingredientId: json['ingredientId'] as String,
@@ -94,15 +94,15 @@ class MissingIngredient {
 }
 
 /// Response model cho ingredient availability
-class IngredientAvailabilityResult {
+class IngredientAvailabilityResultDto {
   final bool isAvailable;
-  final List<MissingIngredient> missingIngredients;
+  final List<MissingIngredientDto> missingIngredients;
   final int totalItemsCount;
   final int unavailableItemsCount;
   final String summaryMessage;
   final List<String> unavailableMenuItems;
 
-  const IngredientAvailabilityResult({
+  const IngredientAvailabilityResultDto({
     required this.isAvailable,
     required this.missingIngredients,
     required this.totalItemsCount,
@@ -111,11 +111,11 @@ class IngredientAvailabilityResult {
     required this.unavailableMenuItems,
   });
 
-  factory IngredientAvailabilityResult.fromJson(Map<String, dynamic> json) {
-    return IngredientAvailabilityResult(
+  factory IngredientAvailabilityResultDto.fromJson(Map<String, dynamic> json) {
+    return IngredientAvailabilityResultDto(
       isAvailable: json['isAvailable'] as bool,
       missingIngredients: (json['missingIngredients'] as List<dynamic>?)
-          ?.map((item) => MissingIngredient.fromJson(item as Map<String, dynamic>))
+          ?.map((item) => MissingIngredientDto.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
       totalItemsCount: json['totalItemsCount'] as int,
       unavailableItemsCount: json['unavailableItemsCount'] as int,
@@ -135,3 +135,6 @@ class IngredientAvailabilityResult {
     return "⚠️ Thiếu nguyên liệu cho $unavailableItemsCount/$totalItemsCount món";
   }
 }
+
+// Type aliases for backward compatibility
+typedef MissingIngredient = MissingIngredientDto;

@@ -77,7 +77,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       child: _buildStatCard(
                         context,
                         'Chờ thanh toán',
-                        '${_pendingPayments.length}',
+                        '$_pendingPayments.length',
                         Icons.pending_actions,
                         Colors.orange,
                       ),

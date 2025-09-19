@@ -52,5 +52,13 @@ namespace SmartRestaurant.TableManagement.LayoutSections
         /// </summary>
         /// <returns>Số thứ tự hiển thị tiếp theo</returns>
         Task<int> GetNextDisplayOrderAsync();
+
+        /// <summary>
+        /// Cập nhật trạng thái kích hoạt của khu vực bố cục
+        /// </summary>
+        /// <param name="id">ID của khu vực cần cập nhật trạng thái</param>
+        /// <param name="isActive">Trạng thái mới (true = kích hoạt, false = vô hiệu hóa)</param>
+        /// <returns>DTO khu vực sau khi cập nhật trạng thái</returns>
+        Task<LayoutSectionDto> UpdateStatusAsync(Guid id, bool isActive);
     }
 }

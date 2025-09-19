@@ -285,8 +285,8 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal?>("CostPerUnit")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("CostPerUnit")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone")
@@ -406,8 +406,8 @@ namespace SmartRestaurant.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("LastModifierId");
 
-                    b.Property<decimal?>("PurchasePrice")
-                        .HasColumnType("numeric");
+                    b.Property<int?>("PurchasePrice")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UnitId")
                         .HasColumnType("uuid");
@@ -730,8 +730,8 @@ namespace SmartRestaurant.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("RequiresCooking")
                         .HasColumnType("boolean");
@@ -820,8 +820,8 @@ namespace SmartRestaurant.Migrations
                     b.Property<Guid?>("TableId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("TotalAmount")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -910,8 +910,8 @@ namespace SmartRestaurant.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("UnitPrice")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -937,8 +937,8 @@ namespace SmartRestaurant.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("CreatorId");
 
-                    b.Property<decimal>("CustomerMoney")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("CustomerMoney")
+                        .HasColumnType("integer");
 
                     b.Property<Guid?>("DeleterId")
                         .HasColumnType("uuid")
@@ -975,8 +975,8 @@ namespace SmartRestaurant.Migrations
                     b.Property<DateTime>("PaymentTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("TotalAmount")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

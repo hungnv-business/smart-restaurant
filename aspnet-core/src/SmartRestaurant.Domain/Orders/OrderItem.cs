@@ -45,8 +45,8 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// <summary>
     /// Giá đơn vị của món (VND) tại thời điểm đặt hàng
     /// </summary>
-    [Range(0, double.MaxValue, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0")]
-    public decimal UnitPrice { get; set; }
+    [Range(0, int.MaxValue, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0")]
+    public int UnitPrice { get; set; }
 
     /// <summary>
     /// Ghi chú riêng cho món này (ví dụ: "Không cay", "Thêm hành")
@@ -108,7 +108,7 @@ public class OrderItem : FullAuditedEntity<Guid>
         Guid menuItemId,
         string menuItemName,
         int quantity,
-        decimal unitPrice,
+        int unitPrice,
         string? notes = null) : base(id)
     {
         // Validate input parameters
@@ -140,7 +140,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// <summary>
     /// Tính tổng tiền của item này
     /// </summary>
-    public decimal GetTotalPrice()
+    public int GetTotalPrice()
     {
         return UnitPrice * Quantity;
     }

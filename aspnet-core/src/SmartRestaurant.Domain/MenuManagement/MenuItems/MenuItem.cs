@@ -30,7 +30,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
 
         /// <summary>Giá món ăn (VND)</summary>
         [Required]
-        public decimal Price { get; set; }
+        public int Price { get; set; }
 
         /// <summary>Món có sẵn để đặt hay không</summary>
         public bool IsAvailable { get; set; }
@@ -88,7 +88,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             Guid id,
             string name,
             string? description,
-            decimal price,
+            int price,
             bool isAvailable,
             string? imageUrl,
             Guid categoryId,
@@ -204,7 +204,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             IGuidGenerator guidGenerator,
             [NotNull] string name,
             string? description,
-            decimal price,
+            int price,
             bool isAvailable,
             string? imageUrl,
             [NotNull] Guid categoryId,

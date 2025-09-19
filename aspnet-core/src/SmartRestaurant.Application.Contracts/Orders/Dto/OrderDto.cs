@@ -43,7 +43,7 @@ public class OrderDto : FullAuditedEntityDto<Guid>
     /// <summary>
     /// Tổng số tiền của đơn hàng (VND)
     /// </summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
 
     /// <summary>
     /// Ghi chú chung của khách hàng hoặc nhân viên

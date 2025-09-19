@@ -40,7 +40,8 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         catch (Exception ex)
         {
             Console.WriteLine($"❌ OrderNotificationService: Error sending notification - {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            Console.WriteLine($"❌ OrderNotificationService: Exception type: {ex.GetType().Name}");
+            Console.WriteLine($"❌ OrderNotificationService: Stack trace: {ex.StackTrace}");
         }
     }
 
@@ -91,8 +92,24 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
 
     public async Task NotifyOrderItemStatusUpdatedAsync(Guid orderItemId, int newStatus)
     {
-        // Không thực hiện gì - đã đơn giản hóa
-        await Task.CompletedTask;
+        try
+        {
+            Console.WriteLine($"🔔 OrderNotificationService: Sending order item status update for {orderItemId} to status {newStatus}");
+            
+            await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemStatusUpdated", new
+            {
+                OrderItemId = orderItemId,
+                NewStatus = newStatus,
+                UpdatedAt = DateTime.UtcNow,
+                Message = $"Trạng thái món ăn đã được cập nhật thành {(OrderItemStatus)newStatus}"
+            });
+            
+            Console.WriteLine($"✅ OrderNotificationService: Successfully sent order item status update notification");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderNotificationService: Error sending order item status update notification - {ex.Message}");
+        }
     }
 
     public async Task NotifyOrderItemQuantityUpdatedAsync(OrderItemQuantityUpdateNotificationDto dto)

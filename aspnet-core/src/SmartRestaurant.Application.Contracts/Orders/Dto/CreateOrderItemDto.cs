@@ -32,8 +32,8 @@ public class CreateOrderItemDto
     /// Giá đơn vị (sẽ được lấy từ MenuItem, có thể override cho discount)
     /// </summary>
     [Required]
-    [Range(0, double.MaxValue, ErrorMessage = "Giá không được âm")]
-    public decimal UnitPrice { get; set; }
+    [Range(0, int.MaxValue, ErrorMessage = "Giá không được âm")]
+    public int UnitPrice { get; set; }
 
     /// <summary>
     /// Ghi chú riêng cho món này (ví dụ: "Không cay", "Thêm hành")

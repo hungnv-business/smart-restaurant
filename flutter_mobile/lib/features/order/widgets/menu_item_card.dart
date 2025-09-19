@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/menu_models.dart';
-import '../../../shared/utils/price_formatter.dart';
+import '../../../core/utils/price_formatter.dart';
 
 /// Widget hiển thị món ăn theo template V0 design
 class MenuItemCard extends StatelessWidget {
@@ -197,7 +197,7 @@ class MenuItemCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 2),
                   Text(
-                    '${menuItem.soldQuantity} đã bán',
+                    '$menuItem.soldQuantity đã bán',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,

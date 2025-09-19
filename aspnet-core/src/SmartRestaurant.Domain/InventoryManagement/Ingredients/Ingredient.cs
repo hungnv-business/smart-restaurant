@@ -42,7 +42,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Giá thành trên đơn vị (VND) - có thể null khi chưa có giá
     /// </summary>
-    public decimal? CostPerUnit { get; set; }
+    public int? CostPerUnit { get; set; }
     
     /// <summary>
     /// Thông tin nhà cung cấp (JSON hoặc simple string)
@@ -230,7 +230,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Thêm đơn vị mua hàng mới hoặc cập nhật nếu đã tồn tại
     /// </summary>
-    public void AddPurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice = null, int displayOrder = 1, bool isActive = true)
+    public void AddPurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, int? purchasePrice = null, int displayOrder = 1, bool isActive = true)
     {
         // Validation: Đơn vị cơ sở phải có tỷ lệ = 1
         if (isBaseUnit && conversionRatio != 1)
@@ -287,7 +287,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Thêm nhiều đơn vị mua hàng cùng lúc (gọi AddPurchaseUnit cho từng unit)
     /// </summary>
-    public void AddPurchaseUnits(IEnumerable<(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, bool isActive)> units)
+    public void AddPurchaseUnits(IEnumerable<(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, int? purchasePrice, bool isActive)> units)
     {
         if (units == null)
         {
@@ -308,7 +308,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// <summary>
     /// Cập nhật đơn vị mua hàng
     /// </summary>
-    public void UpdatePurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, decimal? purchasePrice, int displayOrder = 1, bool isActive = true)
+    public void UpdatePurchaseUnit(Guid id, Guid unitId, string unitName, int conversionRatio, bool isBaseUnit, int? purchasePrice, int displayOrder = 1, bool isActive = true)
     {
         var purchaseUnit = PurchaseUnits.FirstOrDefault(pu => pu.Id == id);
         if (purchaseUnit == null)
@@ -378,7 +378,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         string name,
         Guid unitId,
         string? description = null,
-        decimal? costPerUnit = null,
+        int? costPerUnit = null,
         string? supplierInfo = null,
         bool isStockTrackingEnabled = true,
         bool isActive = true

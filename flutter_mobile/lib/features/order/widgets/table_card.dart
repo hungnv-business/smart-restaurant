@@ -24,9 +24,9 @@ class TableCard extends StatelessWidget {
 
     final borderRadius = isCompact ? 8.0 : 12.0;
     final cardPadding = isCompact
-        ? const EdgeInsets.all(12)
+        ? const EdgeInsets.all(8)
         : const EdgeInsets.all(16);
-    final spacing = isCompact ? 8.0 : 12.0;
+    final spacing = isCompact ? 10.0 : 12.0; // Tăng spacing
 
     return Container(
       decoration: BoxDecoration(
@@ -51,8 +51,10 @@ class TableCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
             padding: cardPadding,
+            width: double.infinity, // Đảm bảo chiều rộng đầy đủ
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _buildHeader(context),
                 SizedBox(height: spacing),
@@ -85,18 +87,23 @@ class TableCard extends StatelessWidget {
           );
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Table number với background
-        Container(
-          padding: tablePadding,
-          decoration: BoxDecoration(
-            color: const Color(0xFF4CAF50).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
+        Flexible(
+          child: Container(
+            padding: tablePadding,
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
+            ),
+            child: Text(
+              table.tableNumber,
+              style: textStyle,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          child: Text(table.tableNumber, style: textStyle),
         ),
-
-        const Spacer(),
 
         // Status indicator dot
         Container(
@@ -149,31 +156,62 @@ class TableCard extends StatelessWidget {
   }
 
   Widget _buildOrderInfo(BuildContext context) {
-    // Chỉ hiển thị tổng số món đang chờ/phục vụ
-    final totalItems = table.pendingItemsCount;
-    if (totalItems == 0) return const SizedBox.shrink();
+    final totalPending = table.pendingItemsCount;
+    final totalReady = table.readyItemsCount;
 
-    final iconSize = isCompact ? 16.0 : 18.0;
-    final fontSize = isCompact ? 11.0 : 12.0;
+    // Chỉ hiển thị nếu có món chờ hoặc món sẵn sàng
+    if (totalPending == 0 && totalReady == 0) return const SizedBox.shrink();
 
-    return Row(
+    final iconSize = isCompact ? 14.0 : 18.0;
+    final fontSize = isCompact ? 10.0 : 12.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.schedule, size: iconSize, color: Colors.orange),
-        const SizedBox(width: 4),
-        Text(
-          '$totalItems món chờ',
-          style: TextStyle(
-            color: Colors.orange,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
+        // Hiển thị món chờ nếu có
+        if (totalPending > 0)
+          Row(
+            children: [
+              Icon(Icons.schedule, size: iconSize, color: Colors.orange),
+              const SizedBox(width: 4),
+              Text(
+                '$totalPending món chờ',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-        ),
+
+        // Khoảng cách giữa 2 dòng nếu cả 2 đều hiển thị
+        if (totalPending > 0 && totalReady > 0) const SizedBox(height: 2),
+
+        // Hiển thị món sẵn sàng nếu có
+        if (totalReady > 0)
+          Row(
+            children: [
+              Icon(Icons.check_circle, size: iconSize, color: Colors.green),
+              const SizedBox(width: 4),
+              Text(
+                '$totalReady món sẵn sàng',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
 
   bool _hasOrderInfo() {
-    return table.hasActiveOrders || table.pendingItemsCount > 0;
+    return table.hasActiveOrders ||
+        table.pendingItemsCount > 0 ||
+        table.readyItemsCount > 0;
   }
 
   void _navigateToMenu(BuildContext context) async {

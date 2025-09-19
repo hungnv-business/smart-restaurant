@@ -18,7 +18,7 @@ public class CreateUpdatePurchaseUnitDto
     [Required]
     public bool IsBaseUnit { get; set; }
     
-    public decimal? PurchasePrice { get; set; }
+    public int? PurchasePrice { get; set; }
     
     public bool IsActive { get; set; } = true;
 }

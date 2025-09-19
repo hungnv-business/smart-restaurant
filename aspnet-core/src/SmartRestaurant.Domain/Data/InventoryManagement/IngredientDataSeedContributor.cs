@@ -76,20 +76,20 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             // Đồ uống
             new Ingredient { CategoryId = doUongCategory.Id, Name = "Bia", Description = "Bia tươi",
-                UnitId = mlUnit.Id, CostPerUnit = 16m, SupplierInfo = "Đại lý bia", IsActive = true },
+                UnitId = mlUnit.Id, CostPerUnit = 16, SupplierInfo = "Đại lý bia", IsActive = true },
 
             new Ingredient { CategoryId = doUongCategory.Id, Name = "Coca", Description = "Coca Cola 330ml",
-                UnitId = lonUnit.Id, CostPerUnit = 12000m, SupplierInfo = "Đại lý Coca", IsActive = true },
+                UnitId = lonUnit.Id, CostPerUnit = 12000, SupplierInfo = "Đại lý Coca", IsActive = true },
             
             // Đồ khô
             new Ingredient { CategoryId = doKhoCategory.Id, Name = "Mực", Description = "Mực khô",
-                UnitId = conUnit.Id, CostPerUnit = 20000m, SupplierInfo = "Chợ hải sản", IsActive = true },
+                UnitId = conUnit.Id, CostPerUnit = 20000, SupplierInfo = "Chợ hải sản", IsActive = true },
 
             new Ingredient { CategoryId = doKhoCategory.Id, Name = "Cá", Description = "Cá khô",
-                UnitId = conUnit.Id, CostPerUnit = 15000m, SupplierInfo = "Chợ hải sản", IsActive = true },
+                UnitId = conUnit.Id, CostPerUnit = 15000, SupplierInfo = "Chợ hải sản", IsActive = true },
 
             new Ingredient { CategoryId = doKhoCategory.Id, Name = "Đậu", Description = "Đậu phộng rang",
-                UnitId = caiUnit.Id, CostPerUnit = 5000m, SupplierInfo = "Cửa hàng tạp hóa", IsActive = true }
+                UnitId = caiUnit.Id, CostPerUnit = 5000, SupplierInfo = "Cửa hàng tạp hóa", IsActive = true }
         };
 
         await _ingredientRepository.InsertManyAsync(ingredients, autoSave: true);
@@ -107,8 +107,8 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), cocaIngredient.Id, lonUnit.Id, 1, true, 1, 12000m, true),     // Base: lon - 12,000đ/lon
-                new IngredientPurchaseUnit(Guid.NewGuid(), cocaIngredient.Id, locUnit.Id, 6, false, 2, 70000m, true)     // 1 lốc = 6 lon - 70,000đ/lốc
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaIngredient.Id, lonUnit.Id, 1, true, 1, 12000, true),     // Base: lon - 12,000đ/lon
+                new IngredientPurchaseUnit(Guid.NewGuid(), cocaIngredient.Id, locUnit.Id, 6, false, 2, 70000, true)     // 1 lốc = 6 lon - 70,000đ/lốc
             });
         }
 
@@ -116,8 +116,8 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, mlUnit.Id, 1, true, 1, 16m, true),        // Base: ml - 16đ/ml
-                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, bomUnit.Id, 50000, false, 2, 800000m, true) // 1 bom = 50,000ml - 800,000đ/bom
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, mlUnit.Id, 1, true, 1, 16, true),        // Base: ml - 16đ/ml
+                new IngredientPurchaseUnit(Guid.NewGuid(), biaIngredient.Id, bomUnit.Id, 50000, false, 2, 800000, true) // 1 bom = 50,000ml - 800,000đ/bom
             });
         }
 
@@ -125,8 +125,8 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), mucIngredient.Id, conUnit.Id, 1, true, 1, 20000m, true),    // Base: con - 20,000đ/con
-                new IngredientPurchaseUnit(Guid.NewGuid(), mucIngredient.Id, kgUnit.Id, 20, false, 2, 400000m, true)   // 1 kg = 20 con - 400,000đ/kg
+                new IngredientPurchaseUnit(Guid.NewGuid(), mucIngredient.Id, conUnit.Id, 1, true, 1, 20000, true),    // Base: con - 20,000đ/con
+                new IngredientPurchaseUnit(Guid.NewGuid(), mucIngredient.Id, kgUnit.Id, 20, false, 2, 400000, true)   // 1 kg = 20 con - 400,000đ/kg
             });
         }
 
@@ -134,8 +134,8 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), caIngredient.Id, conUnit.Id, 1, true, 1, 15000m, true),     // Base: con - 15,000đ/con
-                new IngredientPurchaseUnit(Guid.NewGuid(), caIngredient.Id, kgUnit.Id, 25, false, 2, 375000m, true)    // 1 kg = 25 con - 375,000đ/kg
+                new IngredientPurchaseUnit(Guid.NewGuid(), caIngredient.Id, conUnit.Id, 1, true, 1, 15000, true),     // Base: con - 15,000đ/con
+                new IngredientPurchaseUnit(Guid.NewGuid(), caIngredient.Id, kgUnit.Id, 25, false, 2, 375000, true)    // 1 kg = 25 con - 375,000đ/kg
             });
         }
 
@@ -143,7 +143,7 @@ public class IngredientDataSeedContributor : ITransientDependency
         {
             purchaseUnits.AddRange(new[]
             {
-                new IngredientPurchaseUnit(Guid.NewGuid(), dauIngredient.Id, caiUnit.Id, 1, true, 1, 3000m, true),     // Base: cái - 5,000đ/cái
+                new IngredientPurchaseUnit(Guid.NewGuid(), dauIngredient.Id, caiUnit.Id, 1, true, 1, 3000, true),     // Base: cái - 3,000đ/cái
             });
         }
 

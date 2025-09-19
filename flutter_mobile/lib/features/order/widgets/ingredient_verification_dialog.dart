@@ -3,7 +3,7 @@ import '../../../core/models/ingredient_verification_models.dart';
 
 /// Dialog hiển thị thông tin thiếu nguyên liệu và cho phép người dùng xác nhận
 class IngredientVerificationDialog extends StatelessWidget {
-  final IngredientAvailabilityResult verificationResult;
+  final IngredientAvailabilityResultDto verificationResult;
 
   const IngredientVerificationDialog({
     Key? key,
@@ -16,23 +16,46 @@ class IngredientVerificationDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxWidth: MediaQuery.of(context).size.width * 0.9,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
-            const SizedBox(height: 16),
-            _buildSummary(context),
-            const SizedBox(height: 20),
-            if (verificationResult.hasMissingIngredients) ...[
-              _buildMissingIngredientsList(context),
-              const SizedBox(height: 16),
-              _buildIngredientSummary(context),
-              const SizedBox(height: 20),
-            ],
-            _buildActionButtons(context),
+            // Header cố định
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: _buildHeader(context),
+            ),
+            
+            // Content có thể scroll
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildSummary(context),
+                    const SizedBox(height: 20),
+                    if (verificationResult.hasMissingIngredients) ...[
+                      _buildMissingIngredientsList(context),
+                      const SizedBox(height: 16),
+                      _buildIngredientSummary(context),
+                      const SizedBox(height: 20),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            
+            // Action buttons cố định ở dưới
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: _buildActionButtons(context),
+            ),
           ],
         ),
       ),
@@ -121,16 +144,11 @@ class IngredientVerificationDialog extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 300),
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: verificationResult.missingIngredients.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final missing = verificationResult.missingIngredients[index];
-              return _buildMissingIngredientItem(context, missing);
-            },
+        // Sử dụng Column thay vì ListView để tránh nested scroll
+        ...verificationResult.missingIngredients.map((missing) => 
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildMissingIngredientItem(context, missing),
           ),
         ),
       ],

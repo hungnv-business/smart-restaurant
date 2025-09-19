@@ -79,7 +79,6 @@ class AuthService extends ChangeNotifier {
 
         _isLoggedIn = true;
         
-        print('✅ Login successful: ${_userInfo?.displayName} (${_userInfo?.roles.join(", ")})');
         
         // Lưu authentication state vào persistent storage
         await _saveAuthState();
@@ -245,7 +244,6 @@ class AuthService extends ChangeNotifier {
           );
         }
         
-        print('✅ Token refreshed successfully');
         
         // Lưu lại authentication state sau khi refresh
         await _saveAuthState();
@@ -290,10 +288,11 @@ class AuthService extends ChangeNotifier {
         _tokenCreationTime = DateTime.parse(tokenCreationTimeStr);
         _isLoggedIn = true;
         
-        print('✅ AuthService: Restored authentication state from storage');
+        
+        // Notify listeners để trigger SignalR connection (delayed để tránh setState during build)
+        Future.microtask(() => notifyListeners());
       }
     } catch (e) {
-      print('⚠️ AuthService: Error loading saved auth state: $e');
       await _clearAuthState();
     } finally {
       _setLoading(false);
@@ -312,9 +311,7 @@ class AuthService extends ChangeNotifier {
         await prefs.setString('token_creation_time', _tokenCreationTime!.toIso8601String());
       }
       
-      print('✅ AuthService: Saved authentication state to storage');
     } catch (e) {
-      print('⚠️ AuthService: Error saving auth state: $e');
     }
   }
 
@@ -326,9 +323,7 @@ class AuthService extends ChangeNotifier {
       await prefs.remove('user_data');
       await prefs.remove('token_creation_time');
       
-      print('✅ AuthService: Cleared authentication state from storage');
     } catch (e) {
-      print('⚠️ AuthService: Error clearing auth state: $e');
     }
   }
 

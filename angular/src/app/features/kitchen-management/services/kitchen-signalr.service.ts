@@ -59,8 +59,13 @@ export class KitchenSignalRService implements OnDestroy {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => {
-          // Lấy access token từ ABP auth
+          // Lấy access token từ ABP auth với retry logic
           const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+          if (!token) {
+            console.warn('🔑 KitchenSignalR: No access token found for SignalR connection');
+          } else {
+            console.log('🔑 KitchenSignalR: Using access token for connection');
+          }
           return token || '';
         }
       })
@@ -90,6 +95,7 @@ export class KitchenSignalRService implements OnDestroy {
 
     this.hubConnection.onclose(async (error) => {
       this.connectionState$.next('disconnected');
+      console.warn('🔌 KitchenSignalR: Connection closed', error);
       
       // Bắt đầu quá trình reconnect
       this.startReconnectProcess();
@@ -155,6 +161,11 @@ export class KitchenSignalRService implements OnDestroy {
         message: data.Message || data.message,
         servedAt: new Date(data.ServedAt || data.servedAt)
       });
+    });
+
+    // Lắng nghe confirmation khi join Kitchen group thành công
+    this.hubConnection.on('JoinedKitchenGroup', (data: any) => {
+      console.log('✅ KitchenSignalR: Successfully joined Kitchen group', data);
     });
   }
 

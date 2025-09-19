@@ -56,6 +56,7 @@ class MenuItem {
   final int maximumQuantityAvailable;
   final bool isOutOfStock;
   final bool hasLimitedStock;
+  final bool requiresCooking;
 
   const MenuItem({
     required this.id,
@@ -71,6 +72,7 @@ class MenuItem {
     this.maximumQuantityAvailable = 0,
     this.isOutOfStock = false,
     this.hasLimitedStock = false,
+    this.requiresCooking = true,
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
@@ -88,6 +90,7 @@ class MenuItem {
       maximumQuantityAvailable: json['maximumQuantityAvailable'] as int? ?? 0,
       isOutOfStock: json['isOutOfStock'] as bool? ?? false,
       hasLimitedStock: json['hasLimitedStock'] as bool? ?? false,
+      requiresCooking: json['requiresCooking'] as bool? ?? true,
     );
   }
 
@@ -106,6 +109,7 @@ class MenuItem {
       'maximumQuantityAvailable': maximumQuantityAvailable,
       'isOutOfStock': isOutOfStock,
       'hasLimitedStock': hasLimitedStock,
+      'requiresCooking': requiresCooking,
     };
   }
 

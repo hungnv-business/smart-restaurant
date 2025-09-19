@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/menu_models.dart';
 import '../../../core/models/table_models.dart';
-import '../../../shared/utils/price_formatter.dart';
+import '../../../core/utils/price_formatter.dart';
 
 /// Widget dialog hiển thị giỏ hàng
 class CartDialog extends StatefulWidget {
@@ -12,6 +12,7 @@ class CartDialog extends StatefulWidget {
   final Function(int index) onDecreaseQuantity;
   final VoidCallback onClearCart;
   final VoidCallback onSubmitOrder;
+  final Function(int index, String note)? onUpdateNote;
   final bool hasActiveOrder;
 
   const CartDialog({
@@ -23,6 +24,7 @@ class CartDialog extends StatefulWidget {
     required this.onDecreaseQuantity,
     required this.onClearCart,
     required this.onSubmitOrder,
+    this.onUpdateNote,
     this.hasActiveOrder = false,
   }) : super(key: key);
 
@@ -31,6 +33,34 @@ class CartDialog extends StatefulWidget {
 }
 
 class _CartDialogState extends State<CartDialog> {
+  late List<String> itemNotes;
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo danh sách ghi chú cho từng món
+    itemNotes = List.generate(
+      widget.cartItems.length.clamp(0, widget.cartItems.length), 
+      (index) => ''
+    );
+  }
+
+  @override
+  void didUpdateWidget(CartDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Cập nhật itemNotes khi widget thay đổi
+    if (widget.cartItems.length != itemNotes.length) {
+      final newLength = widget.cartItems.length;
+      if (newLength > itemNotes.length) {
+        // Thêm notes mới
+        itemNotes.addAll(List.generate(newLength - itemNotes.length, (_) => ''));
+      } else if (newLength < itemNotes.length) {
+        // Cắt bớt notes thừa
+        itemNotes = itemNotes.take(newLength).toList();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -84,71 +114,147 @@ class _CartDialogState extends State<CartDialog> {
   }
 
   Widget _buildCartItem(BuildContext context, int index) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      title: Text(
-        widget.cartItems[index].name,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
       ),
-      subtitle: Text(
-        PriceFormatter.format(widget.cartItems[index].price),
-        style: TextStyle(
-          fontSize: 14,
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      trailing: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: () {
-                widget.onDecreaseQuantity(index);
-                setState(() {}); // Rebuild dialog để cập nhật UI
-              },
-              icon: const Icon(Icons.remove),
-              iconSize: 20,
-              constraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 40,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                '${index < widget.cartItemQuantities.length ? widget.cartItemQuantities[index] : 0}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header với tên món và điều chỉnh số lượng
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.cartItems[index].name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      PriceFormatter.format(widget.cartItems[index].price),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                widget.onIncreaseQuantity(index);
-                setState(() {}); // Rebuild dialog để cập nhật UI
-              },
-              icon: const Icon(Icons.add),
-              iconSize: 20,
-              constraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 40,
+              // Quantity controls
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (index >= 0 && index < widget.cartItems.length) {
+                          widget.onDecreaseQuantity(index);
+                        }
+                      },
+                      icon: const Icon(Icons.remove),
+                      iconSize: 20,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        '${widget.cartItemQuantities.isNotEmpty && index < widget.cartItemQuantities.length ? widget.cartItemQuantities[index] : 0}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        if (index >= 0 && index < widget.cartItems.length) {
+                          widget.onIncreaseQuantity(index);
+                        }
+                      },
+                      icon: const Icon(Icons.add),
+                      iconSize: 20,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Ghi chú
+          Row(
+            children: [
+              Icon(
+                Icons.edit_note,
+                size: 18,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Ghi chú cho món này...',
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade500,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    isDense: true,
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                  maxLines: 1,
+                  onChanged: (value) {
+                    if (index < itemNotes.length) {
+                      setState(() {
+                        itemNotes[index] = value;
+                      });
+                      widget.onUpdateNote?.call(index, value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

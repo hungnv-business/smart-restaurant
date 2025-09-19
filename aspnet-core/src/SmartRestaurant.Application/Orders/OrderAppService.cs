@@ -79,11 +79,18 @@ public class OrderAppService : ApplicationService, IOrderAppService
         var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
 
         Console.WriteLine($"📱 OrderAppService: Created order #{orderDto.OrderNumber}, sending notification...");
-        
-        // Send real-time notifications  
-        await _notificationService.NotifyNewOrderAsync(orderDto);
-        
-        Console.WriteLine($"✅ OrderAppService: Notification sent for order #{orderDto.OrderNumber}");
+
+        // Send notification
+        try
+        {
+            Console.WriteLine($"🔔 OrderAppService: Sending notification for order #{orderDto.OrderNumber}");
+            await _notificationService.NotifyNewOrderAsync(orderDto);
+            Console.WriteLine($"✅ OrderAppService: Notification sent for order #{orderDto.OrderNumber}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderAppService: Failed to send notification for order #{orderDto.OrderNumber}: {ex.Message}");
+        }
     }
 
 
@@ -104,11 +111,15 @@ public class OrderAppService : ApplicationService, IOrderAppService
             // Count order items from current order
             var hasActiveOrders = table.CurrentOrder != null;
             var pendingServeCount = 0;
+            var readyItemsCount = 0;
             var orderStatusDisplay = "Trống";
 
             if (hasActiveOrders && table.CurrentOrder?.OrderItems != null)
             {
-                pendingServeCount = table.CurrentOrder.GetUnservedItems().Sum(oi => oi.Quantity);
+                pendingServeCount = table.CurrentOrder.GetUnservedItemsForMoblie().Sum(oi => oi.Quantity);
+                readyItemsCount = table.CurrentOrder.OrderItems
+                    .Where(oi => oi.IsReady())
+                    .Sum(oi => oi.Quantity);
 
                 orderStatusDisplay = pendingServeCount > 0 ? "Món chờ phục vụ" : "Có đơn hàng";
             }
@@ -124,7 +135,8 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 LayoutSectionName = table.LayoutSection?.SectionName ?? "",
                 HasActiveOrders = hasActiveOrders,
                 OrderStatusDisplay = orderStatusDisplay,
-                PendingItemsCount = pendingServeCount
+                PendingItemsCount = pendingServeCount,
+                ReadyItemsCount = readyItemsCount
             };
 
             activeTableDtos.Add(dto);
@@ -172,10 +184,17 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 TotalAmount = totalAmount
             };
 
-            // Map order items to DTOs
+            // Lấy thông tin MenuItem cho tất cả order items để có RequiresCooking
+            var menuItemIds = allOrderItems.Select(oi => oi.MenuItemId).Distinct().ToList();
+            var menuItems = await _menuItemRepository.GetListAsync(mi => menuItemIds.Contains(mi.Id));
+            var menuItemDict = menuItems.ToDictionary(mi => mi.Id, mi => mi);
+
+            // Map order items to DTOs và sắp xếp theo trạng thái
             dto.OrderItems = allOrderItems.Select(oi =>
             {
                 var totalPrice = oi.UnitPrice * oi.Quantity;
+                var menuItem = menuItemDict.GetValueOrDefault(oi.MenuItemId);
+                
                 return new TableOrderItemDto
                 {
                     Id = oi.Id,
@@ -187,8 +206,12 @@ public class OrderAppService : ApplicationService, IOrderAppService
                     CanEdit = GlobalEnums.CanEditOrderItem(oi.Status),
                     CanDelete = GlobalEnums.CanDeleteOrderItem(oi.Status),
                     SpecialRequest = oi.Notes ?? string.Empty,
+                    RequiresCooking = menuItem?.RequiresCooking ?? true, // Mặc định true nếu không tìm thấy MenuItem
                 };
-            }).ToList();
+            })
+            .OrderBy(oi => GetOrderItemSortPriority(oi.Status))
+            .ThenBy(oi => oi.MenuItemName)
+            .ToList();
 
             // Check ingredient availability cho những món unserved
             var unservedOrderItems = activeOrders.SelectMany(o => o.GetUnservedItems()).ToList();
@@ -246,6 +269,22 @@ public class OrderAppService : ApplicationService, IOrderAppService
     }
 
     /// <summary>
+    /// Định nghĩa thứ tự ưu tiên sắp xếp order items (số nhỏ hơn = ưu tiên cao hơn)
+    /// </summary>
+    private static int GetOrderItemSortPriority(OrderItemStatus status)
+    {
+        return status switch
+        {
+            OrderItemStatus.Ready => 1,          // Đã hoàn thành (ưu tiên cao nhất)
+            OrderItemStatus.Preparing => 2,      // Đang chuẩn bị
+            OrderItemStatus.Pending => 3,        // Chờ chuẩn bị
+            OrderItemStatus.Served => 4,         // Đã phục vụ
+            OrderItemStatus.Canceled => 5,       // Đã hủy (cuối cùng)
+            _ => 99                              // Các trạng thái khác
+        };
+    }
+
+    /// <summary>
     /// Lấy danh sách tất cả danh mục món ăn đang hoạt động
     /// </summary>
     public async Task<ListResultDto<GuidLookupItemDto>> GetActiveMenuCategoriesAsync()
@@ -299,6 +338,12 @@ public class OrderAppService : ApplicationService, IOrderAppService
             dto.HasLimitedStock = maxQuantity > 0 && maxQuantity < 10; // < 10 phần là hạn chế
         }
 
+        // Lọc theo stock thực tế nếu OnlyAvailable = true
+        if (input.OnlyAvailable ?? true)
+        {
+            menuItemDtos = menuItemDtos.Where(dto => !dto.IsOutOfStock).ToList();
+        }
+
         return new ListResultDto<MenuItemDto>(menuItemDtos);
     }
 
@@ -322,7 +367,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
         var menuItemIds = input.Items.Select(i => i.MenuItemId).ToList();
         await _orderManager.AddItemsToOrderAsync(order, menuItemIds, input.Items, input.AdditionalNotes);
 
-        Console.WriteLine($"✅ OrderAppService: Added items to order #{order.OrderNumber}, sending notification...");
+        Console.WriteLine($"✅ OrderAppService: Added items to order #{order.OrderNumber}, scheduling notification...");
 
         // Tạo thông báo chi tiết về các món đã thêm
         var menuItems = await _menuItemRepository.GetListAsync();
@@ -336,13 +381,19 @@ public class OrderAppService : ApplicationService, IOrderAppService
         var tableName = order.GetTableDisplayName();
 
         // Gửi thông báo realtime về việc thêm món
-        await _notificationService.NotifyOrderItemsAddedAsync(new OrderItemsAddedNotificationDto
+        try
         {
-            TableName = tableName,
-            AddedItemsDetail = addedItemsDetail
-        });
-
-        Console.WriteLine($"✅ OrderAppService: Add items notification sent for order #{order.OrderNumber}");
+            await _notificationService.NotifyOrderItemsAddedAsync(new OrderItemsAddedNotificationDto
+            {
+                TableName = tableName,
+                AddedItemsDetail = addedItemsDetail
+            });
+            Console.WriteLine($"✅ OrderAppService: Add items notification sent for order #{order.OrderNumber}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderAppService: Failed to send add items notification for order #{order.OrderNumber}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -357,12 +408,12 @@ public class OrderAppService : ApplicationService, IOrderAppService
         var orderItem = order.OrderItems.FirstOrDefault(x => x.Id == orderItemId);
         var menuItemName = orderItem?.MenuItemName ?? "Unknown";
         var quantity = orderItem?.Quantity ?? 1;
-        
+
         Console.WriteLine($"📱 OrderAppService: Removing item {menuItemName} from order #{order.OrderNumber}");
 
         // Sử dụng domain service để xử lý business logic
         await _orderManager.RemoveOrderItemAsync(order, orderItemId);
-        
+
         Console.WriteLine($"✅ OrderAppService: Removed item from order #{order.OrderNumber}, sending notification...");
 
         // Lấy tên hiển thị của bàn
@@ -395,21 +446,27 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Sử dụng OrderManager để xử lý business logic
         await _orderManager.UpdateOrderItemQuantityAsync(order, orderItemId, input.NewQuantity, input.Notes);
 
-        Console.WriteLine($"✅ OrderAppService: Updated quantity for order #{order.OrderNumber}, sending notification...");
+        Console.WriteLine($"✅ OrderAppService: Updated quantity for order #{order.OrderNumber}, scheduling notification...");
 
         // Lấy tên hiển thị của bàn
         var tableName = order.GetTableDisplayName();
 
         // Gửi thông báo realtime về việc cập nhật số lượng
-        await _notificationService.NotifyOrderItemQuantityUpdatedAsync(new OrderItemQuantityUpdateNotificationDto
+        try
         {
-            TableName = tableName,
-            OrderItemId = orderItemId,
-            MenuItemName = menuItemName,
-            NewQuantity = input.NewQuantity
-        });
-
-        Console.WriteLine($"✅ OrderAppService: Quantity update notification sent for order #{order.OrderNumber}");
+            await _notificationService.NotifyOrderItemQuantityUpdatedAsync(new OrderItemQuantityUpdateNotificationDto
+            {
+                TableName = tableName,
+                OrderItemId = orderItemId,
+                MenuItemName = menuItemName,
+                NewQuantity = input.NewQuantity
+            });
+            Console.WriteLine($"✅ OrderAppService: Quantity update notification sent for order #{order.OrderNumber}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ OrderAppService: Failed to send quantity update notification for order #{order.OrderNumber}: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -584,7 +641,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
 
         // Lấy tên hiển thị của bàn
         var tableName = order.GetTableDisplayName();
-        
+
         // Thông báo món ăn đã phục vụ cho bếp qua SignalR
         await _notificationService.NotifyOrderServedAsync(new OrderItemServedNotificationDto
         {
@@ -597,7 +654,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
         });
 
         Logger.LogInformation("✅ OrderAppService: Successfully marked order item {OrderItemId} as served", orderItemId);
-        
+
         // Log thông tin phục vụ thành công
         Console.WriteLine($"🍽️ OrderAppService: Món {orderItem.MenuItemName} đã được đánh dấu phục vụ cho {tableName}");
     }

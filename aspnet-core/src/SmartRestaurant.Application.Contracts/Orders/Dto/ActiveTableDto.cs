@@ -34,4 +34,7 @@ public class ActiveTableDto : EntityDto<Guid>
     
     /// <summary>Số món đang chờ phục vụ</summary>
     public int PendingItemsCount { get; set; }
+    
+    /// <summary>Số món đã sẵn sàng phục vụ (đã nấu xong)</summary>
+    public int ReadyItemsCount { get; set; }
 }

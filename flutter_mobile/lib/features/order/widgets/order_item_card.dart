@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../../shared/utils/price_formatter.dart';
+import '../../../core/utils/price_formatter.dart';
+import '../../../core/enums/restaurant_enums.dart';
 
 /// Widget hiển thị thông tin một món trong đơn hàng
 class OrderItemCard extends StatelessWidget {
   final String itemName;
   final int quantity;
   final int unitPrice;
-  final String status;
-  final Color? statusColor;
+  final OrderItemStatus status;
   final String? totalPrice;
   final String? specialRequest;
   final bool hasMissingIngredients;
   final String? missingIngredientsMessage; // Thêm field cho displayMessage
+  final bool requiresCooking; // Món có cần nấu hay không
   final VoidCallback? onEdit;
   final VoidCallback? onRemove;
   final VoidCallback? onServe; // Callback cho nút phục vụ
@@ -22,33 +23,37 @@ class OrderItemCard extends StatelessWidget {
     required this.quantity,
     required this.unitPrice,
     required this.status,
-    this.statusColor,
     this.totalPrice,
     this.specialRequest,
     this.hasMissingIngredients = false,
     this.missingIngredientsMessage,
+    this.requiresCooking = true,
     this.onEdit,
     this.onRemove,
     this.onServe,
   }) : super(key: key);
 
+
+  /// Lấy màu cho status
+  Color _getStatusColor() {
+    return Color(status.colorValue);
+  }
+
+  /// Kiểm tra có thể hiển thị nút phục vụ hay không
+  bool _canShowServeButton() {
+    if (requiresCooking) {
+      // Món cần nấu: chỉ hiển thị khi đã hoàn thành
+      return status == OrderItemStatus.ready;
+    } else {
+      // Món không cần nấu: hiển thị từ trạng thái chờ xử lý
+      return status == OrderItemStatus.pending || status == OrderItemStatus.ready;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final statusColors = {
-      'Chờ chuẩn bị': Colors.grey,
-      'Đang chuẩn bị': Colors.orange,
-      'Đã hoàn thành': Colors.green,
-      'Đã phục vụ': Colors.blue,
-      'Đã Huỷ': Colors.red,
-    };
-
-    final statusIcons = {
-      'Chờ chuẩn bị': Icons.pending,
-      'Đang chuẩn bị': Icons.restaurant,
-      'Đã hoàn thành': Icons.check_circle,
-      'Đã phục vụ': Icons.done_all,
-      'Đã Huỷ': Icons.cancel,
-    };
+    final displayStatus = status.displayName;
+    final statusColor = _getStatusColor();
 
     return Card(
       margin: EdgeInsets.zero, // Bỏ margin vì đã có trong ListView
@@ -99,13 +104,13 @@ class OrderItemCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: statusColors[status]?.withOpacity(0.2),
+                              color: statusColor.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              status,
+                              displayStatus,
                               style: TextStyle(
-                                color: statusColors[status] ?? Colors.grey,
+                                color: statusColor,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -128,7 +133,7 @@ class OrderItemCard extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 missingIngredientsMessage?.isNotEmpty == true
-                                    ? '${missingIngredientsMessage!}'
+                                    ? missingIngredientsMessage!
                                     : 'Thiếu nguyên liệu',
                                 style: TextStyle(
                                   fontSize: 10,
@@ -175,7 +180,7 @@ class OrderItemCard extends StatelessWidget {
                     ),
                     
                     // Action buttons compact
-                    if (status == 'Chờ chuẩn bị') ...[
+                    if (status == OrderItemStatus.pending) ...[
                       const SizedBox(height: 4),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -209,8 +214,10 @@ class OrderItemCard extends StatelessWidget {
                       ),
                     ],
                     
-                    // Nút Phục vụ khi món đã sẵn sàng
-                    if (status == 'Đã hoàn thành' && onServe != null) ...[
+                    // Nút Phục vụ 
+                    // - Món cần nấu: chỉ hiển thị khi status == OrderItemStatus.ready
+                    // - Món không cần nấu: hiển thị ngay từ OrderItemStatus.pending
+                    if (onServe != null && _canShowServeButton()) ...[
                       const SizedBox(height: 4),
                       InkWell(
                         onTap: onServe,
@@ -221,9 +228,9 @@ class OrderItemCard extends StatelessWidget {
                             color: Colors.green,
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'Phục vụ',
-                            style: TextStyle(
+                          child: Text(
+                            requiresCooking ? 'Phục vụ' : 'Phục vụ ngay',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

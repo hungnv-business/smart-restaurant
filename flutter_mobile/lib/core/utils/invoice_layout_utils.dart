@@ -540,7 +540,7 @@ class InvoiceLayoutHelper {
         align: TextAlign.left,
       );
       _drawTableCell(
-        '${item.quantity}',
+        '$item.quantity',
         tableX + col1Width,
         col2Width,
         12,

@@ -16,10 +16,10 @@ public class Payment : FullAuditedEntity<Guid>
     public DateTime PaymentTime { get; set; }
     
     /// <summary>Tổng tiền thanh toán</summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
     
     /// <summary>Tiền khách đưa</summary>
-    public decimal CustomerMoney { get; set; }
+    public int CustomerMoney { get; set; }
     
     /// <summary>Phương thức thanh toán</summary>
     public PaymentMethod PaymentMethod { get; set; }
@@ -40,8 +40,8 @@ public class Payment : FullAuditedEntity<Guid>
     public Payment(
         Guid id,
         Guid orderId,
-        decimal totalAmount,
-        decimal customerMoney,
+        int totalAmount,
+        int customerMoney,
         PaymentMethod paymentMethod,
         string? notes = null) : base(id)
     {

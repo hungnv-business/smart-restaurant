@@ -19,7 +19,7 @@ public class CreateUpdateIngredientDto
     [Required]
     public Guid UnitId { get; set; }
     
-    public decimal? CostPerUnit { get; set; }
+    public int? CostPerUnit { get; set; }
     
     [MaxLength(512)]
     public string? SupplierInfo { get; set; }

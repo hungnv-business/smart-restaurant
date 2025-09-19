@@ -42,8 +42,8 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <summary>
     /// Tổng số tiền của đơn hàng (VND)
     /// </summary>
-    [Range(0, double.MaxValue, ErrorMessage = "Tổng tiền phải lớn hơn 0")]
-    public decimal TotalAmount { get; set; }
+    [Range(0, int.MaxValue, ErrorMessage = "Tổng tiền phải lớn hơn 0")]
+    public int TotalAmount { get; set; }
 
     /// <summary>
     /// Ghi chú chung của khách hàng hoặc nhân viên
@@ -336,6 +336,15 @@ public class Order : FullAuditedAggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Lấy danh sách món chưa được phục vụ
+    /// </summary>
+    /// <returns>Danh sách món chưa phục vụ</returns>
+    public List<OrderItem> GetUnservedItemsForMoblie()
+    {
+        return OrderItems.Where(oi => oi.IsPending() || oi.IsPreparing()).ToList();
+    }
+
+    /// <summary>
     /// Lấy danh sách món cần nấu cho bếp
     /// Chỉ bao gồm các món có RequiresCooking = true và chưa hoàn thành
     /// </summary>
@@ -372,8 +381,8 @@ public class Order : FullAuditedAggregateRoot<Guid>
     /// <returns>Payment đã được tạo</returns>
     public Payment AddPayment(
         IGuidGenerator guidGenerator,
-        decimal totalAmount,
-        decimal customerMoney,
+        int totalAmount,
+        int customerMoney,
         PaymentMethod paymentMethod,
         string? notes = null)
     {

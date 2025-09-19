@@ -17,7 +17,7 @@ public class PaymentRequestDto
     public PaymentMethod PaymentMethod { get; set; }
     
     /// <summary>Tiền khách đưa (nếu thanh toán tiền mặt)</summary>
-    public decimal? CustomerMoney { get; set; }
+    public int? CustomerMoney { get; set; }
     
     /// <summary>Ghi chú thêm cho thanh toán</summary>
     public string? Notes { get; set; }
@@ -41,7 +41,7 @@ public class OrderForPaymentDto
     public OrderStatus Status { get; set; }
     
     /// <summary>Tổng tiền đơn hàng</summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
     
     /// <summary>Ghi chú đơn hàng</summary>
     public string? Notes { get; set; }

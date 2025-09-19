@@ -28,8 +28,6 @@ class AuthInterceptor extends Interceptor {
         !err.requestOptions.path.contains('/connect/token')) {
       
       try {
-        print('🔄 AuthInterceptor: Token expired, attempting refresh...');
-        
         // Thử refresh token
         await authService.refreshToken();
         
@@ -39,12 +37,10 @@ class AuthInterceptor extends Interceptor {
         
         final response = await dio.fetch(requestOptions);
         
-        print('✅ AuthInterceptor: Request retried successfully');
         handler.resolve(response);
         return;
         
       } catch (refreshError) {
-        print('❌ AuthInterceptor: Token refresh failed: $refreshError');
         
         // Nếu refresh thất bại, logout user
         await authService.logout();

@@ -44,7 +44,7 @@ public class TableDetailsDto : EntityDto<Guid>
     public List<OrderSummaryDto> ActiveOrders { get; set; } = new();
     
     /// <summary>Tổng tiền của tất cả đơn hàng đang hoạt động</summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
     
     /// <summary>Thời gian bàn bắt đầu được sử dụng (từ đơn hàng đầu tiên)</summary>
     public DateTime? FirstOrderTime { get; set; }

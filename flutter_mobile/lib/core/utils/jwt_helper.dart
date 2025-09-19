@@ -29,7 +29,6 @@ class JwtHelper {
       final decoded = utf8.decode(base64Url.decode(payload));
       return json.decode(decoded) as Map<String, dynamic>;
     } catch (e) {
-      print('⚠️ JwtHelper: Error decoding token: $e');
       return null;
     }
   }

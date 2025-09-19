@@ -55,7 +55,10 @@
               </div>
 
               <div class="flex gap-3 items-center">
-                <p-inputSwitch [(ngModel)]="section.isActive"> </p-inputSwitch>
+                <p-inputSwitch 
+                  [ngModel]="section.isActive"
+                  (onChange)="toggleActive(section)"> 
+                </p-inputSwitch>
                 <span
                   [class.text-green-600]="section.isActive"
                   [class.text-red-600]="!section.isActive"

@@ -67,7 +67,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Bia cốc",
             "Bia tươi cốc 300ml",
-            10000m,
+            10000,
             true,
             "https://example.com/images/bia-ca.jpg",
             drinksCategory.Id
@@ -90,7 +90,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Bia Lít",
             "Bia tươi lít 1000ml",
-            25000m,
+            25000,
             true,
             "https://example.com/images/bia-lit.jpg",
             drinksCategory.Id
@@ -112,7 +112,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Bia Ca",
             "Bia tươi can 1300ml",
-            30000m,
+            30000,
             true,
             "https://example.com/images/bia-can.jpg",
             drinksCategory.Id
@@ -134,7 +134,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Bia Tháp",
             "Bia tươi tháp 3000ml",
-            75000m,
+            75000,
             true,
             "https://example.com/images/bia-thap.jpg",
             drinksCategory.Id
@@ -156,7 +156,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Coca Cola",
             "Coca Cola 330ml",
-            15000m,
+            15000,
             true,
             "https://example.com/images/coca-cola.jpg",
             drinksCategory.Id
@@ -178,7 +178,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Mực Nướng",
             "Mực nướng thơm ngon với 1 con",
-            120000m,
+            120000,
             true,
             "https://example.com/images/muc-nuong.jpg",
             snacksCategory.Id
@@ -200,7 +200,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Cá Chỉ Nướng",
             "Cá chỉ nướng giòn rụm với 10 con",
-            50000m,
+            50000,
             true,
             "https://example.com/images/ca-chi-nuong.jpg",
             snacksCategory.Id
@@ -222,7 +222,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Đậu Tẩm Hành",
             "Đậu phộng tẩm hành tỏi với 3 cái",
-            40000m,
+            40000,
             true,
             "https://example.com/images/dau-tam-hanh.jpg",
             snacksCategory.Id
@@ -244,7 +244,7 @@ public class MenuItemDataSeedContributor : ITransientDependency
             Guid.NewGuid(),
             "Đậu Lướt",
             "Đậu phộng lướt nước mắm với 3 cái",
-            30000m,
+            30000,
             true,
             "https://example.com/images/dau-luot.jpg",
             snacksCategory.Id

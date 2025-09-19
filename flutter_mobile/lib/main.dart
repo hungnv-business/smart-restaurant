@@ -4,19 +4,48 @@ import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/order_service.dart';
+import 'core/services/signalr_service.dart';
+import 'core/services/notification_service.dart';
 import 'core/widgets/auth_wrapper.dart';
 
 /// Entry point của ứng dụng Quán bia Mobile
-void main() {
+void main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
   runApp(
     MultiProvider(
       providers: [
+        // Auth Service
         ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProxyProvider<AuthService, OrderService>(
-          create: (_) => OrderService(accessToken: null),
-          update: (_, auth, previous) => OrderService(
-            accessToken: auth.accessToken,
+        
+        // Notification Service
+        ChangeNotifierProvider(create: (_) => NotificationService()),
+        
+        // SignalR Service (depends on AuthService)
+        ChangeNotifierProxyProvider<AuthService, SignalRService>(
+          create: (context) => SignalRService(authService: context.read<AuthService>()),
+          update: (_, auth, previous) => previous ?? SignalRService(authService: auth),
+        ),
+        
+        // Order Service (depends on AuthService, SignalRService, NotificationService)
+        ChangeNotifierProxyProvider3<AuthService, SignalRService, NotificationService, OrderService>(
+          create: (context) => OrderService(
+            accessToken: context.read<AuthService>().accessToken,
+            signalRService: context.read<SignalRService>(),
+            notificationService: context.read<NotificationService>(),
           ),
+          update: (_, auth, signalR, notification, previous) {
+            // Reuse existing OrderService if possible, only create new if null
+            if (previous != null) {
+              return previous;
+            }
+            return OrderService(
+              accessToken: auth.accessToken,
+              signalRService: signalR,
+              notificationService: notification,
+            );
+          },
         ),
       ],
       child: const QuanBiaApp(),

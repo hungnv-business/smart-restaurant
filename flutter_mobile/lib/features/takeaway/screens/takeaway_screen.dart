@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/enums/restaurant_enums.dart';
 
 /// Màn hình Mang về
 class TakeawayScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
       'items': ['Phở Bò Tái', 'Cà phê sữa đá'],
       'total': '110.000₫',
       'pickupTime': '14:30',
-      'status': 'Đang chuẩn bị',
+      'status': TakeawayStatus.preparing,
       'orderTime': '13:45',
     },
     {
@@ -27,7 +28,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
       'items': ['Cơm tấm', 'Nước mía'],
       'total': '80.000₫',
       'pickupTime': '15:00',
-      'status': 'Sẵn sàng',
+      'status': TakeawayStatus.ready,
       'orderTime': '14:15',
     },
     {
@@ -37,17 +38,17 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
       'items': ['Bánh mì thịt nướng', 'Bánh flan'],
       'total': '70.000₫',
       'pickupTime': '15:15',
-      'status': 'Đã giao',
+      'status': TakeawayStatus.delivered,
       'orderTime': '14:30',
     },
   ];
 
-  String _selectedStatus = 'Tất cả';
-  final List<String> _statusFilters = [
-    'Tất cả',
-    'Đang chuẩn bị',
-    'Sẵn sàng',
-    'Đã giao',
+  TakeawayStatus? _selectedStatus;
+  final List<TakeawayStatus?> _statusFilters = [
+    null, // Tất cả
+    TakeawayStatus.preparing,
+    TakeawayStatus.ready,
+    TakeawayStatus.delivered,
   ];
 
   @override
@@ -80,7 +81,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                       return Container(
                         margin: const EdgeInsets.only(right: 8),
                         child: FilterChip(
-                          label: Text(status),
+                          label: Text(status?.displayName ?? 'Tất cả'),
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
@@ -121,33 +122,30 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
   }
 
   List<Map<String, dynamic>> _getFilteredOrders() {
-    if (_selectedStatus == 'Tất cả') {
+    if (_selectedStatus == null) {
       return _takeawayOrders;
     }
-    return _takeawayOrders.where((order) => order['status'] == _selectedStatus).toList();
+    return _takeawayOrders.where((order) {
+      final TakeawayStatus status = order['status'] as TakeawayStatus;
+      return status == _selectedStatus;
+    }).toList();
+  }
+
+  IconData _getStatusIcon(TakeawayStatus status) {
+    switch (status) {
+      case TakeawayStatus.preparing:
+        return Icons.restaurant;
+      case TakeawayStatus.ready:
+        return Icons.check_circle;
+      case TakeawayStatus.delivered:
+        return Icons.done_all;
+    }
   }
 
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
-    Color statusColor;
-    IconData statusIcon;
-    
-    switch (order['status']) {
-      case 'Đang chuẩn bị':
-        statusColor = Colors.orange;
-        statusIcon = Icons.restaurant;
-        break;
-      case 'Sẵn sàng':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-        break;
-      case 'Đã giao':
-        statusColor = Colors.grey;
-        statusIcon = Icons.done_all;
-        break;
-      default:
-        statusColor = Colors.blue;
-        statusIcon = Icons.info;
-    }
+    final TakeawayStatus status = order['status'] as TakeawayStatus;
+    final Color statusColor = Color(status.colorValue);
+    final IconData statusIcon = _getStatusIcon(status);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -178,7 +176,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                       Icon(statusIcon, size: 16, color: statusColor),
                       const SizedBox(width: 4),
                       Text(
-                        order['status'],
+                        status.displayName,
                         style: TextStyle(
                           color: statusColor,
                           fontSize: 12,
@@ -266,41 +264,41 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
             ),
             
             // Actions
-            if (order['status'] == 'Đang chuẩn bị' || order['status'] == 'Sẵn sàng')
+            if (status == TakeawayStatus.preparing || status == TakeawayStatus.ready)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (order['status'] == 'Đang chuẩn bị')
+                    if (status == TakeawayStatus.preparing)
                       ElevatedButton.icon(
                         onPressed: () {
                           setState(() {
-                            order['status'] = 'Sẵn sàng';
+                            order['status'] = TakeawayStatus.ready;
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Đơn ${order['id']} đã sẵn sàng')),
                           );
                         },
                         icon: const Icon(Icons.check),
-                        label: const Text('Hoàn thành'),
+                        label: Text(AppTexts.completed),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
                         ),
                       ),
-                    if (order['status'] == 'Sẵn sàng')
+                    if (status == TakeawayStatus.ready)
                       ElevatedButton.icon(
                         onPressed: () {
                           setState(() {
-                            order['status'] = 'Đã giao';
+                            order['status'] = TakeawayStatus.delivered;
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Đã giao đơn ${order['id']}')),
                           );
                         },
                         icon: const Icon(Icons.done_all),
-                        label: const Text('Đã giao'),
+                        label: Text(TakeawayStatus.delivered.displayName),
                       ),
                   ],
                 ),

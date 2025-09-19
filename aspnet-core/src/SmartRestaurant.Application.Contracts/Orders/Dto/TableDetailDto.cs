@@ -44,7 +44,7 @@ public class TableOrderSummaryDto
     public int PendingServeCount { get; set; }
     
     /// <summary>Tổng tiền đơn hàng</summary>
-    public decimal TotalAmount { get; set; }
+    public int TotalAmount { get; set; }
     
 }
 
@@ -63,10 +63,10 @@ public class TableOrderItemDto
     public int Quantity { get; set; }
     
     /// <summary>Đơn giá</summary>
-    public decimal UnitPrice { get; set; }
+    public int UnitPrice { get; set; }
     
     /// <summary>Thành tiền</summary>
-    public decimal TotalPrice { get; set; }
+    public int TotalPrice { get; set; }
     
     /// <summary>Trạng thái món ăn</summary>
     public OrderItemStatus Status { get; set; }
@@ -86,4 +86,7 @@ public class TableOrderItemDto
     
     /// <summary>Danh sách nguyên liệu thiếu (nếu có)</summary>
     public List<MissingIngredientDto> MissingIngredients { get; set; } = new();
+    
+    /// <summary>Món có cần nấu nướng hay không (false = có thể phục vụ ngay)</summary>
+    public bool RequiresCooking { get; set; }
 }

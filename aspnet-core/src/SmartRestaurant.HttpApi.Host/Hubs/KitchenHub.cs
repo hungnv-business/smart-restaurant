@@ -28,6 +28,14 @@ public class KitchenHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, "Kitchen");
         _logger.LogInformation("Client {ConnectionId} joined Kitchen group", Context.ConnectionId);
         Console.WriteLine($"👥 KitchenHub: Client {Context.ConnectionId} joined Kitchen group");
+        
+        // Gửi confirmation message cho client
+        await Clients.Caller.SendAsync("JoinedKitchenGroup", new
+        {
+            ConnectionId = Context.ConnectionId,
+            JoinedAt = DateTime.UtcNow,
+            Message = "Successfully joined Kitchen group"
+        });
     }
 
 

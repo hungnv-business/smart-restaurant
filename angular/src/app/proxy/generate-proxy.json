@@ -1103,6 +1103,23 @@
                     "type": "System.Void",
                     "typeSimple": "System.Void"
                   }
+                },
+                {
+                  "name": "MarkOrderItemServedAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "orderItemId",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "System.Void",
+                    "typeSimple": "System.Void"
+                  }
                 }
               ]
             }
@@ -1616,6 +1633,43 @@
               },
               "allowAnonymous": null,
               "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
+            },
+            "MarkOrderItemServedAsyncByOrderItemId": {
+              "uniqueName": "MarkOrderItemServedAsyncByOrderItemId",
+              "name": "MarkOrderItemServedAsync",
+              "httpMethod": "POST",
+              "url": "api/app/order/mark-order-item-served/{orderItemId}",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "orderItemId",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "orderItemId",
+                  "name": "orderItemId",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "System.Void",
+                "typeSimple": "System.Void"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.Application.Contracts.Orders.IOrderAppService"
             }
           }
         },
@@ -1780,6 +1834,77 @@
               },
               "allowAnonymous": null,
               "implementFrom": "SmartRestaurant.Common.IGlobalAppService"
+            }
+          }
+        },
+        "SmartRestaurant.HttpApi.Host.Controllers.TestController": {
+          "controllerName": "Test",
+          "controllerGroupName": null,
+          "isRemoteService": false,
+          "isIntegrationService": false,
+          "apiVersion": null,
+          "type": "SmartRestaurant.HttpApi.Host.Controllers.TestController",
+          "interfaces": [],
+          "actions": {
+            "SendTestOrder": {
+              "uniqueName": "SendTestOrder",
+              "name": "SendTestOrder",
+              "httpMethod": "POST",
+              "url": "api/Test/send-test-order",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "Microsoft.AspNetCore.Mvc.IActionResult",
+                "typeSimple": "Microsoft.AspNetCore.Mvc.IActionResult"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.HttpApi.Host.Controllers.TestController"
+            },
+            "SendTestQuantityUpdate": {
+              "uniqueName": "SendTestQuantityUpdate",
+              "name": "SendTestQuantityUpdate",
+              "httpMethod": "POST",
+              "url": "api/Test/send-test-quantity-update",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "Microsoft.AspNetCore.Mvc.IActionResult",
+                "typeSimple": "Microsoft.AspNetCore.Mvc.IActionResult"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.HttpApi.Host.Controllers.TestController"
+            },
+            "SendTestAddItems": {
+              "uniqueName": "SendTestAddItems",
+              "name": "SendTestAddItems",
+              "httpMethod": "POST",
+              "url": "api/Test/send-test-add-items",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "Microsoft.AspNetCore.Mvc.IActionResult",
+                "typeSimple": "Microsoft.AspNetCore.Mvc.IActionResult"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.HttpApi.Host.Controllers.TestController"
+            },
+            "SendTestRemoveItem": {
+              "uniqueName": "SendTestRemoveItem",
+              "name": "SendTestRemoveItem",
+              "httpMethod": "POST",
+              "url": "api/Test/send-test-remove-item",
+              "supportedVersions": [],
+              "parametersOnMethod": [],
+              "parameters": [],
+              "returnValue": {
+                "type": "Microsoft.AspNetCore.Mvc.IActionResult",
+                "typeSimple": "Microsoft.AspNetCore.Mvc.IActionResult"
+              },
+              "allowAnonymous": null,
+              "implementFrom": "SmartRestaurant.HttpApi.Host.Controllers.TestController"
             }
           }
         },
@@ -4294,6 +4419,31 @@
                     "type": "System.Int32",
                     "typeSimple": "number"
                   }
+                },
+                {
+                  "name": "UpdateStatusAsync",
+                  "parametersOnMethod": [
+                    {
+                      "name": "id",
+                      "typeAsString": "System.Guid, System.Private.CoreLib",
+                      "type": "System.Guid",
+                      "typeSimple": "string",
+                      "isOptional": false,
+                      "defaultValue": null
+                    },
+                    {
+                      "name": "isActive",
+                      "typeAsString": "System.Boolean, System.Private.CoreLib",
+                      "type": "System.Boolean",
+                      "typeSimple": "boolean",
+                      "isOptional": false,
+                      "defaultValue": null
+                    }
+                  ],
+                  "returnValue": {
+                    "type": "SmartRestaurant.TableManagement.LayoutSections.Dto.LayoutSectionDto",
+                    "typeSimple": "SmartRestaurant.TableManagement.LayoutSections.Dto.LayoutSectionDto"
+                  }
                 }
               ]
             }
@@ -4493,6 +4643,63 @@
               "returnValue": {
                 "type": "System.Int32",
                 "typeSimple": "number"
+              },
+              "allowAnonymous": false,
+              "implementFrom": "SmartRestaurant.TableManagement.LayoutSections.ILayoutSectionAppService"
+            },
+            "UpdateStatusAsyncByIdAndIsActive": {
+              "uniqueName": "UpdateStatusAsyncByIdAndIsActive",
+              "name": "UpdateStatusAsync",
+              "httpMethod": "PUT",
+              "url": "api/app/layout-section/{id}/status",
+              "supportedVersions": [],
+              "parametersOnMethod": [
+                {
+                  "name": "id",
+                  "typeAsString": "System.Guid, System.Private.CoreLib",
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null
+                },
+                {
+                  "name": "isActive",
+                  "typeAsString": "System.Boolean, System.Private.CoreLib",
+                  "type": "System.Boolean",
+                  "typeSimple": "boolean",
+                  "isOptional": false,
+                  "defaultValue": null
+                }
+              ],
+              "parameters": [
+                {
+                  "nameOnMethod": "id",
+                  "name": "id",
+                  "jsonName": null,
+                  "type": "System.Guid",
+                  "typeSimple": "string",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": [],
+                  "bindingSourceId": "Path",
+                  "descriptorName": ""
+                },
+                {
+                  "nameOnMethod": "isActive",
+                  "name": "isActive",
+                  "jsonName": null,
+                  "type": "System.Boolean",
+                  "typeSimple": "boolean",
+                  "isOptional": false,
+                  "defaultValue": null,
+                  "constraintTypes": null,
+                  "bindingSourceId": "ModelBinding",
+                  "descriptorName": ""
+                }
+              ],
+              "returnValue": {
+                "type": "SmartRestaurant.TableManagement.LayoutSections.Dto.LayoutSectionDto",
+                "typeSimple": "SmartRestaurant.TableManagement.LayoutSections.Dto.LayoutSectionDto"
               },
               "allowAnonymous": false,
               "implementFrom": "SmartRestaurant.TableManagement.LayoutSections.ILayoutSectionAppService"
@@ -7997,6 +8204,14 @@
     }
   },
   "types": {
+    "Microsoft.AspNetCore.Mvc.IActionResult": {
+      "baseType": null,
+      "isEnum": false,
+      "enumNames": null,
+      "enumValues": null,
+      "genericArguments": null,
+      "properties": []
+    },
     "SmartRestaurant.Application.Contracts.Orders.Dto.ActiveTableDto": {
       "baseType": "Volo.Abp.Application.Dtos.EntityDto<System.Guid>",
       "isEnum": false,
@@ -8102,6 +8317,18 @@
         },
         {
           "name": "PendingItemsCount",
+          "jsonName": null,
+          "type": "System.Int32",
+          "typeSimple": "number",
+          "isRequired": false,
+          "minLength": null,
+          "maxLength": null,
+          "minimum": null,
+          "maximum": null,
+          "regex": null
+        },
+        {
+          "name": "ReadyItemsCount",
           "jsonName": null,
           "type": "System.Int32",
           "typeSimple": "number",

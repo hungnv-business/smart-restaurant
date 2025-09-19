@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/widgets/connection_status_widget.dart';
+import '../../../core/widgets/notification_list_widget.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../order/screens/order_screen.dart';
 import '../../takeaway/screens/takeaway_screen.dart';
 import '../../payment/screens/payment_screen.dart';
 import '../../settings/screens/network_printer_settings_screen.dart';
-import '../../settings/screens/settings_screen.dart';
 
 /// Màn hình chính với bottom navigation cho 3 tab
 class HomeScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
+
   final List<Widget> _screens = const [
     OrderScreen(),
     TakeawayScreen(),
@@ -52,15 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // Xử lý thông báo
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Thông báo đang phát triển')),
-              );
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.print),
             tooltip: 'Cài đặt máy in',
             onPressed: () {
@@ -72,6 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+          // Notification button with badge
+          NotificationBadge(
+            child: IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                NotificationBottomSheet.show(context);
+              },
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () {
@@ -81,9 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: Column(
+        children: [
+          // Connection status indicator
+          const ConnectionStatusWidget(showAsAppBar: true),
+          // Main content
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: _screens),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -113,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showProfileBottomSheet(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
     final userInfo = authService.userInfo;
-    
+
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -121,10 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(
-              radius: 30,
-              child: Icon(Icons.person, size: 30),
-            ),
+            const CircleAvatar(radius: 30, child: Icon(Icons.person, size: 30)),
             const SizedBox(height: 16),
             Text(
               userInfo?.displayName ?? userInfo?.username ?? 'Nhân viên',
@@ -173,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _getUserRoleDisplay(List<String> roles) {
     if (roles.isEmpty) return 'Nhân viên';
-    
+
     // Map roles to Vietnamese display names
     final roleMap = {
       'admin': 'Quản lý',
@@ -184,11 +188,11 @@ class _HomeScreenState extends State<HomeScreen> {
       'kitchen': 'Bếp',
       'cook': 'Đầu bếp',
     };
-    
+
     final displayRoles = roles
         .map((role) => roleMap[role.toLowerCase()] ?? role)
         .toList();
-    
+
     return displayRoles.join(', ');
   }
 
@@ -206,10 +210,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              
-              final authService = Provider.of<AuthService>(context, listen: false);
+
+              final authService = Provider.of<AuthService>(
+                context,
+                listen: false,
+              );
               await authService.logout();
-              
+
               // Quay về màn hình login
               if (mounted) {
                 Navigator.of(context).pushAndRemoveUntil(

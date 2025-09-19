@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using SmartRestaurant.Kitchen.Dtos;
 using SmartRestaurant.Permissions;
+using SmartRestaurant.Application.Contracts.Orders;
+using SmartRestaurant.Application.Contracts.Orders.Dto;
+using SmartRestaurant.Orders;
 using Volo.Abp.Application.Services;
 
 namespace SmartRestaurant.Kitchen
@@ -18,11 +21,17 @@ namespace SmartRestaurant.Kitchen
     public class KitchenDashboardAppService : ApplicationService, IKitchenDashboardAppService
     {
         private readonly KitchenPriorityManager _kitchenPriorityManager;
+        private readonly IOrderNotificationService _notificationService;
+        private readonly IOrderRepository _orderRepository;
 
         public KitchenDashboardAppService(
-            KitchenPriorityManager kitchenPriorityManager)
+            KitchenPriorityManager kitchenPriorityManager,
+            IOrderNotificationService notificationService,
+            IOrderRepository orderRepository)
         {
             _kitchenPriorityManager = kitchenPriorityManager;
+            _notificationService = notificationService;
+            _orderRepository = orderRepository;
         }
 
         /// <summary>
@@ -57,8 +66,61 @@ namespace SmartRestaurant.Kitchen
             // Sử dụng KitchenPriorityManager để cập nhật trạng thái (kitchen-specific logic)
             await _kitchenPriorityManager.UpdateOrderItemStatusAsync(input.OrderItemId, input.Status);
 
+            // Gửi notification đến mobile khi trạng thái thay đổi
+            await SendStatusUpdateNotification(input.OrderItemId, input.Status);
+
             Logger.LogInformation("Successfully updated OrderItem {OrderItemId} status to {Status}", 
                 input.OrderItemId, input.Status);
+        }
+
+        /// <summary>
+        /// Gửi notification khi kitchen cập nhật trạng thái món ăn
+        /// </summary>
+        private async Task SendStatusUpdateNotification(Guid orderItemId, OrderItemStatus newStatus)
+        {
+            try
+            {
+                // Lấy thông tin order item từ tất cả orders
+                var orders = await _orderRepository.GetListAsync();
+                OrderItem? orderItem = null;
+                Order? parentOrder = null;
+
+                foreach (var order in orders)
+                {
+                    var item = order.OrderItems.FirstOrDefault(oi => oi.Id == orderItemId);
+                    if (item != null)
+                    {
+                        orderItem = item;
+                        parentOrder = order;
+                        break;
+                    }
+                }
+
+                if (orderItem == null || parentOrder == null)
+                {
+                    Logger.LogWarning("OrderItem {OrderItemId} not found for notification", orderItemId);
+                    return;
+                }
+
+                // Gửi notification tùy theo trạng thái
+                switch (newStatus)
+                {
+                    case OrderItemStatus.Preparing:
+                    case OrderItemStatus.Ready:
+                        // Gửi notification cho status updates khác
+                        await _notificationService.NotifyOrderItemStatusUpdatedAsync(orderItemId, (int)newStatus);
+                        Logger.LogInformation("🔔 Sent OrderItemStatusUpdated notification for {MenuItemName} status: {Status}", 
+                            orderItem.MenuItemName, newStatus);
+                        Console.WriteLine($"🔔 KitchenDashboard: Sent status update for {orderItem.MenuItemName} to {newStatus}");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error sending notification for OrderItem {OrderItemId} status update", orderItemId);
+                Console.WriteLine($"❌ KitchenDashboard: Error sending notification - {ex.Message}");
+                // Don't throw - notification failure shouldn't block status update
+            }
         }
 
         /// <summary>

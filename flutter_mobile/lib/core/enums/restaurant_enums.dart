@@ -7,7 +7,7 @@ enum TableStatus {
 
 /// Trạng thái đơn hàng (sync với backend OrderStatus enum)
 enum OrderStatus {
-  active,       // Đang hoạt động - Đơn hàng đang được phục vụ (0)
+  serving,      // Đang phục vụ - Đơn hàng đang được phục vụ (0)
   paid,         // Đã thanh toán - Khách hàng đã ăn xong và thanh toán (1)
 }
 
@@ -64,8 +64,8 @@ extension TableStatusExtension on TableStatus {
 extension OrderStatusExtension on OrderStatus {
   String get displayName {
     switch (this) {
-      case OrderStatus.active:
-        return 'Đang hoạt động';
+      case OrderStatus.serving:
+        return 'Đang phục vụ';
       case OrderStatus.paid:
         return 'Đã thanh toán';
     }
@@ -73,7 +73,7 @@ extension OrderStatusExtension on OrderStatus {
 
   int get colorValue {
     switch (this) {
-      case OrderStatus.active:
+      case OrderStatus.serving:
         return 0xFF2196F3; // Blue
       case OrderStatus.paid:
         return 0xFF4CAF50; // Green
@@ -162,4 +162,192 @@ extension PaymentMethodExtension on PaymentMethod {
         return 0xFFF44336; // Red
     }
   }
+}
+
+/// Trạng thái kết nối
+enum ConnectionStatus {
+  disconnected,  // Ngắt kết nối
+  connecting,    // Đang kết nối
+  connected,     // Đã kết nối  
+  reconnecting,  // Đang kết nối lại
+  error,         // Lỗi kết nối
+}
+
+/// Extension để hiển thị trạng thái kết nối bằng tiếng Việt
+extension ConnectionStatusExtension on ConnectionStatus {
+  String get displayName {
+    switch (this) {
+      case ConnectionStatus.disconnected:
+        return 'Ngắt kết nối';
+      case ConnectionStatus.connecting:
+        return 'Đang kết nối';
+      case ConnectionStatus.connected:
+        return 'Đã kết nối';
+      case ConnectionStatus.reconnecting:
+        return 'Đang kết nối lại';
+      case ConnectionStatus.error:
+        return 'Lỗi kết nối';
+    }
+  }
+
+  int get colorValue {
+    switch (this) {
+      case ConnectionStatus.disconnected:
+        return 0xFFF44336; // Red
+      case ConnectionStatus.connecting:
+        return 0xFFFF9800; // Orange
+      case ConnectionStatus.connected:
+        return 0xFF4CAF50; // Green
+      case ConnectionStatus.reconnecting:
+        return 0xFFFF9800; // Orange
+      case ConnectionStatus.error:
+        return 0xFFF44336; // Red
+    }
+  }
+
+  bool get isConnected => this == ConnectionStatus.connected;
+}
+
+/// Trạng thái sẵn có của món ăn
+enum AvailabilityStatus {
+  available,    // Có sẵn
+  unavailable,  // Hết hàng
+}
+
+/// Extension để hiển thị trạng thái sẵn có bằng tiếng Việt
+extension AvailabilityStatusExtension on AvailabilityStatus {
+  String get displayName {
+    switch (this) {
+      case AvailabilityStatus.available:
+        return 'Có sẵn';
+      case AvailabilityStatus.unavailable:
+        return 'Hết hàng';
+    }
+  }
+
+  int get colorValue {
+    switch (this) {
+      case AvailabilityStatus.available:
+        return 0xFF4CAF50; // Green
+      case AvailabilityStatus.unavailable:
+        return 0xFFF44336; // Red
+    }
+  }
+}
+
+/// Trạng thái đơn takeaway
+enum TakeawayStatus {
+  preparing,    // Đang chuẩn bị
+  ready,        // Sẵn sàng
+  delivered,    // Đã giao
+}
+
+/// Extension để hiển thị trạng thái takeaway bằng tiếng Việt
+extension TakeawayStatusExtension on TakeawayStatus {
+  String get displayName {
+    switch (this) {
+      case TakeawayStatus.preparing:
+        return 'Đang chuẩn bị';
+      case TakeawayStatus.ready:
+        return 'Sẵn sàng';
+      case TakeawayStatus.delivered:
+        return 'Đã giao';
+    }
+  }
+
+  int get colorValue {
+    switch (this) {
+      case TakeawayStatus.preparing:
+        return 0xFFFF9800; // Orange
+      case TakeawayStatus.ready:
+        return 0xFF4CAF50; // Green
+      case TakeawayStatus.delivered:
+        return 0xFF2196F3; // Blue
+    }
+  }
+}
+
+/// Helper class để parse enum từ JSON
+class EnumParser {
+  /// Parse TableStatus từ dynamic value (int index hoặc string)
+  static TableStatus parseTableStatus(dynamic value) {
+    if (value == null) return TableStatus.available;
+    
+    if (value is int) {
+      if (value >= 0 && value < TableStatus.values.length) {
+        return TableStatus.values[value];
+      }
+    }
+    
+    if (value is String) {
+      // Parse từ string nếu backend gửi string thay vì index
+      final intValue = int.tryParse(value);
+      if (intValue != null && intValue >= 0 && intValue < TableStatus.values.length) {
+        return TableStatus.values[intValue];
+      }
+    }
+    
+    return TableStatus.available; // Default fallback
+  }
+  
+  /// Parse OrderItemStatus từ dynamic value (int index hoặc string)
+  static OrderItemStatus parseOrderItemStatus(dynamic value) {
+    if (value == null) return OrderItemStatus.pending;
+    
+    if (value is int) {
+      if (value >= 0 && value < OrderItemStatus.values.length) {
+        return OrderItemStatus.values[value];
+      }
+    }
+    
+    if (value is String) {
+      // Parse từ string nếu backend gửi string thay vì index
+      final intValue = int.tryParse(value);
+      if (intValue != null && intValue >= 0 && intValue < OrderItemStatus.values.length) {
+        return OrderItemStatus.values[intValue];
+      }
+    }
+    
+    return OrderItemStatus.pending; // Default fallback
+  }
+  
+  /// Parse OrderStatus từ dynamic value
+  static OrderStatus parseOrderStatus(dynamic value) {
+    if (value == null) return OrderStatus.serving;
+    
+    if (value is int) {
+      if (value >= 0 && value < OrderStatus.values.length) {
+        return OrderStatus.values[value];
+      }
+    }
+    
+    if (value is String) {
+      final intValue = int.tryParse(value);
+      if (intValue != null && intValue >= 0 && intValue < OrderStatus.values.length) {
+        return OrderStatus.values[intValue];
+      }
+    }
+    
+    return OrderStatus.serving; // Default fallback
+  }
+}
+
+/// Các constant text thường dùng trong ứng dụng
+class AppTexts {
+  // Empty states
+  static const String emptyTable = 'Trống';
+  static const String waitingPayment = 'Chờ thanh toán';
+  
+  // Actions
+  static const String completed = 'Hoàn thành';
+  static const String cancel = 'Hủy';
+  static const String processing = 'Đang xử lý';
+  
+  // Success messages
+  static const String printSuccess = 'Đã in hóa đơn thành công';
+  
+  // Error messages
+  static const String orderIdNotFound = 'Không tìm thấy ID đơn hàng';
+  static const String orderInfoNotFound = 'Không tìm thấy thông tin đơn hàng';
+  static const String orderItemNotFound = 'Không tìm thấy món cần xóa';
 }

@@ -12,7 +12,7 @@ public class IngredientDto : FullAuditedEntityDto<Guid>
     public string? Description { get; set; }
     public Guid UnitId { get; set; }
     public string UnitName { get; set; } = string.Empty; // Để hiển thị tên đơn vị
-    public decimal? CostPerUnit { get; set; }
+    public int? CostPerUnit { get; set; }
     public string? SupplierInfo { get; set; }
     public int CurrentStock { get; set; }
     public bool IsActive { get; set; }

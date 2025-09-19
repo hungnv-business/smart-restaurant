@@ -13,6 +13,7 @@ class ActiveTableDto {
   final bool hasActiveOrders;
   final String orderStatusDisplay; // "Có đơn hàng", "Món chờ phục vụ"
   final int pendingItemsCount;
+  final int readyItemsCount; // Số món đã sẵn sàng phục vụ
 
   ActiveTableDto({
     required this.id,
@@ -25,6 +26,7 @@ class ActiveTableDto {
     required this.hasActiveOrders,
     required this.orderStatusDisplay,
     required this.pendingItemsCount,
+    required this.readyItemsCount,
   });
 
   factory ActiveTableDto.fromJson(Map<String, dynamic> json) {
@@ -32,13 +34,14 @@ class ActiveTableDto {
       id: json['id'] ?? '',
       tableNumber: json['tableNumber'] ?? '',
       displayOrder: json['displayOrder'] ?? 0,
-      status: _parseTableStatus(json['status']),
+      status: EnumParser.parseTableStatus(json['status']),
       statusDisplay: json['statusDisplay'] ?? '',
       layoutSectionId: json['layoutSectionId'],
       layoutSectionName: json['layoutSectionName'],
       hasActiveOrders: json['hasActiveOrders'] ?? false,
-      orderStatusDisplay: json['orderStatusDisplay'] ?? 'Trống',
+      orderStatusDisplay: json['orderStatusDisplay'] ?? AppTexts.emptyTable,
       pendingItemsCount: json['pendingItemsCount'] ?? 0,
+      readyItemsCount: json['readyItemsCount'] ?? 0,
     );
   }
 
@@ -54,45 +57,10 @@ class ActiveTableDto {
       'hasActiveOrders': hasActiveOrders,
       'orderStatusDisplay': orderStatusDisplay,
       'pendingItemsCount': pendingItemsCount,
+      'readyItemsCount': readyItemsCount,
     };
   }
 
-  static TableStatus _parseTableStatus(dynamic statusValue) {
-    if (statusValue == null) return TableStatus.available;
-    
-    // Nếu là số (enum index từ backend)
-    if (statusValue is int) {
-      switch (statusValue) {
-        case 0:
-          return TableStatus.available;
-        case 1:
-          return TableStatus.occupied;
-        case 2:
-          return TableStatus.reserved;
-        default:
-          return TableStatus.available;
-      }
-    }
-    
-    // Nếu là string
-    if (statusValue is String) {
-      switch (statusValue.toLowerCase()) {
-        case 'available':
-        case '0':
-          return TableStatus.available;
-        case 'occupied':
-        case '1':
-          return TableStatus.occupied;
-        case 'reserved':
-        case '2':
-          return TableStatus.reserved;
-        default:
-          return TableStatus.available;
-      }
-    }
-    
-    return TableStatus.available;
-  }
 
   ActiveTableDto copyWith({
     String? id,
@@ -105,6 +73,7 @@ class ActiveTableDto {
     bool? hasActiveOrders,
     String? orderStatusDisplay,
     int? pendingItemsCount,
+    int? readyItemsCount,
   }) {
     return ActiveTableDto(
       id: id ?? this.id,
@@ -117,6 +86,7 @@ class ActiveTableDto {
       hasActiveOrders: hasActiveOrders ?? this.hasActiveOrders,
       orderStatusDisplay: orderStatusDisplay ?? this.orderStatusDisplay,
       pendingItemsCount: pendingItemsCount ?? this.pendingItemsCount,
+      readyItemsCount: readyItemsCount ?? this.readyItemsCount,
     );
   }
 }
@@ -148,7 +118,7 @@ class TableDetailDto {
       id: json['id'] ?? '',
       tableNumber: json['tableNumber'] ?? '',
       layoutSectionName: json['layoutSectionName'] ?? '',
-      status: ActiveTableDto._parseTableStatus(json['status']),
+      status: EnumParser.parseTableStatus(json['status']),
       statusDisplay: json['statusDisplay'] ?? '',
       orderId: json['orderId'], // ID của order đang active
       orderSummary: json['orderSummary'] != null
@@ -180,7 +150,7 @@ class TableDetailDto {
 class TableOrderSummaryDto {
   final int totalItemsCount;
   final int pendingServeCount;
-  final double totalAmount;
+  final int totalAmount;
 
   TableOrderSummaryDto({
     required this.totalItemsCount,
@@ -192,7 +162,7 @@ class TableOrderSummaryDto {
     return TableOrderSummaryDto(
       totalItemsCount: json['totalItemsCount'] ?? 0,
       pendingServeCount: json['pendingServeCount'] ?? 0,
-      totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+      totalAmount: (json['totalAmount'] ?? 0).toInt(),
     );
   }
 
@@ -210,14 +180,15 @@ class TableOrderItemDto {
   final String id;
   final String menuItemName;
   final int quantity;
-  final double unitPrice;
-  final double totalPrice;
+  final int unitPrice;
+  final int totalPrice;
   final OrderItemStatus status;
   final bool canEdit;
   final bool canDelete;
   final String? specialRequest;
   final bool hasMissingIngredients;
-  final List<MissingIngredient> missingIngredients;
+  final List<MissingIngredientDto> missingIngredients;
+  final bool requiresCooking;
 
   TableOrderItemDto({
     required this.id,
@@ -231,6 +202,7 @@ class TableOrderItemDto {
     this.specialRequest,
     this.hasMissingIngredients = false,
     this.missingIngredients = const [],
+    this.requiresCooking = true,
   });
 
   factory TableOrderItemDto.fromJson(Map<String, dynamic> json) {
@@ -238,16 +210,17 @@ class TableOrderItemDto {
       id: json['id'] ?? '',
       menuItemName: json['menuItemName'] ?? '',
       quantity: json['quantity'] ?? 0,
-      unitPrice: (json['unitPrice'] ?? 0).toDouble(),
-      totalPrice: (json['totalPrice'] ?? 0).toDouble(),
-      status: _parseOrderItemStatus(json['status']),
+      unitPrice: (json['unitPrice'] ?? 0).toInt(),
+      totalPrice: (json['totalPrice'] ?? 0).toInt(),
+      status: EnumParser.parseOrderItemStatus(json['status']),
       canEdit: json['canEdit'] ?? false,
       canDelete: json['canDelete'] ?? false,
       specialRequest: json['specialRequest'],
       hasMissingIngredients: json['hasMissingIngredients'] ?? false,
       missingIngredients: (json['missingIngredients'] as List<dynamic>?)
-          ?.map((item) => MissingIngredient.fromJson(item as Map<String, dynamic>))
+          ?.map((item) => MissingIngredientDto.fromJson(item as Map<String, dynamic>))
           .toList() ?? [],
+      requiresCooking: json['requiresCooking'] ?? true,
     );
   }
 
@@ -264,54 +237,9 @@ class TableOrderItemDto {
       'specialRequest': specialRequest,
       'hasMissingIngredients': hasMissingIngredients,
       'missingIngredients': missingIngredients.map((item) => item.toJson()).toList(),
+      'requiresCooking': requiresCooking,
     };
   }
 
-  static OrderItemStatus _parseOrderItemStatus(dynamic statusValue) {
-    if (statusValue == null) return OrderItemStatus.pending;
-    
-    // Nếu là số (enum index từ backend)
-    if (statusValue is int) {
-      switch (statusValue) {
-        case 0:
-          return OrderItemStatus.pending;
-        case 1:
-          return OrderItemStatus.preparing;
-        case 2:
-          return OrderItemStatus.ready;
-        case 3:
-          return OrderItemStatus.served;
-        case 4:
-          return OrderItemStatus.canceled;
-        default:
-          return OrderItemStatus.pending;
-      }
-    }
-    
-    // Nếu là string
-    if (statusValue is String) {
-      switch (statusValue.toLowerCase()) {
-        case 'pending':
-        case '0':
-          return OrderItemStatus.pending;
-        case 'preparing':
-        case '1':
-          return OrderItemStatus.preparing;
-        case 'ready':
-        case '2':
-          return OrderItemStatus.ready;
-        case 'served':
-        case '3':
-          return OrderItemStatus.served;
-        case 'canceled':
-        case '4':
-          return OrderItemStatus.canceled;
-        default:
-          return OrderItemStatus.pending;
-      }
-    }
-    
-    return OrderItemStatus.pending;
-  }
 }
 

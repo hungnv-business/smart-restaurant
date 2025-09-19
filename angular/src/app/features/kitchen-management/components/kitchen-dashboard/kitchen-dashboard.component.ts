@@ -179,7 +179,10 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           life: 5000
         });
         
-        this.loadData();
+        // Delay để đảm bảo database đã được commit
+        setTimeout(() => {
+          this.loadData();
+        }, 1000);
         break;
 
       case 'ORDER_ITEM_QUANTITY_UPDATED':
@@ -195,7 +198,10 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           life: 4000
         });
         
-        this.loadData();
+        // Delay để đảm bảo database đã được commit
+        setTimeout(() => {
+          this.loadData();
+        }, 1000);
         break;
 
       case 'ORDER_ITEMS_ADDED':
@@ -211,7 +217,10 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           life: 5000
         });
         
-        this.loadData();
+        // Delay để đảm bảo database đã được commit
+        setTimeout(() => {
+          this.loadData();
+        }, 1000);
         break;
 
       case 'ORDER_ITEM_REMOVED':
@@ -227,7 +236,10 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           life: 4000
         });
         
-        this.loadData();
+        // Delay để đảm bảo database đã được commit
+        setTimeout(() => {
+          this.loadData();
+        }, 1000);
         break;
 
       case 'ORDER_ITEM_SERVED':
@@ -243,8 +255,10 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           life: 3000
         });
         
-        // Reload data để cập nhật danh sách
-        this.loadData();
+        // Delay để đảm bảo database đã được commit
+        setTimeout(() => {
+          this.loadData();
+        }, 1000);
         break;
     }
   }

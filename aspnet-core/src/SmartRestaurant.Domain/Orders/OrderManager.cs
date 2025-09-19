@@ -491,7 +491,7 @@ public class OrderManager : DomainService
     public async Task ProcessPaymentAsync(
         Guid orderId,
         PaymentMethod paymentMethod = PaymentMethod.Cash,
-        decimal? customerMoney = null,
+        int? customerMoney = null,
         string? notes = null)
     {
         // 1. Lấy order cần thanh toán với đầy đủ thông tin
@@ -509,7 +509,7 @@ public class OrderManager : DomainService
         }
 
         // 3. Validate tiền khách đưa theo phương thức thanh toán
-        decimal customerPayment;
+        int customerPayment;
         switch (paymentMethod)
         {
             case PaymentMethod.Cash:
@@ -525,7 +525,7 @@ public class OrderManager : DomainService
                     // Ví dụ: Hóa đơn 155.000đ, bớt 5.000đ, khách trả 150.000đ
 
                     // Chỉ cảnh báo nếu tiền khách đưa quá ít (nhỏ hơn 50% hóa đơn - có thể là lỗi nhập)
-                    var minimumPayment = activeOrder.TotalAmount * 0.5m;
+                    var minimumPayment = activeOrder.TotalAmount / 2;
                     if (customerPayment < minimumPayment)
                     {
                         throw OrderValidationException.PaymentAmountTooLow(activeOrder.TotalAmount, customerPayment);

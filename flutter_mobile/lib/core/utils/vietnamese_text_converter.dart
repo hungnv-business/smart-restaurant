@@ -98,7 +98,6 @@ class VietnameseTextConverter {
   static String convertWithDebug(String text) {
     if (containsVietnamese(text)) {
       final converted = toAscii(text);
-      print('🔄 Vietnamese text converted: "$text" -> "$converted"');
       return converted;
     }
     return text;
@@ -109,7 +108,6 @@ class VietnameseTextConverter {
     try {
       return toAscii(text);
     } catch (e) {
-      print('❌ Error converting Vietnamese text: $e');
       // Fallback: chỉ giữ lại ASCII characters
       return text.replaceAll(RegExp(r'[^\x00-\x7F]'), '?');
     }
