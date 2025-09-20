@@ -52,6 +52,18 @@ public class Order : FullAuditedAggregateRoot<Guid>
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Tên khách hàng (bắt buộc cho đơn takeaway/delivery)
+    /// </summary>
+    [StringLength(100)]
+    public string? CustomerName { get; set; }
+
+    /// <summary>
+    /// Số điện thoại khách hàng (bắt buộc cho đơn takeaway/delivery)
+    /// </summary>
+    [StringLength(20)]
+    public string? CustomerPhone { get; set; }
+
+    /// <summary>
     /// Thời gian tạo đơn hàng
     /// </summary>
     public DateTime CreatedTime { get; set; }
@@ -89,12 +101,16 @@ public class Order : FullAuditedAggregateRoot<Guid>
         string orderNumber,
         OrderType orderType,
         Guid? tableId = null,
-        string? notes = null) : base(id)
+        string? notes = null,
+        string? customerName = null,
+        string? customerPhone = null) : base(id)
     {
         OrderNumber = orderNumber;
         OrderType = orderType;
         TableId = tableId;
         Notes = notes;
+        CustomerName = customerName;
+        CustomerPhone = customerPhone;
         Status = OrderStatus.Serving;
         TotalAmount = 0;
         CreatedTime = DateTime.Now;
@@ -259,6 +275,13 @@ public class Order : FullAuditedAggregateRoot<Guid>
         {
             // Business Exception: Đơn hàng ăn tại chỗ không có bàn
             throw OrderValidationException.DineInWithoutTable();
+        }
+
+        if ((OrderType == OrderType.Takeaway || OrderType == OrderType.Delivery) && 
+            (string.IsNullOrWhiteSpace(CustomerName) || string.IsNullOrWhiteSpace(CustomerPhone)))
+        {
+            // Business Exception: Đơn hàng takeaway/delivery thiếu thông tin khách hàng
+            throw OrderValidationException.TakeawayWithoutCustomerInfo();
         }
 
         if (TotalAmount <= 0)

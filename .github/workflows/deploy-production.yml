@@ -1,0 +1,353 @@
+name: Deploy SmartRestaurant to Production (chodocquan.site)
+
+on:
+  push:
+    branches: [ main, production ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Build và test backend
+  build-backend:
+    runs-on: ubuntu-latest
+    outputs:
+      api-image: ${{ steps.meta.outputs.tags }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: |
+        cd aspnet-core
+        dotnet restore SmartRestaurant.sln
+        
+    - name: Build
+      run: |
+        cd aspnet-core
+        dotnet build SmartRestaurant.sln --configuration Release --no-restore
+        
+    - name: Run tests
+      run: |
+        cd aspnet-core
+        dotnet test SmartRestaurant.sln --configuration Release --no-build --verbosity normal
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata for API
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: Build and push API Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./aspnet-core
+        file: ./infrastructure/docker/Dockerfile.api
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  # Build Angular frontend
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'angular/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd angular
+        npm ci
+        
+    - name: Install ABP libraries
+      run: |
+        cd angular
+        npm install -g @abp/cli
+        abp install-libs
+        
+    - name: Generate service proxies
+      run: |
+        cd angular
+        # Note: Trong production workflow, cần API đang chạy
+        # Hoặc dùng pre-generated proxies
+        echo "Using pre-generated service proxies"
+        
+    - name: Lint
+      run: |
+        cd angular
+        npm run lint
+        
+    - name: Test
+      run: |
+        cd angular
+        npm run test -- --watch=false --browsers=ChromeHeadless
+        
+    - name: Build for production
+      run: |
+        cd angular
+        npm run build:prod
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: angular-dist
+        path: angular/dist/
+        retention-days: 1
+
+  # Test Flutter mobile (build test)
+  test-mobile:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.1'
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: |
+        cd flutter_mobile
+        flutter pub get
+        
+    - name: Analyze code
+      run: |
+        cd flutter_mobile
+        flutter analyze
+        
+    - name: Run tests
+      run: |
+        cd flutter_mobile
+        flutter test
+        
+    - name: Build APK (test build)
+      run: |
+        cd flutter_mobile
+        flutter build apk --debug
+
+  # Deploy to production VPS
+  deploy-production:
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    environment:
+      name: production
+      url: https://chodocquan.site
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download Angular build
+      uses: actions/download-artifact@v4
+      with:
+        name: angular-dist
+        path: ./angular-dist
+        
+    - name: Create deployment package
+      run: |
+        mkdir -p deployment-package
+        cp -r infrastructure/docker/* deployment-package/
+        cp -r angular-dist/* deployment-package/static/
+        
+    - name: Deploy to VPS via SSH
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        script_stop: true
+        script: |
+          set -e
+          
+          echo "🚀 Starting deployment for SmartRestaurant..."
+          
+          # Create backup of current deployment
+          if [ -d "/opt/smartrestaurant" ]; then
+            sudo cp -r /opt/smartrestaurant /opt/smartrestaurant.backup.$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Create directories
+          sudo mkdir -p /opt/smartrestaurant
+          cd /opt/smartrestaurant
+          
+          # Stop current services gracefully
+          if [ -f "docker-compose.prod.yml" ]; then
+            echo "⏹️ Stopping current services..."
+            sudo docker-compose -f docker-compose.prod.yml down --timeout 30
+          fi
+          
+          # Pull latest images
+          echo "📦 Pulling latest API image..."
+          sudo docker pull ${{ needs.build-backend.outputs.api-image }}
+          
+          # Tag image for local use
+          sudo docker tag ${{ needs.build-backend.outputs.api-image }} smartrestaurant/api:latest
+          
+          # Clean up old images
+          sudo docker image prune -f
+          
+          echo "✅ Deployment preparation completed"
+          
+    - name: Copy deployment files
+      uses: appleboy/scp-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        source: "deployment-package/*"
+        target: "/opt/smartrestaurant/"
+        strip_components: 1
+        
+    - name: Copy Angular static files
+      uses: appleboy/scp-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        source: "angular-dist/*"
+        target: "/var/www/html/"
+        strip_components: 1
+        
+    - name: Start services and verify
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        script_stop: true
+        script: |
+          set -e
+          
+          cd /opt/smartrestaurant
+          
+          # Create .env if not exists
+          if [ ! -f ".env" ]; then
+            echo "Creating .env file..."
+            cat > .env << EOF
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          EOF
+          fi
+          
+          # Set proper permissions
+          sudo chown -R $USER:$USER /opt/smartrestaurant
+          sudo chown -R www-data:www-data /var/www/html
+          sudo chmod -R 755 /var/www/html
+          
+          # Start services
+          echo "🚀 Starting services..."
+          sudo docker-compose -f docker-compose.prod.yml up -d
+          
+          # Wait for services to be ready
+          echo "⏳ Waiting for services to start..."
+          sleep 30
+          
+          # Health check
+          echo "🔍 Performing health checks..."
+          
+          # Check if containers are running
+          if ! sudo docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+            echo "❌ Some containers failed to start"
+            sudo docker-compose -f docker-compose.prod.yml logs
+            exit 1
+          fi
+          
+          # Check nginx
+          if ! curl -f http://localhost/health; then
+            echo "❌ Nginx health check failed"
+            sudo docker-compose -f docker-compose.prod.yml logs nginx
+            exit 1
+          fi
+          
+          # Check API health (with timeout)
+          timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done' || {
+            echo "❌ API health check failed"
+            sudo docker-compose -f docker-compose.prod.yml logs api
+            exit 1
+          }
+          
+          echo "✅ All services are healthy!"
+          echo "🌐 SmartRestaurant is now available at https://chodocquan.site"
+          
+          # Show service status
+          sudo docker-compose -f docker-compose.prod.yml ps
+
+  # Post-deployment monitoring
+  post-deploy-check:
+    needs: [deploy-production]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    
+    steps:
+    - name: Wait for deployment stabilization
+      run: sleep 60
+      
+    - name: Check website availability
+      run: |
+        # Check main site
+        curl -f https://chodocquan.site/health || exit 1
+        
+        # Check API endpoint
+        curl -f https://chodocquan.site/api/health || exit 1
+        
+        echo "✅ Post-deployment checks passed!"
+        
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "🎉 SmartRestaurant successfully deployed to production!"
+        echo "🌐 Available at: https://chodocquan.site"
+        
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Deployment failed! Check logs for details."
+        exit 1

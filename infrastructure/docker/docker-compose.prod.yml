@@ -1,105 +1,139 @@
 version: '3.8'
 
+networks:
+  smartrestaurant-network:
+    driver: bridge
+
 services:
-  # PostgreSQL Database (Production)
-  postgres:
-    image: postgres:15
-    container_name: smartrestaurant-postgres-prod
-    environment:
-      POSTGRES_DB: SmartRestaurant
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--locale=vi_VN.UTF-8 --encoding=UTF8"
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-      - ./backup:/backup
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-
-  # Redis Cache (Production)
-  redis:
-    image: redis:7-alpine
-    container_name: smartrestaurant-redis-prod
-    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
-    volumes:
-      - redis_data_prod:/data
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 128M
-
-  # ABP Backend API (Production)
-  api:
-    build:
-      context: ../../
-      dockerfile: infrastructure/docker/Dockerfile.api
-      target: production
-    container_name: smartrestaurant-api-prod
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__Default=User ID=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Host=postgres;Port=5432;Database=SmartRestaurant;
-      - Redis__Configuration=redis:6379,password=${REDIS_PASSWORD}
-      - App__SelfUrl=${API_BASE_URL}
-      - App__CorsOrigins=${WEB_BASE_URL}
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Angular Frontend with Nginx (Production)
-  web:
-    build:
-      context: ../../
-      dockerfile: infrastructure/docker/Dockerfile.web
-      target: production
-    container_name: smartrestaurant-web-prod
+  # Nginx Reverse Proxy (Memory Optimized for 2GB VPS)
+  nginx:
+    image: nginx:alpine
+    container_name: smartrestaurant_nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/html:/var/www/html:ro
+      - /opt/smartrestaurant/logs:/var/log/nginx
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
     depends_on:
       - api
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # .NET API Backend (Optimized for 2GB RAM)
+  api:
+    image: smartrestaurant/api:latest
+    container_name: smartrestaurant_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
+      - JwtSettings__SecretKey=${JWT_SECRET}
+      - JwtSettings__Issuer=chodocquan.site
+      - JwtSettings__Audience=chodocquan.site
+      - Serilog__MinimumLevel__Default=Warning
+      - DOTNET_GCHeapHardLimit=400000000
+    volumes:
+      - /opt/smartrestaurant/logs:/app/logs
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 450M
+          cpus: '0.7'
+        reservations:
+          memory: 200M
+          cpus: '0.3'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+
+  # PostgreSQL Database (Optimized for 2GB RAM)
+  postgres:
+    image: postgres:15-alpine
+    container_name: smartrestaurant_postgres
+    environment:
+      POSTGRES_DB: SmartRestaurant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=vi_VN.UTF-8 --lc-ctype=vi_VN.UTF-8"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - /opt/smartrestaurant/backups:/backups
+      - /opt/smartrestaurant/logs:/var/log/postgresql
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+          cpus: '0.5'
+        reservations:
+          memory: 150M
+          cpus: '0.2'
+    command: >
+      postgres
+      -c shared_buffers=80MB
+      -c effective_cache_size=200MB
+      -c maintenance_work_mem=24MB
+      -c work_mem=2MB
+      -c max_connections=40
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c min_wal_size=64MB
+      -c max_wal_size=512MB
+      -c log_statement=error
+      -c log_min_error_statement=error
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d SmartRestaurant"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache (Lightweight for caching)
+  redis:
+    image: redis:alpine
+    container_name: smartrestaurant_redis
+    command: redis-server --maxmemory 48mb --maxmemory-policy allkeys-lru --save ""
     networks:
       - smartrestaurant-network
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 64M
         reservations:
-          memory: 128M
+          memory: 32M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
 
 volumes:

@@ -73,7 +73,9 @@ public class OrderAppService : ApplicationService, IOrderAppService
             input.OrderType,
             orderItems,
             input.TableId,
-            input.Notes);
+            input.Notes,
+            input.CustomerName,
+            input.CustomerPhone);
 
         // Create DTO for notifications
         var orderDto = await MapToOrderDtoAsync(order, includeOrderItems: true);
@@ -611,6 +613,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
     }
     #endregion
 
+
     /// <summary>
     /// Cập nhật trạng thái món sang "Đã phục vụ" từ mobile app
     /// Chỉ cho phép khi món ở trạng thái "Ready" (đã hoàn thành)
@@ -658,4 +661,195 @@ public class OrderAppService : ApplicationService, IOrderAppService
         // Log thông tin phục vụ thành công
         Console.WriteLine($"🍽️ OrderAppService: Món {orderItem.MenuItemName} đã được đánh dấu phục vụ cho {tableName}");
     }
+
+    /// <summary>
+    /// Lấy danh sách đơn hàng takeaway với filtering
+    /// </summary>
+    public async Task<ListResultDto<TakeawayOrderDto>> GetTakeawayOrdersAsync(GetTakeawayOrdersDto input)
+    {
+        try
+        {
+            Logger.LogInformation("🥡 OrderAppService: Getting takeaway orders with filter: {Filter}", input.StatusFilter);
+
+            // Sử dụng GetTakeawayOrdersTodayAsync từ repository
+            var orderStatus = input.StatusFilter.HasValue 
+                ? MapTakeawayStatusToOrderStatus(input.StatusFilter.Value)
+                : (OrderStatus?)null;
+                
+            var orders = await _orderRepository.GetTakeawayOrdersTodayAsync(orderStatus);
+
+            // TODO: Thêm filter theo ngày và search text nếu cần
+            // Hiện tại GetTakeawayOrdersTodayAsync chỉ support filter theo status
+
+            // Map sang TakeawayOrderDto
+            var takeawayOrders = orders.Select(MapToTakeawayOrderDto).ToList();
+
+            Logger.LogInformation("✅ OrderAppService: Found {Count} takeaway orders", takeawayOrders.Count);
+
+            return new ListResultDto<TakeawayOrderDto>(takeawayOrders);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ OrderAppService: Error getting takeaway orders");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Cập nhật trạng thái đơn hàng takeaway
+    /// </summary>
+    public async Task UpdateTakeawayOrderStatusAsync(Guid orderId, TakeawayStatus status)
+    {
+        try
+        {
+            Logger.LogInformation("🔄 OrderAppService: Updating takeaway order {OrderId} to status {Status}", orderId, status);
+
+            var order = await _orderRepository.GetAsync(orderId);
+            
+            if (order.OrderType != OrderType.Takeaway)
+            {
+                throw new InvalidOperationException($"Order {orderId} is not a takeaway order");
+            }
+
+            // Map TakeawayStatus sang OrderStatus tương ứng
+            var newOrderStatus = MapTakeawayStatusToOrderStatus(status);
+            
+            // Cập nhật trạng thái order (logic cụ thể tùy vào business rules)
+            // Hiện tại đơn giản chỉ update status
+            var orderType = typeof(Order);
+            var statusProperty = orderType.GetProperty("Status");
+            statusProperty?.SetValue(order, newOrderStatus);
+
+            await _orderRepository.UpdateAsync(order);
+
+            Logger.LogInformation("✅ OrderAppService: Successfully updated takeaway order {OrderId} status to {Status}", orderId, status);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ OrderAppService: Error updating takeaway order status");
+            throw;
+        }
+    }
+
+    #region Private Helper Methods
+
+    /// <summary>
+    /// Map Order entity sang TakeawayOrderDto
+    /// </summary>
+    private TakeawayOrderDto MapToTakeawayOrderDto(Order order)
+    {
+        return new TakeawayOrderDto
+        {
+            Id = order.Id,
+            OrderNumber = order.OrderNumber,
+            CustomerName = order.CustomerName ?? "",
+            CustomerPhone = order.CustomerPhone ?? "",
+            Status = MapOrderStatusToTakeawayStatus(order.Status),
+            StatusDisplay = MapOrderStatusToTakeawayStatus(order.Status).GetDisplayName(),
+            TotalAmount = order.TotalAmount,
+            Notes = order.Notes,
+            CreatedTime = order.CreatedTime,
+            PickupTime = null, // Có thể tính toán dựa trên thời gian chuẩn bị
+            ItemNames = order.OrderItems.Select(oi => oi.MenuItemName).ToList(),
+            ItemCount = order.OrderItems.Count
+        };
+    }
+
+
+    /// <summary>
+    /// Map TakeawayStatus sang OrderStatus
+    /// </summary>
+    private OrderStatus MapTakeawayStatusToOrderStatus(TakeawayStatus takeawayStatus)
+    {
+        return takeawayStatus switch
+        {
+            TakeawayStatus.Preparing => OrderStatus.Serving,
+            TakeawayStatus.Ready => OrderStatus.Serving, // Still serving but ready
+            TakeawayStatus.Delivered => OrderStatus.Paid,
+            _ => OrderStatus.Serving
+        };
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết đơn hàng takeaway để chỉnh sửa
+    /// </summary>
+    public async Task<TakeawayOrderDetailsDto> GetTakeawayOrderDetailsAsync(Guid orderId)
+    {
+        Logger.LogInformation("📋 OrderAppService: Getting takeaway order details for order {OrderId}", orderId);
+
+        // Lấy order với tất cả thông tin liên quan
+        var order = await _orderRepository.GetAsync(orderId);
+        if (order == null)
+        {
+            throw new EntityNotFoundException(typeof(Order), orderId);
+        }
+
+        // Kiểm tra xem đây có phải là takeaway order không
+        if (order.OrderType != OrderType.Takeaway)
+        {
+            throw new InvalidOperationException($"Order {orderId} is not a takeaway order");
+        }
+
+        // Lấy chi tiết order items với menu information
+        var orderWithDetails = await _orderRepository.GetWithDetailsAsync(orderId);
+        if (orderWithDetails == null)
+        {
+            throw new EntityNotFoundException(typeof(Order), orderId);
+        }
+
+        Logger.LogInformation("✅ OrderAppService: Found takeaway order {OrderNumber} with {ItemCount} items", 
+            order.OrderNumber, orderWithDetails.OrderItems.Count);
+
+        // Map sang TakeawayOrderDetailsDto
+        var result = new TakeawayOrderDetailsDto
+        {
+            Id = order.Id,
+            OrderNumber = order.OrderNumber,
+            CustomerName = order.CustomerName ?? "",
+            CustomerPhone = order.CustomerPhone ?? "",
+            Status = MapOrderStatusToTakeawayStatus(order.Status),
+            TotalAmount = order.TotalAmount,
+            Notes = order.Notes,
+            CreatedTime = order.CreationTime,
+            PickupTime = null, // TODO: Calculate based on preparation time
+            OrderSummary = new TakeawayOrderSummaryDto
+            {
+                TotalItemsCount = orderWithDetails.OrderItems.Count,
+                PendingServeCount = orderWithDetails.OrderItems.Count(i => i.Status == OrderItemStatus.Pending || i.Status == OrderItemStatus.Preparing),
+                TotalAmount = order.TotalAmount
+            },
+            OrderItems = orderWithDetails.OrderItems.Select(item => new TakeawayOrderItemDto
+            {
+                Id = item.Id,
+                MenuItemName = item.MenuItemName,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                TotalPrice = item.UnitPrice * item.Quantity,
+                Status = item.Status,
+                SpecialRequest = item.Notes,
+                CanEdit = item.Status == OrderItemStatus.Pending,
+                CanDelete = item.Status == OrderItemStatus.Pending,
+                HasMissingIngredients = false, // TODO: Implement missing ingredients check
+                MissingIngredients = new List<string>(),
+                RequiresCooking = true // Default value
+            }).ToList()
+        };
+
+        return result;
+    }
+
+    /// <summary>
+    /// Map OrderStatus sang TakeawayStatus
+    /// </summary>
+    private TakeawayStatus MapOrderStatusToTakeawayStatus(OrderStatus orderStatus)
+    {
+        return orderStatus switch
+        {
+            OrderStatus.Serving => TakeawayStatus.Preparing,
+            OrderStatus.Paid => TakeawayStatus.Delivered,
+            _ => TakeawayStatus.Preparing
+        };
+    }
+
+    #endregion
 }

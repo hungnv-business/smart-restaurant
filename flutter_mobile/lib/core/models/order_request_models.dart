@@ -69,6 +69,12 @@ class CreateOrderDto {
   
   /// Ghi chú chung của khách hàng hoặc nhân viên
   final String? notes;
+
+  /// Tên khách hàng (bắt buộc cho Takeaway/Delivery)
+  final String? customerName;
+
+  /// Số điện thoại khách hàng (bắt buộc cho Takeaway/Delivery)
+  final String? customerPhone;
   
   /// Danh sách món được đặt (tối thiểu 1 món)
   final List<CreateOrderItemDto> orderItems;
@@ -77,6 +83,8 @@ class CreateOrderDto {
     this.tableId,
     this.orderType = OrderType.dineIn,
     this.notes,
+    this.customerName,
+    this.customerPhone,
     required this.orderItems,
   });
 
@@ -86,6 +94,8 @@ class CreateOrderDto {
       if (tableId != null && tableId!.isNotEmpty) 'tableId': tableId,
       'orderType': orderType.index,
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
+      if (customerName != null && customerName!.isNotEmpty) 'customerName': customerName,
+      if (customerPhone != null && customerPhone!.isNotEmpty) 'customerPhone': customerPhone,
       'orderItems': orderItems.map((item) => item.toJson()).toList(),
     };
   }
@@ -97,6 +107,16 @@ class CreateOrderDto {
     // Validate DineIn requires table
     if (orderType == OrderType.dineIn && (tableId == null || tableId!.isEmpty)) {
       errors.add('Đơn hàng ăn tại chỗ phải có bàn');
+    }
+
+    // Validate Takeaway/Delivery requires customer info
+    if (orderType == OrderType.takeaway || orderType == OrderType.delivery) {
+      if (customerName == null || customerName!.trim().isEmpty) {
+        errors.add('Đơn hàng mang về/giao hàng phải có tên khách hàng');
+      }
+      if (customerPhone == null || customerPhone!.trim().isEmpty) {
+        errors.add('Đơn hàng mang về/giao hàng phải có số điện thoại khách hàng');
+      }
     }
     
     // Validate OrderItems not empty  

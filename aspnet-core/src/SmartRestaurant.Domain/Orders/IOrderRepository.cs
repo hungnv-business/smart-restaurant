@@ -141,4 +141,14 @@ public interface IOrderRepository : IRepository<Order, Guid>
     Task<List<Order>> GetActiveOrdersWithDetailsAsync(
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Lấy danh sách đơn hàng takeaway trong ngày hôm nay
+    /// </summary>
+    /// <param name="status">Trạng thái đơn hàng cần lọc (optional)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Danh sách đơn hàng takeaway hôm nay với đầy đủ thông tin</returns>
+    Task<List<Order>> GetTakeawayOrdersTodayAsync(
+        OrderStatus? status = null,
+        CancellationToken cancellationToken = default);
+
 }

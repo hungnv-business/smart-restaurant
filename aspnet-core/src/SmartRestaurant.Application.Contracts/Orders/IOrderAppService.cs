@@ -5,6 +5,7 @@ using Volo.Abp.Application.Services;
 using SmartRestaurant.Application.Contracts.Orders.Dto;
 using SmartRestaurant.Common.Dto;
 using SmartRestaurant.MenuManagement.MenuItems.Dto;
+using SmartRestaurant.Orders;
 
 namespace SmartRestaurant.Application.Contracts.Orders;
 
@@ -109,4 +110,27 @@ public interface IOrderAppService : IApplicationService
     /// </summary>
     /// <param name="orderItemId">ID của món cần đánh dấu đã phục vụ</param>
     Task MarkOrderItemServedAsync(Guid orderItemId);
+
+    /// <summary>
+    /// Lấy danh sách tất cả đơn hàng takeaway với filtering
+    /// Chỉ lấy đơn hàng có OrderType = Takeaway
+    /// </summary>
+    /// <param name="input">Filter parameters cho takeaway orders</param>
+    /// <returns>Danh sách đơn hàng takeaway</returns>
+    Task<ListResultDto<TakeawayOrderDto>> GetTakeawayOrdersAsync(GetTakeawayOrdersDto input);
+
+    /// <summary>
+    /// Cập nhật trạng thái đơn hàng takeaway
+    /// </summary>
+    /// <param name="orderId">ID đơn hàng</param>
+    /// <param name="status">Trạng thái mới</param>
+    Task UpdateTakeawayOrderStatusAsync(Guid orderId, TakeawayStatus status);
+
+    /// <summary>
+    /// Lấy thông tin chi tiết đơn hàng takeaway để chỉnh sửa
+    /// Tương tự GetTableDetailsAsync nhưng cho takeaway orders
+    /// </summary>
+    /// <param name="orderId">ID đơn hàng takeaway</param>
+    /// <returns>Thông tin chi tiết đơn hàng takeaway với các món</returns>
+    Task<TakeawayOrderDetailsDto> GetTakeawayOrderDetailsAsync(Guid orderId);
 }

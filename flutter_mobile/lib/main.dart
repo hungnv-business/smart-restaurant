@@ -4,6 +4,7 @@ import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/order_service.dart';
+import 'core/services/shared_order_service.dart';
 import 'core/services/signalr_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/widgets/auth_wrapper.dart';
@@ -46,6 +47,12 @@ void main() async {
               notificationService: notification,
             );
           },
+        ),
+        
+        // Shared Order Service (depends on OrderService)
+        ChangeNotifierProxyProvider<OrderService, SharedOrderService>(
+          create: (context) => SharedOrderService(orderService: context.read<OrderService>()),
+          update: (_, orderService, previous) => previous ?? SharedOrderService(orderService: orderService),
         ),
       ],
       child: const QuanBiaApp(),

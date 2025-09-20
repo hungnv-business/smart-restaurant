@@ -33,6 +33,14 @@ public class OrderValidationException : BusinessException
     }
 
     /// <summary>
+    /// Đơn hàng takeaway/delivery thiếu thông tin khách hàng
+    /// </summary>
+    public static OrderValidationException TakeawayWithoutCustomerInfo()
+    {
+        return new OrderValidationException("Đơn hàng mang về/giao hàng phải có tên và số điện thoại khách hàng");
+    }
+
+    /// <summary>
     /// Chỉ có thể xác nhận đơn hàng ở trạng thái Pending
     /// </summary>
     public static OrderValidationException CannotConfirmNonPendingOrder()

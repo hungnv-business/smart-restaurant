@@ -242,5 +242,26 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .ToListAsync(GetCancellationToken(cancellationToken));
         }
 
+        /// <summary>
+        /// Lấy danh sách đơn hàng takeaway trong ngày hôm nay
+        /// </summary>
+        public async Task<List<Order>> GetTakeawayOrdersTodayAsync(
+            OrderStatus? status = null,
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+
+            return await dbSet
+                .Where(o => o.OrderType == OrderType.Takeaway)
+                .Where(o => o.CreationTime >= today && o.CreationTime < tomorrow)
+                .WhereIf(status.HasValue, o => o.Status == status!.Value)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .OrderBy(o => o.CreationTime)
+                .ToListAsync(GetCancellationToken(cancellationToken));
+        }
+
     }
 }

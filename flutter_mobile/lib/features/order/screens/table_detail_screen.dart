@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/table_models.dart';
+import '../../../core/models/takeaway_order_details_models.dart';
 import '../../../core/services/order_service.dart';
+import '../../../core/services/shared_order_service.dart';
 import '../../../core/services/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../widgets/order_item_card.dart';
@@ -11,13 +13,17 @@ import '../widgets/edit_quantity_dialog.dart';
 import '../../../core/utils/price_formatter.dart';
 import 'menu_screen.dart';
 
-/// Màn hình chi tiết order của một bàn cụ thể
+/// Màn hình chi tiết order của một bàn cụ thể hoặc đơn takeaway
 class TableDetailScreen extends StatefulWidget {
-  final ActiveTableDto table;
+  final ActiveTableDto? table;
+  final TakeawayOrderDto? takeawayOrder;
+  final bool isForTakeaway;
 
   const TableDetailScreen({
     Key? key,
-    required this.table,
+    this.table,
+    this.takeawayOrder,
+    this.isForTakeaway = false,
   }) : super(key: key);
 
   @override
@@ -26,6 +32,7 @@ class TableDetailScreen extends StatefulWidget {
 
 class _TableDetailScreenState extends State<TableDetailScreen> {
   TableDetailDto? _tableDetail;
+  TakeawayOrderDetailsDto? _takeawayOrderDetails;
   bool _isLoading = true;
   String? _errorMessage;
   @override
@@ -46,16 +53,59 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         _errorMessage = null;
       });
 
-      final orderService = Provider.of<OrderService>(context, listen: false);
-      final tableDetail = await orderService.getTableDetails(widget.table.id);
+      if (widget.isForTakeaway) {
+        // Use real API for takeaway order details
+        if (widget.takeawayOrder != null) {
+          final sharedOrderService = Provider.of<SharedOrderService>(context, listen: false);
+          _takeawayOrderDetails = await sharedOrderService.getTakeawayOrderDetails(widget.takeawayOrder!.id);
+          
+          // Convert TakeawayOrderDetailsDto to TableDetailDto for UI compatibility
+          final orderItems = _takeawayOrderDetails!.orderItems.map((item) {
+            return TableOrderItemDto(
+              id: item.id,
+              menuItemName: item.menuItemName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice,
+              status: item.status,
+              specialRequest: item.specialRequest ?? '',
+              missingIngredients: [],
+              requiresCooking: item.requiresCooking,
+              canEdit: item.canEdit,
+              canDelete: item.canDelete,
+              hasMissingIngredients: item.hasMissingIngredients,
+            );
+          }).toList();
+          
+          _tableDetail = TableDetailDto(
+            id: _takeawayOrderDetails!.id,
+            tableNumber: _takeawayOrderDetails!.orderNumber,
+            layoutSectionName: 'Mang về',
+            status: TableStatus.occupied,
+            statusDisplay: _mapTakeawayStatusToDisplay(_takeawayOrderDetails!.status),
+            orderId: _takeawayOrderDetails!.id,
+            orderSummary: TableOrderSummaryDto(
+              totalItemsCount: _takeawayOrderDetails!.orderSummary.totalItemsCount,
+              pendingServeCount: _takeawayOrderDetails!.orderSummary.pendingServeCount,
+              totalAmount: _takeawayOrderDetails!.orderSummary.totalAmount,
+            ),
+            orderItems: orderItems,
+          );
+        }
+      } else {
+        final orderService = Provider.of<OrderService>(context, listen: false);
+        final tableDetail = await orderService.getTableDetails(widget.table!.id);
+        _tableDetail = tableDetail;
+      }
       
       setState(() {
-        _tableDetail = tableDetail;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Lỗi khi tải chi tiết bàn: ${e.toString()}';
+        _errorMessage = widget.isForTakeaway 
+            ? 'Lỗi khi tải chi tiết đơn mang về: ${e.toString()}'
+            : 'Lỗi khi tải chi tiết bàn: ${e.toString()}';
         _isLoading = false;
       });
     }
@@ -65,7 +115,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBar(
-        title: 'Bàn ${widget.table.tableNumber}',
+        title: widget.isForTakeaway 
+            ? 'Đơn mang về ${widget.takeawayOrder?.orderNumber ?? ''}'
+            : 'Bàn ${widget.table?.tableNumber ?? ''}',
         actions: [
           IconButton(
             onPressed: _canPrintInvoice() ? _printInvoice : null,
@@ -150,42 +202,85 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       ),
       child: Row(
         children: [
-          // Table icon và số bàn
+          // Icon cho table hoặc takeaway
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Color(widget.table.status.colorValue).withOpacity(0.1),
+              color: widget.isForTakeaway 
+                  ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E).withOpacity(0.1)
+                  : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E).withOpacity(0.1),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: Color(widget.table.status.colorValue),
+                color: widget.isForTakeaway 
+                    ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
+                    : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E),
                 width: 2,
               ),
             ),
             child: Icon(
-              Icons.table_restaurant,
+              widget.isForTakeaway ? Icons.takeout_dining : Icons.table_restaurant,
               size: 30,
-              color: Color(widget.table.status.colorValue),
+              color: widget.isForTakeaway 
+                  ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
+                  : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E),
             ),
           ),
           
           const SizedBox(width: 16),
           
-          // Thông tin bàn
+          // Thông tin bàn hoặc khách hàng
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bàn ${widget.table.tableNumber}',
+                  widget.isForTakeaway 
+                      ? 'Đơn mang về ${_takeawayOrderDetails?.orderNumber ?? widget.takeawayOrder?.orderNumber ?? ''}'
+                      : 'Bàn ${widget.table?.tableNumber ?? ''}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
-                if (widget.table.layoutSectionName != null)
+                if (widget.isForTakeaway && _takeawayOrderDetails != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'KH: ${_takeawayOrderDetails!.customerName}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        'SĐT: ${_takeawayOrderDetails!.customerPhone}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (_takeawayOrderDetails!.notes != null && _takeawayOrderDetails!.notes!.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.amber),
+                          ),
+                          child: Text(
+                            'Ghi chú: ${_takeawayOrderDetails!.notes}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade800,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  )
+                else if (!widget.isForTakeaway && widget.table?.layoutSectionName != null)
                   Text(
-                    'Khu vực: ${widget.table.layoutSectionName}',
+                    'Khu vực: ${widget.table!.layoutSectionName}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -201,14 +296,21 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Widget _buildStatusChip() {
+    final statusText = widget.isForTakeaway 
+        ? widget.takeawayOrder?.status.displayName ?? ''
+        : widget.table?.status.displayName ?? '';
+    final statusColor = widget.isForTakeaway 
+        ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
+        : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E);
+        
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Color(widget.table.status.colorValue),
+        color: statusColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        widget.table.status.displayName,
+        statusText,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
@@ -513,7 +615,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   void _navigateToMenu() async {
-    // Kiểm tra bàn đã có order chưa
+    // Kiểm tra đã có order chưa
     final hasActiveOrder = _tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty;
     
     final result = await Navigator.push(
@@ -522,14 +624,15 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         builder: (context) => MenuScreen(
           selectedTable: widget.table,
           hasActiveOrder: hasActiveOrder,
-          currentOrderId: _tableDetail?.orderId, // Lấy orderId từ TableDetailDto
+          currentOrderId: _tableDetail?.orderId,
+          isForTakeaway: widget.isForTakeaway,
         ),
       ),
     );
     
-    // Nếu có thay đổi (tạo đơn hàng hoặc thêm món), pop về OrderScreen
+    // Nếu có thay đổi (tạo đơn hàng hoặc thêm món), pop về màn hình trước
     if (result == true && mounted) {
-      Navigator.of(context).pop(true); // Trả về result cho TableCard
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -1121,14 +1224,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Thông tin bàn ${widget.table.tableNumber}'),
+        title: Text('Thông tin bàn ${widget.table?.tableNumber ?? 'Không có'}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('Số bàn', widget.table.tableNumber),
-            _buildInfoRow('Khu vực', widget.table.layoutSectionName ?? 'Không có'),
-            _buildInfoRow('Trạng thái', widget.table.status.displayName),
+            _buildInfoRow('Số bàn', widget.table?.tableNumber ?? 'Không có'),
+            _buildInfoRow('Khu vực', widget.table?.layoutSectionName ?? 'Không có'),
+            _buildInfoRow('Trạng thái', widget.table?.status.displayName ?? 'Không xác định'),
             _buildInfoRow('Có đơn hàng', (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty) ? 'Có' : 'Không'),
             _buildInfoRow('Món chờ phục vụ', '$_tableDetail?.orderSummary?.pendingServeCount ?? 0'),
           ],
@@ -1195,6 +1298,18 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           ),
         );
       }
+    }
+  }
+
+  /// Map TakeawayStatus sang display string cho UI
+  String _mapTakeawayStatusToDisplay(TakeawayStatus status) {
+    switch (status) {
+      case TakeawayStatus.preparing:
+        return 'Đang chuẩn bị';
+      case TakeawayStatus.ready:
+        return 'Sẵn sàng lấy';
+      case TakeawayStatus.delivered:
+        return 'Đã giao/lấy';
     }
   }
 }

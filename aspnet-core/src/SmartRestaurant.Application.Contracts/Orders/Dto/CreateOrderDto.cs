@@ -29,6 +29,18 @@ public class CreateOrderDto
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Tên khách hàng (bắt buộc cho Takeaway/Delivery)
+    /// </summary>
+    [StringLength(100, ErrorMessage = "Tên khách hàng không được vượt quá 100 ký tự")]
+    public string? CustomerName { get; set; }
+
+    /// <summary>
+    /// Số điện thoại khách hàng (bắt buộc cho Takeaway/Delivery)
+    /// </summary>
+    [StringLength(20, ErrorMessage = "Số điện thoại không được vượt quá 20 ký tự")]
+    public string? CustomerPhone { get; set; }
+
+    /// <summary>
     /// Danh sách món được đặt (tối thiểu 1 món)
     /// </summary>
     [Required]
@@ -46,6 +58,24 @@ public class CreateOrderDto
             yield return new ValidationResult(
                 "Đơn hàng ăn tại chỗ phải có bàn",
                 new[] { nameof(TableId) });
+        }
+
+        // Validate Takeaway/Delivery requires customer info
+        if ((OrderType == OrderType.Takeaway || OrderType == OrderType.Delivery))
+        {
+            if (string.IsNullOrWhiteSpace(CustomerName))
+            {
+                yield return new ValidationResult(
+                    "Đơn hàng mang về/giao hàng phải có tên khách hàng",
+                    new[] { nameof(CustomerName) });
+            }
+
+            if (string.IsNullOrWhiteSpace(CustomerPhone))
+            {
+                yield return new ValidationResult(
+                    "Đơn hàng mang về/giao hàng phải có số điện thoại khách hàng",
+                    new[] { nameof(CustomerPhone) });
+            }
         }
 
         // Validate OrderItems not empty

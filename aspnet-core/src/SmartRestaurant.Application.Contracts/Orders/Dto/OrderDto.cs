@@ -51,6 +51,16 @@ public class OrderDto : FullAuditedEntityDto<Guid>
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Tên khách hàng (cho đơn takeaway/delivery)
+    /// </summary>
+    public string? CustomerName { get; set; }
+
+    /// <summary>
+    /// Số điện thoại khách hàng (cho đơn takeaway/delivery)
+    /// </summary>
+    public string? CustomerPhone { get; set; }
+
+    /// <summary>
     /// Thời gian các trạng thái
     /// </summary>
     public DateTime? ConfirmedTime { get; set; }

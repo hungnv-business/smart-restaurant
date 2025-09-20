@@ -11,17 +11,23 @@ import '../widgets/menu_item_card.dart';
 import '../widgets/cart_dialog.dart';
 import '../widgets/ingredient_verification_dialog.dart';
 
-/// Màn hình Menu món ăn cho bàn đã chọn
+/// Màn hình Menu món ăn cho bàn đã chọn hoặc đơn takeaway
 class MenuScreen extends StatefulWidget {
-  final ActiveTableDto selectedTable;
+  final ActiveTableDto? selectedTable;
+  final String? tableId;
   final bool hasActiveOrder;
   final String? currentOrderId;
+  final bool isForTakeaway;
+  final List<CreateOrderItemDto> initialSelectedItems;
 
   const MenuScreen({
     Key? key,
-    required this.selectedTable,
+    this.selectedTable,
+    this.tableId,
     this.hasActiveOrder = false,
     this.currentOrderId,
+    this.isForTakeaway = false,
+    this.initialSelectedItems = const [],
   }) : super(key: key);
 
   @override
@@ -94,8 +100,17 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeCartFromInitialItems();
     _syncCartArrays(); // Đảm bảo đồng bộ từ đầu
     _loadCategories();
+  }
+
+  /// Khởi tạo cart từ initialSelectedItems (cho takeaway)
+  void _initializeCartFromInitialItems() {
+    if (widget.initialSelectedItems.isNotEmpty) {
+      // TODO: Convert CreateOrderItemDto to MenuItem when needed
+      // Hiện tại để trống, sẽ implement sau khi có API lấy MenuItem by ID
+    }
   }
 
   @override
@@ -186,17 +201,19 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBar(
-        title: 'Menu - ${widget.selectedTable.tableNumber}',
-        actions: [
+        title: widget.isForTakeaway 
+            ? 'Menu - Mang về' 
+            : 'Menu - ${widget.selectedTable?.tableNumber ?? ""}',
+        actions: widget.isForTakeaway ? [] : [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: Color(widget.selectedTable.status.colorValue),
+              color: Color(widget.selectedTable!.status.colorValue),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              widget.selectedTable.status.displayName,
+              widget.selectedTable!.status.displayName,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -657,7 +674,7 @@ class _MenuScreenState extends State<MenuScreen> {
         // THÊM MÓN VÀO ORDER HIỆN CÓ
         if (widget.currentOrderId == null) {
           throw Exception(
-            'Không tìm thấy orderId của bàn ${widget.selectedTable.tableNumber}',
+            'Không tìm thấy orderId của bàn ${widget.selectedTable?.tableNumber ?? ""}',
           );
         }
 
@@ -676,17 +693,23 @@ class _MenuScreenState extends State<MenuScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '✅ Đã thêm món vào đơn hàng cho ${widget.selectedTable.tableNumber}',
+                '✅ Đã thêm món vào đơn hàng cho ${widget.selectedTable?.tableNumber ?? ""}',
               ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
             ),
           );
         }
+      } else if (widget.isForTakeaway) {
+        // CHO TAKEAWAY: Trả về orderItems để TakeawayOrderDialog xử lý
+        if (mounted) {
+          Navigator.of(context).pop(orderItems); // Return selected items
+        }
+        return;
       } else {
-        // TẠO ĐƠNAHAÀNG MỚI
+        // TẠO ĐƠN HÀNG MỚI CHO DINE-IN
         final orderRequest = CreateOrderDto(
-          tableId: widget.selectedTable.id,
+          tableId: widget.selectedTable?.id ?? widget.tableId,
           orderType: OrderType.dineIn,
           orderItems: orderItems,
           notes: null,
@@ -700,11 +723,11 @@ class _MenuScreenState extends State<MenuScreen> {
           if (response != null) {
             // API trả về response với orderNumber
             message =
-                '✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable.tableNumber}';
+                '✅ Đã tạo đơn hàng #${response.orderNumber} cho ${widget.selectedTable?.tableNumber ?? ""}';
           } else {
             // API chỉ trả về 204 No Content
             message =
-                '✅ Đã tạo đơn hàng thành công cho ${widget.selectedTable.tableNumber}';
+                '✅ Đã tạo đơn hàng thành công cho ${widget.selectedTable?.tableNumber ?? ""}';
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -751,6 +774,7 @@ class _MenuScreenState extends State<MenuScreen> {
     // Chỉ hiển thị nút giỏ hàng khi có món
     if (_cartItemCount > 0) {
       return FloatingActionButton.extended(
+        heroTag: "menu_cart_fab",
         onPressed: () {
           _showCartBottomSheet(context);
         },
@@ -774,6 +798,7 @@ class _MenuScreenState extends State<MenuScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => CartDialog(
           selectedTable: widget.selectedTable,
+          isForTakeaway: widget.isForTakeaway,
           cartItems: _cartItems,
           cartItemQuantities: _cartItemQuantities,
           onIncreaseQuantity: (index) {

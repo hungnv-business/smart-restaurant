@@ -52,21 +52,52 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 ENTRYPOINT ["dotnet", "SmartRestaurant.HttpApi.Host.dll"]
 
-# Production stage (for docker-compose.prod.yml)
-FROM base AS production
+# Production stage (for docker-compose.prod.yml) - Optimized for 2GB VPS
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
+
+# Install Vietnamese support and health check tools
+RUN apk add --no-cache \
+    icu-libs \
+    icu-data-full \
+    curl \
+    tzdata && \
+    rm -rf /var/cache/apk/*
+
+# Set timezone to Vietnam
+ENV TZ=Asia/Ho_Chi_Minh
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Create non-root user for security
-RUN addgroup --system --gid 1001 appgroup && \
-    adduser --system --uid 1001 --gid 1001 appuser
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup
 
-# Change ownership of the app directory
-RUN chown -R appuser:appgroup /app
+# Create logs directory and set permissions
+RUN mkdir -p /app/logs && \
+    chown -R appuser:appgroup /app && \
+    chmod -R 755 /app
+
+# Set environment variables for production optimization
+ENV ASPNETCORE_ENVIRONMENT=Production \
+    ASPNETCORE_URLS=http://+:80 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    DOTNET_EnableDiagnostics=0 \
+    DOTNET_USE_POLLING_FILE_WATCHER=true \
+    DOTNET_RUNNING_IN_CONTAINER=true
+
+# Memory optimization for 2GB VPS
+ENV DOTNET_GCHeapHardLimit=400000000 \
+    DOTNET_GCConserveMemory=9 \
+    DOTNET_ThreadPool_UnfairSemaphoreSpinLimit=6
+
 USER appuser
 
-# Health check endpoint
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+# Health check endpoint for Vietnamese restaurant API
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost/health || exit 1
 
 ENTRYPOINT ["dotnet", "SmartRestaurant.HttpApi.Host.dll"]

@@ -124,6 +124,7 @@ class _OrderScreenState extends State<OrderScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "order_refresh_fab",
         onPressed: _refreshTables,
         child: const Icon(Icons.refresh),
       ),

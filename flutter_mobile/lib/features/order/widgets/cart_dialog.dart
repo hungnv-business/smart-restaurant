@@ -5,7 +5,7 @@ import '../../../core/utils/price_formatter.dart';
 
 /// Widget dialog hiển thị giỏ hàng
 class CartDialog extends StatefulWidget {
-  final ActiveTableDto selectedTable;
+  final ActiveTableDto? selectedTable;
   final List<MenuItem> cartItems;
   final List<int> cartItemQuantities;
   final Function(int index) onIncreaseQuantity;
@@ -14,10 +14,11 @@ class CartDialog extends StatefulWidget {
   final VoidCallback onSubmitOrder;
   final Function(int index, String note)? onUpdateNote;
   final bool hasActiveOrder;
+  final bool isForTakeaway;
 
   const CartDialog({
     Key? key,
-    required this.selectedTable,
+    this.selectedTable,
     required this.cartItems,
     required this.cartItemQuantities,
     required this.onIncreaseQuantity,
@@ -26,6 +27,7 @@ class CartDialog extends StatefulWidget {
     required this.onSubmitOrder,
     this.onUpdateNote,
     this.hasActiveOrder = false,
+    this.isForTakeaway = false,
   }) : super(key: key);
 
   @override
@@ -83,7 +85,9 @@ class _CartDialogState extends State<CartDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Giỏ hàng - ${widget.selectedTable.tableNumber}',
+                    widget.isForTakeaway 
+                        ? 'Giỏ hàng - Mang về'
+                        : 'Giỏ hàng - ${widget.selectedTable?.tableNumber ?? ""}',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(

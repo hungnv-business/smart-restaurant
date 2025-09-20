@@ -56,13 +56,17 @@ public class OrderManager : DomainService
     /// <param name="orderItems">Danh sách món ăn</param>
     /// <param name="tableId">ID bàn (nếu có)</param>
     /// <param name="notes">Ghi chú</param>
+    /// <param name="customerName">Tên khách hàng (cho takeaway/delivery)</param>
+    /// <param name="customerPhone">Số điện thoại khách hàng (cho takeaway/delivery)</param>
     /// <returns>Order đã hoàn thành tất cả business logic</returns>
     public async Task<Order> CreateAsync(
         string orderNumber,
         OrderType orderType,
         IEnumerable<OrderItem> orderItems,
         Guid? tableId = null,
-        string? notes = null
+        string? notes = null,
+        string? customerName = null,
+        string? customerPhone = null
         )
     {
         // Validate bàn nếu là đơn hàng ăn tại chỗ
@@ -76,7 +80,9 @@ public class OrderManager : DomainService
             orderNumber,
             orderType,
             tableId,
-            notes);
+            notes,
+            customerName,
+            customerPhone);
 
         order.AddItems(GuidGenerator, orderItems);
 
