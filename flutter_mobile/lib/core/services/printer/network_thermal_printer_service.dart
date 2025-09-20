@@ -5,10 +5,10 @@ import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image/image.dart' as img;
-import '../models/table_models.dart';
-import '../utils/thermal_printer_image_utils.dart';
-import '../utils/invoice_layout_utils.dart';
-import 'auth_service.dart';
+import '../../models/order/order_details_models.dart';
+import '../../utils/thermal_printer_image_utils.dart';
+import '../../utils/invoice_layout_utils.dart';
+import '../auth/auth_service.dart';
 
 /// Service xử lý in hóa đơn qua máy in nhiệt WiFi (Xprinter T80W) - Đã refactor
 class NetworkThermalPrinterService {
@@ -182,7 +182,7 @@ class NetworkThermalPrinterService {
 
   /// In hóa đơn cho bàn (sử dụng InvoiceLayoutUtils)
   Future<void> printInvoice(
-    TableDetailDto tableDetail, {
+    OrderDetailsDto orderDetails, {
     AuthService? authService,
   }) async {
     if (_printerIP == null) {
@@ -192,7 +192,7 @@ class NetworkThermalPrinterService {
     try {
       // Tạo hình ảnh hóa đơn với QR code
       final imageBytes = await InvoiceLayoutUtils.createInvoiceImage(
-        tableDetail,
+        orderDetails,
         authService: authService,
       );
 

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
-import '../../lib/core/services/order_service.dart';
-import '../../lib/core/models/table_models.dart';
-import '../../lib/core/enums/restaurant_enums.dart';
+import 'package:flutter_mobile/core/services/order/order_service.dart';
+import 'package:flutter_mobile/core/models/order/dinein_table_models.dart';
+import 'package:flutter_mobile/core/enums/restaurant_enums.dart';
 
 /// Integration test cho OrderService
 /// 
@@ -24,10 +24,10 @@ void main() {
     test('should connect to API and get active tables', () async {
       try {
         // Test gọi API lấy danh sách bàn
-        final tables = await orderService.getActiveTables();
+        final tables = await orderService.getDineInTables();
         
         // Verify kết quả
-        expect(tables, isA<List<ActiveTableDto>>());
+        expect(tables, isA<List<DineInTableDto>>());
         
         // Log kết quả để debug
         print('✅ API connection successful');
@@ -74,7 +74,7 @@ void main() {
       
       try {
         // Override base URL để tạo lỗi
-        await badService.getActiveTables();
+        await badService.getDineInTables();
         fail('Should have thrown an exception');
       } catch (e) {
         expect(e, isA<OrderServiceException>());
@@ -106,9 +106,11 @@ void main() {
           'hasActiveOrders': false,
           'pendingItemsCount': 0,
           'orderStatusDisplay': 'Trống',
+          'layoutSectionName': 'Test Section',
+          'currentOrderId': null,
         };
 
-        final table = ActiveTableDto.fromJson(mockTableData);
+        final table = DineInTableDto.fromJson(mockTableData);
         expect(table.status, testCase['expected']);
         print('✅ Status ${testCase['status']} -> ${table.status}');
       }

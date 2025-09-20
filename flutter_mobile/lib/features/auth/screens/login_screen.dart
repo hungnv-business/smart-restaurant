@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/models/auth_models.dart';
+import '../../../core/services/auth/auth_service.dart';
+import '../../../core/models/auth/auth_models.dart';
 import '../../home/screens/home_screen.dart';
 
 /// Màn hình đăng nhập cho nhân viên nhà hàng

@@ -40,7 +40,8 @@
       "Bash(flutter pub:*)",
       "Bash(dart format:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(flutter:*)"
     ],
     "deny": [],
     "ask": []

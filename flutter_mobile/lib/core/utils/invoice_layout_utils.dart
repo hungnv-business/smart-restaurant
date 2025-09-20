@@ -4,10 +4,10 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobile/core/utils/emvco_vietqr_builder.dart';
-import '../models/table_models.dart';
+import '../models/order/order_details_models.dart';
 import '../enums/restaurant_enums.dart';
 import '../utils/price_formatter.dart';
-import '../services/auth_service.dart';
+import '../services/auth/auth_service.dart';
 import 'thermal_printer_image_utils.dart';
 import 'number_to_words_utils.dart';
 
@@ -15,7 +15,7 @@ import 'number_to_words_utils.dart';
 class InvoiceLayoutUtils {
   /// Tạo hình ảnh hóa đơn với tiếng Việt (80mm width = 576 pixels)
   static Future<Uint8List> createInvoiceImage(
-    TableDetailDto tableDetail, {
+    OrderDetailsDto orderDetails, {
     AuthService? authService,
   }) async {
     // Cấu hình cho máy in thermal với độ phân giải cao
@@ -91,7 +91,7 @@ class InvoiceLayoutUtils {
 
     // === THÔNG TIN BÀN VÀ CHI TIẾT ===
     currentY = layoutHelper.drawText(
-      'Bàn ${tableDetail.tableNumber}',
+      'Bàn ${orderDetails.tableNumber ?? orderDetails.orderNumber}',
       fontSize: 14,
       isBold: true,
       currentY: currentY,
@@ -126,7 +126,7 @@ class InvoiceLayoutUtils {
     currentY += 8;
 
     // === TABLE 4 CỘT VỚI VIỀN - CHỈ HIỂN THỊ MÓN ĐÃ PHỤC VỤ ===
-    final servedItems = tableDetail.orderItems
+    final servedItems = orderDetails.orderItems
         .where((item) => item.status == OrderItemStatus.served)
         .toList();
     currentY = layoutHelper.drawOrderTable(servedItems, currentY);
@@ -165,7 +165,7 @@ class InvoiceLayoutUtils {
     currentY += 12;
 
     // === QR CODE THANH TOÁN ===
-    currentY = await _addQRCodeSection(tableDetail, layoutHelper, currentY);
+    currentY = await _addQRCodeSection(orderDetails, layoutHelper, currentY);
 
     // === FOOTER ===
     currentY = layoutHelper.drawText(
@@ -193,7 +193,7 @@ class InvoiceLayoutUtils {
 
   /// Thêm section QR code thanh toán với thông tin Techcombank
   static Future<double> _addQRCodeSection(
-    TableDetailDto tableDetail,
+    OrderDetailsDto orderDetails,
     InvoiceLayoutHelper helper,
     double currentY,
   ) async {
@@ -209,7 +209,7 @@ class InvoiceLayoutUtils {
 
     try {
       // Tạo QR data EMVCo thủ công
-      final qrData = EmvcoVietQrBuilder.buildPaymentQRData(tableDetail);
+      final qrData = EmvcoVietQrBuilder.buildPaymentQRData(orderDetails);
 
       // Tạo QR code từ data EMVCo (không cần API)
       final qrBytes = await ThermalPrinterImageUtils.generateQRFromData(qrData);

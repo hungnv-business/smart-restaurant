@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile/core/models/notification/notification_models.dart';
+import 'package:flutter_mobile/core/services/notification/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../models/notification_models.dart';
-import '../services/notification_service.dart';
 
 /// Widget hiển thị danh sách notifications
 class NotificationListWidget extends StatelessWidget {
   final bool showOnlyUnread;
   final int? maxItems;
   final VoidCallback? onNotificationTap;
-  
+
   const NotificationListWidget({
     Key? key,
     this.showOnlyUnread = false,
@@ -21,11 +21,11 @@ class NotificationListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<NotificationService>(
       builder: (context, notificationService, child) {
-        final notifications = showOnlyUnread 
+        final notifications = showOnlyUnread
             ? notificationService.unreadNotifications
             : notificationService.notifications;
-            
-        final displayNotifications = maxItems != null 
+
+        final displayNotifications = maxItems != null
             ? notifications.take(maxItems!).toList()
             : notifications;
 
@@ -65,9 +65,7 @@ class NotificationListWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            showOnlyUnread 
-                ? 'Không có thông báo mới'
-                : 'Chưa có thông báo nào',
+            showOnlyUnread ? 'Không có thông báo mới' : 'Chưa có thông báo nào',
             style: const TextStyle(
               fontSize: 16,
               color: Colors.grey,
@@ -79,10 +77,7 @@ class NotificationListWidget extends StatelessWidget {
             showOnlyUnread
                 ? 'Thông báo mới từ bếp sẽ hiển thị ở đây'
                 : 'Thông báo từ bếp sẽ xuất hiện ở đây',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -96,7 +91,7 @@ class NotificationTile extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback? onTap;
   final VoidCallback? onDismiss;
-  
+
   const NotificationTile({
     Key? key,
     required this.notification,
@@ -117,17 +112,16 @@ class NotificationTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         color: Colors.red,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: ListTile(
         leading: _buildLeadingIcon(),
         title: Text(
           notification.title,
           style: TextStyle(
-            fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+            fontWeight: notification.isRead
+                ? FontWeight.normal
+                : FontWeight.bold,
             fontSize: 16,
           ),
         ),
@@ -137,7 +131,9 @@ class NotificationTile extends StatelessWidget {
             Text(
               notification.body,
               style: TextStyle(
-                color: notification.isRead ? Colors.grey[600] : Colors.grey[800],
+                color: notification.isRead
+                    ? Colors.grey[600]
+                    : Colors.grey[800],
                 fontSize: 14,
               ),
               maxLines: 2,
@@ -146,15 +142,12 @@ class NotificationTile extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               _formatTimestamp(notification.timestamp),
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
             ),
           ],
         ),
-        trailing: notification.isRead 
-            ? null 
+        trailing: notification.isRead
+            ? null
             : Container(
                 width: 8,
                 height: 8,
@@ -229,7 +222,7 @@ class NotificationTile extends StatelessWidget {
 class NotificationBadge extends StatelessWidget {
   final Widget child;
   final bool showCount;
-  
+
   const NotificationBadge({
     Key? key,
     required this.child,
@@ -241,7 +234,7 @@ class NotificationBadge extends StatelessWidget {
     return Consumer<NotificationService>(
       builder: (context, notificationService, _) {
         final unreadCount = notificationService.unreadCount;
-        
+
         if (unreadCount == 0) {
           return child;
         }
@@ -258,10 +251,7 @@ class NotificationBadge extends StatelessWidget {
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 child: showCount && unreadCount < 100
                     ? Text(
                         unreadCount.toString(),
@@ -313,7 +303,9 @@ class NotificationBottomSheet extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey, width: 0.5),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -342,15 +334,15 @@ class NotificationBottomSheet extends StatelessWidget {
                 // Notifications list
                 Expanded(
                   child: notificationService.notifications.isEmpty
-                      ? const Center(
-                          child: NotificationListWidget(),
-                        )
+                      ? const Center(child: NotificationListWidget())
                       : ListView.separated(
                           controller: scrollController,
                           itemCount: notificationService.notifications.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 1),
                           itemBuilder: (context, index) {
-                            final notification = notificationService.notifications[index];
+                            final notification =
+                                notificationService.notifications[index];
                             return NotificationTile(
                               notification: notification,
                               onTap: () {

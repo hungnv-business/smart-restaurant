@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../models/notification_models.dart';
+import '../../models/notification/notification_models.dart';
 
 /// Service để hiển thị local notifications và quản lý notification state
 class NotificationService extends ChangeNotifier {

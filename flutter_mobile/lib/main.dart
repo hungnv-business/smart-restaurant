@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/themes/app_theme.dart';
 import 'core/constants/app_constants.dart';
-import 'core/services/auth_service.dart';
-import 'core/services/order_service.dart';
-import 'core/services/shared_order_service.dart';
-import 'core/services/signalr_service.dart';
-import 'core/services/notification_service.dart';
+import 'core/services/auth/auth_service.dart';
+import 'core/services/order/order_service.dart';
+import 'core/services/order/shared_order_service.dart';
+import 'core/services/notification/signalr_service.dart';
+import 'core/services/notification/notification_service.dart';
 import 'core/widgets/auth_wrapper.dart';
 
 /// Entry point của ứng dụng Quán bia Mobile

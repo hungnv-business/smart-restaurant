@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/table_models.dart';
+import '../../../core/models/order/dinein_table_models.dart';
 import 'table_card.dart';
 
 /// Widget hiển thị một cột chứa các bàn thuộc cùng một section
 class SectionColumn extends StatelessWidget {
   final String sectionName;
-  final List<ActiveTableDto> tables;
+  final List<DineInTableDto> tables;
   final VoidCallback? onTableUpdated;
   final bool isCompact;
   

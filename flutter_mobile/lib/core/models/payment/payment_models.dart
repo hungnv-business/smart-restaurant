@@ -1,3 +1,5 @@
+library;
+
 /// Models cho Payment API
 /// Tương ứng với DTOs từ backend SmartRestaurant
 

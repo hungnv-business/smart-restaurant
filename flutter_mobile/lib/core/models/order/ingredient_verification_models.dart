@@ -1,9 +1,13 @@
+library;
+
 /// Models cho Ingredient Verification API
 /// Tương ứng với DTOs từ backend SmartRestaurant
 
+import 'order_request_models.dart';
+
 /// Request model cho verify ingredients
 class VerifyIngredientsRequestDto {
-  final List<VerifyOrderItemDto> items;
+  final List<CreateOrderItemDto> items;
 
   const VerifyIngredientsRequestDto({
     required this.items,
@@ -16,29 +20,6 @@ class VerifyIngredientsRequestDto {
   }
 }
 
-/// Model cho một item trong verify ingredients request
-class VerifyOrderItemDto {
-  final String menuItemId;
-  final String menuItemName;
-  final int quantity;
-  final String? notes;
-
-  const VerifyOrderItemDto({
-    required this.menuItemId,
-    required this.menuItemName,
-    required this.quantity,
-    this.notes,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'menuItemId': menuItemId,
-      'menuItemName': menuItemName,
-      'quantity': quantity,
-      'notes': notes,
-    };
-  }
-}
 
 /// Model cho nguyên liệu thiếu
 class MissingIngredientDto {

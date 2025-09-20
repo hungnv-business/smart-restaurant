@@ -51,9 +51,9 @@ public class TakeawayOrderDto : EntityDto<Guid>
     public DateTime CreatedTime { get; set; }
 
     /// <summary>
-    /// Thời gian dự kiến nhận hàng
+    /// Thời gian thanh toán
     /// </summary>
-    public DateTime? PickupTime { get; set; }
+    public DateTime? PaymentTime { get; set; }
 
     /// <summary>
     /// Danh sách món ăn (tên món)
@@ -76,9 +76,9 @@ public class TakeawayOrderDto : EntityDto<Guid>
     public string FormattedOrderTime => CreatedTime.ToString("HH:mm");
 
     /// <summary>
-    /// Thời gian nhận hàng format cho hiển thị
+    /// Thời gian thanh toán format cho hiển thị
     /// </summary>
-    public string FormattedPickupTime => PickupTime?.ToString("HH:mm") ?? "";
+    public string FormattedPaymentTime => PaymentTime?.ToString("HH:mm") ?? "";
 }
 
 /// <summary>
@@ -90,16 +90,6 @@ public class GetTakeawayOrdersDto
     /// Filter theo trạng thái (nullable = tất cả)
     /// </summary>
     public TakeawayStatus? StatusFilter { get; set; }
-
-    /// <summary>
-    /// Filter theo ngày tạo (mặc định là hôm nay)
-    /// </summary>
-    public DateTime? Date { get; set; } = DateTime.Today;
-
-    /// <summary>
-    /// Tìm kiếm theo tên khách hàng hoặc SĐT
-    /// </summary>
-    public string? SearchText { get; set; }
 }
 
 /// <summary>

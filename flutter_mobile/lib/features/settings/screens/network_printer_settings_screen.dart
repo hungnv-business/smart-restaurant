@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/services/network_thermal_printer_service.dart';
+import '../../../core/services/printer/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 
 /// Màn hình cài đặt máy in nhiệt WiFi (Xprinter T80W)

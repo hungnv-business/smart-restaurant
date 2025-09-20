@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
-import '../constants/app_constants.dart';
-import '../models/notification_models.dart';
-import '../enums/restaurant_enums.dart';
-import 'auth_service.dart';
+import '../../constants/app_constants.dart';
+import '../../models/notification/notification_models.dart';
+import '../../enums/restaurant_enums.dart';
+import '../auth/auth_service.dart';
 
 /// Service để kết nối với SignalR KitchenHub và nhận real-time notifications
 class SignalRService extends ChangeNotifier {

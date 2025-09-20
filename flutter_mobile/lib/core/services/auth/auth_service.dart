@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../constants/app_constants.dart';
-import '../models/auth_models.dart';
-import '../utils/jwt_helper.dart';
-import 'http_client_service.dart';
+import '../../constants/app_constants.dart';
+import '../../models/auth/auth_models.dart';
+import '../../utils/jwt_helper.dart';
+import '../shared/http_client_service.dart';
 
 /// Service xử lý authentication cho ứng dụng Quán bia
 class AuthService extends ChangeNotifier {

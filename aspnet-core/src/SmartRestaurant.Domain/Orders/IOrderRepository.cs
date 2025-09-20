@@ -11,51 +11,6 @@ namespace SmartRestaurant.Orders;
 /// </summary>
 public interface IOrderRepository : IRepository<Order, Guid>
 {
-    // /// <summary>
-    // /// Lấy danh sách đơn hàng theo bàn
-    // /// </summary>
-    // /// <param name="tableId">ID bàn</param>
-    // /// <param name="includeOrderItems">Có bao gồm OrderItems không</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Danh sách đơn hàng của bàn</returns>
-    // Task<List<Order>> GetOrdersByTableIdAsync(
-    //     Guid tableId, 
-    //     bool includeOrderItems = false,
-    //     CancellationToken cancellationToken = default);
-
-    // /// <summary>
-    // /// Lấy danh sách đơn hàng theo trạng thái
-    // /// </summary>
-    // /// <param name="status">Trạng thái đơn hàng</param>
-    // /// <param name="includeOrderItems">Có bao gồm OrderItems không</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Danh sách đơn hàng theo trạng thái</returns>
-    // Task<List<Order>> GetOrdersByStatusAsync(
-    //     OrderStatus status, 
-    //     bool includeOrderItems = false,
-    //     CancellationToken cancellationToken = default);
-
-    // /// <summary>
-    // /// Lấy danh sách đơn hàng cho bếp (trạng thái Confirmed và Preparing)
-    // /// </summary>
-    // /// <param name="includeOrderItems">Có bao gồm OrderItems không</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Danh sách đơn hàng cho bếp</returns>
-    // Task<List<Order>> GetKitchenOrdersAsync(
-    //     bool includeOrderItems = true,
-    //     CancellationToken cancellationToken = default);
-
-    // /// <summary>
-    // /// Lấy đơn hàng theo số đơn hàng
-    // /// </summary>
-    // /// <param name="orderNumber">Số đơn hàng</param>
-    // /// <param name="includeOrderItems">Có bao gồm OrderItems không</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Đơn hàng nếu tìm thấy</returns>
-    // Task<Order?> GetByOrderNumberAsync(
-    //     string orderNumber, 
-    //     bool includeOrderItems = false,
-    //     CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
@@ -67,17 +22,6 @@ public interface IOrderRepository : IRepository<Order, Guid>
         Guid orderId,
         CancellationToken cancellationToken = default);
 
-    // /// <summary>
-    // /// Kiểm tra xem số đơn hàng đã tồn tại chưa
-    // /// </summary>
-    // /// <param name="orderNumber">Số đơn hàng</param>
-    // /// <param name="excludeOrderId">ID đơn hàng cần loại trừ (dùng cho update)</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>True nếu số đơn hàng đã tồn tại</returns>
-    // Task<bool> IsOrderNumberExistsAsync(
-    //     string orderNumber, 
-    //     Guid? excludeOrderId = null,
-    //     CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Đếm số đơn hàng theo ngày
@@ -89,15 +33,6 @@ public interface IOrderRepository : IRepository<Order, Guid>
         DateTime date,
         CancellationToken cancellationToken = default);
 
-    // /// <summary>
-    // /// Lấy danh sách đơn hàng đang hoạt động (chưa thanh toán)
-    // /// </summary>
-    // /// <param name="includeOrderItems">Có bao gồm OrderItems không</param>
-    // /// <param name="cancellationToken">Cancellation token</param>
-    // /// <returns>Danh sách đơn hàng đang hoạt động</returns>
-    // Task<List<Order>> GetActiveOrdersAsync(
-    //     bool includeOrderItems = false,
-    //     CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lấy danh sách đơn hàng đang hoạt động của một bàn cụ thể
@@ -149,6 +84,22 @@ public interface IOrderRepository : IRepository<Order, Guid>
     /// <returns>Danh sách đơn hàng takeaway hôm nay với đầy đủ thông tin</returns>
     Task<List<Order>> GetTakeawayOrdersTodayAsync(
         OrderStatus? status = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lấy danh sách đơn hàng với filtering chung (unified method)
+    /// </summary>
+    /// <param name="orderTypeFilter">Lọc theo loại đơn hàng</param>
+    /// <param name="statusFilter">Lọc theo trạng thái</param>
+    /// <param name="date">Lọc theo ngày (mặc định là hôm nay)</param>
+    /// <param name="searchText">Tìm kiếm theo text</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Danh sách đơn hàng với đầy đủ thông tin</returns>
+    Task<List<Order>> GetOrdersAsync(
+        OrderType? orderTypeFilter = null,
+        OrderStatus? statusFilter = null,
+        DateTime? date = null,
+        string? searchText = null,
         CancellationToken cancellationToken = default);
 
 }

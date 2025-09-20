@@ -33,7 +33,6 @@ class OrderItemCard extends StatelessWidget {
     this.onServe,
   }) : super(key: key);
 
-
   /// Lấy màu cho status
   Color _getStatusColor() {
     return Color(status.colorValue);
@@ -45,8 +44,8 @@ class OrderItemCard extends StatelessWidget {
       // Món cần nấu: chỉ hiển thị khi đã hoàn thành
       return status == OrderItemStatus.ready;
     } else {
-      // Món không cần nấu: hiển thị từ trạng thái chờ xử lý
-      return status == OrderItemStatus.pending || status == OrderItemStatus.ready;
+      // Món không cần nấu: hiển thị luôn (trừ khi đã served)
+      return status != OrderItemStatus.served;
     }
   }
 
@@ -61,9 +60,7 @@ class OrderItemCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8), // Giảm border radius
         side: BorderSide(
-          color: hasMissingIngredients 
-              ? Colors.orange 
-              : Colors.transparent,
+          color: hasMissingIngredients ? Colors.orange : Colors.transparent,
           width: hasMissingIngredients ? 1.5 : 0,
         ),
       ),
@@ -88,23 +85,29 @@ class OrderItemCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      
+
                       // Số lượng và status inline
                       Row(
                         children: [
                           Text(
                             'SL: $quantity',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
                           const SizedBox(width: 12),
                           // Status compact
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.2),
+                              color: statusColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -118,7 +121,7 @@ class OrderItemCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
+
                       // Warning thiếu nguyên liệu
                       if (hasMissingIngredients) ...[
                         const SizedBox(height: 4),
@@ -147,16 +150,18 @@ class OrderItemCard extends StatelessWidget {
                           ],
                         ),
                       ],
-                      
+
                       // Ghi chú nếu có (compact)
-                      if (specialRequest != null && specialRequest!.isNotEmpty) ...[
+                      if (specialRequest != null &&
+                          specialRequest!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
                           specialRequest!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.amber[800],
-                            fontStyle: FontStyle.italic,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Colors.amber[800],
+                                fontStyle: FontStyle.italic,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -164,9 +169,9 @@ class OrderItemCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Giá và actions
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -178,7 +183,7 @@ class OrderItemCard extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                    
+
                     // Action buttons compact
                     if (status == OrderItemStatus.pending) ...[
                       const SizedBox(height: 4),
@@ -213,23 +218,26 @@ class OrderItemCard extends StatelessWidget {
                         ],
                       ),
                     ],
-                    
-                    // Nút Phục vụ 
+
+                    // Nút Phục vụ
                     // - Món cần nấu: chỉ hiển thị khi status == OrderItemStatus.ready
-                    // - Món không cần nấu: hiển thị ngay từ OrderItemStatus.pending
+                    // - Món không cần nấu: hiển thị ngay từ
                     if (onServe != null && _canShowServeButton()) ...[
                       const SizedBox(height: 4),
                       InkWell(
                         onTap: onServe,
                         borderRadius: BorderRadius.circular(4),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            requiresCooking ? 'Phục vụ' : 'Phục vụ ngay',
+                            'Phục vụ ngay',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,

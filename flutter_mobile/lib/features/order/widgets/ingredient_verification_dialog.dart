@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/ingredient_verification_models.dart';
+import '../../../core/models/order/ingredient_verification_models.dart';
 
 /// Dialog hiển thị thông tin thiếu nguyên liệu và cho phép người dùng xác nhận
 class IngredientVerificationDialog extends StatelessWidget {

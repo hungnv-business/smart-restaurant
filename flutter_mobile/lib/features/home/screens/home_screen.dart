@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile/core/services/auth/auth_service.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/connection_status_widget.dart';
 import '../../../core/widgets/notification_list_widget.dart';
 import '../../auth/screens/login_screen.dart';

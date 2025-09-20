@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/menu_models.dart';
+import '../../../core/models/menu/menu_models.dart';
 import '../../../core/utils/price_formatter.dart';
 
 /// Widget hiển thị món ăn theo template V0 design
@@ -186,63 +186,80 @@ class MenuItemCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Sold quantity
-            if (menuItem.soldQuantity > 0)
-              Row(
-                children: [
-                  Icon(
-                    Icons.trending_up,
-                    size: 12,
-                    color: Colors.green[600],
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '$menuItem.soldQuantity đã bán',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
+            // Hiển thị thông tin trạng thái - đã bán hoặc stock status
+            if (menuItem.isOutOfStock || menuItem.hasLimitedStock)
+              Flexible(
+                child: _buildCompactStockStatus(context),
+              )
+            else if (menuItem.soldQuantity > 0)
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 4), // spacing
+                    Icon(
+                      Icons.trending_up,
+                      size: 12,
                       color: Colors.green[600],
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 2),
+                    Flexible(
+                      child: Text(
+                        '${menuItem.soldQuantity} đã bán',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.green[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
           ],
         ),
-        // Stock status
-        const SizedBox(height: 4),
-        _buildStockStatus(context),
+        // Không cần stock status riêng nữa vì đã hiển thị trong title row
       ],
     );
   }
 
-  Widget _buildStockStatus(BuildContext context) {
+  Widget _buildCompactStockStatus(BuildContext context) {
     final stockColor = _getStockStatusColor();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: stockColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: stockColor.withOpacity(0.3), width: 1),
-      ),
-      child: Text(
-        menuItem.stockStatusText,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: stockColor,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          decoration: BoxDecoration(
+            color: stockColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: stockColor.withValues(alpha: 0.3), width: 1),
+          ),
+          child: Text(
+            menuItem.stockStatusText,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: stockColor,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Color _getStockStatusColor() {
-    switch (menuItem.stockStatusColor) {
-      case StockStatusColor.available:
-        return Colors.green[700]!;
-      case StockStatusColor.limited:
-        return Colors.orange[700]!;
-      case StockStatusColor.outOfStock:
-        return Colors.red[700]!;
+    if (menuItem.isOutOfStock) {
+      return Colors.red[700]!;
+    } else if (menuItem.hasLimitedStock) {
+      return Colors.orange[700]!;
+    } else {
+      return Colors.green[700]!;
     }
   }
 
@@ -282,17 +299,23 @@ class MenuItemCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Price
-        Text(
-          PriceFormatter.format(menuItem.price),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: menuItem.isAvailable 
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        // Price - sử dụng Expanded để tránh overflow
+        Expanded(
+          child: Text(
+            PriceFormatter.format(menuItem.price),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: menuItem.isAvailable 
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        
+        const SizedBox(width: 8), // Thêm spacing
         
         // Add button hoặc Quantity controls
         _buildActionButton(context),

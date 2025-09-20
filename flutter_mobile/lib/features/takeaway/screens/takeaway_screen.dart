@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile/core/models/order/takeaway_models.dart';
 import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/services/shared_order_service.dart';
+import '../../../core/services/order/shared_order_service.dart';
 import '../widgets/takeaway_order_dialog.dart';
 import '../../order/screens/table_detail_screen.dart';
 
@@ -32,8 +33,13 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
 
   Future<void> _loadTakeawayOrders() async {
     try {
-      final sharedOrderService = Provider.of<SharedOrderService>(context, listen: false);
-      await sharedOrderService.loadTakeawayOrders(statusFilter: _selectedStatus);
+      final sharedOrderService = Provider.of<SharedOrderService>(
+        context,
+        listen: false,
+      );
+      await sharedOrderService.loadTakeawayOrders(
+        statusFilter: _selectedStatus,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +69,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Bộ lọc trạng thái
                 SizedBox(
                   height: 40,
@@ -92,7 +98,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
               ],
             ),
           ),
-          
+
           // Danh sách đơn hàng
           Expanded(
             child: Consumer<SharedOrderService>(
@@ -101,11 +107,11 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final orders = sharedOrderService.getFilteredTakeawayOrders(_selectedStatus);
+                final orders = sharedOrderService.getFilteredTakeawayOrders(
+                  _selectedStatus,
+                );
                 if (orders.isEmpty) {
-                  return const Center(
-                    child: Text('Không có đơn hàng mang về'),
-                  );
+                  return const Center(child: Text('Không có đơn hàng mang về'));
                 }
 
                 return ListView.builder(
@@ -121,7 +127,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
           ),
         ],
       ),
-      
+
       // Nút thêm đơn hàng mới
       floatingActionButton: FloatingActionButton(
         heroTag: "takeaway_add_order",
@@ -172,7 +178,10 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
@@ -195,9 +204,9 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Thông tin khách hàng
             Row(
               children: [
@@ -222,9 +231,9 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Món ăn
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +248,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
               ],
             ),
-            
+
             // Ghi chú (nếu có)
             if (order.notes.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -253,7 +262,11 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.sticky_note_2, size: 18, color: Colors.amber.shade700),
+                    Icon(
+                      Icons.sticky_note_2,
+                      size: 18,
+                      color: Colors.amber.shade700,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -268,9 +281,9 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 12),
-            
+
             // Thời gian và tổng tiền
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -280,10 +293,14 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                        const Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          'Nhận: ${order.pickupTime}',
+                          'Thanh toán: ${order.formattedPaymentTime}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -291,7 +308,11 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                        const Icon(
+                          Icons.schedule,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Đặt: ${order.orderTime}',
@@ -310,9 +331,10 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                 ),
               ],
             ),
-            
+
             // Actions
-            if (order.status == TakeawayStatus.preparing || order.status == TakeawayStatus.ready)
+            if (order.status == TakeawayStatus.preparing ||
+                order.status == TakeawayStatus.ready)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Row(
@@ -331,7 +353,7 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                       )
                     else
                       const SizedBox.shrink(),
-                    
+
                     // Nút trạng thái - chỉ hiển thị nút delivered cho status ready
                     Row(
                       children: [
@@ -339,20 +361,31 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
                           ElevatedButton.icon(
                             onPressed: () async {
                               try {
-                                final sharedOrderService = Provider.of<SharedOrderService>(context, listen: false);
-                                await sharedOrderService.updateTakeawayOrderStatus(
-                                  orderId: order.id,
-                                  newStatus: TakeawayStatus.delivered,
-                                );
+                                final sharedOrderService =
+                                    Provider.of<SharedOrderService>(
+                                      context,
+                                      listen: false,
+                                    );
+                                await sharedOrderService
+                                    .updateTakeawayOrderStatus(
+                                      orderId: order.id,
+                                      newStatus: TakeawayStatus.delivered,
+                                    );
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Đã giao đơn ${order.orderNumber}')),
+                                    SnackBar(
+                                      content: Text(
+                                        'Đã giao đơn ${order.orderNumber}',
+                                      ),
+                                    ),
                                   );
                                 }
                               } catch (e) {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Lỗi: ${e.toString()}')),
+                                    SnackBar(
+                                      content: Text('Lỗi: ${e.toString()}'),
+                                    ),
                                   );
                                 }
                               }
@@ -383,14 +416,15 @@ class _TakeawayScreenState extends State<TakeawayScreen> {
     }
   }
 
-  void _showEditOrderScreen(BuildContext context, TakeawayOrderDto order) async {
+  void _showEditOrderScreen(
+    BuildContext context,
+    TakeawayOrderDto order,
+  ) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TableDetailScreen(
-          takeawayOrder: order,
-          isForTakeaway: true,
-        ),
+        builder: (context) =>
+            TableDetailScreen(takeawayOrder: order, isForTakeaway: true),
       ),
     );
 

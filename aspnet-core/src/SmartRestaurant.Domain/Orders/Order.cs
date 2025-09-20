@@ -86,9 +86,9 @@ public class Order : FullAuditedAggregateRoot<Guid>
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     /// <summary>
-    /// Danh sách thanh toán cho đơn hàng (thường sẽ có 1 payment khi thanh toán)
+    /// Thông tin thanh toán cho đơn hàng
     /// </summary>
-    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public virtual Payment? Payment { get; set; }
 
     // Constructor
     protected Order()
@@ -422,7 +422,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
             paymentMethod,
             notes);
 
-        Payments.Add(payment);
+        Payment = payment;
         return payment;
     }
 }

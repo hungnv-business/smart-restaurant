@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/models/table_models.dart';
-import '../../../core/services/order_service.dart';
+import '../../../core/models/order/dinein_table_models.dart';
+import '../../../core/services/order/order_service.dart';
 import '../widgets/table_screen_header.dart';
 import '../widgets/table_filters.dart';
 import '../widgets/section_column.dart';
@@ -18,7 +18,7 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  List<ActiveTableDto> _allTables = [];
+  List<DineInTableDto> _allTables = [];
   String _searchQuery = '';
   TableStatus? _selectedStatusFilter;
   Timer? _searchTimer;
@@ -36,7 +36,7 @@ class _OrderScreenState extends State<OrderScreen> {
       final orderService = Provider.of<OrderService>(context, listen: false);
       
       // Gọi API với filters - OrderService sẽ tự động notify listeners
-      await orderService.getActiveTables(
+      await orderService.getDineInTables(
         tableNameFilter: _searchQuery.isEmpty ? null : _searchQuery,
         statusFilter: _selectedStatusFilter,
       );
@@ -80,8 +80,8 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   /// Group bàn theo section
-  Map<String, List<ActiveTableDto>> get _groupedTables {
-    final Map<String, List<ActiveTableDto>> grouped = {};
+  Map<String, List<DineInTableDto>> get _groupedTables {
+    final Map<String, List<DineInTableDto>> grouped = {};
     
     for (final table in _allTables) {
       final sectionName = table.layoutSectionName ?? 'Không có khu vực';
@@ -139,7 +139,7 @@ class _OrderScreenState extends State<OrderScreen> {
         }
 
         // Sử dụng data từ OrderService thay vì local state
-        final tables = orderService.activeTables;
+        final tables = orderService.dineInTables;
         if (tables.isEmpty) {
           return const EmptyStateWidget(hasNoTables: true);
         }
@@ -230,7 +230,7 @@ class _OrderScreenState extends State<OrderScreen> {
     _loadTables().then((_) {
       if (mounted) {
         final orderService = Provider.of<OrderService>(context, listen: false);
-        final tableCount = orderService.activeTables.length;
+        final tableCount = orderService.dineInTables.length;
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Đã cập nhật danh sách bàn ($tableCount bàn)')),

@@ -96,179 +96,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
     }
 
 
-    /// <summary>
-    /// Lấy danh sách tất cả các bàn active trong hệ thống
-    /// </summary>
-    public async Task<ListResultDto<ActiveTableDto>> GetActiveTablesAsync(
-        string? tableNameFilter = null,
-        TableStatus? statusFilter = null)
-    {
-        // Lấy tất cả bàn active với current order và order items
-        var activeTables = await _tableRepository.GetAllActiveTablesWithOrdersAsync(tableNameFilter, statusFilter);
 
-        // Tạo DTOs đơn giản cho danh sách bàn
-        var activeTableDtos = new List<ActiveTableDto>();
-        foreach (var table in activeTables)
-        {
-            // Count order items from current order
-            var hasActiveOrders = table.CurrentOrder != null;
-            var pendingServeCount = 0;
-            var readyItemsCount = 0;
-            var orderStatusDisplay = "Trống";
-
-            if (hasActiveOrders && table.CurrentOrder?.OrderItems != null)
-            {
-                pendingServeCount = table.CurrentOrder.GetUnservedItemsForMoblie().Sum(oi => oi.Quantity);
-                readyItemsCount = table.CurrentOrder.OrderItems
-                    .Where(oi => oi.IsReady())
-                    .Sum(oi => oi.Quantity);
-
-                orderStatusDisplay = pendingServeCount > 0 ? "Món chờ phục vụ" : "Có đơn hàng";
-            }
-
-            var dto = new ActiveTableDto
-            {
-                Id = table.Id,
-                TableNumber = table.TableNumber,
-                DisplayOrder = table.DisplayOrder,
-                Status = table.Status,
-                StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
-                LayoutSectionId = table.LayoutSectionId,
-                LayoutSectionName = table.LayoutSection?.SectionName ?? "",
-                HasActiveOrders = hasActiveOrders,
-                OrderStatusDisplay = orderStatusDisplay,
-                PendingItemsCount = pendingServeCount,
-                ReadyItemsCount = readyItemsCount
-            };
-
-            activeTableDtos.Add(dto);
-        }
-
-        return new ListResultDto<ActiveTableDto>(activeTableDtos);
-    }
-
-    /// <summary>
-    /// Lấy thông tin chi tiết bàn với đơn hàng để hiển thị trên mobile
-    /// </summary>
-    public async Task<TableDetailDto> GetTableDetailsAsync(Guid tableId)
-    {
-        // Lấy thông tin bàn với các đơn hàng đang hoạt động
-        var table = await _tableRepository.GetTableWithActiveOrdersAsync(tableId) ?? throw OrderValidationException.TableNotFound(tableId);
-
-        // Lấy danh sách đơn hàng đang hoạt động của bàn
-        var activeOrders = await _orderRepository.GetActiveOrdersByTableIdAsync(tableId, includeOrderItems: true);
-
-        // Tạo DTO cho table details
-        var dto = new TableDetailDto
-        {
-            Id = table.Id,
-            TableNumber = table.TableNumber,
-            Status = table.Status,
-            StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
-            LayoutSectionName = table.LayoutSection?.SectionName ?? ""
-        };
-
-        // Nếu có đơn hàng đang hoạt động, tính toán thông tin chi tiết
-        if (activeOrders.Count != 0)
-        {
-            var totalAmount = activeOrders.Sum(o => o.TotalAmount);
-            var allOrderItems = activeOrders.SelectMany(o => o.OrderItems ?? new List<OrderItem>()).ToList();
-            var pendingServeCount = activeOrders.SelectMany(o => o.GetUnservedItems()).Sum(oi => oi.Quantity);
-
-            // Set OrderId từ order đầu tiên (giả sử chỉ có 1 active order per table)
-            dto.OrderId = activeOrders.First().Id;
-
-            // Tạo order summary
-            dto.OrderSummary = new TableOrderSummaryDto
-            {
-                TotalItemsCount = allOrderItems.Sum(e => e.Quantity),
-                PendingServeCount = pendingServeCount,
-                TotalAmount = totalAmount
-            };
-
-            // Lấy thông tin MenuItem cho tất cả order items để có RequiresCooking
-            var menuItemIds = allOrderItems.Select(oi => oi.MenuItemId).Distinct().ToList();
-            var menuItems = await _menuItemRepository.GetListAsync(mi => menuItemIds.Contains(mi.Id));
-            var menuItemDict = menuItems.ToDictionary(mi => mi.Id, mi => mi);
-
-            // Map order items to DTOs và sắp xếp theo trạng thái
-            dto.OrderItems = allOrderItems.Select(oi =>
-            {
-                var totalPrice = oi.UnitPrice * oi.Quantity;
-                var menuItem = menuItemDict.GetValueOrDefault(oi.MenuItemId);
-                
-                return new TableOrderItemDto
-                {
-                    Id = oi.Id,
-                    MenuItemName = oi.MenuItemName,
-                    Quantity = oi.Quantity,
-                    UnitPrice = oi.UnitPrice,
-                    TotalPrice = totalPrice,
-                    Status = oi.Status,
-                    CanEdit = GlobalEnums.CanEditOrderItem(oi.Status),
-                    CanDelete = GlobalEnums.CanDeleteOrderItem(oi.Status),
-                    SpecialRequest = oi.Notes ?? string.Empty,
-                    RequiresCooking = menuItem?.RequiresCooking ?? true, // Mặc định true nếu không tìm thấy MenuItem
-                };
-            })
-            .OrderBy(oi => GetOrderItemSortPriority(oi.Status))
-            .ThenBy(oi => oi.MenuItemName)
-            .ToList();
-
-            // Check ingredient availability cho những món unserved
-            var unservedOrderItems = activeOrders.SelectMany(o => o.GetUnservedItems()).ToList();
-            var itemsNeedIngredientCheck = dto.OrderItems
-                .Where(oi => unservedOrderItems.Any(unserved => unserved.Id == oi.Id))
-                .ToList();
-
-            foreach (var orderItemDto in itemsNeedIngredientCheck)
-            {
-                try
-                {
-                    // Tìm OrderItem gốc để lấy MenuItemId
-                    var originalOrderItem = allOrderItems.FirstOrDefault(oi => oi.Id == orderItemDto.Id);
-                    if (originalOrderItem?.MenuItemId != null)
-                    {
-                        var missingIngredients = await _recipeManager
-                            .CheckIngredientAvailabilityAsync(originalOrderItem.MenuItemId, orderItemDto.Quantity);
-
-                        orderItemDto.HasMissingIngredients = missingIngredients.Any();
-                        orderItemDto.MissingIngredients = missingIngredients.Select(mi => new MissingIngredientDto
-                        {
-                            MenuItemId = mi.MenuItemId,
-                            MenuItemName = mi.MenuItemName,
-                            IngredientId = mi.IngredientId,
-                            IngredientName = mi.IngredientName,
-                            RequiredQuantity = mi.RequiredQuantity,
-                            CurrentStock = mi.CurrentStock,
-                            Unit = mi.Unit,
-                            ShortageAmount = mi.ShortageAmount,
-                            DisplayMessage = mi.DisplayMessage ?? $"Thiếu {mi.IngredientName} ({mi.ShortageAmount}{mi.Unit})"
-                        }).ToList();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log error nhưng không block việc trả về table details
-                    Logger.LogWarning(ex, "Failed to check ingredient availability for order item {OrderItemId}", orderItemDto.Id);
-                    // Graceful degradation: keep HasMissingIngredients = false
-                }
-            }
-        }
-        else
-        {
-            // Bàn không có đơn hàng
-            dto.OrderSummary = new TableOrderSummaryDto
-            {
-                TotalItemsCount = 0,
-                PendingServeCount = 0,
-                TotalAmount = 0
-            };
-            dto.OrderItems = new List<TableOrderItemDto>();
-        }
-
-        return dto;
-    }
 
     /// <summary>
     /// Định nghĩa thứ tự ưu tiên sắp xếp order items (số nhỏ hơn = ưu tiên cao hơn)
@@ -662,38 +490,6 @@ public class OrderAppService : ApplicationService, IOrderAppService
         Console.WriteLine($"🍽️ OrderAppService: Món {orderItem.MenuItemName} đã được đánh dấu phục vụ cho {tableName}");
     }
 
-    /// <summary>
-    /// Lấy danh sách đơn hàng takeaway với filtering
-    /// </summary>
-    public async Task<ListResultDto<TakeawayOrderDto>> GetTakeawayOrdersAsync(GetTakeawayOrdersDto input)
-    {
-        try
-        {
-            Logger.LogInformation("🥡 OrderAppService: Getting takeaway orders with filter: {Filter}", input.StatusFilter);
-
-            // Sử dụng GetTakeawayOrdersTodayAsync từ repository
-            var orderStatus = input.StatusFilter.HasValue 
-                ? MapTakeawayStatusToOrderStatus(input.StatusFilter.Value)
-                : (OrderStatus?)null;
-                
-            var orders = await _orderRepository.GetTakeawayOrdersTodayAsync(orderStatus);
-
-            // TODO: Thêm filter theo ngày và search text nếu cần
-            // Hiện tại GetTakeawayOrdersTodayAsync chỉ support filter theo status
-
-            // Map sang TakeawayOrderDto
-            var takeawayOrders = orders.Select(MapToTakeawayOrderDto).ToList();
-
-            Logger.LogInformation("✅ OrderAppService: Found {Count} takeaway orders", takeawayOrders.Count);
-
-            return new ListResultDto<TakeawayOrderDto>(takeawayOrders);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "❌ OrderAppService: Error getting takeaway orders");
-            throw;
-        }
-    }
 
     /// <summary>
     /// Cập nhật trạng thái đơn hàng takeaway
@@ -705,7 +501,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
             Logger.LogInformation("🔄 OrderAppService: Updating takeaway order {OrderId} to status {Status}", orderId, status);
 
             var order = await _orderRepository.GetAsync(orderId);
-            
+
             if (order.OrderType != OrderType.Takeaway)
             {
                 throw new InvalidOperationException($"Order {orderId} is not a takeaway order");
@@ -713,7 +509,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
 
             // Map TakeawayStatus sang OrderStatus tương ứng
             var newOrderStatus = MapTakeawayStatusToOrderStatus(status);
-            
+
             // Cập nhật trạng thái order (logic cụ thể tùy vào business rules)
             // Hiện tại đơn giản chỉ update status
             var orderType = typeof(Order);
@@ -749,7 +545,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
             TotalAmount = order.TotalAmount,
             Notes = order.Notes,
             CreatedTime = order.CreatedTime,
-            PickupTime = null, // Có thể tính toán dựa trên thời gian chuẩn bị
+            PaymentTime = order.Payment?.PaymentTime,
             ItemNames = order.OrderItems.Select(oi => oi.MenuItemName).ToList(),
             ItemCount = order.OrderItems.Count
         };
@@ -770,73 +566,279 @@ public class OrderAppService : ApplicationService, IOrderAppService
         };
     }
 
+
+    #endregion
+
+    #region Separate List APIs - New Implementation
+
     /// <summary>
-    /// Lấy thông tin chi tiết đơn hàng takeaway để chỉnh sửa
+    /// Lấy danh sách bàn cho màn hình DineIn mobile (tối ưu hóa cho table grid)
+    /// Logic base từ GetActiveTablesAsync nhưng response format tối ưu cho mobile
     /// </summary>
-    public async Task<TakeawayOrderDetailsDto> GetTakeawayOrderDetailsAsync(Guid orderId)
+    public async Task<ListResultDto<DineInTableDto>> GetDineInTablesAsync(GetDineInTablesDto input)
     {
-        Logger.LogInformation("📋 OrderAppService: Getting takeaway order details for order {OrderId}", orderId);
-
-        // Lấy order với tất cả thông tin liên quan
-        var order = await _orderRepository.GetAsync(orderId);
-        if (order == null)
+        try
         {
-            throw new EntityNotFoundException(typeof(Order), orderId);
-        }
+            Logger.LogInformation("🏪 OrderAppService: Getting DineIn tables with filters - Status: {Status}, TableName: {TableName}",
+                input.StatusFilter, input.TableNameFilter);
 
-        // Kiểm tra xem đây có phải là takeaway order không
-        if (order.OrderType != OrderType.Takeaway)
-        {
-            throw new InvalidOperationException($"Order {orderId} is not a takeaway order");
-        }
+            // Lấy tất cả bàn active với current order và order items
+            var activeTables = await _tableRepository.GetAllActiveTablesWithOrdersAsync(
+                input.TableNameFilter,
+                input.StatusFilter);
 
-        // Lấy chi tiết order items với menu information
-        var orderWithDetails = await _orderRepository.GetWithDetailsAsync(orderId);
-        if (orderWithDetails == null)
-        {
-            throw new EntityNotFoundException(typeof(Order), orderId);
-        }
-
-        Logger.LogInformation("✅ OrderAppService: Found takeaway order {OrderNumber} with {ItemCount} items", 
-            order.OrderNumber, orderWithDetails.OrderItems.Count);
-
-        // Map sang TakeawayOrderDetailsDto
-        var result = new TakeawayOrderDetailsDto
-        {
-            Id = order.Id,
-            OrderNumber = order.OrderNumber,
-            CustomerName = order.CustomerName ?? "",
-            CustomerPhone = order.CustomerPhone ?? "",
-            Status = MapOrderStatusToTakeawayStatus(order.Status),
-            TotalAmount = order.TotalAmount,
-            Notes = order.Notes,
-            CreatedTime = order.CreationTime,
-            PickupTime = null, // TODO: Calculate based on preparation time
-            OrderSummary = new TakeawayOrderSummaryDto
+            // Tạo DTOs tối ưu cho mobile DineIn screen
+            var dineInTableDtos = new List<DineInTableDto>();
+            foreach (var table in activeTables)
             {
-                TotalItemsCount = orderWithDetails.OrderItems.Count,
-                PendingServeCount = orderWithDetails.OrderItems.Count(i => i.Status == OrderItemStatus.Pending || i.Status == OrderItemStatus.Preparing),
-                TotalAmount = order.TotalAmount
-            },
-            OrderItems = orderWithDetails.OrderItems.Select(item => new TakeawayOrderItemDto
-            {
-                Id = item.Id,
-                MenuItemName = item.MenuItemName,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice,
-                TotalPrice = item.UnitPrice * item.Quantity,
-                Status = item.Status,
-                SpecialRequest = item.Notes,
-                CanEdit = item.Status == OrderItemStatus.Pending,
-                CanDelete = item.Status == OrderItemStatus.Pending,
-                HasMissingIngredients = false, // TODO: Implement missing ingredients check
-                MissingIngredients = new List<string>(),
-                RequiresCooking = true // Default value
-            }).ToList()
-        };
 
-        return result;
+                // Count order items from current order
+                var hasActiveOrders = table.CurrentOrder != null;
+                var pendingServeCount = 0;
+                var readyItemsCount = 0;
+                DateTime? orderCreatedTime = null;
+                Guid? currentOrderId = null;
+
+                if (hasActiveOrders && table.CurrentOrder?.OrderItems != null)
+                {
+                    var unservedItems = table.CurrentOrder.GetUnservedItemsForMoblie();
+                    pendingServeCount = unservedItems.Sum(oi => oi.Quantity);
+
+                    readyItemsCount = table.CurrentOrder.OrderItems
+                        .Where(oi => oi.IsReady())
+                        .Sum(oi => oi.Quantity);
+
+                    orderCreatedTime = table.CurrentOrder.CreatedTime;
+                    currentOrderId = table.CurrentOrder.Id;
+                }
+
+                var dto = new DineInTableDto
+                {
+                    Id = table.Id,
+                    TableNumber = table.TableNumber,
+                    DisplayOrder = table.DisplayOrder,
+                    Status = table.Status,
+                    StatusDisplay = GlobalEnums.GetTableStatusDisplayName(table.Status),
+                    LayoutSectionId = table.LayoutSectionId ?? Guid.Empty,
+                    LayoutSectionName = table.LayoutSection?.SectionName ?? "",
+                    HasActiveOrders = hasActiveOrders,
+                    CurrentOrderId = currentOrderId,
+                    PendingItemsDisplay = $"{pendingServeCount} món đang chờ",
+                    ReadyItemsCountDisplay = $"{readyItemsCount} món sẵn sàng",
+                    OrderCreatedTime = orderCreatedTime
+                };
+
+                dineInTableDtos.Add(dto);
+            }
+
+            // Sắp xếp theo DisplayOrder (mặc định)
+            dineInTableDtos = dineInTableDtos.OrderBy(t => t.DisplayOrder).ToList();
+
+            Logger.LogInformation("✅ OrderAppService: Found {Count} DineIn tables", dineInTableDtos.Count);
+
+            return new ListResultDto<DineInTableDto>(dineInTableDtos);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ OrderAppService: Error getting DineIn tables");
+            throw;
+        }
     }
+
+    /// <summary>
+    /// Enhanced GetTakeawayOrdersAsync với filtering và sorting tốt hơn
+    /// </summary>
+    public async Task<ListResultDto<TakeawayOrderDto>> GetTakeawayOrdersAsync(GetTakeawayOrdersDto input)
+    {
+        try
+        {
+            Logger.LogInformation("🥡 OrderAppService: Getting takeaway orders with status filter: {Status}",
+                input.StatusFilter);
+
+            // Convert TakeawayStatus to OrderStatus for repository query
+            OrderStatus? orderStatusFilter = null;
+            if (input.StatusFilter.HasValue)
+            {
+                orderStatusFilter = MapTakeawayStatusToOrderStatus(input.StatusFilter.Value);
+            }
+
+            // Sử dụng unified repository method với đơn giản filtering
+            var orders = await _orderRepository.GetOrdersAsync(
+                orderTypeFilter: OrderType.Takeaway,
+                statusFilter: orderStatusFilter,
+                date: DateTime.Today,
+                searchText: null
+            );
+
+            // Map sang TakeawayOrderDto và sắp xếp theo thời gian tạo
+            var takeawayOrders = orders
+                .Select(MapToTakeawayOrderDto)
+                .OrderByDescending(o => o.CreatedTime)
+                .ToList();
+
+            Logger.LogInformation("✅ OrderAppService: Found {Count} takeaway orders", takeawayOrders.Count);
+
+            return new ListResultDto<TakeawayOrderDto>(takeawayOrders);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ OrderAppService: Error getting takeaway orders");
+            throw;
+        }
+    }
+
+    #region Private Helper Methods for New APIs
+
+
+
+    #endregion
+
+    #region Unified Order Details API
+
+    /// <summary>
+    /// API thống nhất lấy chi tiết đơn hàng cho cả DineIn và Takeaway
+    /// Gộp logic từ GetTableDetailsAsync và GetTakeawayOrderDetailsAsync
+    /// </summary>
+    public async Task<OrderDetailsDto> GetOrderDetailsAsync(Guid orderId)
+    {
+        try
+        {
+            Logger.LogInformation("📋 OrderAppService: Getting unified order details for order {OrderId}", orderId);
+
+            // Lấy order với đầy đủ thông tin
+            var order = await _orderRepository.GetWithDetailsAsync(orderId);
+            if (order == null)
+            {
+                throw new EntityNotFoundException(typeof(Order), orderId);
+            }
+
+            Logger.LogInformation("✅ OrderAppService: Found order {OrderNumber} of type {OrderType} with {ItemCount} items", 
+                order.OrderNumber, order.OrderType, order.OrderItems.Count);
+
+            // Tạo DTO thống nhất
+            var result = new OrderDetailsDto
+            {
+                Id = order.Id,
+                OrderNumber = order.OrderNumber,
+                OrderType = order.OrderType,
+                Status = order.Status,
+                StatusDisplay = GlobalEnums.GetOrderStatusDisplayName(order.Status),
+                TotalAmount = order.TotalAmount,
+                Notes = order.Notes,
+                CreatedTime = order.CreationTime
+            };
+
+            // Set fields dựa trên OrderType
+            if (order.OrderType == OrderType.Takeaway)
+            {
+                // Takeaway-specific fields
+                result.CustomerName = order.CustomerName ?? "";
+                result.CustomerPhone = order.CustomerPhone ?? "";
+                result.PaymentTime = order.Payment?.PaymentTime;
+            }
+            else if (order.OrderType == OrderType.DineIn && order.Table != null)
+            {
+                // DineIn-specific fields
+                result.TableNumber = order.Table.TableNumber;
+                result.LayoutSectionName = order.Table.LayoutSection?.SectionName ?? "";
+            }
+
+            // Tính toán order summary
+            var pendingServeCount = order.OrderItems.Count(i => 
+                i.Status == OrderItemStatus.Pending || i.Status == OrderItemStatus.Preparing);
+
+            result.OrderSummary = new OrderSummaryDto
+            {
+                TotalItemsCount = order.OrderItems.Count,
+                PendingServeCount = pendingServeCount,
+                TotalAmount = order.TotalAmount
+            };
+
+            // Lấy thông tin MenuItem cho ingredient availability check
+            var menuItemIds = order.OrderItems.Select(oi => oi.MenuItemId).Distinct().ToList();
+            var menuItems = await _menuItemRepository.GetListAsync(mi => menuItemIds.Contains(mi.Id));
+            var menuItemDict = menuItems.ToDictionary(mi => mi.Id, mi => mi);
+
+            // Map order items với ingredient availability check
+            var orderItemDetails = new List<OrderItemDetailDto>();
+            var unservedOrderItems = order.GetUnservedItems();
+
+            foreach (var orderItem in order.OrderItems)
+            {
+                var menuItem = menuItemDict.GetValueOrDefault(orderItem.MenuItemId);
+                var totalPrice = orderItem.UnitPrice * orderItem.Quantity;
+
+                var itemDetail = new OrderItemDetailDto
+                {
+                    Id = orderItem.Id,
+                    MenuItemName = orderItem.MenuItemName,
+                    Quantity = orderItem.Quantity,
+                    UnitPrice = orderItem.UnitPrice,
+                    TotalPrice = totalPrice,
+                    Status = orderItem.Status,
+                    SpecialRequest = orderItem.Notes ?? string.Empty,
+                    CanEdit = GlobalEnums.CanEditOrderItem(orderItem.Status),
+                    CanDelete = GlobalEnums.CanDeleteOrderItem(orderItem.Status),
+                    RequiresCooking = menuItem?.RequiresCooking ?? false,
+                    HasMissingIngredients = false,
+                    MissingIngredients = new List<MissingIngredientDto>()
+                };
+
+                // Check ingredient availability cho món chưa phục vụ
+                if (unservedOrderItems.Any(unserved => unserved.Id == orderItem.Id))
+                {
+                    try
+                    {
+                        var missingIngredients = await _recipeManager
+                            .CheckIngredientAvailabilityAsync(orderItem.MenuItemId, orderItem.Quantity);
+
+                        if (missingIngredients.Any())
+                        {
+                            itemDetail.HasMissingIngredients = true;
+                            itemDetail.MissingIngredients = missingIngredients.Select(mi => new MissingIngredientDto
+                            {
+                                MenuItemId = mi.MenuItemId,
+                                MenuItemName = mi.MenuItemName,
+                                IngredientId = mi.IngredientId,
+                                IngredientName = mi.IngredientName,
+                                RequiredQuantity = mi.RequiredQuantity,
+                                CurrentStock = mi.CurrentStock,
+                                Unit = mi.Unit,
+                                ShortageAmount = mi.ShortageAmount,
+                                DisplayMessage = mi.DisplayMessage ?? $"Thiếu {mi.IngredientName} ({mi.ShortageAmount}{mi.Unit})"
+                            }).ToList();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "Failed to check ingredient availability for order item {OrderItemId}", orderItem.Id);
+                        // Graceful degradation: keep HasMissingIngredients = false
+                    }
+                }
+
+                orderItemDetails.Add(itemDetail);
+            }
+
+            // Sắp xếp order items theo trạng thái ưu tiên
+            result.OrderItems = orderItemDetails
+                .OrderBy(oi => GetOrderItemSortPriority(oi.Status))
+                .ThenBy(oi => oi.MenuItemName)
+                .ToList();
+
+            Logger.LogInformation("✅ OrderAppService: Successfully processed unified order details for order {OrderId}", orderId);
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ OrderAppService: Error getting unified order details for order {OrderId}", orderId);
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Private Helper Methods
 
     /// <summary>
     /// Map OrderStatus sang TakeawayStatus
@@ -850,6 +852,8 @@ public class OrderAppService : ApplicationService, IOrderAppService
             _ => TakeawayStatus.Preparing
         };
     }
+
+    #endregion
 
     #endregion
 }

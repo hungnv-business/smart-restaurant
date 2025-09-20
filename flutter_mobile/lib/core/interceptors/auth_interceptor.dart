@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../services/auth_service.dart';
+import '../services/auth/auth_service.dart';
 
 /// Interceptor tự động refresh token khi gặp lỗi 401 Unauthorized
 class AuthInterceptor extends Interceptor {

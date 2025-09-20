@@ -184,7 +184,7 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// </summary>
     public void MarkAsServed()
     {
-        if (!IsReady())
+        if (!IsReady() && MenuItem.RequiresCooking)
         {
             throw OrderItemValidationException.CannotServeNonReadyItem();
         }

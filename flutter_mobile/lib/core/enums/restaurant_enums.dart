@@ -330,24 +330,25 @@ class EnumParser {
     
     return OrderStatus.serving; // Default fallback
   }
+
+  /// Parse OrderType từ dynamic value (int index hoặc string)
+  static OrderType parseOrderType(dynamic value) {
+    if (value == null) return OrderType.dineIn;
+    
+    if (value is int) {
+      if (value >= 0 && value < OrderType.values.length) {
+        return OrderType.values[value];
+      }
+    }
+    
+    if (value is String) {
+      final intValue = int.tryParse(value);
+      if (intValue != null && intValue >= 0 && intValue < OrderType.values.length) {
+        return OrderType.values[intValue];
+      }
+    }
+    
+    return OrderType.dineIn; // Default fallback
+  }
 }
 
-/// Các constant text thường dùng trong ứng dụng
-class AppTexts {
-  // Empty states
-  static const String emptyTable = 'Trống';
-  static const String waitingPayment = 'Chờ thanh toán';
-  
-  // Actions
-  static const String completed = 'Hoàn thành';
-  static const String cancel = 'Hủy';
-  static const String processing = 'Đang xử lý';
-  
-  // Success messages
-  static const String printSuccess = 'Đã in hóa đơn thành công';
-  
-  // Error messages
-  static const String orderIdNotFound = 'Không tìm thấy ID đơn hàng';
-  static const String orderInfoNotFound = 'Không tìm thấy thông tin đơn hàng';
-  static const String orderItemNotFound = 'Không tìm thấy món cần xóa';
-}

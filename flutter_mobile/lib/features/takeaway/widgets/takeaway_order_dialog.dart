@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/models/order_request_models.dart';
-import '../../../core/services/shared_order_service.dart';
+import '../../../core/models/order/order_request_models.dart';
+import '../../../core/services/order/shared_order_service.dart';
 import '../../order/screens/menu_screen.dart';
 
 /// Dialog để tạo đơn hàng takeaway với form nhập thông tin khách hàng

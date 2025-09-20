@@ -1,7 +1,9 @@
+library;
+
 /// Models cho Order Requests - tương ứng với backend DTOs
 /// Dùng để gửi request tạo đơn hàng lên API
 
-import '../enums/restaurant_enums.dart';
+import '../../enums/restaurant_enums.dart';
 
 /// DTO cho việc tạo OrderItem trong đơn hàng
 /// Tương ứng với CreateOrderItemDto.cs
@@ -211,33 +213,6 @@ class AddItemsToOrderDto {
   bool get isValid => validate().isEmpty;
 }
 
-/// Response từ API sau khi tạo đơn hàng thành công
-class CreateOrderResponseDto {
-  final String orderId;
-  final String orderNumber;
-  final DateTime createdAt;
-  final int totalAmount;
-
-  const CreateOrderResponseDto({
-    required this.orderId,
-    required this.orderNumber,
-    required this.createdAt,
-    required this.totalAmount,
-  });
-
-  factory CreateOrderResponseDto.fromJson(Map<String, dynamic> json) {
-    return CreateOrderResponseDto(
-      orderId: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String? ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      totalAmount: json['totalAmount'] != null 
-          ? (json['totalAmount'] as num).toInt()
-          : 0,
-    );
-  }
-}
 
 // Type aliases for backward compatibility
 typedef OrderItemRequest = CreateOrderItemDto;

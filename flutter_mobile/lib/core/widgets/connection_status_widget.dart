@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobile/core/enums/restaurant_enums.dart';
+import 'package:flutter_mobile/core/services/notification/signalr_service.dart';
 import 'package:provider/provider.dart';
-import '../enums/restaurant_enums.dart';
-import '../services/signalr_service.dart';
 
 /// Widget hiển thị trạng thái kết nối SignalR
 class ConnectionStatusWidget extends StatelessWidget {
   final bool showAsSnackBar;
   final bool showAsAppBar;
-  
+
   const ConnectionStatusWidget({
     Key? key,
     this.showAsSnackBar = false,
@@ -60,7 +60,11 @@ class ConnectionStatusWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBarIndicator(ConnectionStatus status, String? error, SignalRService signalRService) {
+  Widget _buildAppBarIndicator(
+    ConnectionStatus status,
+    String? error,
+    SignalRService signalRService,
+  ) {
     // Only show for non-connected states
     if (status == ConnectionStatus.connected) {
       return const SizedBox.shrink();
@@ -88,7 +92,8 @@ class ConnectionStatusWidget extends StatelessWidget {
               ),
             ),
           ),
-          if (status == ConnectionStatus.error || status == ConnectionStatus.disconnected)
+          if (status == ConnectionStatus.error ||
+              status == ConnectionStatus.disconnected)
             TextButton(
               onPressed: () {
                 signalRService.connect();
@@ -103,7 +108,11 @@ class ConnectionStatusWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInlineIndicator(ConnectionStatus status, String? error, SignalRService signalRService) {
+  Widget _buildInlineIndicator(
+    ConnectionStatus status,
+    String? error,
+    SignalRService signalRService,
+  ) {
     final color = _getStatusColor(status);
     final icon = _getStatusIcon(status);
     final text = _getStatusText(status, error);

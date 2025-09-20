@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/menu_models.dart';
-import '../../../core/models/table_models.dart';
+import '../../../core/models/menu/menu_models.dart';
+import '../../../core/models/order/dinein_table_models.dart';
 import '../../../core/utils/price_formatter.dart';
 
 /// Widget dialog hiển thị giỏ hàng
 class CartDialog extends StatefulWidget {
-  final ActiveTableDto? selectedTable;
+  final DineInTableDto? selectedTable;
   final List<MenuItem> cartItems;
   final List<int> cartItemQuantities;
   final Function(int index) onIncreaseQuantity;

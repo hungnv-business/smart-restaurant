@@ -1,3 +1,5 @@
+library;
+
 /// Models cho Menu Management
 /// Tương ứng với DTOs từ backend SmartRestaurant
 
@@ -139,20 +141,8 @@ class MenuItem {
     return 'Còn ${maximumQuantityAvailable} phần';
   }
   
-  /// Getter để lấy màu stock status
-  StockStatusColor get stockStatusColor {
-    if (isOutOfStock) return StockStatusColor.outOfStock;
-    if (hasLimitedStock) return StockStatusColor.limited;
-    return StockStatusColor.available;
-  }
 }
 
-/// Enum cho màu stock status
-enum StockStatusColor {
-  available, // Xanh lá
-  limited,   // Vàng/Cam
-  outOfStock // Đỏ
-}
 
 /// Model cho filter khi lấy danh sách món ăn (tương ứng GetMenuItemsForOrderDto)
 class GetMenuItemsForOrder {
@@ -181,36 +171,3 @@ class GetMenuItemsForOrder {
   }
 }
 
-/// Response wrapper cho danh sách categories từ API
-class MenuCategoriesResponse {
-  final List<MenuCategory> items;
-
-  const MenuCategoriesResponse({
-    required this.items,
-  });
-
-  factory MenuCategoriesResponse.fromJson(Map<String, dynamic> json) {
-    final items = (json['items'] as List<dynamic>?)
-        ?.map((item) => MenuCategory.fromJson(item as Map<String, dynamic>))
-        .toList() ?? [];
-    
-    return MenuCategoriesResponse(items: items);
-  }
-}
-
-/// Response wrapper cho danh sách menu items từ API
-class MenuItemsResponse {
-  final List<MenuItem> items;
-
-  const MenuItemsResponse({
-    required this.items,
-  });
-
-  factory MenuItemsResponse.fromJson(Map<String, dynamic> json) {
-    final items = (json['items'] as List<dynamic>?)
-        ?.map((item) => MenuItem.fromJson(item as Map<String, dynamic>))
-        .toList() ?? [];
-    
-    return MenuItemsResponse(items: items);
-  }
-}

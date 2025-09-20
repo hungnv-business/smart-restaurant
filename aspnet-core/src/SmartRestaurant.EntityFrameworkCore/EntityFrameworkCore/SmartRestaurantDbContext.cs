@@ -464,8 +464,8 @@ public class SmartRestaurantDbContext :
             b.Property(x => x.Notes).HasMaxLength(500);
             
             b.HasOne(x => x.Order)
-                .WithMany(o => o.Payments)
-                .HasForeignKey(x => x.OrderId)
+                .WithOne(o => o.Payment)
+                .HasForeignKey<Payment>(x => x.OrderId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
                 

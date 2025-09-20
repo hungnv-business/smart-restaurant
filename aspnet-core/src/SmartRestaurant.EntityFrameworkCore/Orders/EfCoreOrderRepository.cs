@@ -21,87 +21,6 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
         {
         }
 
-        // /// <summary>
-        // /// Lấy danh sách đơn hàng theo bàn
-        // /// </summary>
-        // public async Task<List<Order>> GetOrdersByTableIdAsync(
-        //     Guid tableId, 
-        //     bool includeOrderItems = false,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => o.TableId == tableId);
-
-        //     if (includeOrderItems)
-        //     {
-        //         query = query.Include(o => o.OrderItems);
-        //     }
-
-        //     return await query
-        //         .OrderBy(o => o.CreationTime)
-        //         .ToListAsync(GetCancellationToken(cancellationToken));
-        // }
-
-        // /// <summary>
-        // /// Lấy danh sách đơn hàng theo trạng thái
-        // /// </summary>
-        // public async Task<List<Order>> GetOrdersByStatusAsync(
-        //     OrderStatus status, 
-        //     bool includeOrderItems = false,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => o.Status == status);
-
-        //     if (includeOrderItems)
-        //     {
-        //         query = query.Include(o => o.OrderItems);
-        //     }
-
-        //     return await query
-        //         .OrderBy(o => o.CreationTime)
-        //         .ToListAsync(GetCancellationToken(cancellationToken));
-        // }
-
-        // /// <summary>
-        // /// Lấy danh sách đơn hàng cho bếp (trạng thái Confirmed và Preparing)
-        // /// </summary>
-        // public async Task<List<Order>> GetKitchenOrdersAsync(
-        //     bool includeOrderItems = true,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => 
-        //         o.Status == OrderStatus.Serving);
-
-        //     if (includeOrderItems)
-        //     {
-        //         query = query.Include(o => o.OrderItems);
-        //     }
-
-        //     return await query
-        //         .OrderBy(o => o.CreationTime)
-        //         .ToListAsync(GetCancellationToken(cancellationToken));
-        // }
-
-        // /// <summary>
-        // /// Lấy đơn hàng theo số đơn hàng
-        // /// </summary>
-        // public async Task<Order?> GetByOrderNumberAsync(
-        //     string orderNumber, 
-        //     bool includeOrderItems = false,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => o.OrderNumber == orderNumber);
-
-        //     if (includeOrderItems)
-        //     {
-        //         query = query.Include(o => o.OrderItems);
-        //     }
-
-        //     return await query.FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
-        // }
 
         /// <summary>
         /// Lấy đơn hàng đầy đủ thông tin bao gồm OrderItems và MenuItem
@@ -119,24 +38,6 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
         }
 
-        // /// <summary>
-        // /// Kiểm tra xem số đơn hàng đã tồn tại chưa
-        // /// </summary>
-        // public async Task<bool> IsOrderNumberExistsAsync(
-        //     string orderNumber, 
-        //     Guid? excludeOrderId = null,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => o.OrderNumber == orderNumber);
-
-        //     if (excludeOrderId.HasValue)
-        //     {
-        //         query = query.Where(o => o.Id != excludeOrderId.Value);
-        //     }
-
-        //     return await query.AnyAsync(GetCancellationToken(cancellationToken));
-        // }
 
         /// <summary>
         /// Đếm số đơn hàng theo ngày
@@ -154,25 +55,6 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .CountAsync(GetCancellationToken(cancellationToken));
         }
 
-        // /// <summary>
-        // /// Lấy danh sách đơn hàng đang hoạt động (chưa thanh toán)
-        // /// </summary>
-        // public async Task<List<Order>> GetActiveOrdersAsync(
-        //     bool includeOrderItems = false,
-        //     CancellationToken cancellationToken = default)
-        // {
-        //     var dbSet = await GetDbSetAsync();
-        //     var query = dbSet.Where(o => o.Status != OrderStatus.Paid);
-
-        //     if (includeOrderItems)
-        //     {
-        //         query = query.Include(o => o.OrderItems);
-        //     }
-
-        //     return await query
-        //         .OrderBy(o => o.CreationTime)
-        //         .ToListAsync(GetCancellationToken(cancellationToken));
-        // }
 
         /// <summary>
         /// Lấy danh sách đơn hàng đang hoạt động của một bàn cụ thể
@@ -221,6 +103,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
             return await dbSet
                 .Include(o => o.Table)
                 .Include(o => o.OrderItems)
+                    .ThenInclude(o => o.MenuItem)
                 .FirstOrDefaultAsync(o => o.OrderItems.Any(oi => oi.Id == orderItemId), 
                     GetCancellationToken(cancellationToken));
         }
@@ -260,6 +143,40 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .OrderBy(o => o.CreationTime)
+                .ToListAsync(GetCancellationToken(cancellationToken));
+        }
+
+        /// <summary>
+        /// Lấy danh sách đơn hàng với filtering chung (unified method)
+        /// </summary>
+        public async Task<List<Order>> GetOrdersAsync(
+            OrderType? orderTypeFilter = null,
+            OrderStatus? statusFilter = null,
+            DateTime? date = null,
+            string? searchText = null,
+            CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            var targetDate = date ?? DateTime.Today;
+            var nextDay = targetDate.AddDays(1);
+
+            var searchLower = searchText?.ToLower();
+
+            return await dbSet
+                .WhereIf(orderTypeFilter.HasValue, o => o.OrderType == orderTypeFilter!.Value)
+                .WhereIf(statusFilter.HasValue, o => o.Status == statusFilter!.Value)
+                .Where(o => o.CreationTime >= targetDate && o.CreationTime < nextDay)
+                .WhereIf(!string.IsNullOrWhiteSpace(searchText), o => 
+                    (o.CustomerName != null && o.CustomerName.ToLower().Contains(searchLower!)) ||
+                    (o.CustomerPhone != null && o.CustomerPhone.Contains(searchLower!)) ||
+                    (o.Table != null && o.Table.TableNumber.ToLower().Contains(searchLower!)) ||
+                    o.OrderNumber.ToLower().Contains(searchLower!)
+                )
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.Table)
+                .Include(o => o.Payment)
+                .OrderByDescending(o => o.CreationTime)
                 .ToListAsync(GetCancellationToken(cancellationToken));
         }
 

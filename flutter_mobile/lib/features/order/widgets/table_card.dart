@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/models/table_models.dart';
+import '../../../core/models/order/dinein_table_models.dart';
 import '../screens/table_detail_screen.dart';
 
 /// Widget hiển thị thông tin một bàn dưới dạng card
 class TableCard extends StatelessWidget {
-  final ActiveTableDto table;
+  final DineInTableDto table;
   final VoidCallback? onTableUpdated; // Callback khi bàn cập nhật
   final bool isCompact;
 

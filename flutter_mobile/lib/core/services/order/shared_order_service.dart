@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../enums/restaurant_enums.dart';
-import '../models/order_request_models.dart';
-import '../models/table_models.dart';
-import '../models/takeaway_order_details_models.dart';
+import '../../enums/restaurant_enums.dart';
+import '../../models/order/order_request_models.dart';
+import '../../models/order/order_details_models.dart';
+import '../../models/order/dinein_table_models.dart';
+import '../../models/order/takeaway_models.dart';
 import 'order_service.dart';
-import 'http_client_service.dart';
+import '../shared/http_client_service.dart';
 
 /// Shared service để xử lý cả dine-in và takeaway orders
 /// Tái sử dụng logic chung, chỉ khác tableId (null cho takeaway)
@@ -32,14 +33,14 @@ class SharedOrderService extends ChangeNotifier {
   String? get lastTakeawayError => _lastTakeawayError;
 
   // Delegate dine-in operations to OrderService
-  List<ActiveTableDto> get activeTables => _orderService.activeTables;
+  List<DineInTableDto> get dineInTables => _orderService.dineInTables;
   bool get isLoadingTables => _orderService.isLoading;
   String? get lastTablesError => _orderService.lastError;
 
   /// Tạo order cho cả dine-in và takeaway
   /// orderType: OrderType.dineIn hoặc OrderType.takeaway
   /// tableId: required cho dine-in, null cho takeaway
-  Future<CreateOrderResponseDto?> createOrder({
+  Future<String?> createOrder({
     required OrderType orderType,
     String? tableId,
     required List<CreateOrderItemDto> orderItems,
@@ -67,24 +68,23 @@ class SharedOrderService extends ChangeNotifier {
     return await _orderService.createOrder(request);
   }
 
-  /// Load takeaway orders từ API
+  /// Load takeaway orders từ API sử dụng method mới
   Future<void> loadTakeawayOrders({
     TakeawayStatus? statusFilter,
-    DateTime? date,
-    String? searchText,
   }) async {
     try {
       _setLoadingTakeaway(true);
       _clearTakeawayError();
 
-      // Gọi API thật thông qua GET method
+      // Sử dụng API getTakeawayOrders với endpoint chuẩn
+      final Map<String, dynamic> queryParams = {};
+      if (statusFilter != null) {
+        queryParams['statusFilter'] = statusFilter.index;
+      }
+
       final response = await _dio.get(
         '/api/app/order/takeaway-orders',
-        queryParameters: {
-          if (statusFilter != null) 'statusFilter': statusFilter.index,
-          'date': (date ?? DateTime.now()).toIso8601String(),
-          if (searchText != null && searchText.isNotEmpty) 'searchText': searchText,
-        },
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -97,25 +97,14 @@ class SharedOrderService extends ChangeNotifier {
         } else if (response.data is List) {
           data = response.data;
         } else {
-          data = [];
+          data = [response.data];
         }
             
         _takeawayOrders = data
             .map((json) => TakeawayOrderDto.fromJson(json))
             .toList();
-
-        // Sắp xếp theo thời gian tạo (mới nhất trước)
-        _takeawayOrders.sort((a, b) => b.orderTime.compareTo(a.orderTime));
       } else {
-        // Fallback to mock data nếu API fail
-        _takeawayOrders = _getMockTakeawayOrders();
-        
-        // Apply filter local
-        if (statusFilter != null) {
-          _takeawayOrders = _takeawayOrders
-              .where((order) => order.status == statusFilter)
-              .toList();
-        }
+        throw Exception('Phản hồi không hợp lệ từ server khi lấy danh sách đơn takeaway');
       }
 
       notifyListeners();
@@ -179,41 +168,24 @@ class SharedOrderService extends ChangeNotifier {
     return _takeawayOrders.where((order) => order.status == filter).toList();
   }
 
-  /// Delegate table operations to OrderService
-  Future<void> loadTables({
+
+  /// Load DineIn tables sử dụng API mới
+  Future<List<DineInTableDto>> loadDineInTables({
     String? tableNameFilter,
     TableStatus? statusFilter,
   }) async {
-    await _orderService.getActiveTables(
+    return await _orderService.getDineInTables(
       tableNameFilter: tableNameFilter,
       statusFilter: statusFilter,
     );
   }
 
-  Future<TableDetailDto> getTableDetails(String tableId) async {
-    return await _orderService.getTableDetails(tableId);
+
+  /// Lấy chi tiết đơn hàng thống nhất (thay thế getTableDetails và getTakeawayOrderDetails)
+  Future<OrderDetailsDto> getOrderDetails(String orderId) async {
+    return await _orderService.getOrderDetails(orderId);
   }
 
-  /// Lấy chi tiết takeaway order từ API
-  Future<TakeawayOrderDetailsDto> getTakeawayOrderDetails(String orderId) async {
-    try {
-      _setLoadingTakeaway(true);
-      _clearTakeawayError();
-
-      final response = await _dio.get('/api/app/order/takeaway-order-details/$orderId');
-
-      if (response.statusCode == 200 && response.data != null) {
-        return TakeawayOrderDetailsDto.fromJson(response.data);
-      } else {
-        throw Exception('API call failed with status: ${response.statusCode}');
-      }
-    } catch (e) {
-      _setTakeawayError('Lỗi khi tải chi tiết đơn hàng: ${e.toString()}');
-      rethrow;
-    } finally {
-      _setLoadingTakeaway(false);
-    }
-  }
 
   /// Private helper methods
   void _setLoadingTakeaway(bool loading) {
@@ -243,11 +215,13 @@ class SharedOrderService extends ChangeNotifier {
         orderNumber: 'ORD-MOCK-001',
         customerName: 'Nguyễn Văn A',
         customerPhone: '0901234567',
-        items: ['Phở Bò Tái', 'Cà phê sữa đá'],
+        itemNames: ['Phở Bò Tái', 'Cà phê sữa đá'],
+        itemCount: 2,
         totalAmount: 110000,
-        pickupTime: '14:30',
+        paymentTime: DateTime.now().add(const Duration(minutes: 45)),
         status: TakeawayStatus.preparing,
-        orderTime: '13:45',
+        createdTime: DateTime.now().subtract(const Duration(minutes: 15)),
+        statusDisplay: 'Đang chuẩn bị',
         notes: '',
       ),
       TakeawayOrderDto(
@@ -255,11 +229,13 @@ class SharedOrderService extends ChangeNotifier {
         orderNumber: 'ORD-MOCK-002',
         customerName: 'Trần Thị B',
         customerPhone: '0987654321',
-        items: ['Cơm tấm', 'Nước mía'],
+        itemNames: ['Cơm tấm', 'Nước mía'],
+        itemCount: 2,
         totalAmount: 80000,
-        pickupTime: '15:00',
+        paymentTime: DateTime.now().add(const Duration(hours: 1)),
         status: TakeawayStatus.ready,
-        orderTime: '14:15',
+        createdTime: DateTime.now().subtract(const Duration(minutes: 30)),
+        statusDisplay: 'Sẵn sàng',
         notes: 'Không cần đậu',
       ),
       TakeawayOrderDto(
@@ -267,11 +243,13 @@ class SharedOrderService extends ChangeNotifier {
         orderNumber: 'ORD-MOCK-003',
         customerName: 'Lê Văn C',
         customerPhone: '0912345678',
-        items: ['Bánh mì thịt nướng', 'Bánh flan'],
+        itemNames: ['Bánh mì thịt nướng', 'Bánh flan'],
+        itemCount: 2,
         totalAmount: 70000,
-        pickupTime: '15:15',
+        paymentTime: DateTime.now().add(const Duration(hours: 1, minutes: 15)),
         status: TakeawayStatus.delivered,
-        orderTime: '14:30',
+        createdTime: DateTime.now().subtract(const Duration(minutes: 45)),
+        statusDisplay: 'Đã giao',
         notes: '',
       ),
     ];
@@ -284,75 +262,3 @@ class SharedOrderService extends ChangeNotifier {
   }
 }
 
-/// DTO cho takeaway order
-class TakeawayOrderDto {
-  final String id;
-  final String orderNumber;
-  final String customerName;
-  final String customerPhone;
-  final List<String> items;
-  final int totalAmount;
-  final String pickupTime;
-  final TakeawayStatus status;
-  final String orderTime;
-  final String notes;
-
-  const TakeawayOrderDto({
-    required this.id,
-    required this.orderNumber,
-    required this.customerName,
-    required this.customerPhone,
-    required this.items,
-    required this.totalAmount,
-    required this.pickupTime,
-    required this.status,
-    required this.orderTime,
-    required this.notes,
-  });
-
-  TakeawayOrderDto copyWith({
-    String? id,
-    String? orderNumber,
-    String? customerName,
-    String? customerPhone,
-    List<String>? items,
-    int? totalAmount,
-    String? pickupTime,
-    TakeawayStatus? status,
-    String? orderTime,
-    String? notes,
-  }) {
-    return TakeawayOrderDto(
-      id: id ?? this.id,
-      orderNumber: orderNumber ?? this.orderNumber,
-      customerName: customerName ?? this.customerName,
-      customerPhone: customerPhone ?? this.customerPhone,
-      items: items ?? this.items,
-      totalAmount: totalAmount ?? this.totalAmount,
-      pickupTime: pickupTime ?? this.pickupTime,
-      status: status ?? this.status,
-      orderTime: orderTime ?? this.orderTime,
-      notes: notes ?? this.notes,
-    );
-  }
-
-  String get formattedTotal => '${totalAmount.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), 
-    (Match m) => '${m[1]}.',
-  )}₫';
-
-  factory TakeawayOrderDto.fromJson(Map<String, dynamic> json) {
-    return TakeawayOrderDto(
-      id: json['id'] ?? '',
-      orderNumber: json['orderNumber'] ?? '',
-      customerName: json['customerName'] ?? '',
-      customerPhone: json['customerPhone'] ?? '',
-      items: (json['itemNames'] as List<dynamic>?)?.cast<String>() ?? [],
-      totalAmount: json['totalAmount'] ?? 0,
-      pickupTime: json['formattedPickupTime'] ?? '',
-      status: TakeawayStatus.values[json['status'] ?? 0],
-      orderTime: json['formattedOrderTime'] ?? '',
-      notes: json['notes'] ?? '',
-    );
-  }
-}

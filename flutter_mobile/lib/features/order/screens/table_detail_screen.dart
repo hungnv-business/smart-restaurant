@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/models/table_models.dart';
-import '../../../core/models/takeaway_order_details_models.dart';
-import '../../../core/services/order_service.dart';
-import '../../../core/services/shared_order_service.dart';
-import '../../../core/services/network_thermal_printer_service.dart';
+import '../../../core/models/order/dinein_table_models.dart';
+import '../../../core/models/order/order_details_models.dart';
+import '../../../core/models/order/takeaway_models.dart';
+import '../../../core/services/order/order_service.dart';
+import '../../../core/services/order/shared_order_service.dart';
+import '../../../core/services/printer/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../widgets/order_item_card.dart';
 import '../widgets/edit_quantity_dialog.dart';
 import '../../../core/utils/price_formatter.dart';
 import 'menu_screen.dart';
+import '../../../shared/constants/app_texts.dart';
 
 /// Màn hình chi tiết order của một bàn cụ thể hoặc đơn takeaway
 class TableDetailScreen extends StatefulWidget {
-  final ActiveTableDto? table;
+  final DineInTableDto? table;
   final TakeawayOrderDto? takeawayOrder;
   final bool isForTakeaway;
 
@@ -31,8 +33,7 @@ class TableDetailScreen extends StatefulWidget {
 }
 
 class _TableDetailScreenState extends State<TableDetailScreen> {
-  TableDetailDto? _tableDetail;
-  TakeawayOrderDetailsDto? _takeawayOrderDetails;
+  OrderDetailsDto? _orderDetails;
   bool _isLoading = true;
   String? _errorMessage;
   @override
@@ -54,48 +55,15 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       });
 
       if (widget.isForTakeaway) {
-        // Use real API for takeaway order details
         if (widget.takeawayOrder != null) {
-          final sharedOrderService = Provider.of<SharedOrderService>(context, listen: false);
-          _takeawayOrderDetails = await sharedOrderService.getTakeawayOrderDetails(widget.takeawayOrder!.id);
-          
-          // Convert TakeawayOrderDetailsDto to TableDetailDto for UI compatibility
-          final orderItems = _takeawayOrderDetails!.orderItems.map((item) {
-            return TableOrderItemDto(
-              id: item.id,
-              menuItemName: item.menuItemName,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
-              status: item.status,
-              specialRequest: item.specialRequest ?? '',
-              missingIngredients: [],
-              requiresCooking: item.requiresCooking,
-              canEdit: item.canEdit,
-              canDelete: item.canDelete,
-              hasMissingIngredients: item.hasMissingIngredients,
-            );
-          }).toList();
-          
-          _tableDetail = TableDetailDto(
-            id: _takeawayOrderDetails!.id,
-            tableNumber: _takeawayOrderDetails!.orderNumber,
-            layoutSectionName: 'Mang về',
-            status: TableStatus.occupied,
-            statusDisplay: _mapTakeawayStatusToDisplay(_takeawayOrderDetails!.status),
-            orderId: _takeawayOrderDetails!.id,
-            orderSummary: TableOrderSummaryDto(
-              totalItemsCount: _takeawayOrderDetails!.orderSummary.totalItemsCount,
-              pendingServeCount: _takeawayOrderDetails!.orderSummary.pendingServeCount,
-              totalAmount: _takeawayOrderDetails!.orderSummary.totalAmount,
-            ),
-            orderItems: orderItems,
-          );
+          final orderService = Provider.of<OrderService>(context, listen: false);
+          _orderDetails = await orderService.getOrderDetails(widget.takeawayOrder!.id);
         }
       } else {
-        final orderService = Provider.of<OrderService>(context, listen: false);
-        final tableDetail = await orderService.getTableDetails(widget.table!.id);
-        _tableDetail = tableDetail;
+        if (widget.table?.currentOrderId != null) {
+          final orderService = Provider.of<OrderService>(context, listen: false);
+          _orderDetails = await orderService.getOrderDetails(widget.table!.currentOrderId!);
+        }
       }
       
       setState(() {
@@ -174,7 +142,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       );
     }
 
-    if (_tableDetail == null) {
+    if (_orderDetails == null) {
       return const Center(child: Text('Không có dữ liệu'));
     }
 
@@ -236,30 +204,31 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               children: [
                 Text(
                   widget.isForTakeaway 
-                      ? 'Đơn mang về ${_takeawayOrderDetails?.orderNumber ?? widget.takeawayOrder?.orderNumber ?? ''}'
+                      ? 'Đơn mang về ${_orderDetails?.orderNumber ?? widget.takeawayOrder?.orderNumber ?? ''}'
                       : 'Bàn ${widget.table?.tableNumber ?? ''}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
-                if (widget.isForTakeaway && _takeawayOrderDetails != null)
+                if (widget.isForTakeaway && _orderDetails != null && _orderDetails!.customerName != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'KH: ${_takeawayOrderDetails!.customerName}',
+                        'KH: ${_orderDetails!.customerName!}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      Text(
-                        'SĐT: ${_takeawayOrderDetails!.customerPhone}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      if (_orderDetails!.customerPhone != null)
+                        Text(
+                          'SĐT: ${_orderDetails!.customerPhone!}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      if (_takeawayOrderDetails!.notes != null && _takeawayOrderDetails!.notes!.isNotEmpty)
+                      if (_orderDetails!.notes != null && _orderDetails!.notes!.isNotEmpty)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -269,7 +238,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                             border: Border.all(color: Colors.amber),
                           ),
                           child: Text(
-                            'Ghi chú: ${_takeawayOrderDetails!.notes}',
+                            'Ghi chú: ${_orderDetails!.notes!}',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.amber.shade800,
                               fontWeight: FontWeight.w500,
@@ -321,7 +290,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Widget _buildOrderSummary() {
-    final summary = _tableDetail?.orderSummary;
+    final summary = _orderDetails?.orderSummary;
     
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -449,7 +418,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
 
   Widget _buildOrderItemsList() {
-    final orderItems = _tableDetail?.orderItems ?? [];
+    final orderItems = _orderDetails?.orderItems ?? [];
     
     if (orderItems.isEmpty) {
       return Center(
@@ -493,13 +462,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     );
   }
 
-  Widget _buildOrderItemCard(TableOrderItemDto item, int index) {
+  Widget _buildOrderItemCard(OrderItemDetailDto item, int index) {
     // Tạo displayMessage từ danh sách missingIngredients
-    String? missingMessage;
-    if (item.missingIngredients.isNotEmpty) {
-      final messages = item.missingIngredients.map((ingredient) => ingredient.displayMessage).toList();
-      missingMessage = messages.join(', ');
-    }
+    String? missingMessage = item.missingIngredientsMessage;
     
     return OrderItemCard(
       itemName: item.menuItemName,
@@ -513,7 +478,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       requiresCooking: item.requiresCooking,
       onEdit: item.canEdit ? () => _editOrderItem(index) : null,
       onRemove: item.canDelete ? () => _removeOrderItem(index) : null,
-      onServe: item.status == OrderItemStatus.ready ? () => _markOrderItemServed(item.id) : null,
+      onServe: (item.requiresCooking && item.status == OrderItemStatus.ready) || 
+               (!item.requiresCooking && item.status != OrderItemStatus.served) 
+               ? () => _markOrderItemServed(item.id) : null,
     );
   }
 
@@ -523,8 +490,8 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     bool canPayment = false;
     String? paymentDisabledReason;
     
-    if (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty) {
-      final orderItems = _tableDetail!.orderItems;
+    if (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty) {
+      final orderItems = _orderDetails!.orderItems;
       
       // Kiểm tra các món chưa ở trạng thái "đã phục vụ" hoặc "cancel"
       final nonCompletedItems = orderItems.where((item) => 
@@ -571,7 +538,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           
           
           // Nút thanh toán (nếu có đơn hàng)
-          if (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty)
+          if (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty)
             Expanded(
               child: OutlinedButton(
                 onPressed: canPayment ? _showPaymentOptions : null,
@@ -616,7 +583,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   void _navigateToMenu() async {
     // Kiểm tra đã có order chưa
-    final hasActiveOrder = _tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty;
+    final hasActiveOrder = _orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty;
     
     final result = await Navigator.push(
       context,
@@ -624,7 +591,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         builder: (context) => MenuScreen(
           selectedTable: widget.table,
           hasActiveOrder: hasActiveOrder,
-          currentOrderId: _tableDetail?.orderId,
+          currentOrderId: _orderDetails?.id,
           isForTakeaway: widget.isForTakeaway,
         ),
       ),
@@ -638,9 +605,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   /// Kiểm tra xem có thể in hóa đơn không (có món đã phục vụ)
   bool _canPrintInvoice() {
-    if (_tableDetail == null) return false;
+    if (_orderDetails == null) return false;
     
-    final servedItems = _tableDetail!.orderItems.where((item) => 
+    final servedItems = _orderDetails!.orderItems.where((item) => 
       item.status == OrderItemStatus.served
     ).toList();
     
@@ -648,7 +615,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   void _printInvoice() async {
-    if (_tableDetail == null) return;
+    if (_orderDetails == null) return;
     
     // Kiểm tra lại có món đã phục vụ không
     if (!_canPrintInvoice()) {
@@ -703,7 +670,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Future<void> _printInvoiceLocally() async {
-    if (_tableDetail == null) return;
+    if (_orderDetails == null) return;
 
     try {
       final networkPrinter = NetworkThermalPrinterService();
@@ -726,7 +693,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       }
       
       // In hóa đơn
-      await networkPrinter.printInvoice(_tableDetail!);
+      await networkPrinter.printInvoice(_orderDetails!);
       
     } catch (e) {
       rethrow; // Để _printInvoice() xử lý error
@@ -782,7 +749,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   void _showPaymentConfirmation(PaymentMethod method) {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController noteController = TextEditingController();
-    final totalAmount = _tableDetail?.orderSummary?.totalAmount?.toInt() ?? 0;
+    final totalAmount = _orderDetails?.orderSummary?.totalAmount?.toInt() ?? 0;
     
     // Tự động điền số tiền cần thanh toán với format
     amountController.text = totalAmount.toString().replaceAllMapped(
@@ -908,7 +875,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Future<void> _processPayment(PaymentMethod method, int paidAmount, String note) async {
-    final orderId = _tableDetail?.orderId;
+    final orderId = _orderDetails?.id;
     if (orderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -943,7 +910,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       if (mounted) Navigator.of(context).pop();
 
       // Show success message with details
-      final totalAmount = _tableDetail?.orderSummary?.totalAmount?.toInt() ?? 0;
+      final totalAmount = _orderDetails?.orderSummary?.totalAmount?.toInt() ?? 0;
       final changeAmount = paidAmount - totalAmount;
       
       String message = '✅ Thanh toán thành công!\n';
@@ -993,14 +960,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   void _editOrderItem(int index) {
-    if (_tableDetail == null || 
-        _tableDetail!.orderItems.isEmpty || 
+    if (_orderDetails == null || 
+        _orderDetails!.orderItems.isEmpty || 
         index < 0 || 
-        index >= _tableDetail!.orderItems.length) {
+        index >= _orderDetails!.orderItems.length) {
       return;
     }
 
-    final orderItem = _tableDetail!.orderItems[index];
+    final orderItem = _orderDetails!.orderItems[index];
     _showEditQuantityDialog(orderItem, index);
   }
 
@@ -1053,7 +1020,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   /// Hiển thị dialog sửa số lượng món
-  void _showEditQuantityDialog(TableOrderItemDto orderItem, int index) async {
+  void _showEditQuantityDialog(OrderItemDetailDto orderItem, int index) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => EditQuantityDialog(
@@ -1098,8 +1065,8 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   /// Thực hiện cập nhật số lượng món
-  Future<void> _performUpdateOrderItemQuantity(TableOrderItemDto orderItem, int newQuantity, int index, [String? notes]) async {
-    final orderId = _tableDetail?.orderId;
+  Future<void> _performUpdateOrderItemQuantity(OrderItemDetailDto orderItem, int newQuantity, int index, [String? notes]) async {
+    final orderId = _orderDetails?.id;
     
     if (orderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1158,10 +1125,10 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   /// Thực hiện xóa món khỏi order
   Future<void> _performRemoveOrderItem(int index) async {
-    if (_tableDetail == null || 
-        _tableDetail!.orderItems.isEmpty || 
+    if (_orderDetails == null || 
+        _orderDetails!.orderItems.isEmpty || 
         index < 0 || 
-        index >= _tableDetail!.orderItems.length) {
+        index >= _orderDetails!.orderItems.length) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(AppTexts.orderItemNotFound),
@@ -1171,8 +1138,8 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       return;
     }
 
-    final orderItem = _tableDetail!.orderItems[index];
-    final orderId = _tableDetail!.orderId;
+    final orderItem = _orderDetails!.orderItems[index];
+    final orderId = _orderDetails!.id;
     
     if (orderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1232,8 +1199,8 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             _buildInfoRow('Số bàn', widget.table?.tableNumber ?? 'Không có'),
             _buildInfoRow('Khu vực', widget.table?.layoutSectionName ?? 'Không có'),
             _buildInfoRow('Trạng thái', widget.table?.status.displayName ?? 'Không xác định'),
-            _buildInfoRow('Có đơn hàng', (_tableDetail?.orderSummary != null && _tableDetail!.orderItems.isNotEmpty) ? 'Có' : 'Không'),
-            _buildInfoRow('Món chờ phục vụ', '$_tableDetail?.orderSummary?.pendingServeCount ?? 0'),
+            _buildInfoRow('Có đơn hàng', (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty) ? 'Có' : 'Không'),
+            _buildInfoRow('Món chờ phục vụ', '${_orderDetails?.orderSummary?.pendingServeCount ?? 0}'),
           ],
         ),
         actions: [

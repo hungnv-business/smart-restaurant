@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_mobile/core/services/auth_service.dart';
+import 'package:flutter_mobile/core/services/auth/auth_service.dart';
 import 'package:flutter_mobile/features/auth/screens/login_screen.dart';
 import 'package:flutter_mobile/core/themes/app_theme.dart';
 

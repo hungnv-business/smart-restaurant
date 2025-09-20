@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import '../constants/app_constants.dart';
-import '../interceptors/auth_interceptor.dart';
-import 'auth_service.dart';
+import '../../constants/app_constants.dart';
+import '../../interceptors/auth_interceptor.dart';
+import '../auth/auth_service.dart';
 
 /// Singleton HTTP client service với auth interceptor
 class HttpClientService {

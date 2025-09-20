@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/enums/restaurant_enums.dart';
-import '../../../core/models/table_models.dart';
-import '../../../core/models/menu_models.dart';
-import '../../../core/models/order_request_models.dart';
-import '../../../core/models/ingredient_verification_models.dart';
+import '../../../core/models/order/dinein_table_models.dart';
+import '../../../core/models/menu/menu_models.dart';
+import '../../../core/models/order/order_request_models.dart';
+import '../../../core/models/order/ingredient_verification_models.dart';
 import '../../../shared/widgets/common_app_bar.dart';
-import '../../../core/services/order_service.dart';
+import '../../../core/services/order/order_service.dart';
 import '../widgets/menu_item_card.dart';
 import '../widgets/cart_dialog.dart';
 import '../widgets/ingredient_verification_dialog.dart';
 
 /// Màn hình Menu món ăn cho bàn đã chọn hoặc đơn takeaway
 class MenuScreen extends StatefulWidget {
-  final ActiveTableDto? selectedTable;
+  final DineInTableDto? selectedTable;
   final String? tableId;
   final bool hasActiveOrder;
   final String? currentOrderId;
@@ -150,8 +150,9 @@ class _MenuScreenState extends State<MenuScreen> {
       await _loadMenuItems();
     } catch (e) {
       // Sử dụng fallback categories nếu API lỗi
+      final categoriesData = await _orderService.getFallbackCategories();
       setState(() {
-        _categories = _orderService.getFallbackCategories();
+        _categories = categoriesData;
         _isLoadingCategories = false;
         _categoriesError =
             'Không thể tải danh mục từ server. Sử dụng danh mục mặc định.';
@@ -183,9 +184,9 @@ class _MenuScreenState extends State<MenuScreen> {
         nameFilter: _searchQuery.isEmpty ? null : _searchQuery,
       );
 
-      final menuItems = await _orderService.getMenuItemsForOrder(filter);
+      final menuItemsData = await _orderService.getMenuItemsForOrder(filter);
       setState(() {
-        _menuItems = menuItems;
+        _menuItems = menuItemsData;
         _isLoadingMenuItems = false;
       });
     } catch (e) {
@@ -613,16 +614,17 @@ class _MenuScreenState extends State<MenuScreen> {
 
     try {
       // Tạo order items từ cart để verify ingredients
-      final verificationItems = <VerifyOrderItemDto>[];
+      final verificationItems = <CreateOrderItemDto>[];
       for (int i = 0; i < _cartItems.length; i++) {
         final menuItem = _cartItems[i];
         final quantity = _cartItemQuantities[i];
 
         verificationItems.add(
-          VerifyOrderItemDto(
+          CreateOrderItemDto(
             menuItemId: menuItem.id,
             menuItemName: menuItem.name,
             quantity: quantity,
+            unitPrice: menuItem.price,
           ),
         );
       }

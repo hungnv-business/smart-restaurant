@@ -1,5 +1,5 @@
 import 'package:flutter_mobile/core/enums/restaurant_enums.dart';
-import 'package:flutter_mobile/core/models/table_models.dart';
+import 'package:flutter_mobile/core/models/order/order_details_models.dart';
 
 /// EMVCo / VietQR manual builder (TLV + CRC16-CCITT)
 /// - Hỗ trợ VietQR QRIBFTTA (NAPAS Tag 38 – AID A000000727)
@@ -8,16 +8,16 @@ import 'package:flutter_mobile/core/models/table_models.dart';
 
 class EmvcoVietQrBuilder {
   /// Tạo EMVCo QR data cho thanh toán bàn (chỉ tính món đã phục vụ)
-  static String buildPaymentQRData(TableDetailDto tableDetail) {
+  static String buildPaymentQRData(OrderDetailsDto orderDetails) {
     // Chỉ tính tổng tiền các món đã phục vụ
-    final servedItems = tableDetail.orderItems
+    final servedItems = orderDetails.orderItems
         .where((item) => item.status == OrderItemStatus.served)
         .toList();
     final servedTotal = servedItems.fold<double>(
       0,
       (sum, item) => sum + item.totalPrice,
     );
-    final tableNumber = tableDetail.tableNumber;
+    final tableNumber = orderDetails.tableNumber ?? orderDetails.orderNumber;
 
     return buildVietQrIbftta(
       bankBin: '970407', // Techcombank
