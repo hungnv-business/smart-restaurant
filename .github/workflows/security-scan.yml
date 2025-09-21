@@ -1,0 +1,118 @@
+name: Security Scan
+
+on:
+  schedule:
+    # Chạy vào 2:00 AM UTC mỗi ngày
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Cho phép chạy manual
+  push:
+    branches: [ main ]
+    paths:
+      # Chỉ chạy khi có thay đổi dependencies
+      - '**/package*.json'
+      - '**/packages.lock.json'
+      - '**/*.csproj'
+      - '**/Dockerfile*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+      continue-on-error: true
+      
+    - name: Show Trivy results summary
+      if: always()
+      run: |
+        if [ -f "trivy-results.sarif" ]; then
+          echo "🔍 Security Scan Results:"
+          # Count total vulnerabilities
+          TOTAL_VULNS=$(cat trivy-results.sarif | jq '.runs[0].results | length' || echo "0")
+          echo "Total vulnerabilities found: $TOTAL_VULNS"
+          
+          if [ "$TOTAL_VULNS" -gt "0" ]; then
+            echo "❌ Security vulnerabilities detected. Check the Security tab for details."
+            exit 1
+          else
+            echo "✅ No security vulnerabilities found."
+          fi
+        else
+          echo "⚠️ No scan results found"
+        fi
+
+  # .NET specific security scan
+  dotnet-security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore .NET dependencies
+      run: |
+        cd aspnet-core
+        dotnet restore SmartRestaurant.sln
+
+    - name: Run .NET security audit
+      run: |
+        cd aspnet-core
+        dotnet list package --vulnerable --include-transitive || true
+
+  # Node.js specific security scan
+  npm-security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Install dependencies
+      run: |
+        cd angular
+        npm ci
+
+    - name: Run npm audit
+      run: |
+        cd angular
+        npm audit --audit-level=high || true
+
+    - name: Check for known vulnerabilities
+      run: |
+        cd angular
+        npx audit-ci --config audit-ci.json || true

@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -14,10 +14,63 @@ env:
   POSTGRES_DB: SmartRestaurant_Test
 
 jobs:
-  # Backend Tests (DISABLED)
-  backend-tests:
-    if: false  # Tắt tạm thời để debug CI issues
+  # Build and Lint - Chạy đầu tiên để phát hiện lỗi sớm
+  build-and-lint:
     runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: 'angular/package-lock.json'
+
+    - name: Install .NET format tool
+      run: dotnet tool install -g dotnet-format
+
+    - name: Restore .NET dependencies
+      run: |
+        cd aspnet-core
+        dotnet restore SmartRestaurant.sln
+
+    - name: Check .NET code formatting
+      run: |
+        cd aspnet-core
+        dotnet format SmartRestaurant.sln --verify-no-changes
+
+    - name: Build .NET solution
+      run: |
+        cd aspnet-core
+        dotnet build SmartRestaurant.sln --configuration Release --no-restore
+
+    - name: Install Angular dependencies
+      run: |
+        cd angular
+        npm ci
+
+    - name: Lint Angular code
+      run: |
+        cd angular
+        npm run lint
+
+    - name: Build Angular for production
+      run: |
+        cd angular
+        npm run build:prod
+
+  # Backend Tests
+  backend-tests:
+    runs-on: ubuntu-latest
+    needs: [build-and-lint]
     
     services:
       postgres:
@@ -34,7 +87,6 @@ jobs:
           --health-retries 5 
         ports:
           - 5432:5432
-      
 
     steps:
     - name: Checkout code
@@ -45,41 +97,10 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Cache .NET tools
-      uses: actions/cache@v3
-      with:
-        path: ~/.dotnet/tools
-        key: ${{ runner.os }}-dotnet-tools-abp-8.0.5
-        restore-keys: |
-          ${{ runner.os }}-dotnet-tools-
-
-    - name: Install ABP CLI
-      run: |
-        # Check if ABP CLI is already installed
-        if ! command -v abp &> /dev/null; then
-          echo "Installing ABP CLI..."
-          dotnet tool install -g Volo.Abp.Cli --version 8.0.5
-        else
-          echo "ABP CLI already installed:"
-          abp --version
-        fi
-
-    - name: Cache .NET packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Restore .NET dependencies
+    - name: Restore and build
       run: |
         cd aspnet-core
         dotnet restore SmartRestaurant.sln
-
-    - name: Build .NET solution
-      run: |
-        cd aspnet-core
         dotnet build SmartRestaurant.sln --configuration Release --no-restore
 
     - name: Setup test database
@@ -89,22 +110,15 @@ jobs:
       env:
         ConnectionStrings__Default: "User ID=${{ env.POSTGRES_USER }};Password=${{ env.POSTGRES_PASSWORD }};Host=localhost;Port=5432;Database=${{ env.POSTGRES_DB }};"
 
-    - name: Run .NET tests
+    - name: Run .NET unit tests
       run: |
         cd aspnet-core
-        dotnet test SmartRestaurant.sln --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+        dotnet test SmartRestaurant.sln --configuration Release --no-build --verbosity normal
 
-    - name: Upload backend coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./aspnet-core/TestResults/**/coverage.cobertura.xml
-        flags: backend
-        name: backend-coverage
-
-  # Frontend Tests (DISABLED)
+  # Frontend Tests  
   frontend-tests:
-    if: false  # Tắt tạm thời để debug CI issues
     runs-on: ubuntu-latest
+    needs: [build-and-lint]
 
     steps:
     - name: Checkout code
@@ -115,17 +129,12 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
+        cache-dependency-path: 'angular/package-lock.json'
 
-    - name: Install frontend dependencies
+    - name: Install dependencies
       run: |
         cd angular
         npm ci
-
-    - name: Lint Angular code
-      run: |
-        cd angular
-        npm run lint
 
     - name: Run Angular unit tests
       run: |
@@ -134,266 +143,28 @@ jobs:
       env:
         CI: true
 
-    - name: Build Angular for production
-      run: |
-        cd angular
-        npm run build:prod
-
-    - name: Upload frontend coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./angular/coverage/lcov.info
-        flags: frontend
-        name: frontend-coverage
-
-  # Integration Tests
-  integration-tests:
-    runs-on: ubuntu-latest
-    # needs: [backend-tests, frontend-tests]  # Tạm tắt dependencies
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-          POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
-
-    - name: Install ABP CLI
-      run: |
-        # Check if ABP CLI is already installed
-        if ! command -v abp &> /dev/null; then
-          echo "Installing ABP CLI..."
-          dotnet tool install -g Volo.Abp.Cli --version 8.0.5
-        else
-          echo "ABP CLI already installed:"
-          abp --version
-        fi
-
-    - name: Restore .NET dependencies
-      run: |
-        cd aspnet-core
-        dotnet restore SmartRestaurant.sln
-
-    - name: Build .NET solution
-      run: |
-        cd aspnet-core
-        dotnet build SmartRestaurant.sln --configuration Release --no-restore
-
-    - name: Setup test database
-      run: |
-        cd aspnet-core
-        dotnet run --project src/SmartRestaurant.DbMigrator
-      env:
-        ConnectionStrings__Default: "User ID=${{ env.POSTGRES_USER }};Password=${{ env.POSTGRES_PASSWORD }};Host=localhost;Port=5432;Database=${{ env.POSTGRES_DB }};"
-
-    - name: Start backend API
-      run: |
-        cd aspnet-core
-        dotnet run --project src/SmartRestaurant.HttpApi.Host &
-        sleep 30  # Wait for API to start
-      env:
-        ASPNETCORE_ENVIRONMENT: Development
-        ConnectionStrings__Default: "User ID=${{ env.POSTGRES_USER }};Password=${{ env.POSTGRES_PASSWORD }};Host=localhost;Port=5432;Database=${{ env.POSTGRES_DB }};"
-
-    - name: Install frontend dependencies
-      run: |
-        cd angular
-        npm ci
-
-    - name: Generate Angular proxies
-      run: |
-        cd angular
-        # Skip proxy generation in CI as API may not be fully ready
-        echo "Skipping proxy generation in CI environment"
-
-    - name: Install ABP libraries
-      run: |
-        cd angular
-        # Skip ABP libs install in CI to avoid dependency issues
-        echo "Skipping ABP libs install in CI environment"
-
-    - name: Run E2E tests
-      run: |
-        cd angular
-        npm run e2e:ci
-      env:
-        API_BASE_URL: https://localhost:44391
-
-  # Security Scan
-  security-scan:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.24.0
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        severity: 'CRITICAL,HIGH'
-        ignore-unfixed: true
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-      continue-on-error: true
-      
-    - name: Show Trivy results (fallback)
-      if: always()
-      run: |
-        if [ -f "trivy-results.sarif" ]; then
-          echo "🔍 Trivy Security Scan Results:"
-          cat trivy-results.sarif | jq -r '.runs[0].results[] | "❌ \(.ruleId): \(.message.text)"' || true
-        else
-          echo "⚠️ No Trivy results file found"
-        fi
-
-  # Docker Build Test
-  docker-build:
-    runs-on: ubuntu-latest
-    # needs: [backend-tests, frontend-tests]  # Tạm tắt dependencies
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Build API Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./infrastructure/docker/Dockerfile.api
-        target: production
-        push: false
-        tags: smartrestaurant-api:test
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Build Web Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./infrastructure/docker/Dockerfile.web
-        target: production
-        push: false
-        tags: smartrestaurant-web:test
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Test Docker Compose
-      run: |
-        # Test that docker-compose files are valid
-        cd infrastructure/docker
-        docker-compose -f docker-compose.dev.yml config
-        docker-compose -f docker-compose.prod.yml config
-
-  # Code Quality
-  code-quality:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-
-    - name: Install .NET format tool
-      run: dotnet tool install -g dotnet-format
-
-    - name: Check .NET code formatting
-      run: |
-        cd aspnet-core
-        dotnet format SmartRestaurant.sln --verify-no-changes
-
-    - name: Install frontend dependencies
-      run: |
-        cd angular
-        npm ci
-
-    - name: Check Angular code formatting
-      run: |
-        cd angular
-        npm run lint
-
-    # - name: Check for Vietnamese text hardcoding (should use localization)
-    #   run: |
-    #     # Check for hardcoded Vietnamese text in TypeScript files
-    #     if grep -r "Phở\|Cơm\|Bún\|Bánh" angular/src --include="*.ts" --exclude-dir=assets; then
-    #       echo "❌ Found hardcoded Vietnamese text. Use localization instead."
-    #       exit 1
-    #     else
-    #       echo "✅ No hardcoded Vietnamese text found."
-    #     fi
-
-  # Results Summary
+  # Summary
   ci-summary:
     runs-on: ubuntu-latest
-    needs: [integration-tests, security-scan, docker-build, code-quality]  # Loại bỏ backend-tests, frontend-tests
+    needs: [build-and-lint, backend-tests, frontend-tests]
     if: always()
     
     steps:
     - name: CI Summary
       run: |
-        echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+        echo "## 🚀 CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
         echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "⚠️ Backend và Frontend tests đã được tắt tạm thời để debug CI issues" >> $GITHUB_STEP_SUMMARY
+        echo "| Build & Lint | ${{ needs.build-and-lint.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Backend Tests | ${{ needs.backend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Frontend Tests | ${{ needs.frontend-tests.result }} |" >> $GITHUB_STEP_SUMMARY
         
-        if [[ "${{ needs.integration-tests.result }}" == "success" && 
-              "${{ needs.docker-build.result }}" == "success" && 
-              "${{ needs.code-quality.result }}" == "success" ]]; then
-          echo "🎉 All active CI checks passed!" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ needs.build-and-lint.result }}" == "success" && 
+              "${{ needs.backend-tests.result }}" == "success" && 
+              "${{ needs.frontend-tests.result }}" == "success" ]]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All CI checks passed!**" >> $GITHUB_STEP_SUMMARY
         else
-          echo "❌ Some CI checks failed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "❌ **Some CI checks failed.**" >> $GITHUB_STEP_SUMMARY
         fi

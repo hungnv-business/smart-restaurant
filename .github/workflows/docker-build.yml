@@ -1,0 +1,139 @@
+name: Docker Build & Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      # Chỉ chạy khi có thay đổi liên quan đến Docker
+      - 'infrastructure/docker/**'
+      - 'aspnet-core/**'
+      - 'angular/**'
+      - 'Dockerfile*'
+      - '.dockerignore'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'infrastructure/docker/**'
+      - 'Dockerfile*'
+  workflow_dispatch:
+    # Cho phép chạy manual
+  schedule:
+    # Chạy weekly build để test
+    - cron: '0 4 * * 1'  # Mondays 4:00 AM UTC
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build API Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.api
+        target: production
+        push: false
+        tags: smartrestaurant-api:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+    - name: Build Web Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.web
+        target: production
+        push: false
+        tags: smartrestaurant-web:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+    - name: Test Docker Compose configurations
+      run: |
+        echo "🧪 Testing Docker Compose configurations..."
+        cd infrastructure/docker
+        
+        # Test development configuration
+        docker compose -f docker-compose.dev.yml config
+        echo "✅ Development configuration valid"
+        
+        # Test production configuration
+        docker compose -f docker-compose.prod.yml config
+        echo "✅ Production configuration valid"
+
+    - name: Test container startup
+      run: |
+        echo "🚀 Testing container startup..."
+        
+        # Start containers
+        cd infrastructure/docker
+        docker compose -f docker-compose.dev.yml up -d postgres
+        
+        # Wait for postgres
+        echo "⏳ Waiting for PostgreSQL..."
+        timeout 60 bash -c 'until docker compose -f docker-compose.dev.yml exec -T postgres pg_isready -U postgres; do sleep 2; done'
+        
+        echo "✅ PostgreSQL container started successfully"
+        
+        # Cleanup
+        docker compose -f docker-compose.dev.yml down
+
+  # Security scan for Docker images
+  docker-security:
+    runs-on: ubuntu-latest
+    needs: [docker-build-test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build API image for scanning
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.api
+        target: production
+        push: false
+        tags: smartrestaurant-api:scan
+        load: true
+
+    - name: Run Trivy scan on API image
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        image-ref: 'smartrestaurant-api:scan'
+        format: 'table'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+
+    - name: Build Web image for scanning
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.web
+        target: production
+        push: false
+        tags: smartrestaurant-web:scan
+        load: true
+
+    - name: Run Trivy scan on Web image
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        image-ref: 'smartrestaurant-web:scan'
+        format: 'table'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
