@@ -131,7 +131,9 @@ jobs:
     - name: Test
       run: |
         cd angular
-        npm run test -- --watch=false --browsers=ChromeHeadless
+        npm run test:ci
+      env:
+        CI: true
         
     - name: Build for production
       run: |
