@@ -338,7 +338,7 @@ performance_deep_dive:
     missing_indexes: ['users.email', 'orders.user_id']
   caching:
     hit_rate: 0%
-    recommendation: 'Add Redis for session data'
+    recommendation: 'Add in-memory caching for session data'
   load_test:
     max_rps: 150
     breaking_point: 200 rps

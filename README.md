@@ -9,7 +9,6 @@ A comprehensive restaurant management system built with modern technologies and 
 - **Mobile**: Flutter 3.35.1 (Vietnamese restaurant workflows)
 - **Infrastructure**: Docker + Docker Compose
 - **Database**: PostgreSQL 15+ with Vietnamese collation
-- **Cache**: Redis 7+
 
 ## 🚀 Quick Start
 
@@ -38,9 +37,9 @@ A comprehensive restaurant management system built with modern technologies and 
    # Install dependencies
    npm install
    
-   # Start database (PostgreSQL + Redis)
+   # Start database (PostgreSQL)
    cd infrastructure/docker
-   docker-compose -f docker-compose.dev.yml up postgres redis -d
+   docker-compose -f docker-compose.dev.yml up postgres -d
    
    # Run migrations
    npm run migrate
@@ -155,7 +154,6 @@ Copy `.env.example` to `.env` and configure:
 ```env
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_password
-REDIS_PASSWORD=your_redis_password
 API_BASE_URL=https://api.yourdomain.com
 WEB_BASE_URL=https://yourdomain.com
 ```

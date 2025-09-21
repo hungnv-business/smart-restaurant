@@ -27,12 +27,12 @@ This unified approach combines what would traditionally be separate backend and 
 
 ### Technical Summary (Tóm tắt Kỹ thuật)
 
-Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and Redis caching for peak hours (11:30-13:30, 18:00-21:00). Frontend uses **PrimeNG 19.x with complete Poseidon theme integration** including blue color palette, Google Fonts (Figtree, Roboto Flex), and all interactive components (Settings configurator, Right menu, Search functionality) for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. Backend API configured at https://localhost:44346 with ABP OAuth integration. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và Redis caching cho giờ cao điểm. Frontend sử dụng **PrimeNG 19.x với tích hợp theme Poseidon hoàn chỉnh** bao gồm bảng màu xanh, Google Fonts và tất cả components tương tác cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
+Smart Restaurant Management System uses **ABP Framework Modular Monolith** architecture with .NET 8 backend and Angular 19 frontend, deployed via Docker containers on VPS. The architecture focuses on real-time performance for restaurant operations with SignalR WebSocket connections, PostgreSQL with Vietnamese collation for menu search, and application-level caching for peak hours (11:30-13:30, 18:00-21:00). Frontend uses **PrimeNG 19.x with complete Poseidon theme integration** including blue color palette, Google Fonts (Figtree, Roboto Flex), and all interactive components (Settings configurator, Right menu, Search functionality) for tablet-friendly interface, while Flutter mobile app supports staff and customer workflows. Backend API configured at https://localhost:44346 with ABP OAuth integration. The entire system is designed for Vietnamese payment methods and restaurant-specific workflows (Hệ thống Quản lý Nhà hàng Thông minh sử dụng kiến trúc ABP Framework Modular Monolith với backend .NET 8 và frontend Angular 19, được triển khai qua containers Docker trên VPS. Kiến trúc tập trung vào hiệu suất thời gian thực cho hoạt động nhà hàng với kết nối SignalR WebSocket, PostgreSQL với collation tiếng Việt để tìm kiếm menu, và application-level caching cho giờ cao điểm. Frontend sử dụng **PrimeNG 19.x với tích hợp theme Poseidon hoàn chỉnh** bao gồm bảng màu xanh, Google Fonts và tất cả components tương tác cho giao diện thân thiện với tablet, trong khi ứng dụng di động Flutter hỗ trợ quy trình làm việc của nhân viên và khách hàng).
 
 ### Platform and Infrastructure Choice (Lựa chọn Nền tảng và Hạ tầng)
 
 **Platform:** VPS (Ubuntu 22.04 LTS) with Docker containerization (VPS (Ubuntu 22.04 LTS) với đóng gói Docker)
-**Key Services:** Nginx reverse proxy, PostgreSQL 14+, Redis cache, .NET 8 Runtime, Angular static hosting (Các dịch vụ chính: Nginx reverse proxy, PostgreSQL 14+, Redis cache, .NET 8 Runtime, Angular static hosting)
+**Key Services:** Nginx reverse proxy, PostgreSQL 14+, .NET 8 Runtime, Angular static hosting (Các dịch vụ chính: Nginx reverse proxy, PostgreSQL 14+, .NET 8 Runtime, Angular static hosting)
 **Deployment Host and Regions:** Single VPS deployment (Asia/Ho_Chi_Minh timezone) with horizontal scaling capability (Máy chủ và Khu vực triển khai: Triển khai VPS đơn lẻ với khả năng mở rộng ngang)
 
 **Rationale (Lý do lựa chọn):**
@@ -164,7 +164,6 @@ graph TB
     
     subgraph "Data Layer"
         PG[(PostgreSQL 14+<br/>Vietnamese Collation)]
-        REDIS[(Redis Cache<br/>Session & Performance)]
         FILES[File Storage<br/>Menu Images]
     end
     
@@ -179,7 +178,6 @@ graph TB
     NGINX --> API
     API --> SIGNAL
     API --> PG
-    API --> REDIS
     API --> FILES
     SIGNAL --> PRINT
     API --> QR
@@ -209,7 +207,6 @@ graph TB
 | Backend Framework | ABP Framework | 8.0 | Application framework | Domain-driven design, multitenancy, localization support |
 | API Style | REST + SignalR | HTTP/1.1 + WebSocket | API communication | RESTful services + real-time kitchen updates |
 | Database | PostgreSQL | 14+ | Primary data storage | Vietnamese text search, JSON support, reliability |
-| Cache | Redis | 7.0+ | Session and performance caching | Fast access for menu data, session management |
 | File Storage | Local File System | - | Menu images and documents | Simple VPS storage, future cloud migration path |
 | Authentication | ABP Identity | 8.0 | User authentication and authorization | Built-in role management, Vietnamese user workflows |
 | Frontend Testing | Jasmine + Karma | Latest | Unit and integration testing | Angular ecosystem standard |
@@ -3605,7 +3602,6 @@ NEXT_PUBLIC_DEFAULT_CURRENCY=VND
 
 # Backend (.env in aspnet-core/src/SmartRestaurant.HttpApi.Host/)
 ConnectionStrings__Default=Host=localhost;Database=SmartRestaurant;Username=postgres;Password=yourpassword
-Redis__Configuration=localhost:6379
 Auth__JwtBearer__Authority=https://localhost:44391
 Auth__JwtBearer__Audience=SmartRestaurant
 FileManagement__DefaultPhysicalPath=/app/files
@@ -3678,15 +3674,6 @@ jobs:
         ports:
           - 5432:5432
           
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
     
     steps:
     - name: Checkout code
@@ -3729,7 +3716,6 @@ jobs:
     - name: Run Backend Integration Tests
       env:
         ConnectionStrings__Default: "Host=localhost;Database=SmartRestaurant_Test;Username=postgres;Password=postgres;"
-        Redis__Configuration: "localhost:6379"
       run: |
         dotnet test test/SmartRestaurant.EntityFrameworkCore.Tests/ --no-restore --logger trx --results-directory TestResults/
         
@@ -3912,21 +3898,18 @@ jobs:
 # Development
 export ASPNETCORE_ENVIRONMENT=Development
 export ConnectionStrings__Default="Host=postgres-dev;Database=SmartRestaurant_Dev;Username=dev_user;Password=${DEV_DB_PASSWORD};"
-export Redis__Configuration="redis-dev:6379"
 export App__SelfUrl="https://dev-api.restaurant.local"
 export App__CorsOrigins="https://dev.restaurant.local"
 
 # Staging
 export ASPNETCORE_ENVIRONMENT=Staging
 export ConnectionStrings__Default="Host=postgres-staging;Database=SmartRestaurant_Staging;Username=staging_user;Password=${STAGING_DB_PASSWORD};"
-export Redis__Configuration="redis-staging:6379"
 export App__SelfUrl="https://staging-api.restaurant.com"
 export App__CorsOrigins="https://staging.restaurant.com"
 
 # Production
 export ASPNETCORE_ENVIRONMENT=Production
 export ConnectionStrings__Default="Host=postgres-prod;Database=SmartRestaurant_Prod;Username=prod_user;Password=${PROD_DB_PASSWORD};"
-export Redis__Configuration="redis-prod:6379"
 export App__SelfUrl="https://api.restaurant.com"
 export App__CorsOrigins="https://restaurant.com"
 ```
@@ -4251,13 +4234,6 @@ services:
       "-c", "log_statement=all"
     ]
       
-  redis-test:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_test_data:/data
-      
   api-test:
     build:
       context: .
@@ -4265,13 +4241,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Test
       ConnectionStrings__Default: "Host=postgres-test;Database=SmartRestaurant_Test;Username=postgres;Password=postgres;"
-      Redis__Configuration: "redis-test:6379"
       App__SelfUrl: "http://localhost:5000"
     ports:
       - "5000:80"
     depends_on:
       - postgres-test
-      - redis-test
     volumes:
       - ./test-logs:/app/logs
       
@@ -4289,7 +4263,6 @@ services:
 
 volumes:
   postgres_test_data:
-  redis_test_data:
 ```
 
 **Test Environment Management Script (Script Quản lý Môi trường Kiểm thử):**
@@ -4367,7 +4340,7 @@ esac
 
 **Authentication Security:**
 - Token Storage: JWT in httpOnly cookies with secure flag and SameSite=Strict
-- Session Management: ABP Framework session management with Redis backing store
+- Session Management: ABP Framework built-in session management
 - Password Policy: Minimum 8 characters, require uppercase, lowercase, numbers for admin accounts
 
 ### Performance Optimization (Tối ưu hóa Hiệu suất)
@@ -4380,7 +4353,7 @@ esac
 **Backend Performance:**
 - Response Time Target: < 200ms for menu queries, < 500ms for order processing
 - Database Optimization: Indexes on frequently queried columns, Vietnamese text search optimization
-- Caching Strategy: Redis for menu data (5 min TTL), table status (real-time), user sessions
+- Caching Strategy: In-memory caching for menu data (5 min TTL), table status (real-time), user sessions
 
 ## Testing Strategy
 

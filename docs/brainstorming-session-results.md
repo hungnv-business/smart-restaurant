@@ -298,7 +298,7 @@
 - **🌐 Frontend:** Angular 19 with PrimeNG UI components and Poseidon template
 - **🗄️ Database:** PostgreSQL 14+ with Vietnamese full-text search and JSONB support
 - **🔄 Real-time:** SignalR for order updates and kitchen coordination
-- **💾 Caching:** Redis for performance optimization
+- **💾 Caching:** In-memory caching for performance optimization
 - **🖨️ Printer Integration:** ESC/POS thermal printers for kitchen stations
 - **☁️ Hosting:** Docker containerization with cloud platform deployment
 - **🔐 Authentication:** JWT tokens with ABP Identity system

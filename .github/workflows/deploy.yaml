@@ -135,7 +135,6 @@ jobs:
           cat > .env << EOF
           POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
-          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
           API_BASE_URL=${{ secrets.STAGING_API_BASE_URL }}
           WEB_BASE_URL=${{ secrets.STAGING_WEB_BASE_URL }}
           EOF
@@ -243,7 +242,6 @@ jobs:
           cat > .env << EOF
           POSTGRES_USER=${{ secrets.PRODUCTION_POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.PRODUCTION_POSTGRES_PASSWORD }}
-          REDIS_PASSWORD=${{ secrets.PRODUCTION_REDIS_PASSWORD }}
           API_BASE_URL=${{ secrets.PRODUCTION_API_BASE_URL }}
           WEB_BASE_URL=${{ secrets.PRODUCTION_WEB_BASE_URL }}
           EOF

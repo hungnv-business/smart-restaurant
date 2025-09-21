@@ -14,6 +14,7 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Validation.AspNetCore;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
@@ -206,7 +207,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         }
 
         app.UseCorrelationId();
-        app.MapAbpStaticAssets();
+        app.UseStaticFiles();
         app.UseRouting();
         app.UseCors();
         app.UseAuthentication();
@@ -216,15 +217,17 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         {
             app.UseMultiTenancy();
         }
+
         app.UseUnitOfWork();
-        app.UseDynamicClaims();
         app.UseAuthorization();
 
         app.UseSwagger();
-        app.UseAbpSwaggerUI(c =>
+        app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartRestaurant API");
-
+            c.RoutePrefix = "swagger";
+            c.DocumentTitle = "SmartRestaurant API";
+            
             var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
             c.OAuthClientId(configuration["AuthServer:SwaggerClientId"]);
             c.OAuthScopes("SmartRestaurant");
@@ -234,7 +237,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints(endpoints =>
         {
-            // Chỉ cấu hình KitchenHub đơn giản cho thông báo order mới
+            // Cấu hình SignalR Hub cho kitchen
             endpoints.MapHub<KitchenHub>("/signalr-hubs/kitchen");
         });
     }

@@ -1,9 +1,5 @@
 version: '3.8'
 
-networks:
-  smartrestaurant-network:
-    driver: bridge
-
 services:
   # Nginx Reverse Proxy (Memory Optimized for 2GB VPS)
   nginx:
@@ -116,30 +112,9 @@ services:
       retries: 5
       start_period: 30s
 
-  # Redis Cache (Lightweight for caching)
-  redis:
-    image: redis:alpine
-    container_name: smartrestaurant_redis
-    command: redis-server --maxmemory 48mb --maxmemory-policy allkeys-lru --save ""
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-        reservations:
-          memory: 32M
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
 volumes:
   postgres_data_prod:
-    driver: local
-  redis_data_prod:
     driver: local
 
 networks:

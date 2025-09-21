@@ -180,7 +180,7 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
 
         if (!redirectUri.IsNullOrWhiteSpace() || !postLogoutRedirectUri.IsNullOrWhiteSpace())
         {
-            application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.EndSession);
+            application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Logout);
         }
 
         var buildInGrantTypes = new[] {
@@ -237,7 +237,7 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             if (grantType == OpenIddictConstants.GrantTypes.DeviceCode)
             {
                 application.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.DeviceCode);
-                application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.DeviceAuthorization);
+                application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Device);
             }
 
             if (grantType == OpenIddictConstants.GrantTypes.Implicit)

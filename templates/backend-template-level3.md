@@ -1295,7 +1295,7 @@ namespace SmartRestaurant.Tables
         private async Task InvalidateCachePatternAsync(string pattern)
         {
             // Implementation varies by cache provider
-            // For Redis, use SCAN with pattern matching
+            // For distributed cache, use cache key patterns
             // For in-memory cache, maintain a registry of keys
         }
 

@@ -19,18 +19,6 @@ services:
       - smartrestaurant-network
     restart: unless-stopped
 
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: smartrestaurant-redis-dev
-    command: redis-server --appendonly yes --requirepass "redis123"
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data_dev:/data
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
 
   # ABP Backend API (Development)
   api:
@@ -45,7 +33,6 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ConnectionStrings__Default=User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=SmartRestaurant;
-      - Redis__Configuration=redis:6379,password=redis123
     ports:
       - "44391:443"
       - "44390:80"
@@ -54,7 +41,6 @@ services:
       - ../../aspnet-core:/app:delegated
     depends_on:
       - postgres
-      - redis
     networks:
       - smartrestaurant-network
     restart: unless-stopped
@@ -82,8 +68,6 @@ services:
 
 volumes:
   postgres_data_dev:
-    driver: local
-  redis_data_dev:
     driver: local
 
 networks:

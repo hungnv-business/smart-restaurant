@@ -14,7 +14,7 @@
 
 **Authentication Security:**
 - Token Storage: JWT in httpOnly cookies with secure flag and SameSite=Strict
-- Session Management: ABP Framework session management with Redis backing store
+- Session Management: ABP Framework session management with in-memory cache backing store
 - Password Policy: Minimum 8 characters, require uppercase, lowercase, numbers for admin accounts
 
 ## Performance Optimization (Tối ưu hóa Hiệu suất)
@@ -27,4 +27,4 @@
 **Backend Performance:**
 - Response Time Target: < 200ms for menu queries, < 500ms for order processing
 - Database Optimization: Indexes on frequently queried columns, Vietnamese text search optimization
-- Caching Strategy: Redis for menu data (5 min TTL), table status (real-time), user sessions
+- Caching Strategy: in-memory cache for menu data (5 min TTL), table status (real-time), user sessions

@@ -2,9 +2,9 @@ import { RestService, Rest } from '@abp/ng.core';
 import type { ListResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
 import type { GuidLookupItemDto } from '../../common/dto/models';
-import type { ActiveTableDto, AddItemsToOrderDto, CreateOrderDto, GetMenuItemsForOrderDto, IngredientAvailabilityResultDto, OrderForPaymentDto, PaymentRequestDto, TableDetailDto, UpdateOrderItemQuantityDto, VerifyIngredientsRequestDto } from '../contracts/orders/dto/models';
+import type { AddItemsToOrderDto, CreateOrderDto, DineInTableDto, GetDineInTablesDto, GetMenuItemsForOrderDto, GetTakeawayOrdersDto, IngredientAvailabilityResultDto, OrderDetailsDto, OrderForPaymentDto, PaymentRequestDto, TakeawayOrderDto, UpdateOrderItemQuantityDto, VerifyIngredientsRequestDto } from '../contracts/orders/dto/models';
+import type { TakeawayStatus } from '../contracts/orders/dto/takeaway-status.enum';
 import type { MenuItemDto } from '../../menu-management/menu-items/dto/models';
-import type { TableStatus } from '../../table-status.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -39,11 +39,11 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
-  getActiveTables = (tableNameFilter?: string, statusFilter?: enum, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, ListResultDto<ActiveTableDto>>({
+  getDineInTables = (input: GetDineInTablesDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, ListResultDto<DineInTableDto>>({
       method: 'GET',
-      url: '/api/app/order/active-tables',
-      params: { tableNameFilter, statusFilter },
+      url: '/api/app/order/dine-in-tables',
+      params: { tableNameFilter: input.tableNameFilter, statusFilter: input.statusFilter },
     },
     { apiName: this.apiName,...config });
   
@@ -57,6 +57,14 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
+  getOrderDetails = (orderId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, OrderDetailsDto>({
+      method: 'GET',
+      url: `/api/app/order/order-details/${orderId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   getOrderForPayment = (orderId: string, config?: Partial<Rest.Config>) =>
     this.restService.request<any, OrderForPaymentDto>({
       method: 'GET',
@@ -65,10 +73,11 @@ export class OrderService {
     { apiName: this.apiName,...config });
   
 
-  getTableDetails = (tableId: string, config?: Partial<Rest.Config>) =>
-    this.restService.request<any, TableDetailDto>({
+  getTakeawayOrders = (input: GetTakeawayOrdersDto, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, ListResultDto<TakeawayOrderDto>>({
       method: 'GET',
-      url: `/api/app/order/table-details/${tableId}`,
+      url: '/api/app/order/takeaway-orders',
+      params: { statusFilter: input.statusFilter },
     },
     { apiName: this.apiName,...config });
   
@@ -105,6 +114,15 @@ export class OrderService {
       url: '/api/app/order/order-item-quantity',
       params: { orderId, orderItemId },
       body: input,
+    },
+    { apiName: this.apiName,...config });
+  
+
+  updateTakeawayOrderStatus = (orderId: string, status: TakeawayStatus, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, void>({
+      method: 'PUT',
+      url: `/api/app/order/takeaway-order-status/${orderId}`,
+      params: { status },
     },
     { apiName: this.apiName,...config });
   

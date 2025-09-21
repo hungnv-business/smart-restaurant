@@ -469,7 +469,7 @@ infrastructure/
 
 ### Infrastructure Files (File Hạ tầng)
 
-- `docker-compose.dev.yml` - Development environment with PostgreSQL + Redis
+- `docker-compose.dev.yml` - Development environment with PostgreSQL + in-memory cache
 - `01-vietnamese-collation.sql` - Database setup for Vietnamese text support
 - `Dockerfile.api` - Backend containerization
 - `nginx.conf` - Reverse proxy for production deployment

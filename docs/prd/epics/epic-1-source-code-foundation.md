@@ -71,7 +71,7 @@
 **so that** issues can be detected và resolved quickly (để các vấn đề có thể được phát hiện và giải quyết nhanh chóng).
 
 **Acceptance Criteria:**
-1. Health check endpoints implemented for database, Redis, external services (Kiểm tra tình trạng hoạt động của database, Redis và các dịch vụ liên quan)
+1. Health check endpoints implemented for database and external services (Kiểm tra tình trạng hoạt động của database và các dịch vụ liên quan)
 2. Basic logging framework configured with Serilog (Thiết lập hệ thống ghi log chi tiết bằng Serilog)
 3. Application performance monitoring setup (Giám sát hiệu suất ứng dụng thời gian thực)
 4. Error tracking and notification system implemented (Hệ thống phát hiện lỗi và cảnh báo tự động)

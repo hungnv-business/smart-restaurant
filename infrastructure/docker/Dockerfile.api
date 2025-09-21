@@ -27,19 +27,24 @@ COPY aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurant.EntityF
 COPY aspnet-core/src/SmartRestaurant.HttpApi/SmartRestaurant.HttpApi.csproj src/SmartRestaurant.HttpApi/
 COPY aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj src/SmartRestaurant.HttpApi.Host/
 COPY aspnet-core/src/SmartRestaurant.HttpApi.Client/SmartRestaurant.HttpApi.Client.csproj src/SmartRestaurant.HttpApi.Client/
+COPY aspnet-core/src/SmartRestaurant.DbMigrator/SmartRestaurant.DbMigrator.csproj src/SmartRestaurant.DbMigrator/
 
-# Restore dependencies
-RUN dotnet restore SmartRestaurant.sln
+# Copy test project files
+COPY aspnet-core/test/SmartRestaurant.TestBase/SmartRestaurant.TestBase.csproj test/SmartRestaurant.TestBase/
+COPY aspnet-core/test/SmartRestaurant.Domain.Tests/SmartRestaurant.Domain.Tests.csproj test/SmartRestaurant.Domain.Tests/
+COPY aspnet-core/test/SmartRestaurant.Application.Tests/SmartRestaurant.Application.Tests.csproj test/SmartRestaurant.Application.Tests/
+COPY aspnet-core/test/SmartRestaurant.EntityFrameworkCore.Tests/SmartRestaurant.EntityFrameworkCore.Tests.csproj test/SmartRestaurant.EntityFrameworkCore.Tests/
+COPY aspnet-core/test/SmartRestaurant.HttpApi.Client.ConsoleTestApp/SmartRestaurant.HttpApi.Client.ConsoleTestApp.csproj test/SmartRestaurant.HttpApi.Client.ConsoleTestApp/
+
+# Restore dependencies (exclude test projects to avoid dependency issues)
+RUN dotnet restore src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj
 
 # Copy the entire source code
 COPY aspnet-core/ .
 
-# Build the application
-RUN dotnet build SmartRestaurant.sln -c Release --no-restore
-
-# Publish stage
-FROM build AS publish
-RUN dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj -c Release -o /app/publish --no-restore
+# Publish stage - publish directly without separate build step
+FROM build AS publish  
+RUN dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj -c Release -o /app/publish
 
 # Development stage (for docker-compose.dev.yml)
 FROM base AS development

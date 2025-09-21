@@ -73,7 +73,7 @@
 **so that** issues can be detected và resolved quickly (để các vấn đề có thể được phát hiện và giải quyết nhanh chóng).
 
 **Acceptance Criteria:**
-1. Health check endpoints implemented for database, Redis, external services (Kiểm tra tình trạng hoạt động của database, Redis và các dịch vụ liên quan)
+1. Health check endpoints implemented for database, in-memory cache, external services (Kiểm tra tình trạng hoạt động của database, in-memory cache và các dịch vụ liên quan)
 2. Basic logging framework configured with Serilog (Thiết lập hệ thống ghi log chi tiết bằng Serilog)
 3. Application performance monitoring setup (Giám sát hiệu suất ứng dụng thời gian thực)
 4. Error tracking and notification system implemented (Hệ thống phát hiện lỗi và cảnh báo tự động)
@@ -277,7 +277,7 @@
 
 ## Epic 8: Deployment & Production Management (Deploy)
 
-**VPS Deployment Goal:** Establish production deployment on VPS using Docker containers with GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database, and Redis caching for reliable and cost-effective restaurant system operation (Thiết lập triển khai production trên VPS sử dụng Docker containers với GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database và Redis caching để vận hành hệ thống nhà hàng đáng tin cậy và tiết kiệm chi phí).
+**VPS Deployment Goal:** Establish production deployment on VPS using Docker containers with GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database, and in-memory cache caching for reliable and cost-effective restaurant system operation (Thiết lập triển khai production trên VPS sử dụng Docker containers với GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database và in-memory cache caching để vận hành hệ thống nhà hàng đáng tin cậy và tiết kiệm chi phí).
 
 ### Story 8.1: VPS Setup & Docker Deployment (Thiết lập VPS & Triển khai Docker)
 **As a** system administrator (quản trị viên hệ thống),  
@@ -286,7 +286,7 @@
 
 **Acceptance Criteria:**
 1. **VPS Infrastructure Setup**: Ubuntu 22.04 LTS VPS with minimum 4GB RAM, 2 CPU cores, 40GB SSD storage (Thiết lập hạ tầng VPS: Ubuntu 22.04 LTS VPS với tối thiểu 4GB RAM, 2 CPU cores, 40GB SSD storage)
-2. **Docker Environment**: Docker and Docker Compose installation with containers for .NET API, Angular frontend, PostgreSQL, Redis, and Nginx reverse proxy (Môi trường Docker: Cài đặt Docker và Docker Compose với containers cho .NET API, Angular frontend, PostgreSQL, Redis và Nginx reverse proxy)
+2. **Docker Environment**: Docker and Docker Compose installation with containers for .NET API, Angular frontend, PostgreSQL, in-memory cache, and Nginx reverse proxy (Môi trường Docker: Cài đặt Docker và Docker Compose với containers cho .NET API, Angular frontend, PostgreSQL, in-memory cache và Nginx reverse proxy)
 3. **GitHub Actions CI/CD**: Automated deployment pipeline triggered by GitHub push to main branch with build, test, and deploy stages (GitHub Actions CI/CD: Pipeline triển khai tự động kích hoạt bởi GitHub push to main branch với các giai đoạn build, test và deploy)
 4. **SSL Certificate**: Let's Encrypt SSL certificate setup with automatic renewal for HTTPS access (Chứng chỉ SSL: Thiết lập chứng chỉ SSL Let's Encrypt với gia hạn tự động cho truy cập HTTPS)
 5. **Domain Configuration**: Domain name setup with DNS pointing to VPS IP address for production access (Cấu hình domain: Thiết lập tên miền với DNS trỏ về IP VPS để truy cập production)

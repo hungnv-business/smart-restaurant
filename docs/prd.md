@@ -139,7 +139,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 ### Additional Technical Assumptions and Requests (Giả định và Yêu cầu Kỹ thuật Bổ sung)
 
-• **Technology Stack (Ngăn xếp Công nghệ):** .NET 8 ABP Framework with Entity Framework Core Code First, Angular 19 with ABP Angular template + PrimeNG + Poseidon theme, PostgreSQL 14+ with Vietnamese collation and JSONB, SignalR for real-time coordination, Redis caching, Docker containerization (.NET 8 ABP Framework với EF Core Code First, Angular 19 với template ABP Angular + PrimeNG + theme Poseidon, PostgreSQL 14+ với sắp xếp tiếng Việt và JSONB, SignalR cho phối hợp thời gian thực, bộ nhớ đệm Redis, đóng gói Docker)
+• **Technology Stack (Ngăn xếp Công nghệ):** .NET 8 ABP Framework with Entity Framework Core Code First, Angular 19 with ABP Angular template + PrimeNG + Poseidon theme, PostgreSQL 14+ with Vietnamese collation and JSONB, SignalR for real-time coordination, in-memory caching, Docker containerization (.NET 8 ABP Framework với EF Core Code First, Angular 19 với template ABP Angular + PrimeNG + theme Poseidon, PostgreSQL 14+ với sắp xếp tiếng Việt và JSONB, SignalR cho phối hợp thời gian thực, bộ nhớ đệm trong ứng dụng, đóng gói Docker)
 
 • **Development Environment (Môi trường Phát triển):** Visual Studio Code with ABP extensions, Docker Desktop for local development, ABP CLI for solution generation, ABP Suite for rapid CRUD development, Entity Framework Core tools for Code First migrations (Visual Studio Code với extension ABP, Docker Desktop cho phát triển cục bộ, ABP CLI cho tạo solution, ABP Suite cho phát triển CRUD nhanh, công cụ EF Core cho migration Code First)
 
@@ -151,7 +151,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 • **Security Implementation (Triển khai Bảo mật):** JWT authentication, role-based permissions, data encryption at rest, HTTPS enforcement, audit logging for compliance (Xác thực JWT, phân quyền theo vai trò, mã hóa dữ liệu khi lưu trữ, bắt buộc HTTPS, ghi nhật ký kiểm toán để tuân thủ)
 
-• **Performance Optimization (Tối ưu Hiệu suất):** Redis caching for menu data, database connection pooling, lazy loading for large datasets, image optimization for menu photos (Bộ nhớ đệm Redis cho dữ liệu thực đơn, gộp kết nối cơ sở dữ liệu, tải chậm cho tập dữ liệu lớn, tối ưu hình ảnh cho ảnh thực đơn)
+• **Performance Optimization (Tối ưu Hiệu suất):** In-memory caching for menu data, database connection pooling, lazy loading for large datasets, image optimization for menu photos (Bộ nhớ đệm trong ứng dụng cho dữ liệu thực đơn, gộp kết nối cơ sở dữ liệu, tải chậm cho tập dữ liệu lớn, tối ưu hình ảnh cho ảnh thực đơn)
 
 • **Deployment Strategy (Chiến lược Triển khai):** Docker containers with docker-compose for staging, cloud deployment with automated backups, rolling updates to minimize downtime (Container Docker với docker-compose cho môi trường thử nghiệm, triển khai đám mây với sao lưu tự động, cập nhật luân phiên để giảm thiểu thời gian ngừng hoạt động)
 
@@ -276,7 +276,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 **so that** issues can be detected và resolved quickly (để các vấn đề có thể được phát hiện và giải quyết nhanh chóng).
 
 **Acceptance Criteria:**
-1. Health check endpoints implemented for database, Redis, external services (Kiểm tra tình trạng hoạt động của database, Redis và các dịch vụ liên quan)
+1. Health check endpoints implemented for database and external services (Kiểm tra tình trạng hoạt động của database và các dịch vụ liên quan)
 2. Basic logging framework configured with Serilog (Thiết lập hệ thống ghi log chi tiết bằng Serilog)
 3. Application performance monitoring setup (Giám sát hiệu suất ứng dụng thời gian thực)
 4. Error tracking and notification system implemented (Hệ thống phát hiện lỗi và cảnh báo tự động)
@@ -443,7 +443,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 ### Epic 8: Deployment & Production Management (Deploy)
 
-**VPS Deployment Goal:** Establish production deployment on VPS using Docker containers with GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database, and Redis caching for reliable and cost-effective restaurant system operation (Thiết lập triển khai production trên VPS sử dụng Docker containers với GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database và Redis caching để vận hành hệ thống nhà hàng đáng tin cậy và tiết kiệm chi phí).
+**VPS Deployment Goal:** Establish production deployment on VPS using Docker containers with GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database for reliable and cost-effective restaurant system operation (Thiết lập triển khai production trên VPS sử dụng Docker containers với GitHub Actions CI/CD, Nginx reverse proxy, PostgreSQL database để vận hành hệ thống nhà hàng đáng tin cậy và tiết kiệm chi phí).
 
 #### Story 8.1: VPS Setup & Docker Deployment (Thiết lập VPS & Triển khai Docker)
 **As a** system administrator (quản trị viên hệ thống),  
@@ -452,7 +452,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 **Acceptance Criteria:**
 1. **VPS Infrastructure Setup**: Ubuntu 22.04 LTS VPS with minimum 4GB RAM, 2 CPU cores, 40GB SSD storage (Thiết lập hạ tầng VPS: Ubuntu 22.04 LTS VPS với tối thiểu 4GB RAM, 2 CPU cores, 40GB SSD storage)
-2. **Docker Environment**: Docker and Docker Compose installation with containers for .NET API, Angular frontend, PostgreSQL, Redis, and Nginx reverse proxy (Môi trường Docker: Cài đặt Docker và Docker Compose với containers cho .NET API, Angular frontend, PostgreSQL, Redis và Nginx reverse proxy)
+2. **Docker Environment**: Docker and Docker Compose installation with containers for .NET API, Angular frontend, PostgreSQL, and Nginx reverse proxy (Môi trường Docker: Cài đặt Docker và Docker Compose với containers cho .NET API, Angular frontend, PostgreSQL và Nginx reverse proxy)
 3. **GitHub Actions CI/CD**: Automated deployment pipeline triggered by GitHub push to main branch with build, test, and deploy stages (GitHub Actions CI/CD: Pipeline triển khai tự động kích hoạt bởi GitHub push to main branch với các giai đoạn build, test và deploy)
 4. **SSL Certificate**: Let's Encrypt SSL certificate setup with automatic renewal for HTTPS access (Chứng chỉ SSL: Thiết lập chứng chỉ SSL Let's Encrypt với gia hạn tự động cho truy cập HTTPS)
 5. **Domain Configuration**: Domain name setup with DNS pointing to VPS IP address for production access (Cấu hình domain: Thiết lập tên miền với DNS trỏ về IP VPS để truy cập production)

@@ -30,7 +30,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 ## Additional Technical Assumptions and Requests (Giả định và Yêu cầu Kỹ thuật Bổ sung)
 
-• **Technology Stack (Ngăn xếp Công nghệ):** .NET 8 ABP Framework with Entity Framework Core Code First, Angular 19 with ABP Angular template + PrimeNG + Poseidon theme, PostgreSQL 14+ with Vietnamese collation and JSONB, SignalR for real-time coordination, Redis caching, Docker containerization (.NET 8 ABP Framework với EF Core Code First, Angular 19 với template ABP Angular + PrimeNG + theme Poseidon, PostgreSQL 14+ với sắp xếp tiếng Việt và JSONB, SignalR cho phối hợp thời gian thực, bộ nhớ đệm Redis, đóng gói Docker)
+• **Technology Stack (Ngăn xếp Công nghệ):** .NET 8 ABP Framework with Entity Framework Core Code First, Angular 19 with ABP Angular template + PrimeNG + Poseidon theme, PostgreSQL 14+ with Vietnamese collation and JSONB, SignalR for real-time coordination, in-memory caching, Docker containerization (.NET 8 ABP Framework với EF Core Code First, Angular 19 với template ABP Angular + PrimeNG + theme Poseidon, PostgreSQL 14+ với sắp xếp tiếng Việt và JSONB, SignalR cho phối hợp thời gian thực, bộ nhớ đệm trong ứng dụng, đóng gói Docker)
 
 • **Development Environment (Môi trường Phát triển):** Visual Studio Code with ABP extensions, Docker Desktop for local development, ABP CLI for solution generation, ABP Suite for rapid CRUD development, Entity Framework Core tools for Code First migrations (Visual Studio Code với extension ABP, Docker Desktop cho phát triển cục bộ, ABP CLI cho tạo solution, ABP Suite cho phát triển CRUD nhanh, công cụ EF Core cho migration Code First)
 
@@ -42,7 +42,7 @@ Single repository containing all components: ABP Framework backend, Angular fron
 
 • **Security Implementation (Triển khai Bảo mật):** JWT authentication, role-based permissions, data encryption at rest, HTTPS enforcement, audit logging for compliance (Xác thực JWT, phân quyền theo vai trò, mã hóa dữ liệu khi lưu trữ, bắt buộc HTTPS, ghi nhật ký kiểm toán để tuân thủ)
 
-• **Performance Optimization (Tối ưu Hiệu suất):** Redis caching for menu data, database connection pooling, lazy loading for large datasets, image optimization for menu photos (Bộ nhớ đệm Redis cho dữ liệu thực đơn, gộp kết nối cơ sở dữ liệu, tải chậm cho tập dữ liệu lớn, tối ưu hình ảnh cho ảnh thực đơn)
+• **Performance Optimization (Tối ưu Hiệu suất):** In-memory caching for menu data, database connection pooling, lazy loading for large datasets, image optimization for menu photos (Bộ nhớ đệm trong ứng dụng cho dữ liệu thực đơn, gộp kết nối cơ sở dữ liệu, tải chậm cho tập dữ liệu lớn, tối ưu hình ảnh cho ảnh thực đơn)
 
 • **Deployment Strategy (Chiến lược Triển khai):** Docker containers with docker-compose for staging, cloud deployment with automated backups, rolling updates to minimize downtime (Container Docker với docker-compose cho môi trường thử nghiệm, triển khai đám mây với sao lưu tự động, cập nhật luân phiên để giảm thiểu thời gian ngừng hoạt động)
 

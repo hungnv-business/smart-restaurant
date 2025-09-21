@@ -38,7 +38,6 @@ determine_config() {
         EFFECTIVE_CACHE="6GB"
         MAX_CONNECTIONS="200"
         WORKER_CONNECTIONS="2048"
-        REDIS_MEMORY="512MB"
         GC_HEAP_LIMIT="1600000000"
     elif [ $TOTAL_RAM_GB -ge 4 ]; then
         CONFIG_PROFILE="medium-performance"
@@ -50,7 +49,6 @@ determine_config() {
         EFFECTIVE_CACHE="3GB"
         MAX_CONNECTIONS="100"
         WORKER_CONNECTIONS="1024"
-        REDIS_MEMORY="256MB"
         GC_HEAP_LIMIT="800000000"
     else
         CONFIG_PROFILE="basic"
@@ -62,7 +60,6 @@ determine_config() {
         EFFECTIVE_CACHE="200MB"
         MAX_CONNECTIONS="40"
         WORKER_CONNECTIONS="1024"
-        REDIS_MEMORY="64MB"
         GC_HEAP_LIMIT="400000000"
     fi
     
@@ -94,8 +91,6 @@ update_docker_compose() {
     sed -i "s/effective_cache_size=[0-9]*[MG]B/effective_cache_size=$EFFECTIVE_CACHE/g" "$COMPOSE_FILE"
     sed -i "s/max_connections=[0-9]*/max_connections=$MAX_CONNECTIONS/g" "$COMPOSE_FILE"
     
-    # Update Redis memory
-    sed -i "s/maxmemory [0-9]*mb/maxmemory ${REDIS_MEMORY%MB}mb/g" "$COMPOSE_FILE"
     
     echo -e "${GREEN}  ✅ Docker Compose updated${NC}"
 }
@@ -192,7 +187,6 @@ show_recommendations() {
     if [ "$CONFIG_PROFILE" = "high-performance" ]; then
         echo "🎯 Consider implementing:"
         echo "  • Load balancing with multiple API instances"
-        echo "  • Redis cluster for better caching"
         echo "  • Database connection pooling"
         echo "  • CDN for static assets"
         echo "  • Read replicas for database"
@@ -209,7 +203,6 @@ show_recommendations() {
     echo "📊 New Resource Allocation:"
     echo "  • API Service: $API_MEMORY (CPU: $API_CPU cores)"
     echo "  • PostgreSQL: $POSTGRES_MEMORY (CPU: $POSTGRES_CPU cores)"
-    echo "  • Redis Cache: $REDIS_MEMORY"
     echo "  • Nginx: 64MB (CPU: 0.2 cores)"
     echo ""
 }

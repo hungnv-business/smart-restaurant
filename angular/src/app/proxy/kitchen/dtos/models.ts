@@ -24,14 +24,14 @@ export interface KitchenOrderItemDto extends EntityDto<string> {
   isEmptyTablePriority: boolean;
   servedDishesCount: number;
   priorityScore: number;
-  status?: OrderItemStatus;
-  orderType?: OrderType;
+  status: OrderItemStatus;
+  orderType: OrderType;
 }
 
 export interface KitchenTableGroupDto {
   tableNumber?: string;
   isTakeaway: boolean;
-  orderType?: OrderType;
+  orderType: OrderType;
   totalItems: number;
   highestPriority: number;
   orderItems: KitchenOrderItemDto[];

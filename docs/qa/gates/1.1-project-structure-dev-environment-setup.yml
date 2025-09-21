@@ -34,7 +34,7 @@ nfr_validation:
     notes: "Comprehensive security measures: non-root containers, security headers, secrets externalization, CI security scanning"
   performance:
     status: PASS
-    notes: "Multi-stage builds, nginx caching, Redis integration, Vietnamese text search optimization"
+    notes: "Multi-stage builds, nginx caching, in-memory caching, Vietnamese text search optimization"
   reliability:
     status: PASS
     notes: "Health checks, restart policies, comprehensive error handling in CI/CD"

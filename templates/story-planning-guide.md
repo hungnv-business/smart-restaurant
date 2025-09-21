@@ -173,7 +173,7 @@
   - [ ] Subtask 3.4: Create real-time authorization
 
 - [ ] **Task 4**: Add Performance Optimization
-  - [ ] Subtask 4.1: Implement caching with Redis
+  - [ ] Subtask 4.1: Implement caching with in-memory cache
   - [ ] Subtask 4.2: Add background job processing
   - [ ] Subtask 4.3: Configure database optimization
   - [ ] Subtask 4.4: Add monitoring and metrics

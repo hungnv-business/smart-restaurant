@@ -41,7 +41,7 @@ tasks:
 
     - task: "Add Performance Optimization and Caching"
       subtasks:
-        - "Implement distributed caching with Redis for frequently accessed data"
+        - "Implement in-memory caching for frequently accessed data"
         - "Add background job processing with Hangfire or similar"
         - "Configure database optimization with proper indexing strategies"
         - "Add monitoring and metrics collection for performance tracking"
@@ -115,7 +115,7 @@ tasks:
   infrastructure:
     - task: "Advanced Infrastructure and DevOps"
       subtasks:
-        - "Setup Redis cluster for distributed caching and session management"
+        - "Setup in-memory cache for session management"
         - "Configure load balancing for SignalR sticky sessions"
         - "Add monitoring and alerting for real-time connection health"
         - "Setup CDN for static assets and performance optimization"
@@ -138,7 +138,7 @@ tasks:
 
     - task: "Production Deployment and Monitoring"
       subtasks:
-        - "Deploy with production Redis and SignalR configuration"
+        - "Deploy with production caching and SignalR configuration"
         - "Configure monitoring dashboards for real-time metrics"
         - "Setup automated alerts for performance and availability"
         - "Create deployment procedures for zero-downtime updates"

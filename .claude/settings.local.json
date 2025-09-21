@@ -42,7 +42,11 @@
       "mcp__ide__getDiagnostics",
       "Bash(git reset:*)",
       "Bash(flutter:*)",
-      "Bash(openssl rand:*)"
+      "Bash(openssl rand:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)",
+      "Bash(docker logs:*)",
+      "Bash(dotnet --version)"
     ],
     "deny": [],
     "ask": []

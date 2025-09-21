@@ -13,21 +13,6 @@ namespace SmartRestaurant.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AbpAuditLogExcelFiles",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uuid", nullable: true),
-                    FileName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbpAuditLogExcelFiles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AbpAuditLogs",
                 columns: table => new
                 {
@@ -66,7 +51,6 @@ namespace SmartRestaurant.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ApplicationName = table.Column<string>(type: "character varying(96)", maxLength: 96, nullable: true),
                     JobName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     JobArgs = table.Column<string>(type: "character varying(1048576)", maxLength: 1048576, nullable: false),
                     TryCount = table.Column<short>(type: "smallint", nullable: false, defaultValue: (short)0),
@@ -95,7 +79,6 @@ namespace SmartRestaurant.Migrations
                     RegexDescription = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     ValueType = table.Column<int>(type: "integer", nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
                 },
@@ -261,7 +244,6 @@ namespace SmartRestaurant.Migrations
                     IsStatic = table.Column<bool>(type: "boolean", nullable: false),
                     IsPublic = table.Column<bool>(type: "boolean", nullable: false),
                     EntityVersion = table.Column<int>(type: "integer", nullable: false),
-                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
                 },
@@ -306,10 +288,9 @@ namespace SmartRestaurant.Migrations
                     TenantId = table.Column<Guid>(type: "uuid", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    IpAddresses = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    IpAddresses = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     SignedIn = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    LastAccessed = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ExtraProperties = table.Column<string>(type: "text", nullable: true)
+                    LastAccessed = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -970,7 +951,14 @@ namespace SmartRestaurant.Migrations
                     Subject = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1086,7 +1074,14 @@ namespace SmartRestaurant.Migrations
                     Subject = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
-                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1195,6 +1190,8 @@ namespace SmartRestaurant.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     TotalAmount = table.Column<int>(type: "integer", nullable: false),
                     Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CustomerName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CustomerPhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     PaidTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
@@ -1658,7 +1655,8 @@ namespace SmartRestaurant.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_AppPayments_OrderId",
                 table: "AppPayments",
-                column: "OrderId");
+                column: "OrderId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppPayments_PaymentMethod_PaymentTime",
@@ -1787,9 +1785,6 @@ namespace SmartRestaurant.Migrations
 
             migrationBuilder.DropTable(
                 name: "AbpAuditLogActions");
-
-            migrationBuilder.DropTable(
-                name: "AbpAuditLogExcelFiles");
 
             migrationBuilder.DropTable(
                 name: "AbpBackgroundJobs");

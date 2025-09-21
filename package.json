@@ -12,7 +12,7 @@
     "dev:api": "cd aspnet-core && dotnet run --project src/SmartRestaurant.HttpApi.Host",
     "dev:web": "cd angular && npm start",
     "dev:mobile": "cd flutter_mobile && flutter run",
-    "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44391",
+    "generate-proxy": "cd angular && abp generate-proxy -t ng -u https://localhost:44346",
     "install-libs": "cd angular && abp install-libs",
     "migrate": "cd aspnet-core && dotnet run --project src/SmartRestaurant.DbMigrator",
     "test": "npm run test:backend && npm run test:frontend && npm run test:mobile",
@@ -34,8 +34,7 @@
     "clean": "npm run clean:backend && npm run clean:frontend && npm run clean:mobile",
     "clean:backend": "cd aspnet-core && dotnet clean SmartRestaurant.sln",
     "clean:frontend": "cd angular && rm -rf node_modules dist .angular && npm install",
-    "clean:mobile": "cd flutter_mobile && flutter clean && flutter pub get",
-    "prepare": "husky"
+    "clean:mobile": "cd flutter_mobile && flutter clean && flutter pub get"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

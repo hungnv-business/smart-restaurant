@@ -23,7 +23,6 @@ export interface IdentityRoleDto extends ExtensibleEntityDto<string> {
   isStatic: boolean;
   isPublic: boolean;
   concurrencyStamp?: string;
-  creationTime?: string;
 }
 
 export interface IdentityRoleUpdateDto extends IdentityRoleCreateOrUpdateDtoBase {

@@ -223,7 +223,7 @@ etc...
 ### Internal Integration Points
 
 - **Frontend Communication**: REST API on port 3000, expects specific headers
-- **Background Jobs**: Redis queue, see `src/workers/`
+- **Background Jobs**: In-memory queue, see `src/workers/`
 - **[Other integrations]**
 
 ## Development and Deployment

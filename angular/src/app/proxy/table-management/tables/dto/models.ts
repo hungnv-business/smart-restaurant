@@ -9,7 +9,7 @@ export interface AssignTableToSectionDto {
 export interface CreateTableDto {
   tableNumber: string;
   displayOrder: number;
-  status?: TableStatus;
+  status: TableStatus;
   isActive: boolean;
   layoutSectionId: string;
 }
@@ -28,7 +28,7 @@ export interface SectionWithTablesDto {
 export interface TableDto extends FullAuditedEntityDto<string> {
   tableNumber?: string;
   displayOrder: number;
-  status?: TableStatus;
+  status: TableStatus;
   isActive: boolean;
   layoutSectionId?: string;
   layoutSectionName?: string;
@@ -52,7 +52,7 @@ export interface UpdateTableDisplayOrderDto {
 export interface UpdateTableDto {
   tableNumber: string;
   displayOrder: number;
-  status?: TableStatus;
+  status: TableStatus;
   isActive: boolean;
   layoutSectionId: string;
 }
