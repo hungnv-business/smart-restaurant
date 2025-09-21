@@ -7,7 +7,6 @@ import '../auth/auth_service.dart';
 class HttpClientService {
   static HttpClientService? _instance;
   late Dio _dio;
-  AuthService? _authService;
 
   HttpClientService._internal() {
     _dio = Dio();
@@ -34,7 +33,6 @@ class HttpClientService {
 
   /// Initialize với AuthService reference
   void initialize(AuthService authService) {
-    _authService = authService;
     
     // Clear existing interceptors
     _dio.interceptors.clear();

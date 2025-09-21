@@ -21,21 +21,21 @@ export interface IngredientFormData {
 
 /**
  * Service quản lý dialog form cho nguyên liệu trong hệ thống kho nhà hàng
- * 
+ *
  * Chức năng chính:
  * - Mở dialog tạo mới nguyên liệu với form đầy đủ tính năng
- * - Mở dialog chỉnh sửa nguyên liệu với dữ liệu được load từ server  
+ * - Mở dialog chỉnh sửa nguyên liệu với dữ liệu được load từ server
  * - Quản lý đơn vị cơ bản và các đơn vị mua hàng (multi-unit system)
  * - Cấu hình dialog responsive cho các thiết bị khác nhau
  * - Xử lý data flow giữa list component và complex form component
- * 
+ *
  * @example
  * // Tạo mới nguyên liệu
  * dialogService.openCreateDialog().subscribe(result => {
  *   if (result) this.refreshList();
  * });
- * 
- * // Chỉnh sửa nguyên liệu 
+ *
+ * // Chỉnh sửa nguyên liệu
  * dialogService.openEditDialog(ingredientId).subscribe(result => {
  *   if (result) this.refreshList();
  * });
@@ -53,7 +53,7 @@ export class IngredientFormDialogService {
    * Mở dialog tạo mới nguyên liệu
    * Form sẽ có các trường: tên, danh mục, đơn vị cơ bản, giá, nhà cung cấp
    * Và danh sách đơn vị mua hàng với tỷ lệ quy đổi
-   * 
+   *
    * @returns Observable<boolean> - true nếu tạo thành công, false nếu hủy
    */
   openCreateDialog(): Observable<boolean> {
@@ -67,7 +67,7 @@ export class IngredientFormDialogService {
   /**
    * Mở dialog chỉnh sửa nguyên liệu
    * Tự động load dữ liệu nguyên liệu và các đơn vị mua hàng từ server
-   * 
+   *
    * @param ingredientId - ID của nguyên liệu cần chỉnh sửa
    * @returns Observable<boolean> - true nếu cập nhật thành công, false nếu hủy
    */
@@ -83,7 +83,7 @@ export class IngredientFormDialogService {
   /**
    * Method core để mở dialog - xử lý logic load dữ liệu trước khi hiển thị
    * Tự động phân biệt mode Create/Edit và load dữ liệu tương ứng
-   * 
+   *
    * @param data - Thông tin cấu hình dialog
    * @returns Observable<boolean> - Kết quả thao tác
    * @private
@@ -112,7 +112,7 @@ export class IngredientFormDialogService {
   /**
    * Tạo và hiển thị dialog với cấu hình responsive
    * Dialog rộng hơn do có nhiều trường và bảng đơn vị mua hàng
-   * 
+   *
    * @param data - Dữ liệu truyền vào dialog
    * @param observer - Observer để notify kết quả
    * @private
@@ -145,7 +145,7 @@ export class IngredientFormDialogService {
 
     // Mở dialog và lắng nghe kết quả
     const ref: DynamicDialogRef = this.dialogService.open(IngredientFormComponent, config);
-    
+
     // Transform kết quả: null/undefined thành false, các giá trị khác giữ nguyên
     ref.onClose.pipe(map(result => result || false)).subscribe({
       next: result => {

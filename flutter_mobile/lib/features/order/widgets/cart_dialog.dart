@@ -17,7 +17,7 @@ class CartDialog extends StatefulWidget {
   final bool isForTakeaway;
 
   const CartDialog({
-    Key? key,
+    super.key,
     this.selectedTable,
     required this.cartItems,
     required this.cartItemQuantities,
@@ -28,7 +28,7 @@ class CartDialog extends StatefulWidget {
     this.onUpdateNote,
     this.hasActiveOrder = false,
     this.isForTakeaway = false,
-  }) : super(key: key);
+  });
 
   @override
   State<CartDialog> createState() => _CartDialogState();
@@ -267,7 +267,7 @@ class _CartDialogState extends State<CartDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Column(

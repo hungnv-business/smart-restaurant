@@ -10,12 +10,12 @@ class SectionColumn extends StatelessWidget {
   final bool isCompact;
   
   const SectionColumn({
-    Key? key,
+    super.key,
     required this.sectionName,
     required this.tables,
     this.onTableUpdated,
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class SectionColumn extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
       ),
       child: Row(

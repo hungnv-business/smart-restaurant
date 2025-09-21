@@ -28,28 +28,28 @@ namespace SmartRestaurant.Kitchen.Dtos
         /// Examples: "B05", "Mang về #001", "Giao hàng #002"
         /// </summary>
         public string TableNumber { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// True nếu đây là đơn mang về/giao hàng (không có bàn thật)
         /// </summary>
         public bool IsTakeaway { get; set; }
-        
+
         /// <summary>
         /// Loại đơn hàng: DineIn (ăn tại chỗ), Takeaway (mang về), Delivery (giao hàng)
         /// </summary>
         public OrderType OrderType { get; set; }
-        
+
         /// <summary>
         /// Tổng số món cần nấu trong nhóm này
         /// </summary>
         public int TotalItems { get; set; }
-        
+
         /// <summary>
         /// Điểm priority cao nhất trong nhóm (dùng để sắp xếp thứ tự bàn)
         /// Score càng cao = ưu tiên càng cao
         /// </summary>
         public int HighestPriority { get; set; }
-        
+
         /// <summary>
         /// Danh sách tất cả món cần nấu trong nhóm này
         /// Đã được sắp xếp theo priority giảm dần (món ưu tiên cao nhất lên đầu)

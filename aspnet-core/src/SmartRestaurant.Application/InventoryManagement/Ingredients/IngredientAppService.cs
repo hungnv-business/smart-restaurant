@@ -50,7 +50,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
             filter: input.Filter,
             categoryId: input.CategoryId,
             includeInactive: input.IncludeInactive);
-            
+
         var ingredients = await _ingredientRepository.GetListWithDetailsAsync(
             skipCount: input.SkipCount,
             maxResultCount: input.MaxResultCount,
@@ -58,15 +58,15 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
             filter: input.Filter,
             categoryId: input.CategoryId,
             includeInactive: input.IncludeInactive);
-            
+
         var dtos = ObjectMapper.Map<List<Ingredient>, List<IngredientDto>>(ingredients);
-        
+
         // Set CanDelete và sắp xếp PurchaseUnits cho từng ingredient
         foreach (var dto in dtos)
         {
             dto.CanDelete = !await _ingredientRepository.HasDependenciesAsync(dto.Id);
         }
-        
+
         return new PagedResultDto<IngredientDto>(totalCount, dtos);
     }
 
@@ -84,10 +84,10 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         {
             throw new EntityNotFoundException(typeof(Ingredient), id);
         }
-        
+
         var dto = ObjectMapper.Map<Ingredient, IngredientDto>(ingredient);
         dto.CanDelete = !await _ingredientRepository.HasDependenciesAsync(id);
-        
+
         return dto;
     }
 
@@ -104,7 +104,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
     public virtual async Task<IngredientDto> CreateAsync(CreateUpdateIngredientDto input)
     {
         var ingredient = ObjectMapper.Map<CreateUpdateIngredientDto, Ingredient>(input);
-        
+
         var createdIngredient = await _ingredientRepository.InsertAsync(ingredient);
         return ObjectMapper.Map<Ingredient, IngredientDto>(createdIngredient);
     }
@@ -124,7 +124,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         {
             throw new EntityNotFoundException(typeof(Ingredient), id);
         }
-        
+
         // Map basic properties (exclude PurchaseUnits)
         ingredient.CategoryId = input.CategoryId;
         ingredient.Name = input.Name;
@@ -133,7 +133,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         ingredient.CostPerUnit = input.CostPerUnit;
         ingredient.SupplierInfo = input.SupplierInfo;
         ingredient.IsActive = input.IsActive;
-        
+
         // Update purchase units using domain methods
         if (input.PurchaseUnits?.Count > 0)
         {
@@ -143,18 +143,18 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
             var allUnitIds = inputUnitIds.Concat(currentUnitIds).Distinct().ToList();
             var units = await _unitRepository.GetListAsync(u => allUnitIds.Contains(u.Id));
             var unitLookup = units.ToDictionary(u => u.Id, u => u.Name);
-            
+
             // Xóa các units không còn trong input
             var unitsToRemove = ingredient.PurchaseUnits
                 .Where(pu => !inputUnitIds.Contains(pu.UnitId))
                 .ToList();
-            
+
             foreach (var unitToRemove in unitsToRemove)
             {
                 var unitNameToRemove = unitLookup.GetValueOrDefault(unitToRemove.UnitId, "Unknown");
                 ingredient.RemovePurchaseUnit(unitToRemove.UnitId, unitNameToRemove);
             }
-            
+
             // Thêm/cập nhật units từ input với DisplayOrder theo index
             var unitsToAdd = input.PurchaseUnits.Select(dto => (
                 id: dto.Id,
@@ -165,7 +165,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
                 purchasePrice: dto.PurchasePrice,
                 isActive: dto.IsActive
             ));
-            
+
             ingredient.AddPurchaseUnits(unitsToAdd);
         }
         else
@@ -173,9 +173,9 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
             // Nếu input không có PurchaseUnits thì clear hết
             ingredient.ClearPurchaseUnits();
         }
-        
+
         await _ingredientRepository.UpdateAsync(ingredient);
-        
+
         return ObjectMapper.Map<Ingredient, IngredientDto>(ingredient);
     }
 
@@ -203,7 +203,7 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
     }
 
     // === Multi-Unit Management Methods ===
-    
+
     /// <summary>
     /// Lấy danh sách đơn vị mua hàng của nguyên liệu
     /// </summary>
@@ -217,15 +217,15 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         {
             throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
         }
-        
+
         var purchaseUnits = ingredient.PurchaseUnits
             .Where(pu => pu.IsActive)
             .OrderBy(pu => pu.DisplayOrder)
             .ToList();
-            
+
         return ObjectMapper.Map<List<IngredientPurchaseUnit>, List<IngredientPurchaseUnitDto>>(purchaseUnits);
     }
-    
+
     /// <summary>
     /// Chuyển đổi số lượng từ đơn vị này sang đơn vị khác cho nguyên liệu
     /// </summary>
@@ -242,13 +242,13 @@ public class IngredientAppService : ApplicationService, IIngredientAppService
         {
             throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
         }
-        
+
         // Chuyển đổi từ fromUnit sang base unit
         var baseQuantity = ingredient.ConvertToBaseUnit(quantity, fromUnitId);
-        
+
         // Chuyển đổi từ base unit sang toUnit
         var convertedQuantity = ingredient.ConvertFromBaseUnit(baseQuantity, toUnitId);
-        
+
         return convertedQuantity;
     }
 

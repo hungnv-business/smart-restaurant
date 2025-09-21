@@ -104,7 +104,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .Include(o => o.Table)
                 .Include(o => o.OrderItems)
                     .ThenInclude(o => o.MenuItem)
-                .FirstOrDefaultAsync(o => o.OrderItems.Any(oi => oi.Id == orderItemId), 
+                .FirstOrDefaultAsync(o => o.OrderItems.Any(oi => oi.Id == orderItemId),
                     GetCancellationToken(cancellationToken));
         }
 
@@ -166,7 +166,7 @@ namespace SmartRestaurant.EntityFrameworkCore.Orders
                 .WhereIf(orderTypeFilter.HasValue, o => o.OrderType == orderTypeFilter!.Value)
                 .WhereIf(statusFilter.HasValue, o => o.Status == statusFilter!.Value)
                 .Where(o => o.CreationTime >= targetDate && o.CreationTime < nextDay)
-                .WhereIf(!string.IsNullOrWhiteSpace(searchText), o => 
+                .WhereIf(!string.IsNullOrWhiteSpace(searchText), o =>
                     (o.CustomerName != null && o.CustomerName.ToLower().Contains(searchLower!)) ||
                     (o.CustomerPhone != null && o.CustomerPhone.Contains(searchLower!)) ||
                     (o.Table != null && o.Table.TableNumber.ToLower().Contains(searchLower!)) ||

@@ -712,7 +712,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 throw new EntityNotFoundException(typeof(Order), orderId);
             }
 
-            Logger.LogInformation("✅ OrderAppService: Found order {OrderNumber} of type {OrderType} with {ItemCount} items", 
+            Logger.LogInformation("✅ OrderAppService: Found order {OrderNumber} of type {OrderType} with {ItemCount} items",
                 order.OrderNumber, order.OrderType, order.OrderItems.Count);
 
             // Tạo DTO thống nhất
@@ -744,7 +744,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
             }
 
             // Tính toán order summary
-            var pendingServeCount = order.OrderItems.Count(i => 
+            var pendingServeCount = order.OrderItems.Count(i =>
                 i.Status == OrderItemStatus.Pending || i.Status == OrderItemStatus.Preparing);
 
             result.OrderSummary = new OrderSummaryDto
@@ -826,7 +826,7 @@ public class OrderAppService : ApplicationService, IOrderAppService
                 .ToList();
 
             Logger.LogInformation("✅ OrderAppService: Successfully processed unified order details for order {OrderId}", orderId);
-            
+
             return result;
         }
         catch (Exception ex)

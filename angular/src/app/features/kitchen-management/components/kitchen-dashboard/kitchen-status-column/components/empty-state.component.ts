@@ -11,11 +11,13 @@ import { CommonModule } from '@angular/common';
       <p class="m-0">{{ message }}</p>
     </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
 })
 export class EmptyStateComponent {
   @Input() message: string = 'Không có dữ liệu';

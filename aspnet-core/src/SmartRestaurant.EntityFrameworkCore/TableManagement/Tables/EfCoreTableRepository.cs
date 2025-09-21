@@ -19,7 +19,7 @@ namespace SmartRestaurant.EntityFrameworkCore.TableManagement.Tables
         }
 
         public async Task<List<Table>> GetTablesBySectionAsync(
-            Guid layoutSectionId, 
+            Guid layoutSectionId,
             bool includeInactive = false,
             CancellationToken cancellationToken = default)
         {
@@ -64,7 +64,7 @@ namespace SmartRestaurant.EntityFrameworkCore.TableManagement.Tables
         {
             var dbContext = await GetDbContextAsync();
             var tableIds = updates.Select(u => u.tableId).ToList();
-            
+
             var tables = await dbContext.Tables
                 .Where(t => tableIds.Contains(t.Id))
                 .ToListAsync(GetCancellationToken(cancellationToken));

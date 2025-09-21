@@ -18,7 +18,7 @@ class OrderItemCard extends StatelessWidget {
   final VoidCallback? onServe; // Callback cho nút phục vụ
 
   const OrderItemCard({
-    Key? key,
+    super.key,
     required this.itemName,
     required this.quantity,
     required this.unitPrice,
@@ -31,7 +31,7 @@ class OrderItemCard extends StatelessWidget {
     this.onEdit,
     this.onRemove,
     this.onServe,
-  }) : super(key: key);
+  });
 
   /// Lấy màu cho status
   Color _getStatusColor() {

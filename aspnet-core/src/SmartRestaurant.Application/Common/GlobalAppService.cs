@@ -44,10 +44,10 @@ namespace SmartRestaurant.Common
         public Task<List<IntLookupItemDto>> GetTableStatusLookupAsync()
         {
             var tableStatuses = GlobalEnums.TableStatuses
-                .Select(kvp => new IntLookupItemDto 
-                { 
-                    Id = (int)kvp.Key, 
-                    DisplayName = kvp.Value 
+                .Select(kvp => new IntLookupItemDto
+                {
+                    Id = (int)kvp.Key,
+                    DisplayName = kvp.Value
                 })
                 .ToList();
 

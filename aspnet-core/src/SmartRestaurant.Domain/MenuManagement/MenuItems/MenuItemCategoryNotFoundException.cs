@@ -12,7 +12,7 @@ public class MenuItemCategoryNotFoundException : BusinessException
     /// Khởi tạo exception với ID danh mục không tồn tại
     /// </summary>
     /// <param name="categoryId">ID danh mục không tồn tại</param>
-    public MenuItemCategoryNotFoundException(Guid categoryId) 
+    public MenuItemCategoryNotFoundException(Guid categoryId)
         : base(SmartRestaurantDomainErrorCodes.MenuItems.CategoryNotFound)
     {
         WithData("CategoryId", categoryId);

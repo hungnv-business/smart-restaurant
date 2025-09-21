@@ -9,7 +9,7 @@ namespace SmartRestaurant.Common.Dto
     {
         /// <summary>ID của item (int)</summary>
         public int Id { get; set; }
-        
+
         /// <summary>Tên hiển thị của item</summary>
         public string DisplayName { get; set; } = string.Empty;
     }
@@ -21,7 +21,7 @@ namespace SmartRestaurant.Common.Dto
     {
         /// <summary>ID của item (Guid)</summary>
         public Guid Id { get; set; }
-        
+
         /// <summary>Tên hiển thị của item</summary>
         public string DisplayName { get; set; } = string.Empty;
     }
@@ -33,7 +33,7 @@ namespace SmartRestaurant.Common.Dto
     {
         /// <summary>ID của item (string)</summary>
         public string Id { get; set; } = string.Empty;
-        
+
         /// <summary>Tên hiển thị của item</summary>
         public string DisplayName { get; set; } = string.Empty;
     }

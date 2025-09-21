@@ -88,10 +88,10 @@ namespace SmartRestaurant.TableManagement.LayoutSections
         public async Task<LayoutSectionDto> UpdateAsync(Guid id, UpdateLayoutSectionDto input)
         {
             var section = await _repository.GetAsync(id);
-            
+
             ObjectMapper.Map(input, section);
             await _repository.UpdateAsync(section, autoSave: true);
-            
+
             return ObjectMapper.Map<LayoutSection, LayoutSectionDto>(section);
         }
 
@@ -116,7 +116,7 @@ namespace SmartRestaurant.TableManagement.LayoutSections
             var hasAny = await _repository.AnyAsync();
             if (!hasAny)
                 return 1; // Khu vực đầu tiên có thứ tự là 1
-                
+
             var maxOrder = await _repository.MaxAsync(x => x.DisplayOrder);
             return maxOrder + 1;
         }
@@ -133,9 +133,9 @@ namespace SmartRestaurant.TableManagement.LayoutSections
         {
             var section = await _repository.GetAsync(id);
             section.IsActive = isActive;
-            
+
             await _repository.UpdateAsync(section, autoSave: true);
-            
+
             return ObjectMapper.Map<LayoutSection, LayoutSectionDto>(section);
         }
     }

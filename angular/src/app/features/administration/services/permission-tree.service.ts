@@ -8,7 +8,7 @@ import { GetPermissionListResultDto } from '@abp/ng.permission-management/proxy'
  * - Xây dựng cây phân quyền phân cấp từ ABP permissions
  * - Cập nhật trạng thái partial selection cho các node cha
  * - Quản lý mối quan hệ cha-con giữa các quyền
- * 
+ *
  * Sử dụng: Hiển thị danh sách quyền dạng tree cho phép gán quyền cho vai trò
  */
 @Injectable({

@@ -21,14 +21,14 @@ class MenuScreen extends StatefulWidget {
   final List<CreateOrderItemDto> initialSelectedItems;
 
   const MenuScreen({
-    Key? key,
+    super.key,
     this.selectedTable,
     this.tableId,
     this.hasActiveOrder = false,
     this.currentOrderId,
     this.isForTakeaway = false,
     this.initialSelectedItems = const [],
-  }) : super(key: key);
+  });
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -51,7 +51,7 @@ class _MenuScreenState extends State<MenuScreen> {
   String _searchQuery = ''; // Search query
 
   // Danh sách món trong giỏ hàng với thông tin đầy đủ
-  List<MenuItem> _cartItems = [];
+  final List<MenuItem> _cartItems = [];
   List<int> _cartItemQuantities = [];
   List<String> _cartItemNotes = []; // Ghi chú cho từng món
 
@@ -590,14 +590,6 @@ class _MenuScreenState extends State<MenuScreen> {
         _cartItemNotes[index] = note;
       });
     }
-  }
-
-  int _calculateTotal() {
-    int total = 0;
-    for (int i = 0; i < _cartItems.length; i++) {
-      total += _cartItems[i].price * _cartItemQuantities[i];
-    }
-    return total;
   }
 
   /// Gửi đơn hàng lên API (tạo mới hoặc thêm món)

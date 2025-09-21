@@ -162,7 +162,7 @@ public class RecipeManager : DomainService
 
             // Tính số lượng món có thể làm được từ nguyên liệu này
             var possibleQuantity = ingredient.CurrentStock / menuItemIngredient.RequiredQuantity;
-            
+
             // Lấy minimum (bottleneck ingredient)
             minimumQuantity = Math.Min(minimumQuantity, possibleQuantity);
         }

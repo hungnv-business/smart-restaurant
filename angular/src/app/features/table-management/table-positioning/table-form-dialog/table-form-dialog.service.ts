@@ -23,7 +23,7 @@ export interface TableFormDialogData {
  * - Mở dialog tạo mới bàn ăn trong khu vực cụ thể
  * - Mở dialog chỉnh sửa bàn ăn hiện có
  * - Cấu hình chuẩn cho dialog với các thuộc tính phù hợp
- * 
+ *
  * Sử dụng: Quản lý bàn ăn trong các khu vực nhà hàng
  */
 @Injectable({

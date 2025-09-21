@@ -26,7 +26,7 @@ namespace SmartRestaurant.InventoryManagement.Ingredients
         public async Task ProcessStockChangesAsync(IEnumerable<StockChangeItem> stockChanges)
         {
             var changes = stockChanges.Where(sc => sc.HasChange).ToList();
-            
+
             foreach (var change in changes)
             {
                 await UpdateIngredientStockAsync(change);

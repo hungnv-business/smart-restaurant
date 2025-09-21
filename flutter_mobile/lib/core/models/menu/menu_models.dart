@@ -136,9 +136,9 @@ class MenuItem {
   /// Getter để lấy stock status text
   String get stockStatusText {
     if (isOutOfStock) return 'Hết hàng';
-    if (hasLimitedStock) return 'Còn ${maximumQuantityAvailable} phần';
+    if (hasLimitedStock) return 'Còn $maximumQuantityAvailable phần';
     if (maximumQuantityAvailable == 2147483647) return 'Còn hàng'; // int.maxValue từ backend
-    return 'Còn ${maximumQuantityAvailable} phần';
+    return 'Còn $maximumQuantityAvailable phần';
   }
   
 }

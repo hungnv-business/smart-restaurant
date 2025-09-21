@@ -13,10 +13,14 @@ import { MessageService } from 'primeng/api';
 
 // ABP Proxy Services
 import { KitchenDashboardService } from '../../../../proxy/kitchen/kitchen-dashboard.service';
-import { KitchenTableGroupDto, CookingStatsDto, UpdateOrderItemStatusInput } from '../../../../proxy/kitchen/dtos/models';
+import {
+  KitchenTableGroupDto,
+  CookingStatsDto,
+  UpdateOrderItemStatusInput,
+} from '../../../../proxy/kitchen/dtos/models';
 import { OrderItemStatus } from '../../../../proxy/orders/order-item-status.enum';
 
-// Custom Services  
+// Custom Services
 import { KitchenSignalRService, KitchenUpdateEvent } from '../../services/kitchen-signalr.service';
 import { NotificationSoundService } from '../../services/notification-sound.service';
 
@@ -33,16 +37,16 @@ import { StatusUpdateEvent } from './shared/order-item-card/order-item-card.comp
     ProgressSpinnerModule,
     ToastModule,
     SkeletonModule,
-    KitchenStatusColumnComponent
+    KitchenStatusColumnComponent,
   ],
   providers: [MessageService],
   templateUrl: './kitchen-dashboard.component.html',
-  styleUrl: './kitchen-dashboard.component.scss'
+  styleUrl: './kitchen-dashboard.component.scss',
 })
 export class KitchenDashboardComponent implements OnInit, OnDestroy {
   // Reactive state using Angular signals
   private readonly destroy$ = new Subject<void>();
-  
+
   // Data signals - separated by status
   pendingTableGroups = signal<KitchenTableGroupDto[]>([]);
   preparingTableGroups = signal<KitchenTableGroupDto[]>([]);
@@ -50,8 +54,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
   cookingStats = signal<CookingStatsDto | null>(null);
   loading = signal<boolean>(true);
   refreshing = signal<boolean>(false);
-  
-  
+
   // SignalR state
   signalRConnectionState = signal<'disconnected' | 'connecting' | 'connected'>('disconnected');
   lastUpdate = signal<Date | null>(null);
@@ -83,53 +86,58 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
    */
   private loadData(): void {
     this.loading.set(true);
-    
+
     // Load both cooking orders and stats using ABP proxy
     const orders$ = this.kitchenDashboardService.getCookingOrdersGrouped();
     const stats$ = this.kitchenDashboardService.getCookingStats();
 
-    orders$.pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Lỗi',
-          detail: 'Không thể tải danh sách món ăn'
-        });
-        console.error('Error loading cooking orders:', error);
-        return of([]);
-      })
-    ).subscribe(orders => {
-      this.categorizeTableGroups(orders);
-      this.loading.set(false);
-      this.refreshing.set(false);
-    });
+    orders$
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: 'Không thể tải danh sách món ăn',
+          });
+          console.error('Error loading cooking orders:', error);
+          return of([]);
+        }),
+      )
+      .subscribe(orders => {
+        this.categorizeTableGroups(orders);
+        this.loading.set(false);
+        this.refreshing.set(false);
+      });
 
-    stats$.pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error loading cooking stats:', error);
-        return of(null);
-      })
-    ).subscribe(stats => {
-      this.cookingStats.set(stats);
-    });
+    stats$
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error loading cooking stats:', error);
+          return of(null);
+        }),
+      )
+      .subscribe(stats => {
+        this.cookingStats.set(stats);
+      });
   }
-
 
   /**
    * Setup SignalR real-time connection
    */
   private setupSignalR(): void {
     // Listen to connection state changes
-    this.kitchenSignalRService.getConnectionState()
+    this.kitchenSignalRService
+      .getConnectionState()
       .pipe(takeUntil(this.destroy$))
       .subscribe(state => {
         this.signalRConnectionState.set(state);
       });
 
     // Listen to kitchen updates
-    this.kitchenSignalRService.getKitchenUpdates()
+    this.kitchenSignalRService
+      .getKitchenUpdates()
       .pipe(takeUntil(this.destroy$))
       .subscribe(update => {
         if (update) {
@@ -138,14 +146,13 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
       });
 
     // Establish connection
-    this.kitchenSignalRService.connect()
-      .catch(error => {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Kết Nối Real-time',
-          detail: 'Không thể kết nối real-time. Dữ liệu sẽ được cập nhật theo lịch trình.'
-        });
+    this.kitchenSignalRService.connect().catch(error => {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Kết Nối Real-time',
+        detail: 'Không thể kết nối real-time. Dữ liệu sẽ được cập nhật theo lịch trình.',
       });
+    });
   }
 
   /**
@@ -170,15 +177,15 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
         // Phát âm thanh và đọc message
         const newOrderMessage = update.message || 'Có đơn hàng mới cần chuẩn bị';
         await this.notificationSoundService.playNotification('newOrder', newOrderMessage);
-        
+
         // Hiển thị thông báo đơn hàng mới
         this.messageService.add({
           severity: 'success',
           summary: 'Đơn Hàng Mới Từ Mobile',
           detail: newOrderMessage,
-          life: 5000
+          life: 5000,
         });
-        
+
         // Delay để đảm bảo database đã được commit
         setTimeout(() => {
           this.loadData();
@@ -187,17 +194,19 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
       case 'ORDER_ITEM_QUANTITY_UPDATED':
         // Phát âm thanh và đọc message với thông tin chi tiết
-        const updateMessage = update.message || `${update.tableName || 'Mang về'} đã cập nhật ${update.menuItemName} thành ${update.newQuantity} món`;
+        const updateMessage =
+          update.message ||
+          `${update.tableName || 'Mang về'} đã cập nhật ${update.menuItemName} thành ${update.newQuantity} món`;
         await this.notificationSoundService.playNotification('newOrder', updateMessage);
-        
+
         // Hiển thị thông báo cập nhật số lượng
         this.messageService.add({
           severity: 'info',
           summary: 'Cập Nhật Số Lượng',
           detail: updateMessage,
-          life: 4000
+          life: 4000,
         });
-        
+
         // Delay để đảm bảo database đã được commit
         setTimeout(() => {
           this.loadData();
@@ -206,17 +215,18 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
       case 'ORDER_ITEMS_ADDED':
         // Phát âm thanh và đọc message với thông tin chi tiết
-        const addMessage = update.message || `${update.tableName || 'Mang về'} đã thêm ${update.addedItemsDetail}`;
+        const addMessage =
+          update.message || `${update.tableName || 'Mang về'} đã thêm ${update.addedItemsDetail}`;
         await this.notificationSoundService.playNotification('newOrder', addMessage);
-        
+
         // Hiển thị thông báo thêm món
         this.messageService.add({
           severity: 'success',
           summary: 'Thêm Món Mới',
           detail: addMessage,
-          life: 5000
+          life: 5000,
         });
-        
+
         // Delay để đảm bảo database đã được commit
         setTimeout(() => {
           this.loadData();
@@ -225,17 +235,19 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
       case 'ORDER_ITEM_REMOVED':
         // Phát âm thanh và đọc message với số lượng chi tiết
-        const removeMessage = update.message || `${update.tableName || 'Mang về'} đã xóa ${update.quantity} món ${update.menuItemName}`;
+        const removeMessage =
+          update.message ||
+          `${update.tableName || 'Mang về'} đã xóa ${update.quantity} món ${update.menuItemName}`;
         await this.notificationSoundService.playNotification('newOrder', removeMessage);
-        
+
         // Hiển thị thông báo xóa món
         this.messageService.add({
           severity: 'warn',
           summary: 'Xóa Món',
           detail: removeMessage,
-          life: 4000
+          life: 4000,
         });
-        
+
         // Delay để đảm bảo database đã được commit
         setTimeout(() => {
           this.loadData();
@@ -246,15 +258,15 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
         // Phát âm thanh và đọc message
         const servedMessage = update.message || `Đơn ${update.orderNumber} đã được phục vụ`;
         await this.notificationSoundService.playNotification('newOrder', servedMessage);
-        
+
         // Hiển thị thông báo đã phục vụ
         this.messageService.add({
           severity: 'success',
           summary: 'Món Đã Phục Vụ',
           detail: servedMessage,
-          life: 3000
+          life: 3000,
         });
-        
+
         // Delay để đảm bảo database đã được commit
         setTimeout(() => {
           this.loadData();
@@ -279,30 +291,31 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     const { orderItemId, status: newStatus } = event;
     const updateInput: UpdateOrderItemStatusInput = {
       orderItemId,
-      status: newStatus
+      status: newStatus,
     };
 
-    this.kitchenDashboardService.updateOrderItemStatus(updateInput)
+    this.kitchenDashboardService
+      .updateOrderItemStatus(updateInput)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Thành Công',
-            detail: 'Đã cập nhật trạng thái món thành công'
+            detail: 'Đã cập nhật trạng thái món thành công',
           });
-          
+
           // Refresh data after successful update
           this.onRefresh();
         },
-        error: (error) => {
+        error: error => {
           this.messageService.add({
             severity: 'error',
             summary: 'Lỗi',
-            detail: 'Không thể cập nhật trạng thái món'
+            detail: 'Không thể cập nhật trạng thái món',
           });
           console.error('Error updating order item status:', error);
-        }
+        },
       });
   }
 
@@ -350,13 +363,13 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
   toggleNotificationSound(): void {
     const currentConfig = this.notificationSoundService.getConfig();
     this.notificationSoundService.setEnabled(!currentConfig.enabled);
-    
+
     const status = !currentConfig.enabled ? 'bật' : 'tắt';
     this.messageService.add({
       severity: 'info',
       summary: 'Cài Đặt Âm Thanh',
       detail: `Đã ${status} âm thanh thông báo`,
-      life: 2000
+      life: 2000,
     });
   }
 
@@ -370,14 +383,14 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
         severity: 'info',
         summary: 'Test Âm Thanh',
         detail: 'Đã phát âm thanh test',
-        life: 2000
+        life: 2000,
       });
     } catch (error) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Lỗi Âm Thanh',
         detail: 'Không thể phát âm thanh',
-        life: 3000
+        life: 3000,
       });
     }
   }
@@ -395,13 +408,13 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
   toggleSpeech(): void {
     const currentConfig = this.notificationSoundService.getConfig();
     this.notificationSoundService.setSpeechEnabled(!currentConfig.speechEnabled);
-    
+
     const status = !currentConfig.speechEnabled ? 'bật' : 'tắt';
     this.messageService.add({
       severity: 'info',
       summary: 'Cài Đặt Giọng Đọc',
       detail: `Đã ${status} giọng đọc thông báo`,
-      life: 2000
+      life: 2000,
     });
   }
 
@@ -415,14 +428,14 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
         severity: 'info',
         summary: 'Test Giọng Đọc',
         detail: 'Đã test giọng đọc tiếng Việt',
-        life: 2000
+        life: 2000,
       });
     } catch (error) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Lỗi Giọng Đọc',
         detail: 'Không thể test giọng đọc',
-        life: 3000
+        life: 3000,
       });
     }
   }
@@ -450,8 +463,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
       severity: 'info',
       summary: 'Dừng Âm Thanh',
       detail: 'Đã dừng tất cả âm thanh và giọng đọc',
-      life: 2000
+      life: 2000,
     });
   }
-
 }

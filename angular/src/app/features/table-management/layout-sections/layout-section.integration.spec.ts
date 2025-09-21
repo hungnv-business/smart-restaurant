@@ -23,8 +23,11 @@ describe('LayoutSection Integration Tests', () => {
         { provide: DynamicDialogRef, useValue: {} },
         { provide: DynamicDialogConfig, useValue: {} },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(LayoutSectionListComponent);
@@ -43,8 +46,11 @@ describe('LayoutSection Integration Tests', () => {
         { provide: DynamicDialogRef, useValue: {} },
         { provide: DynamicDialogConfig, useValue: {} },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(LayoutSectionFormComponent);

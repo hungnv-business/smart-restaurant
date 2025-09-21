@@ -17,17 +17,17 @@ namespace SmartRestaurant.TableManagement.LayoutSections
         [Required]
         [MaxLength(128)]
         public string SectionName { get; set; }
-        
+
         /// <summary>Mô tả chi tiết khu vực</summary>
         [MaxLength(512)]
         public string? Description { get; set; }
-        
+
         /// <summary>Thứ tự hiển thị khu vực</summary>
         public int DisplayOrder { get; set; }
-        
+
         /// <summary>Khu vực có đang hoạt động hay không</summary>
         public bool IsActive { get; set; }
-        
+
         // Navigation properties
         /// <summary>Danh sách bàn thuộc khu vực này</summary>
         public virtual ICollection<Table> Tables { get; set; }

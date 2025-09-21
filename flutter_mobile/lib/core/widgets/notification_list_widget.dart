@@ -11,11 +11,11 @@ class NotificationListWidget extends StatelessWidget {
   final VoidCallback? onNotificationTap;
 
   const NotificationListWidget({
-    Key? key,
+    super.key,
     this.showOnlyUnread = false,
     this.maxItems,
     this.onNotificationTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -93,11 +93,11 @@ class NotificationTile extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   const NotificationTile({
-    Key? key,
+    super.key,
     required this.notification,
     this.onTap,
     this.onDismiss,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +157,7 @@ class NotificationTile extends StatelessWidget {
                 ),
               ),
         onTap: onTap,
-        tileColor: notification.isRead ? null : Colors.blue.withOpacity(0.05),
+        tileColor: notification.isRead ? null : Colors.blue.withValues(alpha: 0.05),
       ),
     );
   }
@@ -195,7 +195,7 @@ class NotificationTile extends StatelessWidget {
     }
 
     return CircleAvatar(
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: color.withValues(alpha: 0.1),
       child: Icon(icon, color: color, size: 20),
     );
   }
@@ -224,10 +224,10 @@ class NotificationBadge extends StatelessWidget {
   final bool showCount;
 
   const NotificationBadge({
-    Key? key,
+    super.key,
     required this.child,
     this.showCount = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +274,7 @@ class NotificationBadge extends StatelessWidget {
 
 /// Bottom sheet để hiển thị notifications
 class NotificationBottomSheet extends StatelessWidget {
-  const NotificationBottomSheet({Key? key}) : super(key: key);
+  const NotificationBottomSheet({super.key});
 
   static void show(BuildContext context) {
     showModalBottomSheet(

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService } from 'primeng/dynamicdialog';
 import { Observable } from 'rxjs';
 import { CreateUpdatePurchaseUnitDto } from '../../../../proxy/inventory-management/ingredients/dto';
 import { IngredientUnitFormComponent } from '../ingredient-form/ingredient-unit-form/ingredient-unit-form.component';
@@ -22,7 +22,7 @@ export interface IngredientUnitDialogData {
 
 /**
  * Service quản lý các đơn vị mua hàng của nguyên liệu trong inventory system
- * 
+ *
  * Chức năng chính:
  * - Mở dialog thêm mới/chỉnh sửa đơn vị mua hàng
  * - Validate business rules cho multi-unit system
@@ -30,18 +30,18 @@ export interface IngredientUnitDialogData {
  * - Tính toán tỷ lệ quy đổi giữa các đơn vị
  * - Hiển thị preview chuyển đổi cho user
  * - Utility methods cho unit management
- * 
+ *
  * @example
  * // Thêm đơn vị mua hàng mới
  * service.openAddUnitModal(dialogData).subscribe(result => {
  *   if (result) this.purchaseUnits.push(result);
  * });
- * 
+ *
  * // Validate đơn vị
  * const errors = service.validatePurchaseUnit(unit, existingUnits);
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IngredientUnitService {
   /** Service để quản lý dynamic dialog */
@@ -50,7 +50,7 @@ export class IngredientUnitService {
   /**
    * Mở dialog thêm đơn vị mua hàng mới
    * Form sẽ có: chọn đơn vị, nhập tỷ lệ quy đổi, giá mua, đánh dấu base unit
-   * 
+   *
    * @param data - Thông tin cần thiết để hiển thị form
    * @returns Observable với kết quả đơn vị mua hàng mới
    */
@@ -60,7 +60,7 @@ export class IngredientUnitService {
       width: '500px',
       modal: true,
       closable: true,
-      data: { ...data, editingUnit: null } // Đảm bảo mode thêm mới
+      data: { ...data, editingUnit: null }, // Đảm bảo mode thêm mới
     });
 
     return ref.onClose;
@@ -69,7 +69,7 @@ export class IngredientUnitService {
   /**
    * Mở dialog chỉnh sửa đơn vị mua hàng hiện có
    * Form sẽ được điền sẵn thông tin của đơn vị đang chỉnh sửa
-   * 
+   *
    * @param data - Thông tin đơn vị và context cần thiết
    * @returns Observable với kết quả đơn vị mua hàng đã cập nhật
    */
@@ -79,7 +79,7 @@ export class IngredientUnitService {
       width: '500px',
       modal: true,
       closable: true,
-      data: data
+      data: data,
     });
 
     return ref.onClose;
@@ -88,12 +88,15 @@ export class IngredientUnitService {
   /**
    * Validate business rules cho đơn vị mua hàng
    * Kiểm tra các quy tắc nghiệp vụ của inventory system
-   * 
+   *
    * @param unit - Đơn vị mua hàng cần validate
    * @param existingUnits - Danh sách các đơn vị hiện có
    * @returns Mảng các thông báo lỗi (rỗng nếu hợp lệ)
    */
-  validatePurchaseUnit(unit: CreateUpdatePurchaseUnitDto, existingUnits: CreateUpdatePurchaseUnitDto[]): string[] {
+  validatePurchaseUnit(
+    unit: CreateUpdatePurchaseUnitDto,
+    existingUnits: CreateUpdatePurchaseUnitDto[],
+  ): string[] {
     const errors: string[] = [];
 
     // Validate các trường bắt buộc
@@ -106,8 +109,8 @@ export class IngredientUnitService {
     }
 
     // Kiểm tra trùng lặp đơn vị
-    const duplicate = existingUnits.find(existing => 
-      existing.unitId === unit.unitId && existing !== unit
+    const duplicate = existingUnits.find(
+      existing => existing.unitId === unit.unitId && existing !== unit,
     );
     if (duplicate) {
       errors.push('Đơn vị này đã được cấu hình');
@@ -115,8 +118,8 @@ export class IngredientUnitService {
 
     // Validate business rules cho đơn vị cơ sở
     if (unit.isBaseUnit) {
-      const otherBaseUnit = existingUnits.find(existing => 
-        existing.isBaseUnit && existing !== unit
+      const otherBaseUnit = existingUnits.find(
+        existing => existing.isBaseUnit && existing !== unit,
       );
       if (otherBaseUnit) {
         errors.push('Chỉ được có 1 đơn vị cơ sở');
@@ -162,14 +165,17 @@ export class IngredientUnitService {
   /**
    * Đảm bảo luôn có đúng 1 đơn vị cơ sở trong inventory system
    * Tự động đánh dấu đơn vị đầu tiên là base unit nếu chưa có
-   * 
+   *
    * @param units - Danh sách các đơn vị mua hàng
    * @param baseUnitId - ID của đơn vị cơ bản đã chọn cho nguyên liệu
    * @returns Danh sách đơn vị đã được cập nhật
    */
-  ensureBaseUnit(units: CreateUpdatePurchaseUnitDto[], baseUnitId: string): CreateUpdatePurchaseUnitDto[] {
+  ensureBaseUnit(
+    units: CreateUpdatePurchaseUnitDto[],
+    baseUnitId: string,
+  ): CreateUpdatePurchaseUnitDto[] {
     const hasBase = this.hasBaseUnit(units);
-    
+
     if (!hasBase && units.length > 0) {
       // Tự động đánh dấu đơn vị đầu tiên là đơn vị cơ sở
       units[0].isBaseUnit = true;
@@ -183,13 +189,17 @@ export class IngredientUnitService {
   /**
    * Tạo text preview cho tỷ lệ quy đổi đơn vị
    * Hiển thị thông tin dễ hiểu cho user về cách quy đổi
-   * 
+   *
    * @param unit - Đơn vị mua hàng
    * @param baseUnitName - Tên đơn vị cơ bản
    * @param units - Danh sách các đơn vị từ hệ thống
    * @returns Text preview VD: "1 thùng = 24 chai" hoặc "chai (đơn vị cơ sở)"
    */
-  getConversionPreview(unit: CreateUpdatePurchaseUnitDto, baseUnitName: string, units: GuidLookupItemDto[]): string {
+  getConversionPreview(
+    unit: CreateUpdatePurchaseUnitDto,
+    baseUnitName: string,
+    units: GuidLookupItemDto[],
+  ): string {
     const unitName = this.getUnitName(unit.unitId, units);
     if (unit.isBaseUnit) {
       return `${unitName} (đơn vị cơ sở)`;

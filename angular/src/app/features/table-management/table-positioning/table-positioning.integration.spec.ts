@@ -23,8 +23,11 @@ describe('TablePositioning Integration Tests', () => {
         { provide: DynamicDialogRef, useValue: {} },
         { provide: DynamicDialogConfig, useValue: {} },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TableLayoutKanbanComponent);
@@ -43,8 +46,11 @@ describe('TablePositioning Integration Tests', () => {
         { provide: DynamicDialogRef, useValue: {} },
         { provide: DynamicDialogConfig, useValue: {} },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TableFormDialogComponent);

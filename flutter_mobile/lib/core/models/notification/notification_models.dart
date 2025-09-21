@@ -45,11 +45,9 @@ class NewOrderNotification extends BaseNotification {
     required this.orderNumber,
     required this.tableName,
     this.tableId,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
-          notifiedAt: notifiedAt,
-          message: message,
           type: NotificationType.newOrder,
         );
 
@@ -77,11 +75,9 @@ class OrderItemServedNotification extends BaseNotification {
     required this.quantity,
     required this.tableName,
     this.tableId,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
-          notifiedAt: notifiedAt,
-          message: message,
           type: NotificationType.orderItemServed,
         );
 
@@ -105,11 +101,9 @@ class OrderItemQuantityUpdatedNotification extends BaseNotification {
     required this.tableName,
     required this.menuItemName,
     required this.newQuantity,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
-          notifiedAt: notifiedAt,
-          message: message,
           type: NotificationType.orderItemQuantityUpdated,
         );
 
@@ -131,11 +125,9 @@ class OrderItemsAddedNotification extends BaseNotification {
   const OrderItemsAddedNotification({
     required this.tableName,
     required this.addedItemsDetail,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
-          notifiedAt: notifiedAt,
-          message: message,
           type: NotificationType.orderItemsAdded,
         );
 
@@ -159,11 +151,9 @@ class OrderItemRemovedNotification extends BaseNotification {
     required this.tableName,
     required this.menuItemName,
     required this.quantity,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
-          notifiedAt: notifiedAt,
-          message: message,
           type: NotificationType.orderItemRemoved,
         );
 
@@ -189,12 +179,10 @@ class OrderItemStatusUpdatedNotification extends BaseNotification {
     required this.tableName,
     required this.newStatus,
     this.statusDisplay,
-    required DateTime notifiedAt,
-    required String message,
+    required super.notifiedAt,
+    required super.message,
   }) : super(
           type: NotificationType.orderItemStatusUpdated,
-          notifiedAt: notifiedAt,
-          message: message,
         );
 
   factory OrderItemStatusUpdatedNotification.fromJson(Map<String, dynamic> json) {

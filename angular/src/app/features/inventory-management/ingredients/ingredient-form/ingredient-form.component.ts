@@ -1,6 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
@@ -13,7 +19,6 @@ import { TooltipModule } from 'primeng/tooltip';
 import {
   IngredientDto,
   CreateUpdateIngredientDto,
-  IngredientPurchaseUnitDto,
   CreateUpdatePurchaseUnitDto,
 } from '../../../../proxy/inventory-management/ingredients/dto';
 import { IngredientCategoryDto } from '../../../../proxy/inventory-management/ingredient-categories/dto';
@@ -150,6 +155,74 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   }
 
   /**
+   * Xử lý thêm đơn vị mua hàng mới
+   * Mở dialog cho phép nhập đơn vị, tỷ lệ quy đổi và giá mua
+   */
+  onAddUnit() {
+    const dialogData = {
+      units: this.units,
+      baseUnitId: this.form.get('unitId')?.value || '',
+      existingUnits: this.purchaseUnits,
+    };
+
+    this.ingredientUnitService.openAddUnitModal(dialogData).subscribe({
+      next: result => {
+        if (result) {
+          // Gán id cho đơn vị mới và thêm vào danh sách
+          result.id = this.generateGuid();
+          this.purchaseUnits.push(result);
+        }
+      },
+    });
+  }
+
+  /**
+   * Xử lý chỉnh sửa đơn vị mua hàng
+   * Mở dialog với thông tin hiện tại của đơn vị để chỉnh sửa
+   *
+   * @param unit - Đơn vị mua hàng cần chỉnh sửa
+   */
+  onEditUnit(unit: CreateUpdatePurchaseUnitDto) {
+    const dialogData = {
+      editingUnit: unit,
+      units: this.units,
+      baseUnitId: this.form.get('unitId')?.value || '',
+      existingUnits: this.purchaseUnits,
+    };
+    this.ingredientUnitService.openEditUnitModal(dialogData).subscribe({
+      next: result => {
+        if (result) {
+          // Cập nhật đơn vị trong danh sách
+          const index = this.purchaseUnits.findIndex(u => u === unit);
+          if (index > -1) {
+            this.purchaseUnits[index] = result;
+          }
+        }
+      },
+    });
+  }
+
+  /**
+   * Xử lý xóa đơn vị mua hàng khỏi danh sách
+   * @param unit - Đơn vị mua hàng cần xóa
+   */
+  onDeleteUnit(unit: CreateUpdatePurchaseUnitDto) {
+    const index = this.purchaseUnits.findIndex(u => u === unit);
+    if (index > -1) {
+      this.purchaseUnits.splice(index, 1);
+    }
+  }
+
+  /**
+   * Lấy tên đơn vị đo lường theo ID
+   * @param unitId - ID của đơn vị đo lường
+   * @returns Tên đơn vị hoặc 'N/A' nếu không tìm thấy
+   */
+  getUnitName(unitId: string): string {
+    return this.units.find(u => u.id === unitId)?.displayName || 'N/A';
+  }
+
+  /**
    * Tải danh sách các danh mục nguyên liệu hoạt động
    * Sắp xếp theo thứ tự hiển thị để hiển thị đúng thứ tự trong dropdown
    * @private
@@ -190,7 +263,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   /**
    * Lưu thông tin nguyên liệu (tạo mới hoặc cập nhật)
    * Bao gồm cả thông tin các đơn vị mua hàng và quy đổi
-   * 
+   *
    * @param dto - Dữ liệu nguyên liệu cần lưu
    * @private
    */
@@ -261,7 +334,7 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
    */
   private loadPurchaseUnits() {
     if (!this.ingredient?.purchaseUnits) return;
-    
+
     // Chỉ lấy các đơn vị đang hoạt động và chuyển đổi format
     this.purchaseUnits = this.ingredient.purchaseUnits
       .filter(unit => unit.isActive)
@@ -275,14 +348,13 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
       }));
   }
 
-
   /**
    * Chuẩn bị dữ liệu các đơn vị mua hàng để gửi lên server
    * @private
    * @returns Mảng các đơn vị mua hàng đã được format
    */
   private preparePurchaseUnits(): CreateUpdatePurchaseUnitDto[] {
-    return this.purchaseUnits.map((unit, index) => ({
+    return this.purchaseUnits.map(unit => ({
       id: unit.id || this.generateGuid(),
       unitId: unit.unitId!,
       conversionRatio: unit.conversionRatio,
@@ -293,82 +365,14 @@ export class IngredientFormComponent extends ComponentBase implements OnInit {
   }
 
   /**
-   * Xử lý thêm đơn vị mua hàng mới
-   * Mở dialog cho phép nhập đơn vị, tỷ lệ quy đổi và giá mua
-   */
-  onAddUnit() {
-    const dialogData = {
-      units: this.units,
-      baseUnitId: this.form.get('unitId')?.value || '',
-      existingUnits: this.purchaseUnits
-    };
-
-    this.ingredientUnitService.openAddUnitModal(dialogData).subscribe({
-      next: (result) => {
-        if (result) {
-          // Gán id cho đơn vị mới và thêm vào danh sách
-          result.id = this.generateGuid();
-          this.purchaseUnits.push(result);
-        }
-      }
-    });
-  }
-
-  /**
-   * Xử lý chỉnh sửa đơn vị mua hàng
-   * Mở dialog với thông tin hiện tại của đơn vị để chỉnh sửa
-   * 
-   * @param unit - Đơn vị mua hàng cần chỉnh sửa
-   */
-  onEditUnit(unit: CreateUpdatePurchaseUnitDto) {
-    const dialogData = {
-      editingUnit: unit,
-      units: this.units,
-      baseUnitId: this.form.get('unitId')?.value || '',
-      existingUnits: this.purchaseUnits
-    };
-    this.ingredientUnitService.openEditUnitModal(dialogData).subscribe({
-      next: (result) => {
-        if (result) {
-          // Cập nhật đơn vị trong danh sách
-          const index = this.purchaseUnits.findIndex(u => u === unit);
-          if (index > -1) {
-            this.purchaseUnits[index] = result;
-          }
-        }
-      }
-    });
-  }
-
-  /**
-   * Xử lý xóa đơn vị mua hàng khỏi danh sách
-   * @param unit - Đơn vị mua hàng cần xóa
-   */
-  onDeleteUnit(unit: CreateUpdatePurchaseUnitDto) {
-    const index = this.purchaseUnits.findIndex(u => u === unit);
-    if (index > -1) {
-      this.purchaseUnits.splice(index, 1);
-    }
-  }
-
-  /**
-   * Lấy tên đơn vị đo lường theo ID
-   * @param unitId - ID của đơn vị đo lường
-   * @returns Tên đơn vị hoặc 'N/A' nếu không tìm thấy
-   */
-  getUnitName(unitId: string): string {
-    return this.units.find(u => u.id === unitId)?.displayName || 'N/A';
-  }
-
-  /**
    * Tạo GUID mới cho PurchaseUnit
    * @private
    * @returns GUID string
    */
   private generateGuid(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c == 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }

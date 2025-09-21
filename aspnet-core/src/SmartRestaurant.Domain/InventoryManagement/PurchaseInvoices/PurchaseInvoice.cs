@@ -22,25 +22,25 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         [Required]
         [MaxLength(50)]
         public string InvoiceNumber { get; set; } = string.Empty;
-        
-        
+
+
         /// <summary>
         /// Ngày lập hóa đơn - Foreign Key tới DimDate
         /// </summary>
         [Required]
         public int InvoiceDateId { get; set; }
-        
+
         /// <summary>
         /// Navigation property tới DimDate
         /// </summary>
         public virtual DimDate InvoiceDate { get; set; } = null!;
-        
+
         /// <summary>
         /// Tổng tiền tự động tính từ các Items
         /// </summary>
         [Required]
         public int TotalAmount { get; private set; }
-        
+
         /// <summary>
         /// Ghi chú chung cho hóa đơn
         /// </summary>

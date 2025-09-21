@@ -16,7 +16,7 @@ export interface PurchaseInvoiceFormData {
 
 /**
  * Service quản lý dialog form cho hóa đơn mua nguyên liệu trong hệ thống kho nhà hàng
- * 
+ *
  * Chức năng chính:
  * - Mở dialog tạo mới hóa đơn mua với form đầy đủ tính năng
  * - Mở dialog chỉnh sửa hóa đơn mua với dữ liệu được load từ server
@@ -24,18 +24,18 @@ export interface PurchaseInvoiceFormData {
  * - Cấu hình dialog large size để chứa form phức tạp với nhiều items
  * - Responsive breakpoints cho mobile và tablet
  * - Hỗ trợ maximizable để có thể fullscreen
- * 
+ *
  * @example
  * // Tạo mới hóa đơn mua
  * dialogService.openCreateDialog().subscribe(result => {
  *   if (result) this.refreshList();
  * });
- * 
+ *
  * // Chỉnh sửa hóa đơn mua
  * dialogService.openEditDialog(invoiceId).subscribe(result => {
  *   if (result) this.refreshList();
  * });
- * 
+ *
  * // Xem chi tiết hóa đơn mua
  * dialogService.openViewDialog(invoiceId).subscribe();
  */
@@ -49,7 +49,7 @@ export class PurchaseInvoiceFormDialogService {
   /**
    * Mở dialog tạo mới hóa đơn mua
    * Form có mã hóa đơn tự động sinh, mặc định có 1 item trống để nhập
-   * 
+   *
    * @returns Observable<boolean> - true nếu tạo thành công, false nếu hủy
    */
   openCreateDialog(): Observable<boolean> {
@@ -76,7 +76,7 @@ export class PurchaseInvoiceFormDialogService {
   /**
    * Mở dialog chỉnh sửa hóa đơn mua
    * Tự động load dữ liệu hóa đơn và tất cả items từ server
-   * 
+   *
    * @param purchaseInvoiceId - ID của hóa đơn mua cần chỉnh sửa
    * @returns Observable<boolean> - true nếu cập nhật thành công, false nếu hủy
    */
@@ -104,7 +104,7 @@ export class PurchaseInvoiceFormDialogService {
   /**
    * Mở dialog xem chi tiết hóa đơn mua (chế độ chỉ đọc)
    * Form sẽ được disable và ẩn các nút action
-   * 
+   *
    * @param purchaseInvoiceId - ID của hóa đơn mua cần xem
    * @returns Observable<boolean> - luôn false vì không có thao tác lưu
    */

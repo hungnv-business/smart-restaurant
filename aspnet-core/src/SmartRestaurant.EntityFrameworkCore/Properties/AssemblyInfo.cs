@@ -1,2 +1,2 @@
 ﻿using System.Runtime.CompilerServices;
-[assembly:InternalsVisibleToAttribute("SmartRestaurant.EntityFrameworkCore.Tests")]
+[assembly: InternalsVisibleToAttribute("SmartRestaurant.EntityFrameworkCore.Tests")]

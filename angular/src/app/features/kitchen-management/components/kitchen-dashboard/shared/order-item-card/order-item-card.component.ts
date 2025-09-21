@@ -32,11 +32,11 @@ export interface StatusUpdateEvent {
     TagModule,
     BadgeModule,
     TooltipModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
   ],
   providers: [ConfirmationService],
   templateUrl: './order-item-card.component.html',
-  styleUrl: './order-item-card.component.scss'
+  styleUrl: './order-item-card.component.scss',
 })
 export class OrderItemCardComponent implements OnInit, OnDestroy {
   @Input({ required: true }) orderItem!: KitchenOrderItemDto;
@@ -49,9 +49,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   currentWaitingTime = signal<string>('0:00');
 
-  constructor(
-    private confirmationService: ConfirmationService
-  ) {}
+  constructor(private confirmationService: ConfirmationService) {}
 
   ngOnInit(): void {
     this.updateWaitingTime();
@@ -76,24 +74,24 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
       this.currentWaitingTime.set('0:00');
       return;
     }
-    
+
     const orderTime = new Date(this.orderItem.orderTime);
     const now = new Date();
     const diffMs = now.getTime() - orderTime.getTime();
-    
+
     if (diffMs <= 0) {
       this.currentWaitingTime.set('0:00');
       return;
     }
-    
+
     const totalSeconds = Math.floor(diffMs / 1000);
     const totalMinutes = Math.floor(totalSeconds / 60);
-    
+
     // Luôn hiển thị mm:ss format
     const minutes = totalMinutes;
     const seconds = totalSeconds % 60;
     const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
+
     this.currentWaitingTime.set(timeStr);
   }
 
@@ -102,7 +100,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
    */
   startPreparation(): void {
     if (this.canTransitionTo(OrderItemStatus.Preparing)) {
-      debugger
+      debugger;
       this.confirmationService.confirm({
         message: `Bắt đầu nấu món "${this.orderItem.menuItemName}"?`,
         header: 'Xác Nhận',
@@ -111,7 +109,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
         rejectLabel: 'Hủy',
         accept: () => {
           this.updateStatus(OrderItemStatus.Preparing);
-        }
+        },
       });
     }
   }
@@ -129,11 +127,10 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
         rejectLabel: 'Hủy',
         accept: () => {
           this.updateStatus(OrderItemStatus.Ready);
-        }
+        },
       });
     }
   }
-
 
   /**
    * Cập nhật trạng thái
@@ -141,7 +138,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
   private updateStatus(newStatus: OrderItemStatus): void {
     this.statusUpdate.emit({
       orderItemId: this.orderItem.id!,
-      status: newStatus
+      status: newStatus,
     });
   }
 
@@ -166,11 +163,12 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
     }
   }
 
-
   /**
    * Lấy severity cho status tag
    */
-  getStatusSeverity(status: OrderItemStatus): 'secondary' | 'info' | 'success' | 'warning' | 'danger' {
+  getStatusSeverity(
+    status: OrderItemStatus,
+  ): 'secondary' | 'info' | 'success' | 'warning' | 'danger' {
     switch (status) {
       case OrderItemStatus.Pending:
         return 'secondary';
@@ -213,7 +211,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
   getPriorityClass(): string {
     const score = this.orderItem.priorityScore;
     if (score >= 150) return 'priority-critical';
-    if (score >= 100) return 'priority-high';  
+    if (score >= 100) return 'priority-high';
     if (score >= 50) return 'priority-medium';
     return 'priority-normal';
   }

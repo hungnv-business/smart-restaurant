@@ -19,53 +19,53 @@ public class Ingredient : FullAuditedEntity<Guid>
     /// </summary>
     [Required]
     public Guid CategoryId { get; set; }
-    
+
     /// <summary>
     /// Tên nguyên liệu (ví dụ: "Cà chua", "Thịt bò", "Hành tây")
     /// </summary>
     [Required]
     [MaxLength(128)]
     public string Name { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Mô tả chi tiết về nguyên liệu
     /// </summary>
     [MaxLength(512)]
     public string? Description { get; set; }
-    
+
     /// <summary>
     /// ID đơn vị đo lường
     /// </summary>
     [Required]
     public Guid UnitId { get; set; }
-    
+
     /// <summary>
     /// Giá thành trên đơn vị (VND) - có thể null khi chưa có giá
     /// </summary>
     public int? CostPerUnit { get; set; }
-    
+
     /// <summary>
     /// Thông tin nhà cung cấp (JSON hoặc simple string)
     /// </summary>
     [MaxLength(512)]
     public string? SupplierInfo { get; set; }
-    
+
     /// <summary>
     /// Số lượng hiện tại trong kho - không cho phép set trực tiếp
     /// </summary>
     [Required]
     public int CurrentStock { get; private set; } = 0;
-    
+
     /// <summary>
     /// Có theo dõi và cập nhật kho hay không
     /// </summary>
     public bool IsStockTrackingEnabled { get; set; } = true;
-    
+
     /// <summary>
     /// Nguyên liệu có đang sử dụng hay không
     /// </summary>
     public bool IsActive { get; set; } = true;
-    
+
     // Navigation properties
     /// <summary>
     /// Danh mục chứa nguyên liệu này
@@ -159,17 +159,17 @@ public class Ingredient : FullAuditedEntity<Guid>
     public string GetStockDisplayText()
     {
         var unitName = Unit?.Name ?? "đơn vị";
-        
+
         if (CurrentStock < 0)
         {
             return $"-{Math.Abs(CurrentStock)}{unitName} (thiếu)";
         }
-        
+
         return $"{CurrentStock}{unitName}";
     }
-    
+
     // === Purchase Units Query Methods ===
-    
+
     /// <summary>
     /// Kiểm tra đơn vị có trong danh sách purchase units không (theo ID)
     /// </summary>
@@ -177,7 +177,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     {
         return PurchaseUnits.Any(pu => pu.Id == id);
     }
-    
+
     /// <summary>
     /// Lấy đơn vị cơ sở cho nguyên liệu
     /// </summary>
@@ -190,7 +190,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         }
         return baseUnit;
     }
-    
+
     /// <summary>
     /// Chuyển đổi số lượng từ một đơn vị mua hàng sang đơn vị cơ sở
     /// </summary>
@@ -204,10 +204,10 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             throw new ArgumentException($"Purchase unit {purchaseUnitId} not found for ingredient {Name}");
         }
-        
+
         return purchaseUnit.ConvertToBaseUnit(quantity);
     }
-    
+
     /// <summary>
     /// Chuyển đổi số lượng từ đơn vị cơ sở sang một đơn vị mua hàng
     /// </summary>
@@ -221,12 +221,12 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             throw new ArgumentException($"Purchase unit {targetUnitId} not found for ingredient {Name}");
         }
-        
+
         return purchaseUnit.ConvertFromBaseUnit(baseQuantity);
     }
-    
+
     // === Purchase Units Management Methods ===
-    
+
     /// <summary>
     /// Thêm đơn vị mua hàng mới hoặc cập nhật nếu đã tồn tại
     /// </summary>
@@ -237,7 +237,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             throw new InvalidBaseUnitConversionException(conversionRatio);
         }
-        
+
         if (IsInPurchaseUnits(id))
         {
             // Validation cho update: Không cho phép trùng UnitId (trừ chính nó)
@@ -245,30 +245,30 @@ public class Ingredient : FullAuditedEntity<Guid>
             {
                 throw new DuplicateUnitException(Name, unitName);
             }
-            
+
             // Validation cho update: Chỉ cho phép 1 đơn vị cơ sở (trừ chính nó)
             if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit && pu.Id != id))
             {
                 throw new MultipleBaseUnitException(Name);
             }
-            
+
             // Cập nhật đơn vị đã tồn tại
             UpdatePurchaseUnit(id, unitId, unitName, conversionRatio, isBaseUnit, purchasePrice, displayOrder, isActive);
             return;
         }
-        
+
         // Validation cho create: Không cho phép trùng UnitId
         if (PurchaseUnits.Any(pu => pu.UnitId == unitId))
         {
             throw new DuplicateUnitException(Name, unitName);
         }
-        
+
         // Validation cho create: Chỉ cho phép 1 đơn vị cơ sở
         if (isBaseUnit && PurchaseUnits.Any(pu => pu.IsBaseUnit))
         {
             throw new MultipleBaseUnitException(Name);
         }
-        
+
         // Thêm đơn vị mới
         var purchaseUnit = new IngredientPurchaseUnit(
             id: id,
@@ -280,10 +280,10 @@ public class Ingredient : FullAuditedEntity<Guid>
             purchasePrice: purchasePrice
         );
         purchaseUnit.IsActive = isActive;
-        
+
         PurchaseUnits.Add(purchaseUnit);
     }
-    
+
     /// <summary>
     /// Thêm nhiều đơn vị mua hàng cùng lúc (gọi AddPurchaseUnit cho từng unit)
     /// </summary>
@@ -293,9 +293,9 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             return;
         }
-        
+
         var unitsList = units.ToList();
-        
+
         // Thêm từng đơn vị - AddPurchaseUnit sẽ handle tất cả validation
         var index = 1;
         foreach (var (id, unitId, unitName, conversionRatio, isBaseUnit, purchasePrice, isActive) in unitsList)
@@ -304,7 +304,7 @@ public class Ingredient : FullAuditedEntity<Guid>
             index++;
         }
     }
-    
+
     /// <summary>
     /// Cập nhật đơn vị mua hàng
     /// </summary>
@@ -315,7 +315,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             throw new ArgumentException($"Purchase unit {id} not found for ingredient {Name}");
         }
-        
+
         // Cập nhật thông tin (validation đã được xử lý ở AddPurchaseUnit)
         purchaseUnit.UnitId = unitId;
         purchaseUnit.ConversionRatio = conversionRatio;
@@ -324,7 +324,7 @@ public class Ingredient : FullAuditedEntity<Guid>
         purchaseUnit.DisplayOrder = displayOrder;
         purchaseUnit.IsActive = isActive;
     }
-    
+
     /// <summary>
     /// Xóa đơn vị mua hàng
     /// </summary>
@@ -335,16 +335,16 @@ public class Ingredient : FullAuditedEntity<Guid>
         {
             return;
         }
-        
+
         // Không cho phép xóa đơn vị cơ sở
         if (purchaseUnit.IsBaseUnit)
         {
             throw new CannotRemoveBaseUnitException(unitName, Name);
         }
-        
+
         PurchaseUnits.Remove(purchaseUnit);
     }
-    
+
     /// <summary>
     /// Xóa tất cả đơn vị mua hàng
     /// </summary>
@@ -352,7 +352,7 @@ public class Ingredient : FullAuditedEntity<Guid>
     {
         PurchaseUnits.Clear();
     }
-    
+
     /// <summary>
     /// Constructor mặc định cho EF Core và data seeding
     /// </summary>
@@ -394,5 +394,5 @@ public class Ingredient : FullAuditedEntity<Guid>
         IsActive = isActive;
         CurrentStock = 0; // Bắt đầu với stock = 0
     }
-    
+
 }

@@ -6,34 +6,34 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
     public class MenuItemDto : FullAuditedEntityDto<Guid>
     {
         public string Name { get; set; } = string.Empty;
-        
+
         public string? Description { get; set; }
-        
+
         public int Price { get; set; }
-        
+
         public bool IsAvailable { get; set; }
-        
+
         public string? ImageUrl { get; set; }
-        
+
         public Guid CategoryId { get; set; }
-        
+
         public string? CategoryName { get; set; }
-        
+
         /// <summary>
         /// Món ăn có thể nấu nhanh không
         /// </summary>
         public bool IsQuickCook { get; set; }
-        
+
         /// <summary>
         /// Món ăn có cần phải nấu không
         /// </summary>
         public bool RequiresCooking { get; set; }
-        
+
         /// <summary>
         /// Số lượng đã bán ra (tổng từ tất cả orders đã hoàn thành)
         /// </summary>
         public int SoldQuantity { get; set; }
-        
+
         /// <summary>
         /// Món có phổ biến không (dựa trên số lượng bán)
         /// </summary>

@@ -16,12 +16,12 @@ export interface NotificationSoundConfig {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationSoundService {
   private audioContext: AudioContext | null = null;
   private sounds: Map<string, AudioBuffer> = new Map();
-  
+
   private config: NotificationSoundConfig = {
     enabled: true,
     volume: 0.7,
@@ -33,8 +33,8 @@ export class NotificationSoundService {
       newOrder: '/assets/sounds/new-order.mp3',
       itemUpdate: '/assets/sounds/new-order.mp3', // Dùng chung âm thanh new-order
       itemRemoved: '/assets/sounds/new-order.mp3', // Dùng chung âm thanh new-order
-      itemAdded: '/assets/sounds/new-order.mp3' // Dùng chung âm thanh new-order
-    }
+      itemAdded: '/assets/sounds/new-order.mp3', // Dùng chung âm thanh new-order
+    },
   };
 
   private speechSynthesis: SpeechSynthesis | null = null;
@@ -51,7 +51,8 @@ export class NotificationSoundService {
    */
   private async initializeAudioContext(): Promise<void> {
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioContext = new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     } catch (error) {
       // Silent error handling
     }
@@ -87,14 +88,14 @@ export class NotificationSoundService {
     const sampleRate = this.audioContext.sampleRate;
     const duration = 0.2; // 200ms
     const frequency = 800; // Dùng chung tần số 800Hz cho tất cả
-    
+
     const buffer = this.audioContext.createBuffer(1, sampleRate * duration, sampleRate);
     const data = buffer.getChannelData(0);
-    
+
     for (let i = 0; i < buffer.length; i++) {
-      data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+      data[i] = Math.sin((2 * Math.PI * frequency * i) / sampleRate) * 0.3;
     }
-    
+
     this.sounds.set(key, buffer);
   }
 
@@ -105,17 +106,16 @@ export class NotificationSoundService {
     try {
       if ('speechSynthesis' in window) {
         this.speechSynthesis = window.speechSynthesis;
-        
+
         // Load available voices
         this.loadVoices();
-        
+
         // Listen for voice changes
         if (this.speechSynthesis) {
           this.speechSynthesis.addEventListener('voiceschanged', () => {
             this.loadVoices();
           });
         }
-        
       }
     } catch (error) {
       // Silent error handling
@@ -127,14 +127,14 @@ export class NotificationSoundService {
    */
   private loadVoices(): void {
     if (!this.speechSynthesis) return;
-    
+
     this.availableVoices = this.speechSynthesis.getVoices();
-    
+
     // Tìm giọng Việt Nam hoặc giọng phù hợp
-    const vietnameseVoice = this.availableVoices.find(voice => 
-      voice.lang.startsWith('vi') || voice.lang.includes('VN')
+    const vietnameseVoice = this.availableVoices.find(
+      voice => voice.lang.startsWith('vi') || voice.lang.includes('VN'),
     );
-    
+
     if (vietnameseVoice) {
       this.config.speechVoice = vietnameseVoice.name;
     } else {
@@ -157,34 +157,34 @@ export class NotificationSoundService {
     try {
       // Stop any current speech
       this.speechSynthesis.cancel();
-      
+
       const utterance = new SpeechSynthesisUtterance(text);
-      
+
       // Cấu hình giọng đọc
-      const selectedVoice = this.availableVoices.find(voice => 
-        voice.name === this.config.speechVoice
+      const selectedVoice = this.availableVoices.find(
+        voice => voice.name === this.config.speechVoice,
       );
       if (selectedVoice) {
         utterance.voice = selectedVoice;
       }
-      
+
       utterance.rate = this.config.speechRate;
       utterance.pitch = this.config.speechPitch;
       utterance.volume = this.config.volume;
-      
+
       // Event listeners
       utterance.onstart = () => {
         // Speech started
       };
-      
-      utterance.onerror = (event) => {
+
+      utterance.onerror = () => {
         // Speech error occurred
       };
-      
+
       utterance.onend = () => {
         // Speech finished
       };
-      
+
       this.speechSynthesis.speak(utterance);
     } catch (error) {
       // Silent error handling
@@ -226,10 +226,13 @@ export class NotificationSoundService {
   /**
    * Phát âm thanh và đọc message
    */
-  async playNotification(type: 'newOrder' | 'itemUpdate' | 'itemRemoved' | 'itemAdded', message?: string): Promise<void> {
+  async playNotification(
+    type: 'newOrder' | 'itemUpdate' | 'itemRemoved' | 'itemAdded',
+    message?: string,
+  ): Promise<void> {
     // Phát âm thanh trước
     await this.playSound(type);
-    
+
     // Đợi một chút rồi đọc message
     if (message && this.config.speechEnabled) {
       setTimeout(() => {
@@ -301,7 +304,7 @@ export class NotificationSoundService {
       const savedSpeechRate = localStorage.getItem('kitchen-speech-rate');
       const savedSpeechPitch = localStorage.getItem('kitchen-speech-pitch');
       const savedSpeechVoice = localStorage.getItem('kitchen-speech-voice');
-      
+
       if (savedEnabled !== null) {
         this.config.enabled = savedEnabled === 'true';
       }
@@ -329,7 +332,7 @@ export class NotificationSoundService {
         source.connect(this.audioContext.destination);
         source.start(0);
       }
-      
+
       // Reload voices after settings are loaded
       this.loadVoices();
     } catch (error) {
@@ -340,16 +343,18 @@ export class NotificationSoundService {
   /**
    * Test phát âm thanh và đọc text - dùng chung âm thanh newOrder
    */
-  async testSound(type: 'newOrder' | 'itemUpdate' | 'itemRemoved' | 'itemAdded' = 'newOrder'): Promise<void> {
+  async testSound(
+    type: 'newOrder' | 'itemUpdate' | 'itemRemoved' | 'itemAdded' = 'newOrder',
+  ): Promise<void> {
     await this.initialize();
-    
+
     const testMessages = {
       newOrder: 'Có đơn hàng mới cần chuẩn bị',
       itemAdded: 'Đã thêm món mới vào đơn hàng',
       itemUpdate: 'Số lượng món ăn đã được cập nhật',
-      itemRemoved: 'Đã xóa món khỏi đơn hàng'
+      itemRemoved: 'Đã xóa món khỏi đơn hàng',
     };
-    
+
     // Luôn dùng âm thanh newOrder cho tất cả các loại test
     await this.playNotification('newOrder', testMessages[type]);
   }

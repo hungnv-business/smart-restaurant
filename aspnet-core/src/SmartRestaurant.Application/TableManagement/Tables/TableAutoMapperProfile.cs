@@ -11,7 +11,7 @@ namespace SmartRestaurant.TableManagement.Tables
             // Entity to DTO mappings
             CreateMap<Table, TableDto>()
                 .ForMember(dest => dest.LayoutSectionName, opt => opt.MapFrom(src => src.LayoutSection != null ? src.LayoutSection.SectionName : null));
-            
+
             // DTO to Entity mappings
             CreateMap<CreateTableDto, Table>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -23,7 +23,7 @@ namespace SmartRestaurant.TableManagement.Tables
                 .ForMember(dest => dest.DeletionTime, opt => opt.Ignore())
                 .ForMember(dest => dest.DeleterId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore());
-            
+
             CreateMap<UpdateTableDto, Table>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.LayoutSection, opt => opt.Ignore())

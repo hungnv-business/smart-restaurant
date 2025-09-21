@@ -28,7 +28,7 @@ public class KitchenHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, "Kitchen");
         _logger.LogInformation("Client {ConnectionId} joined Kitchen group", Context.ConnectionId);
         Console.WriteLine($"👥 KitchenHub: Client {Context.ConnectionId} joined Kitchen group");
-        
+
         // Gửi confirmation message cho client
         await Clients.Caller.SendAsync("JoinedKitchenGroup", new
         {
@@ -46,10 +46,10 @@ public class KitchenHub : Hub
     {
         _logger.LogInformation("Kitchen client connected: {ConnectionId}", Context.ConnectionId);
         Console.WriteLine($"🔗 KitchenHub: Client {Context.ConnectionId} connected");
-        
+
         // Tự động join Kitchen group cho tất cả user đã đăng nhập
         await JoinKitchenGroup();
-        
+
         await base.OnConnectedAsync();
     }
 

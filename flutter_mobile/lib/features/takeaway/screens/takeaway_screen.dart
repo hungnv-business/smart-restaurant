@@ -8,7 +8,7 @@ import '../../order/screens/table_detail_screen.dart';
 
 /// Màn hình Mang về
 class TakeawayScreen extends StatefulWidget {
-  const TakeawayScreen({Key? key}) : super(key: key);
+  const TakeawayScreen({super.key});
 
   @override
   State<TakeawayScreen> createState() => _TakeawayScreenState();

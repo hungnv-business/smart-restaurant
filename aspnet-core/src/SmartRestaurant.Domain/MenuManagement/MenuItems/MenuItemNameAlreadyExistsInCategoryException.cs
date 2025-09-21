@@ -13,7 +13,7 @@ public class MenuItemNameAlreadyExistsInCategoryException : BusinessException
     /// </summary>
     /// <param name="name">Tên món ăn bị trùng</param>
     /// <param name="categoryId">ID danh mục</param>
-    public MenuItemNameAlreadyExistsInCategoryException(string name, Guid categoryId) 
+    public MenuItemNameAlreadyExistsInCategoryException(string name, Guid categoryId)
         : base(SmartRestaurantDomainErrorCodes.MenuItems.NameAlreadyExistsInCategory)
     {
         WithData("Name", name);

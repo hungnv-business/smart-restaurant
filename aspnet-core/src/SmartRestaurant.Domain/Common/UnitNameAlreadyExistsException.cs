@@ -11,7 +11,7 @@ public class UnitNameAlreadyExistsException : BusinessException
     /// Khởi tạo exception với tên đơn vị bị trùng
     /// </summary>
     /// <param name="unitName">Tên đơn vị bị trùng</param>
-    public UnitNameAlreadyExistsException(string unitName) 
+    public UnitNameAlreadyExistsException(string unitName)
         : base(SmartRestaurantDomainErrorCodes.Units.NameAlreadyExists)
     {
         WithData("UnitName", unitName);

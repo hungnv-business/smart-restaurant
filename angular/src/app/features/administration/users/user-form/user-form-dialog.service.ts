@@ -21,7 +21,7 @@ export interface UserFormDialogData {
  * - Mở dialog tạo mới nhân viên nhà hàng
  * - Mở dialog chỉnh sửa thông tin nhân viên
  * - Cấu hình chuẩn cho dialog với các thuộc tính phù hợp
- * 
+ *
  * Sử dụng: Quản lý tài khoản nhân viên (thu ngân, phục vụ, bếp, quản lý)
  */
 @Injectable({

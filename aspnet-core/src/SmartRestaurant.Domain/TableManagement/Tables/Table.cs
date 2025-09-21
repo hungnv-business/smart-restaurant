@@ -17,29 +17,29 @@ namespace SmartRestaurant.TableManagement.Tables
         [Required]
         [MaxLength(64)]
         public string TableNumber { get; set; }
-        
+
         /// <summary>Số thứ tự bàn trong khu vực</summary>
         public int DisplayOrder { get; set; }
-        
+
         /// <summary>Trạng thái bàn</summary>
         public TableStatus Status { get; set; }
-        
+
         /// <summary>Bàn có đang hoạt động hay không</summary>
         public bool IsActive { get; set; }
-        
+
         /// <summary>ID khu vực mà bàn này thuộc về</summary>
         public Guid? LayoutSectionId { get; set; }
-        
+
         /// <summary>ID đơn hàng hiện tại đang phục vụ tại bàn (nếu có)</summary>
         public Guid? CurrentOrderId { get; private set; }
-        
+
         // Navigation properties
         /// <summary>Khu vực mà bàn này thuộc về</summary>
         public virtual LayoutSection LayoutSection { get; set; }
-        
+
         /// <summary>Đơn hàng hiện tại đang phục vụ tại bàn</summary>
         public virtual Order? CurrentOrder { get; set; }
-        
+
         /// <summary>Danh sách tất cả đơn hàng đã từng phục vụ tại bàn này</summary>
         public virtual ICollection<Order> Orders { get; set; }
 

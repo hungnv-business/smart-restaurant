@@ -157,7 +157,7 @@ public class OrderItem : FullAuditedEntity<Guid>
 
         Status = OrderItemStatus.Preparing;
         PreparationStartTime = DateTime.UtcNow;
-        
+
         // TODO: Thêm domain event khi cần real-time kitchen dashboard
         // AddLocalEvent(new OrderItemPreparationStartedEvent(Id, OrderId, MenuItemName));
     }
@@ -174,7 +174,7 @@ public class OrderItem : FullAuditedEntity<Guid>
 
         Status = OrderItemStatus.Ready;
         PreparationCompleteTime = DateTime.UtcNow;
-        
+
         // TODO: Thêm domain event khi cần real-time notifications cho nhân viên phục vụ
         // AddLocalEvent(new OrderItemReadyEvent(Id, OrderId, MenuItemName));
     }
@@ -191,7 +191,7 @@ public class OrderItem : FullAuditedEntity<Guid>
 
         Status = OrderItemStatus.Served;
         ServedTime = DateTime.UtcNow;
-        
+
         // TODO: Thêm domain event khi cần analytics và tracking
         // AddLocalEvent(new OrderItemServedEvent(Id, OrderId, MenuItemName));
     }
@@ -340,7 +340,7 @@ public class OrderItem : FullAuditedEntity<Guid>
 
         Status = OrderItemStatus.Canceled;
         CanceledTime = DateTime.UtcNow;
-        
+
         // TODO: Thêm domain event khi cần thông báo hủy món
         // AddLocalEvent(new OrderItemCancelledEvent(Id, OrderId, MenuItemName));
     }

@@ -13,7 +13,7 @@ public class InsufficientStockException : BusinessException
     /// <param name="ingredientName">Tên nguyên liệu</param>
     /// <param name="currentStock">Tồn kho hiện tại</param>
     /// <param name="requiredQuantity">Số lượng yêu cầu</param>
-    public InsufficientStockException(string ingredientName, int currentStock, int requiredQuantity) 
+    public InsufficientStockException(string ingredientName, int currentStock, int requiredQuantity)
         : base(SmartRestaurantDomainErrorCodes.Ingredients.InsufficientStock)
     {
         WithData("IngredientName", ingredientName);

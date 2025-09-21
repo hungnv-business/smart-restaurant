@@ -10,11 +10,11 @@ class TableCard extends StatelessWidget {
   final bool isCompact;
 
   const TableCard({
-    Key? key,
+    super.key,
     required this.table,
     this.onTableUpdated,
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +34,13 @@ class TableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: isCompact ? 6 : 8,
             offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
-          color: Color(table.status.colorValue).withOpacity(0.2),
+          color: Color(table.status.colorValue).withValues(alpha: 0.2),
           width: isCompact ? 1.0 : 1.5,
         ),
       ),
@@ -94,7 +94,7 @@ class TableCard extends StatelessWidget {
           child: Container(
             padding: tablePadding,
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(isCompact ? 6 : 8),
             ),
             child: Text(
@@ -114,7 +114,7 @@ class TableCard extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Color(table.status.colorValue).withOpacity(0.3),
+                color: Color(table.status.colorValue).withValues(alpha: 0.3),
                 blurRadius: isCompact ? 3 : 4,
                 spreadRadius: isCompact ? 0.5 : 1,
               ),
@@ -138,7 +138,7 @@ class TableCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
         boxShadow: [
           BoxShadow(
-            color: Color(table.status.colorValue).withOpacity(0.3),
+            color: Color(table.status.colorValue).withValues(alpha: 0.3),
             blurRadius: isCompact ? 3 : 4,
             offset: const Offset(0, 2),
           ),

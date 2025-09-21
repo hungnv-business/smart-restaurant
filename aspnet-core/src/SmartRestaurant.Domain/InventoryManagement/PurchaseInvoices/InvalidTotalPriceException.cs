@@ -11,7 +11,7 @@ public class InvalidTotalPriceException : BusinessException
     /// Khởi tạo exception với tổng tiền không hợp lệ
     /// </summary>
     /// <param name="totalPrice">Tổng tiền không hợp lệ</param>
-    public InvalidTotalPriceException(int totalPrice) 
+    public InvalidTotalPriceException(int totalPrice)
         : base(SmartRestaurantDomainErrorCodes.PurchaseInvoices.InvalidTotalPrice)
     {
         WithData("TotalPrice", totalPrice);

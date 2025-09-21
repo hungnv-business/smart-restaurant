@@ -16,12 +16,12 @@ namespace SmartRestaurant.TableManagement.LayoutSections
         Task<List<LayoutSection>> GetAllOrderedAsync(
             bool includeInactive = false,
             CancellationToken cancellationToken = default);
-        
+
         /// <summary>Lấy khu vực cùng với danh sách bàn</summary>
         Task<LayoutSection> GetWithTablesAsync(
             Guid id,
             CancellationToken cancellationToken = default);
-        
+
         /// <summary>Lấy thứ tự hiển thị cao nhất</summary>
         Task<int> GetMaxDisplayOrderAsync(CancellationToken cancellationToken = default);
     }

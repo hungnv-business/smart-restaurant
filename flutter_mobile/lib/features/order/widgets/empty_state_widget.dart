@@ -5,9 +5,9 @@ class EmptyStateWidget extends StatelessWidget {
   final bool hasNoTables;
   
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.hasNoTables,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

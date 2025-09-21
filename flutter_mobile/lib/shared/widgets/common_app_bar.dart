@@ -10,14 +10,14 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? elevation;
 
   const CommonAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.actions,
     this.onBackPressed,
     this.backgroundColor,
     this.foregroundColor,
     this.elevation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

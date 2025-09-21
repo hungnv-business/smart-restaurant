@@ -25,8 +25,11 @@ describe('IngredientCategoryFormComponent', () => {
         { provide: DynamicDialogRef, useValue: {} },
         { provide: DynamicDialogConfig, useValue: {} },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(IngredientCategoryFormComponent);

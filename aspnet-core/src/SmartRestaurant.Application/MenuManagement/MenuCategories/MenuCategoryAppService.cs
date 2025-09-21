@@ -37,7 +37,7 @@ public class MenuCategoryAppService :
         : base(repository)
     {
         _menuItemRepository = menuItemRepository;
-        
+
         // Cấu hình permissions cho từng operation
         GetPolicyName = SmartRestaurantPermissions.Menu.Categories.Default;
         GetListPolicyName = SmartRestaurantPermissions.Menu.Categories.Default;
@@ -121,7 +121,7 @@ public class MenuCategoryAppService :
         }
 
         var categoriesToDelete = await Repository.GetListAsync(x => ids.Contains(x.Id));
-        
+
         if (categoriesToDelete.Any())
         {
             await Repository.DeleteManyAsync(categoriesToDelete);
@@ -140,8 +140,8 @@ public class MenuCategoryAppService :
 
         // Kiểm tra trùng tên không phân biệt hoa thường và khoảng trắng
         var existingCategories = await Repository.GetListAsync();
-        var duplicateCategory = existingCategories.FirstOrDefault(c => 
-            (excludeId == null || c.Id != excludeId) && 
+        var duplicateCategory = existingCategories.FirstOrDefault(c =>
+            (excludeId == null || c.Id != excludeId) &&
             StringUtility.AreNormalizedEqual(c.Name, name));
 
         if (duplicateCategory != null)

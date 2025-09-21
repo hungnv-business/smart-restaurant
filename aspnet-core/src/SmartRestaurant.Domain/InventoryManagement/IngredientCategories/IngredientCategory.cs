@@ -17,23 +17,23 @@ public class IngredientCategory : FullAuditedEntity<Guid>
     [Required]
     [MaxLength(128)]
     public string Name { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Mô tả chi tiết về danh mục
     /// </summary>
     [MaxLength(512)]
     public string? Description { get; set; }
-    
+
     /// <summary>
     /// Thứ tự hiển thị trong danh sách
     /// </summary>
     public int DisplayOrder { get; set; }
-    
+
     /// <summary>
     /// Danh mục có đang sử dụng hay không
     /// </summary>
     public bool IsActive { get; set; } = true;
-    
+
     // Navigation properties
     /// <summary>
     /// Danh sách nguyên liệu thuộc danh mục này

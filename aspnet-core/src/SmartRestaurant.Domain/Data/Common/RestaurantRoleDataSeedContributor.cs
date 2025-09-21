@@ -89,7 +89,7 @@ public class RestaurantRoleDataSeedContributor : IDataSeedContributor, ITransien
     private async Task CreateRoleIfNotExistsAsync(string name, string[] permissions)
     {
         var existingRole = await _roleRepository.FindByNormalizedNameAsync(name.ToUpperInvariant());
-        
+
         if (existingRole == null)
         {
             var role = new IdentityRole(

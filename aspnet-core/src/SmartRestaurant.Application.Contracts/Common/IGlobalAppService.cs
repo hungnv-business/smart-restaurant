@@ -18,13 +18,13 @@ namespace SmartRestaurant.Common
 
         /// <summary>Lấy danh sách tất cả đơn vị active cho dropdown</summary>
         Task<List<GuidLookupItemDto>> GetUnitsLookupAsync();
-        
+
         /// <summary>Lấy danh sách tất cả danh mục nguyên liệu active cho dropdown</summary>
         Task<List<GuidLookupItemDto>> GetIngredientCategoriesLookupAsync();
-        
+
         /// <summary>Lấy danh sách tất cả danh mục món ăn active cho dropdown</summary>
         Task<List<GuidLookupItemDto>> GetMenuCategoriesLookupAsync();
-        
+
         /// <summary>Lấy danh sách nguyên liệu theo danh mục cho dropdown</summary>
         Task<List<GuidLookupItemDto>> GetIngredientsByCategoryLookupAsync(Guid categoryId);
     }

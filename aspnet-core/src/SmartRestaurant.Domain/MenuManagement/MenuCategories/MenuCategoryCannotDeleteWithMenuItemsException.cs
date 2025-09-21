@@ -11,7 +11,7 @@ public class MenuCategoryCannotDeleteWithMenuItemsException : BusinessException
     /// Khởi tạo exception với tên danh mục không thể xóa
     /// </summary>
     /// <param name="categoryName">Tên danh mục không thể xóa</param>
-    public MenuCategoryCannotDeleteWithMenuItemsException(string categoryName) 
+    public MenuCategoryCannotDeleteWithMenuItemsException(string categoryName)
         : base(SmartRestaurantDomainErrorCodes.MenuCategories.CannotDeleteCategoryWithMenuItems)
     {
         WithData("CategoryName", categoryName);

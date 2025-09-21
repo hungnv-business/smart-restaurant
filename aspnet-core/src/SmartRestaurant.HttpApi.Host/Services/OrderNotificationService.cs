@@ -26,7 +26,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending notification for order #{orderDto.OrderNumber}");
-            
+
             // Chỉ gửi thông báo đến bếp khi có order mới từ mobile
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("NewOrderReceived", new
             {
@@ -34,7 +34,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 NotifiedAt = DateTime.UtcNow,
                 Message = $"Có đơn hàng mới từ {orderDto.TableName}"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent notification for order #{orderDto.OrderNumber}");
         }
         catch (Exception ex)
@@ -63,7 +63,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending order served notification for {dto.TableName}");
-            
+
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemServed", new
             {
                 dto.OrderId,
@@ -75,7 +75,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 ServedAt = DateTime.UtcNow,
                 Message = $"{dto.TableName} {dto.Quantity} {dto.MenuItemName} đã được phục vụ"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent order served notification for {dto.TableName}");
         }
         catch (Exception ex)
@@ -95,7 +95,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending order item status update for {orderItemId} to status {newStatus}");
-            
+
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemStatusUpdated", new
             {
                 OrderItemId = orderItemId,
@@ -103,7 +103,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 UpdatedAt = DateTime.UtcNow,
                 Message = $"Trạng thái món ăn đã được cập nhật thành {(OrderItemStatus)newStatus}"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent order item status update notification");
         }
         catch (Exception ex)
@@ -117,7 +117,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending quantity update notification for table {dto.TableName}");
-            
+
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemQuantityUpdated", new
             {
                 dto.TableName,
@@ -127,7 +127,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 UpdatedAt = DateTime.UtcNow,
                 Message = $"{dto.TableName} đã cập nhật {dto.MenuItemName} thành {dto.NewQuantity}"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent quantity update notification for table {dto.TableName}");
         }
         catch (Exception ex)
@@ -141,7 +141,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending add items notification for table {dto.TableName}");
-            
+
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemsAdded", new
             {
                 dto.TableName,
@@ -149,7 +149,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 AddedAt = DateTime.UtcNow,
                 Message = $"{dto.TableName} đã thêm {dto.AddedItemsDetail}"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent add items notification for table {dto.TableName}");
         }
         catch (Exception ex)
@@ -163,7 +163,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
         try
         {
             Console.WriteLine($"🔔 OrderNotificationService: Sending remove item notification for table {dto.TableName}");
-            
+
             await _kitchenHubContext.Clients.Group("Kitchen").SendAsync("OrderItemRemoved", new
             {
                 dto.TableName,
@@ -173,7 +173,7 @@ public class OrderNotificationService : IOrderNotificationService, ITransientDep
                 RemovedAt = DateTime.UtcNow,
                 Message = $"{dto.TableName} đã xóa {dto.Quantity} {dto.MenuItemName}"
             });
-            
+
             Console.WriteLine($"✅ OrderNotificationService: Successfully sent remove item notification for table {dto.TableName}");
         }
         catch (Exception ex)

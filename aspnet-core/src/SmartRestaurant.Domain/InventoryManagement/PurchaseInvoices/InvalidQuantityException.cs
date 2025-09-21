@@ -11,7 +11,7 @@ public class InvalidQuantityException : BusinessException
     /// Khởi tạo exception với số lượng không hợp lệ
     /// </summary>
     /// <param name="quantity">Số lượng không hợp lệ</param>
-    public InvalidQuantityException(int quantity) 
+    public InvalidQuantityException(int quantity)
         : base(SmartRestaurantDomainErrorCodes.PurchaseInvoices.InvalidQuantity)
     {
         WithData("Quantity", quantity);

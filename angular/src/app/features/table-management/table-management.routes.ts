@@ -10,7 +10,7 @@ export const TABLE_MANAGEMENT_ROUTES: Routes = [
         m => m.LayoutSectionListComponent,
       ),
     canActivate: [RestaurantGuard],
-    data: { 
+    data: {
       breadcrumb: 'Quản lý Khu vực Bố cục',
       permission: PERMISSIONS.RESTAURANT.TABLES.LAYOUT_SECTION.DEFAULT,
     },
@@ -22,7 +22,7 @@ export const TABLE_MANAGEMENT_ROUTES: Routes = [
         m => m.TableLayoutKanbanComponent,
       ),
     canActivate: [RestaurantGuard],
-    data: { 
+    data: {
       breadcrumb: 'Quản lý Vị trí Bàn',
       permission: PERMISSIONS.RESTAURANT.TABLES.TABLE.DEFAULT,
     },

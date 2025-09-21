@@ -55,7 +55,7 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.PurchaseInvoic
         }
 
         public async Task<int> GetCountAsync(
-            string ?filter = null,
+            string? filter = null,
             int? fromDateId = null,
             int? toDateId = null)
         {
@@ -80,7 +80,7 @@ namespace SmartRestaurant.EntityFrameworkCore.InventoryManagement.PurchaseInvoic
                     .ThenInclude(item => item.Ingredient)
                 .Include(x => x.InvoiceDate)
                 .FirstOrDefaultAsync(x => x.Id == id);
-            
+
             return result;
         }
     }

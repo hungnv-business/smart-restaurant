@@ -35,7 +35,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         /// Thêm items vào PurchaseInvoice với stock management
         /// </summary>
         public async Task AddPurchaseInvoiceItemsAsync<TItemDto>(
-            PurchaseInvoice invoice, 
+            PurchaseInvoice invoice,
             IEnumerable<TItemDto> itemDtos) where TItemDto : class
         {
             var stockChanges = new List<StockChangeItem>();
@@ -48,8 +48,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
 
                 // Calculate base unit quantity
                 var baseUnitQuantity = await CalculateBaseUnitQuantityAsync(
-                    (Guid)itemDto.IngredientId, 
-                    (Guid)itemDto.PurchaseUnitId, 
+                    (Guid)itemDto.IngredientId,
+                    (Guid)itemDto.PurchaseUnitId,
                     (int)itemDto.Quantity);
 
                 // Add item to invoice
@@ -100,7 +100,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             }
 
             // 2. THÊM items mới (không có Id hoặc Id không tồn tại)
-            var itemsToAdd = itemDtosList.Where(dto => 
+            var itemsToAdd = itemDtosList.Where(dto =>
             {
                 var id = ((dynamic)dto).Id as Guid?;
                 return !id.HasValue || !oldItemIds.Contains(id.Value);
@@ -111,8 +111,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             {
                 await PopulateItemDataAsync(itemDto);
                 var baseUnitQuantity = await CalculateBaseUnitQuantityAsync(
-                    (Guid)itemDto.IngredientId, 
-                    (Guid)itemDto.PurchaseUnitId, 
+                    (Guid)itemDto.IngredientId,
+                    (Guid)itemDto.PurchaseUnitId,
                     (int)itemDto.Quantity);
 
                 invoice.AddItem(
@@ -131,7 +131,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             }
 
             // 3. CẬP NHẬT items hiện có
-            var itemsToUpdate = itemDtosList.Where(dto => 
+            var itemsToUpdate = itemDtosList.Where(dto =>
             {
                 var id = ((dynamic)dto).Id as Guid?;
                 return id.HasValue && oldItemIds.Contains(id.Value);
@@ -141,8 +141,8 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             {
                 await PopulateItemDataAsync(itemDto);
                 var newBaseUnitQuantity = await CalculateBaseUnitQuantityAsync(
-                    (Guid)itemDto.IngredientId, 
-                    (Guid)itemDto.PurchaseUnitId, 
+                    (Guid)itemDto.IngredientId,
+                    (Guid)itemDto.PurchaseUnitId,
                     (int)itemDto.Quantity);
                 var oldItem = oldItems.First(i => i.Id == (Guid)itemDto.Id);
                 var stockDifference = newBaseUnitQuantity - oldItem.BaseUnitQuantity;
@@ -177,9 +177,9 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
             invoice.ValidateDelete();
 
             // Trừ stock từ tất cả items
-            var stockChanges = invoice.GetItems().Select(item => 
+            var stockChanges = invoice.GetItems().Select(item =>
                 StockChangeItem.ForSubtraction(item.IngredientId, item.BaseUnitQuantity)).ToList();
-            
+
             await _ingredientManager.ProcessStockChangesAsync(stockChanges);
 
             // Clear tất cả items
@@ -213,10 +213,10 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         {
             var ingredient = await _ingredientDetailRepository.GetWithDetailsAsync(ingredientId);
             if (ingredient == null) return quantity;
-            
+
             var purchaseUnit = ingredient.PurchaseUnits.FirstOrDefault(pu => pu.Id == purchaseUnitId);
             if (purchaseUnit == null) return quantity;
-            
+
             return quantity * purchaseUnit.ConversionRatio;
         }
     }

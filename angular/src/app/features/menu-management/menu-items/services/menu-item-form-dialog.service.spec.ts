@@ -14,8 +14,11 @@ describe('MenuItemFormDialogService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         DialogService,
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
-      ]
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
+      ],
     });
     service = TestBed.inject(MenuItemFormDialogService);
   });

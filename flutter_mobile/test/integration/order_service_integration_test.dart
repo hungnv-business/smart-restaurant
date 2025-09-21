@@ -35,10 +35,8 @@ void main() {
         
         for (final table in tables) {
           print('🪑 Table ${table.tableNumber}: ${table.status.displayName}');
-          if (table.layoutSectionName != null) {
-            print('   📍 Section: ${table.layoutSectionName}');
-          }
-          if (table.hasActiveOrders) {
+          print('   📍 Section: ${table.layoutSectionName}');
+                  if (table.hasActiveOrders) {
             print('   📋 Has active orders');
           }
           if (table.pendingItemsCount > 0) {

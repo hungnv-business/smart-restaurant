@@ -6,7 +6,6 @@ import '../../../core/models/order/dinein_table_models.dart';
 import '../../../core/models/order/order_details_models.dart';
 import '../../../core/models/order/takeaway_models.dart';
 import '../../../core/services/order/order_service.dart';
-import '../../../core/services/order/shared_order_service.dart';
 import '../../../core/services/printer/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../widgets/order_item_card.dart';
@@ -22,11 +21,11 @@ class TableDetailScreen extends StatefulWidget {
   final bool isForTakeaway;
 
   const TableDetailScreen({
-    Key? key,
+    super.key,
     this.table,
     this.takeawayOrder,
     this.isForTakeaway = false,
-  }) : super(key: key);
+  });
 
   @override
   State<TableDetailScreen> createState() => _TableDetailScreenState();
@@ -56,22 +55,32 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
       if (widget.isForTakeaway) {
         if (widget.takeawayOrder != null) {
-          final orderService = Provider.of<OrderService>(context, listen: false);
-          _orderDetails = await orderService.getOrderDetails(widget.takeawayOrder!.id);
+          final orderService = Provider.of<OrderService>(
+            context,
+            listen: false,
+          );
+          _orderDetails = await orderService.getOrderDetails(
+            widget.takeawayOrder!.id,
+          );
         }
       } else {
         if (widget.table?.currentOrderId != null) {
-          final orderService = Provider.of<OrderService>(context, listen: false);
-          _orderDetails = await orderService.getOrderDetails(widget.table!.currentOrderId!);
+          final orderService = Provider.of<OrderService>(
+            context,
+            listen: false,
+          );
+          _orderDetails = await orderService.getOrderDetails(
+            widget.table!.currentOrderId!,
+          );
         }
       }
-      
+
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = widget.isForTakeaway 
+        _errorMessage = widget.isForTakeaway
             ? 'Lỗi khi tải chi tiết đơn mang về: ${e.toString()}'
             : 'Lỗi khi tải chi tiết bàn: ${e.toString()}';
         _isLoading = false;
@@ -83,7 +92,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBar(
-        title: widget.isForTakeaway 
+        title: widget.isForTakeaway
             ? 'Đơn mang về ${widget.takeawayOrder?.orderNumber ?? ''}'
             : 'Bàn ${widget.table?.tableNumber ?? ''}',
         actions: [
@@ -93,8 +102,8 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               Icons.print,
               color: _canPrintInvoice() ? null : Colors.grey,
             ),
-            tooltip: _canPrintInvoice() 
-                ? 'In hóa đơn' 
+            tooltip: _canPrintInvoice()
+                ? 'In hóa đơn'
                 : 'Không có món nào đã phục vụ',
           ),
           IconButton(
@@ -162,7 +171,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -175,43 +184,53 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: widget.isForTakeaway 
-                  ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E).withOpacity(0.1)
-                  : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E).withOpacity(0.1),
+              color: widget.isForTakeaway
+                  ? Color(
+                      widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E,
+                    ).withValues(alpha: 0.1)
+                  : Color(
+                      widget.table?.status.colorValue ?? 0xFF9E9E9E,
+                    ).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: widget.isForTakeaway 
-                    ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
+                color: widget.isForTakeaway
+                    ? Color(
+                        widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E,
+                      )
                     : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E),
                 width: 2,
               ),
             ),
             child: Icon(
-              widget.isForTakeaway ? Icons.takeout_dining : Icons.table_restaurant,
+              widget.isForTakeaway
+                  ? Icons.takeout_dining
+                  : Icons.table_restaurant,
               size: 30,
-              color: widget.isForTakeaway 
+              color: widget.isForTakeaway
                   ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
                   : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E),
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Thông tin bàn hoặc khách hàng
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.isForTakeaway 
+                  widget.isForTakeaway
                       ? 'Đơn mang về ${_orderDetails?.orderNumber ?? widget.takeawayOrder?.orderNumber ?? ''}'
                       : 'Bàn ${widget.table?.tableNumber ?? ''}',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                if (widget.isForTakeaway && _orderDetails != null && _orderDetails!.customerName != null)
+                if (widget.isForTakeaway &&
+                    _orderDetails != null &&
+                    _orderDetails!.customerName != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -224,30 +243,39 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                       if (_orderDetails!.customerPhone != null)
                         Text(
                           'SĐT: ${_orderDetails!.customerPhone!}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
-                      if (_orderDetails!.notes != null && _orderDetails!.notes!.isNotEmpty)
+                      if (_orderDetails!.notes != null &&
+                          _orderDetails!.notes!.isNotEmpty)
                         Container(
                           margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.2),
+                            color: Colors.amber.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: Colors.amber),
                           ),
                           child: Text(
                             'Ghi chú: ${_orderDetails!.notes!}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber.shade800,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.amber.shade800,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
                         ),
                     ],
                   )
-                else if (!widget.isForTakeaway && widget.table?.layoutSectionName != null)
+                else if (!widget.isForTakeaway &&
+                    widget.table?.layoutSectionName != null)
                   Text(
                     'Khu vực: ${widget.table!.layoutSectionName}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -265,13 +293,13 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Widget _buildStatusChip() {
-    final statusText = widget.isForTakeaway 
+    final statusText = widget.isForTakeaway
         ? widget.takeawayOrder?.status.displayName ?? ''
         : widget.table?.status.displayName ?? '';
-    final statusColor = widget.isForTakeaway 
+    final statusColor = widget.isForTakeaway
         ? Color(widget.takeawayOrder?.status.colorValue ?? 0xFF9E9E9E)
         : Color(widget.table?.status.colorValue ?? 0xFF9E9E9E);
-        
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -291,7 +319,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   Widget _buildOrderSummary() {
     final summary = _orderDetails?.orderSummary;
-    
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       padding: const EdgeInsets.all(12),
@@ -300,7 +328,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -319,15 +347,15 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               const SizedBox(width: 6),
               Text(
                 'Tổng quan đơn hàng',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 10),
-          
+
           if (summary != null) ...[
             // Order stats cùng 1 hàng
             Row(
@@ -370,17 +398,22 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                 ),
               ),
             ),
-          ]
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -416,10 +449,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     );
   }
 
-
   Widget _buildOrderItemsList() {
     final orderItems = _orderDetails?.orderItems ?? [];
-    
+
     if (orderItems.isEmpty) {
       return Center(
         child: Column(
@@ -450,12 +482,19 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8), // Giảm padding top/bottom
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        8,
+      ), // Giảm padding top/bottom
       itemCount: orderItems.length,
       itemBuilder: (context, index) {
         final item = orderItems[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 8), // Giảm khoảng cách giữa các item
+          padding: const EdgeInsets.only(
+            bottom: 8,
+          ), // Giảm khoảng cách giữa các item
           child: _buildOrderItemCard(item, index),
         );
       },
@@ -465,7 +504,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   Widget _buildOrderItemCard(OrderItemDetailDto item, int index) {
     // Tạo displayMessage từ danh sách missingIngredients
     String? missingMessage = item.missingIngredientsMessage;
-    
+
     return OrderItemCard(
       itemName: item.menuItemName,
       quantity: item.quantity,
@@ -478,41 +517,46 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       requiresCooking: item.requiresCooking,
       onEdit: item.canEdit ? () => _editOrderItem(index) : null,
       onRemove: item.canDelete ? () => _removeOrderItem(index) : null,
-      onServe: (item.requiresCooking && item.status == OrderItemStatus.ready) || 
-               (!item.requiresCooking && item.status != OrderItemStatus.served) 
-               ? () => _markOrderItemServed(item.id) : null,
+      onServe:
+          (item.requiresCooking && item.status == OrderItemStatus.ready) ||
+              (!item.requiresCooking && item.status != OrderItemStatus.served)
+          ? () => _markOrderItemServed(item.id)
+          : null,
     );
   }
-
 
   Widget _buildBottomActions() {
     // Kiểm tra xem có thể thanh toán không
     bool canPayment = false;
     String? paymentDisabledReason;
-    
-    if (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty) {
+
+    if (_orderDetails?.orderSummary != null &&
+        _orderDetails!.orderItems.isNotEmpty) {
       final orderItems = _orderDetails!.orderItems;
-      
+
       // Kiểm tra các món chưa ở trạng thái "đã phục vụ" hoặc "cancel"
-      final nonCompletedItems = orderItems.where((item) => 
-        item.status != OrderItemStatus.served && 
-        item.status != OrderItemStatus.canceled
-      ).toList();
-      
+      final nonCompletedItems = orderItems
+          .where(
+            (item) =>
+                item.status != OrderItemStatus.served &&
+                item.status != OrderItemStatus.canceled,
+          )
+          .toList();
+
       if (nonCompletedItems.isEmpty) {
         canPayment = true;
       } else {
         paymentDisabledReason = '${nonCompletedItems.length} món chưa phục vụ';
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -533,19 +577,22 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               ),
             ),
           ),
-          
+
           const SizedBox(width: 8),
-          
-          
+
           // Nút thanh toán (nếu có đơn hàng)
-          if (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty)
+          if (_orderDetails?.orderSummary != null &&
+              _orderDetails!.orderItems.isNotEmpty)
             Expanded(
               child: OutlinedButton(
                 onPressed: canPayment ? _showPaymentOptions : null,
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 8,
+                  ),
                   side: BorderSide(
-                    color: canPayment 
+                    color: canPayment
                         ? Theme.of(context).colorScheme.outline
                         : Colors.grey.shade300,
                   ),
@@ -562,7 +609,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
-                        canPayment ? 'Thanh toán' : paymentDisabledReason ?? 'Thanh toán',
+                        canPayment
+                            ? 'Thanh toán'
+                            : paymentDisabledReason ?? 'Thanh toán',
                         style: TextStyle(
                           color: canPayment ? null : Colors.grey,
                           fontSize: 12,
@@ -583,8 +632,10 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   void _navigateToMenu() async {
     // Kiểm tra đã có order chưa
-    final hasActiveOrder = _orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty;
-    
+    final hasActiveOrder =
+        _orderDetails?.orderSummary != null &&
+        _orderDetails!.orderItems.isNotEmpty;
+
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -596,7 +647,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         ),
       ),
     );
-    
+
     // Nếu có thay đổi (tạo đơn hàng hoặc thêm món), pop về màn hình trước
     if (result == true && mounted) {
       Navigator.of(context).pop(true);
@@ -606,17 +657,17 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   /// Kiểm tra xem có thể in hóa đơn không (có món đã phục vụ)
   bool _canPrintInvoice() {
     if (_orderDetails == null) return false;
-    
-    final servedItems = _orderDetails!.orderItems.where((item) => 
-      item.status == OrderItemStatus.served
-    ).toList();
-    
+
+    final servedItems = _orderDetails!.orderItems
+        .where((item) => item.status == OrderItemStatus.served)
+        .toList();
+
     return servedItems.isNotEmpty;
   }
 
   void _printInvoice() async {
     if (_orderDetails == null) return;
-    
+
     // Kiểm tra lại có món đã phục vụ không
     if (!_canPrintInvoice()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -633,9 +684,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       // In hóa đơn trực tiếp từ mobile
@@ -674,32 +723,30 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
     try {
       final networkPrinter = NetworkThermalPrinterService();
-      
+
       // Khởi tạo service
       await networkPrinter.initialize();
-      
+
       // Kiểm tra kết nối hiện tại
       bool isConnected = await networkPrinter.checkConnection();
-      
+
       if (!isConnected) {
         // Hiển thị dialog hỏi cấu hình máy in
         await _showPrinterConfigurationDialog();
-        
+
         // Kiểm tra lại kết nối sau khi cấu hình
         isConnected = await networkPrinter.checkConnection();
         if (!isConnected) {
           throw Exception('Chưa cấu hình kết nối với máy in Xprinter T80W');
         }
       }
-      
+
       // In hóa đơn
       await networkPrinter.printInvoice(_orderDetails!);
-      
     } catch (e) {
       rethrow; // Để _printInvoice() xử lý error
     }
   }
-
 
   void _showPaymentOptions() {
     showModalBottomSheet(
@@ -711,9 +758,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           children: [
             Text(
               'Thanh toán',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
@@ -749,14 +796,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   void _showPaymentConfirmation(PaymentMethod method) {
     final TextEditingController amountController = TextEditingController();
     final TextEditingController noteController = TextEditingController();
-    final totalAmount = _orderDetails?.orderSummary?.totalAmount?.toInt() ?? 0;
-    
+    final totalAmount = _orderDetails?.orderSummary.totalAmount.toInt() ?? 0;
+
     // Tự động điền số tiền cần thanh toán với format
     amountController.text = totalAmount.toString().replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'), 
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',
     );
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -791,9 +838,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Ô nhập số tiền khách trả
               const Text(
                 'Số tiền khách trả:',
@@ -813,9 +860,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                   suffixText: '₫',
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Ô nhập ghi chú
               const Text(
                 'Ghi chú (không bắt buộc):',
@@ -850,7 +897,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                 );
                 return;
               }
-              
+
               // Remove dots for parsing
               final cleanAmountText = amountText.replaceAll('.', '');
               final amount = int.tryParse(cleanAmountText);
@@ -863,7 +910,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
                 );
                 return;
               }
-              
+
               Navigator.pop(context);
               _processPayment(method, amount, noteController.text.trim());
             },
@@ -874,7 +921,11 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     );
   }
 
-  Future<void> _processPayment(PaymentMethod method, int paidAmount, String note) async {
+  Future<void> _processPayment(
+    PaymentMethod method,
+    int paidAmount,
+    String note,
+  ) async {
     final orderId = _orderDetails?.id;
     if (orderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -886,15 +937,12 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       return;
     }
 
-
     try {
       // Show loading
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       // Call API
@@ -910,21 +958,21 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       if (mounted) Navigator.of(context).pop();
 
       // Show success message with details
-      final totalAmount = _orderDetails?.orderSummary?.totalAmount?.toInt() ?? 0;
+      final totalAmount = _orderDetails?.orderSummary.totalAmount.toInt() ?? 0;
       final changeAmount = paidAmount - totalAmount;
-      
+
       String message = '✅ Thanh toán thành công!\n';
       message += 'Phương thức: ${method.displayName}\n';
       message += 'Số tiền: ${PriceFormatter.format(paidAmount)}';
-      
+
       if (changeAmount > 0) {
         message += '\nTiền thừa: ${PriceFormatter.format(changeAmount)}';
       }
-      
+
       if (note.isNotEmpty) {
         message += '\nGhi chú: $note';
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -960,9 +1008,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   void _editOrderItem(int index) {
-    if (_orderDetails == null || 
-        _orderDetails!.orderItems.isEmpty || 
-        index < 0 || 
+    if (_orderDetails == null ||
+        _orderDetails!.orderItems.isEmpty ||
+        index < 0 ||
         index >= _orderDetails!.orderItems.length) {
       return;
     }
@@ -978,9 +1026,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       final orderService = Provider.of<OrderService>(context, listen: false);
@@ -1034,7 +1080,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     if (result != null && mounted) {
       final newQuantity = result['quantity'] as int;
       final notes = result['notes'] as String?;
-      
+
       if (newQuantity != orderItem.quantity) {
         _performUpdateOrderItemQuantity(orderItem, newQuantity, index, notes);
       }
@@ -1065,9 +1111,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   /// Thực hiện cập nhật số lượng món
-  Future<void> _performUpdateOrderItemQuantity(OrderItemDetailDto orderItem, int newQuantity, int index, [String? notes]) async {
+  Future<void> _performUpdateOrderItemQuantity(
+    OrderItemDetailDto orderItem,
+    int newQuantity,
+    int index, [
+    String? notes,
+  ]) async {
     final orderId = _orderDetails?.id;
-    
+
     if (orderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1081,8 +1132,13 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     try {
       // Gọi API cập nhật số lượng
       final orderService = Provider.of<OrderService>(context, listen: false);
-      await orderService.updateOrderItemQuantity(orderId, orderItem.id, newQuantity, notes: notes);
-      
+      await orderService.updateOrderItemQuantity(
+        orderId,
+        orderItem.id,
+        newQuantity,
+        notes: notes,
+      );
+
       // Hiển thị thông báo thành công
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1095,28 +1151,36 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
-        
+
         // Reload dữ liệu để cập nhật giao diện
         await _loadTableDetails();
       }
     } catch (e) {
       // Hiển thị thông báo lỗi hoặc thông tin API chưa được implement
       if (mounted) {
-        final isApiNotImplemented = e.toString().contains('API_NOT_IMPLEMENTED');
-        
+        final isApiNotImplemented = e.toString().contains(
+          'API_NOT_IMPLEMENTED',
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isApiNotImplemented 
-                ? '🚧 ${e.toString().split(': ').last}' 
-                : '❌ Lỗi cập nhật số lượng: ${e.toString()}'
+              isApiNotImplemented
+                  ? '🚧 ${e.toString().split(': ').last}'
+                  : '❌ Lỗi cập nhật số lượng: ${e.toString()}',
             ),
             backgroundColor: isApiNotImplemented ? Colors.orange : Colors.red,
             duration: Duration(seconds: isApiNotImplemented ? 4 : 3),
-            action: !isApiNotImplemented ? SnackBarAction(
-              label: 'Thử lại',
-              onPressed: () => _performUpdateOrderItemQuantity(orderItem, newQuantity, index),
-            ) : null,
+            action: !isApiNotImplemented
+                ? SnackBarAction(
+                    label: 'Thử lại',
+                    onPressed: () => _performUpdateOrderItemQuantity(
+                      orderItem,
+                      newQuantity,
+                      index,
+                    ),
+                  )
+                : null,
           ),
         );
       }
@@ -1125,9 +1189,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
   /// Thực hiện xóa món khỏi order
   Future<void> _performRemoveOrderItem(int index) async {
-    if (_orderDetails == null || 
-        _orderDetails!.orderItems.isEmpty || 
-        index < 0 || 
+    if (_orderDetails == null ||
+        _orderDetails!.orderItems.isEmpty ||
+        index < 0 ||
         index >= _orderDetails!.orderItems.length) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1140,22 +1204,12 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
 
     final orderItem = _orderDetails!.orderItems[index];
     final orderId = _orderDetails!.id;
-    
-    if (orderId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppTexts.orderInfoNotFound),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
 
     try {
       // Gọi API xóa món
       final orderService = Provider.of<OrderService>(context, listen: false);
       await orderService.removeOrderItem(orderId, orderItem.id);
-      
+
       // Hiển thị thông báo thành công
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1165,7 +1219,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
-        
+
         // Reload dữ liệu để cập nhật giao diện
         await _loadTableDetails();
       }
@@ -1187,46 +1241,6 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
     }
   }
 
-  void _showTableInfo() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Thông tin bàn ${widget.table?.tableNumber ?? 'Không có'}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoRow('Số bàn', widget.table?.tableNumber ?? 'Không có'),
-            _buildInfoRow('Khu vực', widget.table?.layoutSectionName ?? 'Không có'),
-            _buildInfoRow('Trạng thái', widget.table?.status.displayName ?? 'Không xác định'),
-            _buildInfoRow('Có đơn hàng', (_orderDetails?.orderSummary != null && _orderDetails!.orderItems.isNotEmpty) ? 'Có' : 'Không'),
-            _buildInfoRow('Món chờ phục vụ', '${_orderDetails?.orderSummary?.pendingServeCount ?? 0}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(value),
-        ],
-      ),
-    );
-  }
 
   Future<void> _showPrinterConfigurationDialog() async {
     final shouldConfigure = await showDialog<bool>(
@@ -1254,7 +1268,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         ],
       ),
     );
-    
+
     if (shouldConfigure == true) {
       // Hiển thị thông báo tạm thời
       if (mounted) {
@@ -1265,18 +1279,6 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           ),
         );
       }
-    }
-  }
-
-  /// Map TakeawayStatus sang display string cho UI
-  String _mapTakeawayStatusToDisplay(TakeawayStatus status) {
-    switch (status) {
-      case TakeawayStatus.preparing:
-        return 'Đang chuẩn bị';
-      case TakeawayStatus.ready:
-        return 'Sẵn sàng lấy';
-      case TakeawayStatus.delivered:
-        return 'Đã giao/lấy';
     }
   }
 }
@@ -1294,7 +1296,7 @@ class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
 
     // Remove all dots first
     String digits = newValue.text.replaceAll('.', '');
-    
+
     // Add dots as thousands separators
     String formatted = '';
     for (int i = digits.length - 1; i >= 0; i--) {

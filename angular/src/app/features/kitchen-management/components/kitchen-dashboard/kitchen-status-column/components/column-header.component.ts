@@ -10,7 +10,9 @@ import { BadgeModule } from 'primeng/badge';
     <div class="column-header p-3 border-round mb-3" [ngClass]="backgroundClass">
       <div class="flex">
         <i style="display: flex;" [class]="iconClass" class="text-lg flex items-center"></i>
-        <h3 class="text-lg font-bold m-0 line-height-1 ml-2 mr-2" [ngClass]="textClass">{{ title }}</h3>
+        <h3 class="text-lg font-bold m-0 line-height-1 ml-2 mr-2" [ngClass]="textClass">
+          {{ title }}
+        </h3>
         <p-badge [value]="count.toString()" [severity]="badgeSeverity" badgeSize="large"> </p-badge>
       </div>
     </div>

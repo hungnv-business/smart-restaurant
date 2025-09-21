@@ -13,7 +13,7 @@ public class CannotRemoveBaseUnitException : BusinessException
     /// </summary>
     /// <param name="unitName">Tên đơn vị cơ sở</param>
     /// <param name="ingredientName">Tên nguyên liệu</param>
-    public CannotRemoveBaseUnitException(string unitName, string ingredientName) 
+    public CannotRemoveBaseUnitException(string unitName, string ingredientName)
         : base(SmartRestaurantDomainErrorCodes.Ingredients.CannotRemoveBaseUnit)
     {
         WithData("UnitName", unitName);

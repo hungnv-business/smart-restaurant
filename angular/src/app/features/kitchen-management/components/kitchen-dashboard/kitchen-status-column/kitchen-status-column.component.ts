@@ -18,41 +18,41 @@ import { StatusUpdateEvent } from '../shared/order-item-card/order-item-card.com
   selector: 'app-kitchen-status-column',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     BadgeModule,
     ColumnHeaderComponent,
     TableGroupCardComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
   ],
   template: `
     <div class="flex flex-col h-full md:h-full min-h-[400px]">
-      <app-column-header 
+      <app-column-header
         [title]="title"
-        [icon]="icon" 
+        [icon]="icon"
         [count]="getCount()"
         [theme]="theme"
-        [badgeSeverity]="badgeSeverity"/>
-      
+        [badgeSeverity]="badgeSeverity"
+      />
+
       <div class="flex-1 overflow-y-auto order-items-column max-h-[500px] md:max-h-full">
         @for (tableGroup of filteredTableGroups(); track tableGroup.tableNumber) {
-          <app-table-group-card 
+          <app-table-group-card
             [tableGroup]="tableGroup"
             [status]="status"
-            (statusUpdate)="statusUpdate.emit($event)"/>
+            (statusUpdate)="statusUpdate.emit($event)"
+          />
         }
-        
+
         @if (filteredTableGroups().length === 0) {
-          <app-empty-state 
-            [message]="getEmptyMessage()"
-            [icon]="getEmptyIcon()"/>
+          <app-empty-state [message]="getEmptyMessage()" [icon]="getEmptyIcon()" />
         }
       </div>
     </div>
   `,
   host: {
-    'class': 'flex-1 block'
+    class: 'flex-1 block',
   },
-  styles: []
+  styles: [],
 })
 export class KitchenStatusColumnComponent {
   @Input({ required: true }) title!: string;
@@ -67,8 +67,8 @@ export class KitchenStatusColumnComponent {
    * Computed: Lọc table groups có chứa items với status hiện tại
    */
   filteredTableGroups = computed(() => {
-    return this.tableGroups.filter(group => 
-      group.orderItems.some(item => item.status === this.status)
+    return this.tableGroups.filter(group =>
+      group.orderItems.some(item => item.status === this.status),
     );
   });
 
@@ -77,9 +77,12 @@ export class KitchenStatusColumnComponent {
    */
   getCount(): number {
     return this.tableGroups.reduce((total, group) => {
-      return total + group.orderItems
-        .filter(item => item.status === this.status)
-        .reduce((sum, item) => sum + item.quantity, 0);
+      return (
+        total +
+        group.orderItems
+          .filter(item => item.status === this.status)
+          .reduce((sum, item) => sum + item.quantity, 0)
+      );
     }, 0);
   }
 
@@ -105,5 +108,4 @@ export class KitchenStatusColumnComponent {
   getEmptyIcon(): string {
     return 'pi-check';
   }
-
 }

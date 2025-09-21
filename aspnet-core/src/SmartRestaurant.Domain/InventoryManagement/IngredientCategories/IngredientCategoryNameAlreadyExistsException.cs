@@ -11,7 +11,7 @@ public class IngredientCategoryNameAlreadyExistsException : BusinessException
     /// Khởi tạo exception với tên danh mục bị trùng
     /// </summary>
     /// <param name="categoryName">Tên danh mục bị trùng</param>
-    public IngredientCategoryNameAlreadyExistsException(string categoryName) 
+    public IngredientCategoryNameAlreadyExistsException(string categoryName)
         : base(SmartRestaurantDomainErrorCodes.IngredientCategories.NameAlreadyExists)
     {
         WithData("CategoryName", categoryName);

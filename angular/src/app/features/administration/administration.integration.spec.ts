@@ -41,10 +41,10 @@ describe('Administration Module Integration Tests', () => {
         creationTime: '2024-01-01T00:00:00Z',
         creatorId: null,
         lastModificationTime: null,
-        lastModifierId: null
-      }
+        lastModifierId: null,
+      },
     ],
-    totalCount: 1
+    totalCount: 1,
   };
 
   const mockRoles = {
@@ -55,10 +55,10 @@ describe('Administration Module Integration Tests', () => {
         isDefault: false,
         isStatic: true,
         isPublic: true,
-        concurrencyStamp: 'stamp1'
-      }
+        concurrencyStamp: 'stamp1',
+      },
     ],
-    totalCount: 1
+    totalCount: 1,
   };
 
   const mockPermissions = {
@@ -90,31 +90,35 @@ describe('Administration Module Integration Tests', () => {
   };
 
   beforeEach(async () => {
-    const identityUserServiceSpy = jasmine.createSpyObj('IdentityUserService', 
-      ['getList', 'getRoles', 'create', 'update', 'delete']);
-    const identityRoleServiceSpy = jasmine.createSpyObj('IdentityRoleService', 
-      ['getList', 'create', 'update', 'delete']);
-    const permissionsServiceSpy = jasmine.createSpyObj('PermissionsService', 
-      ['get', 'update']);
+    const identityUserServiceSpy = jasmine.createSpyObj('IdentityUserService', [
+      'getList',
+      'getRoles',
+      'create',
+      'update',
+      'delete',
+    ]);
+    const identityRoleServiceSpy = jasmine.createSpyObj('IdentityRoleService', [
+      'getList',
+      'create',
+      'update',
+      'delete',
+    ]);
+    const permissionsServiceSpy = jasmine.createSpyObj('PermissionsService', ['get', 'update']);
     const messageServiceSpy = jasmine.createSpyObj('MessageService', ['add']);
     const permissionServiceSpy = jasmine.createSpyObj('PermissionService', ['getGrantedPolicy']);
-    
+
     // Create comprehensive ConfirmationService mock for PrimeNG ConfirmDialog
     const confirmationSubject = new Subject<any>();
     const requireConfirmationSubject = new Subject<any>();
     const mockConfirmationService = {
       confirm: jasmine.createSpy('confirm'),
       confirmSource: confirmationSubject.asObservable(),
-      requireConfirmationSource: requireConfirmationSubject.asObservable(),  
-      requireConfirmationSource$: requireConfirmationSubject.asObservable()
+      requireConfirmationSource: requireConfirmationSubject.asObservable(),
+      requireConfirmationSource$: requireConfirmationSubject.asObservable(),
     };
 
     await TestBed.configureTestingModule({
-      imports: [
-        UserListComponent,
-        RoleFormComponent,
-        NoopAnimationsModule
-      ],
+      imports: [UserListComponent, RoleFormComponent, NoopAnimationsModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
         provideHttpClient(),
@@ -127,12 +131,16 @@ describe('Administration Module Integration Tests', () => {
         { provide: PermissionService, useValue: permissionServiceSpy },
         DialogService,
         { provide: DynamicDialogRef, useValue: {} },
-        { provide: DynamicDialogConfig, useValue: {} }
-      ]
+        { provide: DynamicDialogConfig, useValue: {} },
+      ],
     }).compileComponents();
 
-    identityUserService = TestBed.inject(IdentityUserService) as jasmine.SpyObj<IdentityUserService>;
-    identityRoleService = TestBed.inject(IdentityRoleService) as jasmine.SpyObj<IdentityRoleService>;
+    identityUserService = TestBed.inject(
+      IdentityUserService,
+    ) as jasmine.SpyObj<IdentityUserService>;
+    identityRoleService = TestBed.inject(
+      IdentityRoleService,
+    ) as jasmine.SpyObj<IdentityRoleService>;
     permissionsService = TestBed.inject(PermissionsService) as jasmine.SpyObj<PermissionsService>;
     permissionService = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
 
@@ -171,7 +179,7 @@ describe('Administration Module Integration Tests', () => {
     });
 
     it('should handle role data structure', () => {
-      // Test role data structure  
+      // Test role data structure
       expect(mockRoles.items.length).toBeGreaterThan(0);
       expect(mockRoles.items[0].name).toBeDefined();
     });
@@ -219,7 +227,7 @@ describe('Administration Module Integration Tests', () => {
       roleFormComponent.roleForm.patchValue({
         name: 'TestRole',
         isDefault: false,
-        isPublic: true
+        isPublic: true,
       });
       roleFormComponent.onSubmit();
 
@@ -228,8 +236,8 @@ describe('Administration Module Integration Tests', () => {
         jasmine.objectContaining({
           name: 'TestRole',
           isDefault: false,
-          isPublic: true
-        })
+          isPublic: true,
+        }),
       );
     });
   });
@@ -240,12 +248,12 @@ describe('Administration Module Integration Tests', () => {
       expect(identityUserService.getList).toBeDefined();
       expect(identityRoleService.getList).toBeDefined();
       expect(permissionsService.get).toBeDefined();
-      
+
       // Test data flows
       expect(mockUsers.items).toBeDefined();
       expect(mockRoles.items).toBeDefined();
       expect(mockPermissions.groups).toBeDefined();
-      
+
       // Test basic workflow expectations
       expect(typeof identityUserService.getList).toBe('function');
       expect(typeof identityRoleService.getList).toBe('function');

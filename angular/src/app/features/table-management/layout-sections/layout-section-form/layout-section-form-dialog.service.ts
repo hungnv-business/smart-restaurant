@@ -21,7 +21,7 @@ export interface LayoutSectionFormDialogData {
  * - Mở dialog tạo mới khu vực (Dãy 1, Khu VIP, Sân vườn...)
  * - Mở dialog chỉnh sửa khu vực hiện có
  * - Cấu hình chuẩn cho dialog với các thuộc tính phù hợp
- * 
+ *
  * Sử dụng: Quản lý bố cục không gian nhà hàng theo khu vực
  */
 @Injectable({

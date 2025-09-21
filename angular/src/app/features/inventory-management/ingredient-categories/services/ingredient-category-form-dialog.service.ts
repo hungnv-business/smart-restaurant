@@ -23,19 +23,19 @@ export interface IngredientCategoryFormData {
 
 /**
  * Service quản lý dialog form cho danh mục nguyên liệu trong hệ thống kho nhà hàng
- * 
+ *
  * Chức năng chính:
  * - Mở dialog tạo mới danh mục nguyên liệu với thứ tự hiển thị tự động
  * - Mở dialog chỉnh sửa danh mục với dữ liệu được load từ server
  * - Cấu hình dialog responsive cho các thiết bị khác nhau
  * - Xử lý data flow giữa list component và form component
- * 
+ *
  * @example
  * // Tạo mới danh mục
  * dialogService.openCreateDialog().subscribe(result => {
  *   if (result) this.refreshList();
  * });
- * 
+ *
  * // Chỉnh sửa danh mục
  * dialogService.openEditDialog(categoryId).subscribe(result => {
  *   if (result) this.refreshList();
@@ -53,7 +53,7 @@ export class IngredientCategoryFormDialogService {
   /**
    * Mở dialog tạo mới danh mục nguyên liệu
    * Tự động lấy thứ tự hiển thị tiếp theo từ server để đảm bảo tính nhất quán
-   * 
+   *
    * @returns Observable<boolean> - true nếu tạo thành công, false nếu hủy
    */
   openCreateDialog(): Observable<boolean> {
@@ -67,7 +67,7 @@ export class IngredientCategoryFormDialogService {
   /**
    * Mở dialog chỉnh sửa danh mục nguyên liệu
    * Tự động load dữ liệu danh mục từ server trước khi hiển thị form
-   * 
+   *
    * @param categoryId - ID của danh mục nguyên liệu cần chỉnh sửa
    * @returns Observable<boolean> - true nếu cập nhật thành công, false nếu hủy
    */
@@ -83,7 +83,7 @@ export class IngredientCategoryFormDialogService {
   /**
    * Method core để mở dialog - xử lý logic load dữ liệu trước khi hiển thị
    * Tự động phân biệt mode Create/Edit và load dữ liệu tương ứng
-   * 
+   *
    * @param data - Thông tin cấu hình dialog
    * @returns Observable<boolean> - Kết quả thao tác
    * @private
@@ -121,7 +121,7 @@ export class IngredientCategoryFormDialogService {
   /**
    * Tạo và hiển thị dialog với cấu hình responsive
    * Xử lý kết quả trả về từ dialog và notify observer
-   * 
+   *
    * @param data - Dữ liệu truyền vào dialog
    * @param observer - Observer để notify kết quả
    * @private
@@ -154,7 +154,7 @@ export class IngredientCategoryFormDialogService {
 
     // Mở dialog và lắng nghe kết quả
     const ref: DynamicDialogRef = this.dialogService.open(IngredientCategoryFormComponent, config);
-    
+
     // Transform kết quả: null/undefined thành false, các giá trị khác giữ nguyên
     ref.onClose.pipe(map(result => result || false)).subscribe({
       next: result => {

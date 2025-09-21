@@ -29,12 +29,12 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
         string? nameFilter = null)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
             .Include(m => m.Category)
             .WhereIf(onlyAvailable, m => m.IsAvailable == true)
             .WhereIf(categoryId.HasValue, m => m.CategoryId == categoryId!.Value)
-            .WhereIf(!string.IsNullOrWhiteSpace(nameFilter), m => 
+            .WhereIf(!string.IsNullOrWhiteSpace(nameFilter), m =>
                 m.Name.ToLower().Contains(nameFilter!.Trim().ToLower()) ||
                 (m.Description != null && m.Description.ToLower().Contains(nameFilter.Trim().ToLower())))
             .OrderBy(m => m.Name)
@@ -47,9 +47,9 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     public async Task<Dictionary<Guid, int>> GetMenuItemSalesDataAsync(List<Guid>? menuItemIds = null)
     {
         var dbContext = await GetDbContextAsync();
-        
+
         var query = from orderItem in dbContext.Set<SmartRestaurant.Orders.OrderItem>()
-                    join order in dbContext.Set<SmartRestaurant.Orders.Order>() 
+                    join order in dbContext.Set<SmartRestaurant.Orders.Order>()
                         on orderItem.OrderId equals order.Id
                     where order.Status == SmartRestaurant.Orders.OrderStatus.Paid
                     group orderItem by orderItem.MenuItemId into g
@@ -81,7 +81,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     public async Task<MenuItem?> GetWithIngredientsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
             .Include(m => m.Ingredients) // Eager loading MenuItemIngredients
                 .ThenInclude(mi => mi.Ingredient) // Eager loading Ingredient entity
@@ -95,7 +95,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     public async Task<MenuItem?> GetWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
             .Include(m => m.Category)
             .Include(m => m.Ingredients)
@@ -116,12 +116,12 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
         CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         var query = dbSet
             .Include(m => m.Category)
             .Include(m => m.Ingredients)
-            .WhereIf(!string.IsNullOrWhiteSpace(filter), m => 
-                m.Name.Contains(filter!) || 
+            .WhereIf(!string.IsNullOrWhiteSpace(filter), m =>
+                m.Name.Contains(filter!) ||
                 (m.Description != null && m.Description.Contains(filter!)))
             .WhereIf(categoryId.HasValue, m => m.CategoryId == categoryId!.Value)
             .WhereIf(onlyAvailable, m => m.IsAvailable);
@@ -151,10 +151,10 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
         CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
-            .WhereIf(!string.IsNullOrWhiteSpace(filter), m => 
-                m.Name.Contains(filter!) || 
+            .WhereIf(!string.IsNullOrWhiteSpace(filter), m =>
+                m.Name.Contains(filter!) ||
                 (m.Description != null && m.Description.Contains(filter!)))
             .WhereIf(categoryId.HasValue, m => m.CategoryId == categoryId!.Value)
             .WhereIf(onlyAvailable, m => m.IsAvailable)
@@ -170,7 +170,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
         CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
             .Include(m => m.Category)
             .Where(m => m.CategoryId == categoryId)
@@ -188,10 +188,10 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     {
         var dbSet = await GetDbSetAsync();
         var dbContext = await GetDbContextAsync();
-        
+
         var popularMenuItemIds = await (
             from orderItem in dbContext.Set<SmartRestaurant.Orders.OrderItem>()
-            join order in dbContext.Set<SmartRestaurant.Orders.Order>() 
+            join order in dbContext.Set<SmartRestaurant.Orders.Order>()
                 on orderItem.OrderId equals order.Id
             where order.Status == SmartRestaurant.Orders.OrderStatus.Paid
             group orderItem by orderItem.MenuItemId into g
@@ -213,7 +213,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
         CancellationToken cancellationToken = default)
     {
         var dbContext = await GetDbContextAsync();
-        
+
         return await dbContext.Set<SmartRestaurant.Orders.OrderItem>()
             .AnyAsync(oi => oi.MenuItemId == id, cancellationToken);
     }
@@ -222,13 +222,13 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
     /// Kiểm tra tên menu item có trùng trong category không
     /// </summary>
     public async Task<bool> IsNameExistsInCategoryAsync(
-        string name, 
-        Guid categoryId, 
+        string name,
+        Guid categoryId,
         Guid? excludeId = null,
         CancellationToken cancellationToken = default)
     {
         var dbSet = await GetDbSetAsync();
-        
+
         return await dbSet
             .Where(m => m.CategoryId == categoryId && m.Name == name)
             .WhereIf(excludeId.HasValue, m => m.Id != excludeId!.Value)

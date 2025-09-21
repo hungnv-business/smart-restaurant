@@ -227,7 +227,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartRestaurant API");
             c.RoutePrefix = "swagger";
             c.DocumentTitle = "SmartRestaurant API";
-            
+
             var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
             c.OAuthClientId(configuration["AuthServer:SwaggerClientId"]);
             c.OAuthScopes("SmartRestaurant");

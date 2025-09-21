@@ -16,12 +16,12 @@ public class IngredientDto : FullAuditedEntityDto<Guid>
     public string? SupplierInfo { get; set; }
     public int CurrentStock { get; set; }
     public bool IsActive { get; set; }
-    
+
     /// <summary>
     /// Danh sách các đơn vị mua hàng với tỷ lệ quy đổi
     /// </summary>
     public List<IngredientPurchaseUnitDto> PurchaseUnits { get; set; } = new();
-    
+
     /// <summary>
     /// Có thể xóa hay không (false nếu đang được sử dụng trong PurchaseInvoiceItem hoặc MenuItem)
     /// </summary>

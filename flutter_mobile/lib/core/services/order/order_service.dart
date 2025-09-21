@@ -9,14 +9,11 @@ import '../../models/order/order_details_models.dart';
 import '../../models/order/ingredient_verification_models.dart';
 import '../shared/http_client_service.dart';
 import '../notification/signalr_service.dart';
-import '../notification/notification_service.dart';
-
 /// Service xử lý quản lý đơn hàng và bàn trong nhà hàng
 class OrderService extends ChangeNotifier {
   late Dio _dio;
   final HttpClientService _httpClientService;
   final SignalRService? _signalRService;
-  final NotificationService? _notificationService;
 
   List<DineInTableDto> _dineInTables = [];
   bool _isLoading = false;
@@ -26,10 +23,8 @@ class OrderService extends ChangeNotifier {
   OrderService({
     required String? accessToken,
     SignalRService? signalRService,
-    NotificationService? notificationService,
   }) : _httpClientService = HttpClientService(),
-       _signalRService = signalRService,
-       _notificationService = notificationService {
+       _signalRService = signalRService {
     _dio = _httpClientService.dio;
     _setupNotificationListeners();
   }
@@ -556,10 +551,6 @@ class OrderService extends ChangeNotifier {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 /// Exception class cho OrderService

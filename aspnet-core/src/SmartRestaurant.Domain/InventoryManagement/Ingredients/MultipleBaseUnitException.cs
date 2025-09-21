@@ -11,7 +11,7 @@ public class MultipleBaseUnitException : BusinessException
     /// Khởi tạo exception với thông tin nguyên liệu
     /// </summary>
     /// <param name="ingredientName">Tên nguyên liệu</param>
-    public MultipleBaseUnitException(string ingredientName) 
+    public MultipleBaseUnitException(string ingredientName)
         : base(SmartRestaurantDomainErrorCodes.Ingredients.MultipleBaseUnit)
     {
         WithData("IngredientName", ingredientName);

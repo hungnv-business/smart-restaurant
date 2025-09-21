@@ -46,7 +46,9 @@
       "Bash(docker build:*)",
       "Bash(docker run:*)",
       "Bash(docker logs:*)",
-      "Bash(dotnet --version)"
+      "Bash(dotnet --version)",
+      "Bash(npx prettier:*)",
+      "Bash(dotnet format:*)"
     ],
     "deny": [],
     "ask": []

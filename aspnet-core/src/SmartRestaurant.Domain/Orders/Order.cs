@@ -277,7 +277,7 @@ public class Order : FullAuditedAggregateRoot<Guid>
             throw OrderValidationException.DineInWithoutTable();
         }
 
-        if ((OrderType == OrderType.Takeaway || OrderType == OrderType.Delivery) && 
+        if ((OrderType == OrderType.Takeaway || OrderType == OrderType.Delivery) &&
             (string.IsNullOrWhiteSpace(CustomerName) || string.IsNullOrWhiteSpace(CustomerPhone)))
         {
             // Business Exception: Đơn hàng takeaway/delivery thiếu thông tin khách hàng

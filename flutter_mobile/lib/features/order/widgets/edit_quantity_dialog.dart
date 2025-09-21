@@ -9,12 +9,12 @@ class EditQuantityDialog extends StatefulWidget {
   final String? currentNotes;
 
   const EditQuantityDialog({
-    Key? key,
+    super.key,
     required this.itemName,
     required this.currentQuantity,
     required this.unitPrice,
     this.currentNotes,
-  }) : super(key: key);
+  });
 
   @override
   State<EditQuantityDialog> createState() => _EditQuantityDialogState();
@@ -124,7 +124,7 @@ class _EditQuantityDialogState extends State<EditQuantityDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -208,10 +208,10 @@ class _EditQuantityDialogState extends State<EditQuantityDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(

@@ -99,7 +99,7 @@ public class IngredientCategoryAppService :
         }
 
         var categoriesToDelete = await Repository.GetListAsync(x => ids.Contains(x.Id));
-        
+
         if (categoriesToDelete.Any())
         {
             await Repository.DeleteManyAsync(categoriesToDelete);
@@ -118,8 +118,8 @@ public class IngredientCategoryAppService :
 
         // Kiểm tra trùng tên không phân biệt hoa thường và khoảng trắng
         var existingCategories = await Repository.GetListAsync();
-        var duplicateCategory = existingCategories.FirstOrDefault(c => 
-            (excludeId == null || c.Id != excludeId) && 
+        var duplicateCategory = existingCategories.FirstOrDefault(c =>
+            (excludeId == null || c.Id != excludeId) &&
             StringUtility.AreNormalizedEqual(c.Name, name));
 
         if (duplicateCategory != null)

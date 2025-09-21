@@ -9,10 +9,10 @@ class ConnectionStatusWidget extends StatelessWidget {
   final bool showAsAppBar;
 
   const ConnectionStatusWidget({
-    Key? key,
+    super.key,
     this.showAsSnackBar = false,
     this.showAsAppBar = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -121,9 +121,9 @@ class ConnectionStatusWidget extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

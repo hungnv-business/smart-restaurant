@@ -9,12 +9,12 @@ class TableFilters extends StatelessWidget {
   final ValueChanged<TableStatus?> onStatusFilterChanged;
   
   const TableFilters({
-    Key? key,
+    super.key,
     required this.searchQuery,
     required this.selectedStatusFilter,
     required this.onSearchChanged,
     required this.onStatusFilterChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

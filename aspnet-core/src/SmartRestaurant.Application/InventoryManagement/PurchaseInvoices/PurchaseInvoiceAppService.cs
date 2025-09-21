@@ -183,7 +183,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         public async Task DeleteAsync(Guid id)
         {
             var entity = await _purchaseInvoiceRepository.GetWithDetailsAsync(id);
-            
+
             // Xóa hóa đơn và xử lý stock sử dụng PurchaseInvoiceManager
             await _purchaseInvoiceManager.DeletePurchaseInvoiceAsync(entity);
             await _purchaseInvoiceRepository.DeleteAsync(entity);
@@ -200,9 +200,9 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
         public async Task<IngredientForPurchaseDto> GetIngredientForPurchaseAsync(Guid ingredientId)
         {
             var ingredient = await _ingredientDetailRepository.GetWithDetailsAsync(ingredientId);
-            if (ingredient is null) 
+            if (ingredient is null)
                 throw new EntityNotFoundException(typeof(Ingredient), ingredientId);
-            
+
             var result = new IngredientForPurchaseDto
             {
                 Id = ingredient.Id,
@@ -212,7 +212,7 @@ namespace SmartRestaurant.InventoryManagement.PurchaseInvoices
                 PurchaseUnits = ObjectMapper.Map<List<IngredientPurchaseUnit>, List<IngredientPurchaseUnitDto>>(
                     [.. ingredient.PurchaseUnits.Where(pu => pu.IsActive)])
             };
-            
+
             return result;
         }
 

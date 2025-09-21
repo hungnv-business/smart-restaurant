@@ -15,58 +15,58 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
     /// </summary>
     [Required]
     public Guid IngredientId { get; set; }
-    
+
     /// <summary>
     /// ID đơn vị mua hàng
     /// </summary>
     [Required]
     public Guid UnitId { get; set; }
-    
+
     /// <summary>
     /// Tỷ lệ quy đổi về đơn vị cơ sở (phải > 0)
     /// Ví dụ: 1 thùng = 24 lon → ConversionRatio = 24
     /// </summary>
     [Required]
     public int ConversionRatio { get; set; }
-    
+
     /// <summary>
     /// Có phải là đơn vị cơ sở không (mỗi ingredient chỉ có 1 base unit)
     /// </summary>
     [Required]
     public bool IsBaseUnit { get; set; }
-    
+
     /// <summary>
     /// Giá mua cho đơn vị này (có thể null nếu sử dụng giá cơ sở)
     /// </summary>
     public int? PurchasePrice { get; set; }
-    
+
     /// <summary>
     /// Thứ tự hiển thị (để sắp xếp theo thứ tự người dùng thêm vào)
     /// </summary>
     [Required]
     public int DisplayOrder { get; set; }
-    
+
     /// <summary>
     /// Trạng thái kích hoạt
     /// </summary>
     [Required]
     public bool IsActive { get; set; } = true;
-    
+
     // Navigation properties
     /// <summary>
     /// Nguyên liệu liên kết
     /// </summary>
     public virtual Ingredient Ingredient { get; set; } = null!;
-    
+
     /// <summary>
     /// Đơn vị đo lường
     /// </summary>
     public virtual Unit Unit { get; set; } = null!;
-    
+
     protected IngredientPurchaseUnit()
     {
     }
-    
+
     public IngredientPurchaseUnit(
         Guid id,
         Guid ingredientId,
@@ -81,7 +81,7 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         {
             throw new ArgumentException("Conversion ratio must be greater than 0", nameof(conversionRatio));
         }
-        
+
         IngredientId = ingredientId;
         UnitId = unitId;
         ConversionRatio = conversionRatio;
@@ -90,9 +90,9 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         PurchasePrice = purchasePrice;
         IsActive = isActive;
     }
-    
+
     // === Business Methods cho Unit Conversion ===
-    
+
     /// <summary>
     /// Chuyển đổi số lượng từ đơn vị mua hàng này sang đơn vị cơ sở
     /// </summary>
@@ -104,10 +104,10 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         {
             throw new ArgumentException("Quantity cannot be negative", nameof(quantity));
         }
-        
+
         return quantity * ConversionRatio;
     }
-    
+
     /// <summary>
     /// Chuyển đổi số lượng từ đơn vị cơ sở sang đơn vị mua hàng này
     /// </summary>
@@ -119,8 +119,8 @@ public class IngredientPurchaseUnit : FullAuditedEntity<Guid>
         {
             throw new ArgumentException("Base quantity cannot be negative", nameof(baseQuantity));
         }
-        
+
         return baseQuantity / ConversionRatio; // Integer division - làm tròn xuống
     }
-    
+
 }

@@ -45,9 +45,9 @@ namespace SmartRestaurant.Kitchen
 
             var groupedItems = await _kitchenPriorityManager.GetKitchenDashboardGroupedAsync();
 
-            Logger.LogInformation("Found {ItemCount} items grouped into {TableCount} tables", 
+            Logger.LogInformation("Found {ItemCount} items grouped into {TableCount} tables",
                 groupedItems.Sum(g => g.TotalItems), groupedItems.Count);
-            
+
             return groupedItems;
         }
 
@@ -60,7 +60,7 @@ namespace SmartRestaurant.Kitchen
         [Authorize(SmartRestaurantPermissions.Kitchen.UpdateStatus)]
         public virtual async Task UpdateOrderItemStatusAsync(UpdateOrderItemStatusInput input)
         {
-            Logger.LogInformation("Kitchen Dashboard updating OrderItem {OrderItemId} status to {Status}", 
+            Logger.LogInformation("Kitchen Dashboard updating OrderItem {OrderItemId} status to {Status}",
                 input.OrderItemId, input.Status);
 
             // Sử dụng KitchenPriorityManager để cập nhật trạng thái (kitchen-specific logic)
@@ -69,7 +69,7 @@ namespace SmartRestaurant.Kitchen
             // Gửi notification đến mobile khi trạng thái thay đổi
             await SendStatusUpdateNotification(input.OrderItemId, input.Status);
 
-            Logger.LogInformation("Successfully updated OrderItem {OrderItemId} status to {Status}", 
+            Logger.LogInformation("Successfully updated OrderItem {OrderItemId} status to {Status}",
                 input.OrderItemId, input.Status);
         }
 
@@ -109,7 +109,7 @@ namespace SmartRestaurant.Kitchen
                     case OrderItemStatus.Ready:
                         // Gửi notification cho status updates khác
                         await _notificationService.NotifyOrderItemStatusUpdatedAsync(orderItemId, (int)newStatus);
-                        Logger.LogInformation("🔔 Sent OrderItemStatusUpdated notification for {MenuItemName} status: {Status}", 
+                        Logger.LogInformation("🔔 Sent OrderItemStatusUpdated notification for {MenuItemName} status: {Status}",
                             orderItem.MenuItemName, newStatus);
                         Console.WriteLine($"🔔 KitchenDashboard: Sent status update for {orderItem.MenuItemName} to {newStatus}");
                         break;
@@ -132,7 +132,7 @@ namespace SmartRestaurant.Kitchen
             Logger.LogInformation("Getting cooking statistics for dashboard");
 
             var cookingItems = await _kitchenPriorityManager.GetPriorizedOrderItemsAsync();
-            
+
             // Group by table để tính EmptyTablesCount và LongestWaitingTable
             var tableGroups = cookingItems
                 .GroupBy(item => item.TableNumber)
@@ -155,7 +155,7 @@ namespace SmartRestaurant.Kitchen
                     : null
             };
 
-            Logger.LogInformation("Cooking stats: Total={Total}, QuickCook={QuickCook}, EmptyTables={EmptyTables}", 
+            Logger.LogInformation("Cooking stats: Total={Total}, QuickCook={QuickCook}, EmptyTables={EmptyTables}",
                 stats.TotalCookingItems, stats.QuickCookItemsCount, stats.EmptyTablesCount);
 
             return stats;

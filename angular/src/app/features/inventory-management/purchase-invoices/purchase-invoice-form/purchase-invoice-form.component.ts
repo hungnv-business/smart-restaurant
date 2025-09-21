@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
@@ -14,7 +14,6 @@ import { FormFooterActionsComponent } from '../../../../shared/components/form-f
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { PurchaseInvoiceItemComponent } from '../purchase-invoice-item/purchase-invoice-item.component';
 import { PurchaseInvoiceFormData } from '../services/purchase-invoice-form-dialog.service';
-import { GetIngredientListRequestDto } from '../../../../proxy/inventory-management/ingredients/dto';
 import { take, finalize } from 'rxjs';
 import { DateTimeHelper } from '../../../../shared/helpers';
 
@@ -24,19 +23,8 @@ import {
   PurchaseInvoiceDto,
 } from '../../../../proxy/inventory-management/purchase-invoices/dto';
 import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
-import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 import { GlobalService } from '../../../../proxy/common/global.service';
 import { GuidLookupItemDto } from '../../../../proxy/common/dto/models';
-
-/**
- * Interface định nghĩa thông tin lookup của nguyên liệu
- */
-interface IngredientLookupDto {
-  id: string;
-  name: string;
-  costPerUnit: number;
-  supplierInfo: string;
-}
 
 /**
  * Component quản lý form tạo/chỉnh sửa hóa đơn mua nguyên liệu
@@ -339,7 +327,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
         supplierInfo: item.supplierInfo ?? '',
         notes: item.notes ?? '',
         categoryId: item.categoryId ?? null,
-        displayOrder: item.displayOrder ?? (index + 1),
+        displayOrder: item.displayOrder ?? index + 1,
       });
       this.itemsFormArray.push(itemFormGroup);
     });
@@ -364,7 +352,7 @@ export class PurchaseInvoiceFormComponent extends ComponentBase implements OnIni
       },
       error: error => {
         console.error('Lỗi khi tải danh sách danh mục:', error);
-      }
+      },
     });
   }
 

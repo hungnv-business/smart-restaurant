@@ -13,12 +13,12 @@ public class IngredientAutoMapperProfile : Profile
             .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit != null ? src.Unit.Name : string.Empty))
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
             .ForMember(dest => dest.PurchaseUnits, opt => opt.MapFrom(src => src.PurchaseUnits.Where(pu => pu.IsActive)));
-            
+
         CreateMap<CreateUpdateIngredientDto, Ingredient>();
-        
+
         CreateMap<IngredientPurchaseUnit, IngredientPurchaseUnitDto>()
             .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit != null ? src.Unit.Name : string.Empty));
-            
+
         CreateMap<CreateUpdatePurchaseUnitDto, IngredientPurchaseUnit>();
     }
 }

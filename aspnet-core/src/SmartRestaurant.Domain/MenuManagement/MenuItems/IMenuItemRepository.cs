@@ -10,7 +10,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
     {
         /// <summary>Lấy menu item với đầy đủ navigation properties (Category, Ingredients)</summary>
         Task<MenuItem?> GetWithDetailsAsync(
-            Guid id, 
+            Guid id,
             CancellationToken cancellationToken = default);
 
         /// <summary>Lấy danh sách menu items với navigation properties và phân trang</summary>
@@ -58,8 +58,8 @@ namespace SmartRestaurant.MenuManagement.MenuItems
 
         /// <summary>Kiểm tra tên menu item có trùng trong category không</summary>
         Task<bool> IsNameExistsInCategoryAsync(
-            string name, 
-            Guid categoryId, 
+            string name,
+            Guid categoryId,
             Guid? excludeId = null,
             CancellationToken cancellationToken = default);
 

@@ -1,3 +1,1 @@
-
-export interface IActionResult {
-}
+export interface IActionResult {}

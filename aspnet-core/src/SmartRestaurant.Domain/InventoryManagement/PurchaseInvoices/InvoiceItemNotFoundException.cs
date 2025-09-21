@@ -12,7 +12,7 @@ public class InvoiceItemNotFoundException : BusinessException
     /// Khởi tạo exception với thông tin item
     /// </summary>
     /// <param name="itemId">ID của item không tìm thấy</param>
-    public InvoiceItemNotFoundException(Guid itemId) 
+    public InvoiceItemNotFoundException(Guid itemId)
         : base(SmartRestaurantDomainErrorCodes.PurchaseInvoices.InvoiceItemNotFound)
     {
         WithData("ItemId", itemId);

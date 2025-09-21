@@ -18,13 +18,13 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
 
         // Menu permissions
         var menuPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Menu.Default, L("Permission:Menu"));
-        
+
         // Menu Categories permissions
         var menuCategoriesPermission = menuPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Default, L("Permission:Menu.Categories"));
         menuCategoriesPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Create, L("Permission:Menu.Categories.Create"));
         menuCategoriesPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Edit, L("Permission:Menu.Categories.Edit"));
         menuCategoriesPermission.AddChild(SmartRestaurantPermissions.Menu.Categories.Delete, L("Permission:Menu.Categories.Delete"));
-        
+
         // Menu Items permissions
         var menuItemsPermission = menuPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Default, L("Permission:Menu.Items"));
         menuItemsPermission.AddChild(SmartRestaurantPermissions.Menu.Items.Create, L("Permission:Menu.Items.Create"));
@@ -68,19 +68,19 @@ public class SmartRestaurantPermissionDefinitionProvider : PermissionDefinitionP
 
         // Inventory permissions
         var inventoryPermission = smartRestaurantGroup.AddPermission(SmartRestaurantPermissions.Inventory.Default, L("Permission:Inventory"));
-        
+
         // Inventory Categories permissions
         var inventoryCategoriesPermission = inventoryPermission.AddChild(SmartRestaurantPermissions.Inventory.Categories.Default, L("Permission:Inventory.Categories"));
         inventoryCategoriesPermission.AddChild(SmartRestaurantPermissions.Inventory.Categories.Create, L("Permission:Inventory.Categories.Create"));
         inventoryCategoriesPermission.AddChild(SmartRestaurantPermissions.Inventory.Categories.Edit, L("Permission:Inventory.Categories.Edit"));
         inventoryCategoriesPermission.AddChild(SmartRestaurantPermissions.Inventory.Categories.Delete, L("Permission:Inventory.Categories.Delete"));
-        
+
         // Ingredients permissions
         var ingredientsPermission = inventoryPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Default, L("Permission:Inventory.Ingredients"));
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Create, L("Permission:Inventory.Ingredients.Create"));
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Edit, L("Permission:Inventory.Ingredients.Edit"));
         ingredientsPermission.AddChild(SmartRestaurantPermissions.Inventory.Ingredients.Delete, L("Permission:Inventory.Ingredients.Delete"));
-        
+
         // Purchase Invoices permissions
         var purchaseInvoicesPermission = inventoryPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Default, L("Permission:Inventory.PurchaseInvoices"));
         purchaseInvoicesPermission.AddChild(SmartRestaurantPermissions.Inventory.PurchaseInvoices.Create, L("Permission:Inventory.PurchaseInvoices.Create"));

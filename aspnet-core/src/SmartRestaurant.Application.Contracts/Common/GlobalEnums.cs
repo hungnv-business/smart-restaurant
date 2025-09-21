@@ -103,7 +103,7 @@ public static class GlobalEnums
         return status switch
         {
             OrderItemStatus.Pending => "orange",
-            OrderItemStatus.Preparing => "orange", 
+            OrderItemStatus.Preparing => "orange",
             OrderItemStatus.Ready => "blue",
             OrderItemStatus.Served => "success",
             OrderItemStatus.Canceled => "error",
@@ -121,7 +121,7 @@ public static class GlobalEnums
         return status switch
         {
             TableStatus.Available => "success",
-            TableStatus.Occupied => "warning", 
+            TableStatus.Occupied => "warning",
             TableStatus.Reserved => "info",
             _ => "default"
         };

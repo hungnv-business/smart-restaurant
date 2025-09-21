@@ -26,22 +26,22 @@ import { TextareaModule } from 'primeng/textarea';
 
 /**
  * Component quản lý một mặt hàng trong hóa đơn mua nguyên liệu
- * 
+ *
  * Chức năng chính:
  * - Hiển thị form nhập thông tin một mặt hàng trong hóa đơn mua
  * - Chọn danh mục → nguyên liệu → đơn vị mua → số lượng
- * - Tự động tính toán đơn giá dựa trên cost per unit và conversion ratio  
+ * - Tự động tính toán đơn giá dựa trên cost per unit và conversion ratio
  * - Tự động tính toán thành tiền (quantity × unit price)
  * - Hiển thị preview số lượng quy đổi về đơn vị cơ bản
  * - Validate dữ liệu nhập vào
  * - Hỗ trợ mode chỉ xem (view only)
  * - Load thông tin nhà cung cấp từ master data
- * 
+ *
  * @example
  * // Sử dụng trong purchase invoice form:
  * <app-purchase-invoice-item
  *   [itemForm]="getItemForm(i)"
- *   [index]="i" 
+ *   [index]="i"
  *   [isViewOnly]="isViewOnly"
  *   [categories]="categories"
  *   (remove)="removeItem(i)">
@@ -77,6 +77,17 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
   /** Event khi click nút xóa mặt hàng */
   @Output() remove = new EventEmitter<void>();
 
+  /** Danh sách nguyên liệu thuộc danh mục đã chọn */
+  ingredients: GuidLookupItemDto[] = [];
+  /** Danh sách các đơn vị mua hàng của nguyên liệu đã chọn */
+  purchaseUnits: IngredientPurchaseUnitDto[] = [];
+  /** ID danh mục hiện tại đang chọn */
+  currentCategoryId: string | null = null;
+  /** ID nguyên liệu hiện tại đang chọn */
+  currentIngredientId: string | null = null;
+  /** Giá cơ bản trên đơn vị của nguyên liệu hiện tại */
+  currentIngredientCostPerUnit: number | null = null;
+
   /** Service để lấy thông tin nguyên liệu cho purchase */
   private purchaseInvoiceService = inject(PurchaseInvoiceService);
   /** Service để lấy lookup data */
@@ -89,22 +100,12 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
     super();
   }
 
-  /** Danh sách nguyên liệu thuộc danh mục đã chọn */
-  ingredients: GuidLookupItemDto[] = [];
-  /** Danh sách các đơn vị mua hàng của nguyên liệu đã chọn */
-  purchaseUnits: IngredientPurchaseUnitDto[] = [];
-  /** ID danh mục hiện tại đang chọn */
-  currentCategoryId: string | null = null;
-  /** ID nguyên liệu hiện tại đang chọn */
-  currentIngredientId: string | null = null;
-  /** Giá cơ bản trên đơn vị của nguyên liệu hiện tại */
-  currentIngredientCostPerUnit: number | null = null;
-
   /**
    * Khởi tạo dữ liệu khi component được load
    */
   ngOnInit() {
     // Categories được nhận từ parent component qua @Input
+    this.loadPurchaseUnits();
   }
 
   /**
@@ -117,13 +118,13 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
     if (changes['itemForm'] && this.itemForm) {
       const categoryId = this.itemForm.get('categoryId')?.value;
       const ingredientId = this.itemForm.get('ingredientId')?.value;
-      
+
       // Load danh sách nguyên liệu nếu đã chọn danh mục
       if (categoryId) {
         this.currentCategoryId = categoryId;
         this.loadIngredientsByCategory(categoryId);
       }
-      
+
       // Load các đơn vị mua hàng nếu đã chọn nguyên liệu (quan trọng cho view mode)
       if (ingredientId) {
         this.currentIngredientId = ingredientId;
@@ -132,6 +133,88 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
     }
   }
 
+  /**
+   * Xử lý sự kiện click nút xóa mặt hàng
+   */
+  onRemove() {
+    this.remove.emit();
+  }
+
+  /**
+   * Xử lý khi thay đổi nguyên liệu được chọn
+   * Load các đơn vị mua hàng và reset form các field liên quan
+   * @param ingredientId - ID nguyên liệu mới được chọn
+   */
+  onIngredientChange(ingredientId: string | null) {
+    this.currentIngredientId = ingredientId;
+
+    if (ingredientId) {
+      // Load các đơn vị mua hàng của nguyên liệu
+      this.loadPurchaseUnits(ingredientId);
+
+      // Reset các field phụ thuộc vào nguyên liệu
+      this.itemForm.patchValue({
+        purchaseUnitId: null,
+        unitPrice: null,
+        quantity: null,
+        totalPrice: null,
+      });
+    } else {
+      this.purchaseUnits = [];
+      this.currentIngredientCostPerUnit = null;
+    }
+  }
+
+  /**
+   * Xử lý khi thay đổi đơn vị mua hàng
+   * Tự động điền giá theo đơn vị và tính lại thành tiền
+   * @param purchaseUnitId - ID đơn vị mua hàng được chọn
+   */
+  onPurchaseUnitChange(purchaseUnitId: string | null) {
+    if (purchaseUnitId) {
+      const selectedUnit = this.purchaseUnits.find(u => u.id === purchaseUnitId);
+      if (selectedUnit) {
+        // Tự động điền giá từ purchase unit (nếu có)
+        const unitPrice = selectedUnit.purchasePrice || null;
+        this.itemForm.patchValue({ unitPrice });
+
+        // Tính lại thành tiền nếu đã có số lượng
+        const quantity = this.itemForm.get('quantity')?.value;
+        if (quantity && unitPrice) {
+          this.onCalculateTotal();
+        }
+      }
+    }
+  }
+
+  /**
+   * Lấy tên hiển thị của đơn vị mua hàng (bao gồm tỷ lệ quy đổi)
+   * @param purchaseUnit - Đơn vị mua hàng cần hiển thị
+   * @returns Chuỗi mô tả đơn vị (VD: "Thùng (24 chai)")
+   */
+  getPurchaseUnitDisplayName(purchaseUnit: IngredientPurchaseUnitDto): string {
+    const unitName = purchaseUnit.unit?.displayName || 'N/A';
+    if (purchaseUnit.isBaseUnit) {
+      return `${unitName} (đơn vị cơ sở)`;
+    }
+    return `${unitName} (${purchaseUnit.conversionRatio} ${purchaseUnit.baseUnit?.displayName || ''})`;
+  }
+
+  /**
+   * Tính toán tự động thành tiền khi thay đổi số lượng hoặc đơn giá
+   * Công thức: Thành tiền = Số lượng × Đơn giá
+   */
+  onCalculateTotal() {
+    const quantity = this.itemForm.get('quantity')?.value;
+    const unitPrice = this.itemForm.get('unitPrice')?.value;
+
+    if (quantity && unitPrice) {
+      const totalPrice = quantity * unitPrice;
+      this.itemForm.patchValue({ totalPrice }, { emitEvent: false });
+    } else {
+      this.itemForm.patchValue({ totalPrice: null }, { emitEvent: false });
+    }
+  }
 
   /**
    * Xử lý khi thay đổi danh mục nguyên liệu
@@ -184,7 +267,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
 
   onIngredientChange(ingredientId: string | null) {
     this.currentIngredientId = ingredientId;
-    
+
     if (ingredientId) {
       this.loadPurchaseUnits(ingredientId, true); // true = reset form fields
     } else {
@@ -193,7 +276,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
         purchaseUnitId: null,
         unitPrice: null,
         totalPrice: null,
-        supplierInfo: ''
+        supplierInfo: '',
       });
     }
   }
@@ -203,7 +286,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
       next: ingredientInfo => {
         this.purchaseUnits = ingredientInfo.purchaseUnits || [];
         this.currentIngredientCostPerUnit = ingredientInfo.costPerUnit || null;
-        
+
         if (resetFormFields && !this.isViewOnly) {
           this.itemForm.patchValue({
             supplierInfo: ingredientInfo.supplierInfo || '',
@@ -216,10 +299,9 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
       error: error => {
         console.error('Error loading ingredient for purchase:', error);
         this.purchaseUnits = [];
-      }
+      },
     });
   }
-  
 
   onPurchaseUnitChange(purchaseUnitId: string | null) {
     if (purchaseUnitId) {
@@ -227,7 +309,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
       const selectedPurchaseUnit = this.purchaseUnits.find(pu => pu.id === purchaseUnitId);
       if (selectedPurchaseUnit) {
         let unitPrice = 0;
-        
+
         // Nếu có giá riêng cho đơn vị mua này thì sử dụng
         if (selectedPurchaseUnit.purchasePrice) {
           unitPrice = selectedPurchaseUnit.purchasePrice;
@@ -235,7 +317,7 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
           // Nếu không có giá riêng, tính từ giá cơ sở * conversion ratio
           unitPrice = this.currentIngredientCostPerUnit * selectedPurchaseUnit.conversionRatio;
         }
-        
+
         this.itemForm.patchValue({
           unitPrice: unitPrice,
         });
@@ -248,12 +330,14 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
       });
     }
   }
-  
+
   getPurchaseUnitDisplayName(purchaseUnit: IngredientPurchaseUnitDto): string {
-    const ratioText = purchaseUnit.isBaseUnit ? '' : ` (1 = ${purchaseUnit.conversionRatio} ${this.getBaseUnitName()})`;
+    const ratioText = purchaseUnit.isBaseUnit
+      ? ''
+      : ` (1 = ${purchaseUnit.conversionRatio} ${this.getBaseUnitName()})`;
     return `${purchaseUnit.unitName}${ratioText}`;
   }
-  
+
   private getBaseUnitName(): string {
     const baseUnit = this.purchaseUnits.find(u => u.isBaseUnit);
     return baseUnit?.unitName || '';
@@ -268,24 +352,24 @@ export class PurchaseInvoiceItemComponent extends ComponentBase implements OnIni
       this.itemForm.patchValue({ totalPrice });
     }
   }
-  
+
   getPurchaseUnitName(): string {
     const purchaseUnitId = this.itemForm.get('purchaseUnitId')?.value;
     if (!purchaseUnitId) return '';
-    
+
     const purchaseUnit = this.purchaseUnits.find(u => u.id === purchaseUnitId);
     return purchaseUnit?.unitName || '';
   }
-  
+
   getConvertedBaseQuantity(): number {
     const quantity = this.itemForm.get('quantity')?.value || 0;
     const purchaseUnitId = this.itemForm.get('purchaseUnitId')?.value;
-    
+
     if (!quantity || !purchaseUnitId) return 0;
-    
+
     const purchaseUnit = this.purchaseUnits.find(u => u.id === purchaseUnitId);
     if (!purchaseUnit) return 0;
-    
+
     return quantity * purchaseUnit.conversionRatio;
   }
 }

@@ -38,7 +38,7 @@ public class Unit : FullAuditedEntity<Guid>
     /// <param name="name">Tên đơn vị</param>
     /// <param name="displayOrder">Thứ tự hiển thị</param>
     /// <param name="isActive">Trạng thái kích hoạt</param>
-    public Unit(Guid id, string name, int displayOrder = 0, bool isActive = true) 
+    public Unit(Guid id, string name, int displayOrder = 0, bool isActive = true)
         : base(id)
     {
         Name = name;

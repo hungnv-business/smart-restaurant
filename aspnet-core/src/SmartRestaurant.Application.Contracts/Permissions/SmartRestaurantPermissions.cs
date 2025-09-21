@@ -89,7 +89,7 @@ public static class SmartRestaurantPermissions
     public static class Inventory
     {
         public const string Default = GroupName + ".Inventory";
-        
+
         public static class Categories
         {
             public const string Default = GroupName + ".InventoryCategories";
@@ -97,7 +97,7 @@ public static class SmartRestaurantPermissions
             public const string Edit = Default + ".Edit";
             public const string Delete = Default + ".Delete";
         }
-        
+
         public static class Ingredients
         {
             public const string Default = GroupName + ".Ingredients";
@@ -105,7 +105,7 @@ public static class SmartRestaurantPermissions
             public const string Edit = Default + ".Edit";
             public const string Delete = Default + ".Delete";
         }
-        
+
         public static class PurchaseInvoices
         {
             public const string Default = GroupName + ".PurchaseInvoices";

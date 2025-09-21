@@ -6,7 +6,7 @@ import { PermissionService } from '@abp/ng.core';
 
 @Component({
   template: '',
-  standalone: true
+  standalone: true,
 })
 class TestComponentBase extends ComponentBase {
   loading = false;
@@ -22,8 +22,8 @@ describe('ComponentBase', () => {
       providers: [
         MessageService,
         ConfirmationService,
-        { provide: PermissionService, useValue: { getGrantedPolicy: () => true } }
-      ]
+        { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestComponentBase);

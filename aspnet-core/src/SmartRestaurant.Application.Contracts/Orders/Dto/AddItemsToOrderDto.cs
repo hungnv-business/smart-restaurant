@@ -17,7 +17,7 @@ public class AddItemsToOrderDto
     [Required]
     [MinLength(1, ErrorMessage = "Phải có ít nhất 1 món để thêm vào order")]
     public List<CreateOrderItemDto> Items { get; set; } = new();
-    
+
     /// <summary>
     /// Ghi chú chung cho lần gọi thêm này
     /// Ví dụ: "Khách yêu cầu thêm món sau khi ăn xong món đầu"

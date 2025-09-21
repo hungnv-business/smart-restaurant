@@ -113,7 +113,7 @@ class AuthService extends ChangeNotifier {
             errorCode = 'INTERNAL_SERVER_ERROR';
             break;
           default:
-            message = 'Lỗi không xác định (${statusCode})';
+            message = 'Lỗi không xác định ($statusCode)';
         }
 
         // Try to get error details from response

@@ -84,7 +84,7 @@ class _OrderScreenState extends State<OrderScreen> {
     final Map<String, List<DineInTableDto>> grouped = {};
     
     for (final table in _allTables) {
-      final sectionName = table.layoutSectionName ?? 'Không có khu vực';
+      final sectionName = table.layoutSectionName;
       if (!grouped.containsKey(sectionName)) {
         grouped[sectionName] = [];
       }

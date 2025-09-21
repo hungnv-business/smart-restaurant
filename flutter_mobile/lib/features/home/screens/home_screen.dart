@@ -12,7 +12,7 @@ import '../../settings/screens/network_printer_settings_screen.dart';
 
 /// Màn hình chính với bottom navigation cho 3 tab
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();

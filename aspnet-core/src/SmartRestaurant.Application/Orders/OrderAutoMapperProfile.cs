@@ -48,7 +48,7 @@ public class OrderAutoMapperProfile : Profile
 
         // MenuItem mappings
         CreateMap<MenuItem, MenuItemDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => 
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
                 src.Category != null ? src.Category.Name : null));
     }
 }

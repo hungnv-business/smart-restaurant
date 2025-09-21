@@ -6,7 +6,7 @@ import '../../features/home/screens/home_screen.dart';
 
 /// Widget wrapper kiểm tra authentication state và điều hướng phù hợp
 class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
+  const AuthWrapper({super.key});
 
   @override
   State<AuthWrapper> createState() => _AuthWrapperState();

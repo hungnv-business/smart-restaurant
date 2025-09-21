@@ -13,21 +13,12 @@ import { CardModule } from 'primeng/card';
 import {
   MenuItemDto,
   CreateUpdateMenuItemDto,
-  MenuItemIngredientDto,
 } from '../../../../proxy/menu-management/menu-items/dto';
-import { MenuCategoryDto } from '../../../../proxy/menu-management/menu-categories/dto';
-import {
-  IngredientDto,
-  GetIngredientListRequestDto,
-} from '../../../../proxy/inventory-management/ingredients/dto';
 import { MenuItemService } from '../../../../proxy/menu-management/menu-items';
-import { MenuCategoryService } from '../../../../proxy/menu-management/menu-categories';
-import { IngredientService } from '../../../../proxy/inventory-management/ingredients';
 import { ComponentBase } from '../../../../shared/base/component-base';
 import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 import { FormFooterActionsComponent } from '../../../../shared/components/form-footer-actions/form-footer-actions.component';
 import { MenuItemFormData } from '../services/menu-item-form-dialog.service';
-import { PagedAndSortedResultRequestDto } from '@abp/ng.core';
 import { take, finalize } from 'rxjs';
 import { GlobalService } from '@proxy/common';
 import { GuidLookupItemDto } from '@proxy/common/dto';
@@ -115,6 +106,13 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
   }
 
   /**
+   * Lấy FormArray của ingredients
+   */
+  get ingredientsFormArray(): FormArray {
+    return this.form.get('ingredients') as FormArray;
+  }
+
+  /**
    * Xử lý submit form - validate và lưu món ăn
    */
   onSubmit() {
@@ -145,13 +143,6 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
    */
   onCancel() {
     this.ref.close(false);
-  }
-
-  /**
-   * Lấy FormArray của ingredients
-   */
-  get ingredientsFormArray(): FormArray {
-    return this.form.get('ingredients') as FormArray;
   }
 
   /**

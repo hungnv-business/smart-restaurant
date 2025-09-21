@@ -34,7 +34,6 @@ void main() async {
           create: (context) => OrderService(
             accessToken: context.read<AuthService>().accessToken,
             signalRService: context.read<SignalRService>(),
-            notificationService: context.read<NotificationService>(),
           ),
           update: (_, auth, signalR, notification, previous) {
             // Reuse existing OrderService if possible, only create new if null
@@ -44,7 +43,6 @@ void main() async {
             return OrderService(
               accessToken: auth.accessToken,
               signalRService: signalR,
-              notificationService: notification,
             );
           },
         ),
@@ -71,7 +69,7 @@ void main() async {
 /// Tối ưu hóa cho tablet nhà hàng với responsive design
 class QuanBiaApp extends StatelessWidget {
   /// Constructor với key tùy chọn
-  const QuanBiaApp({Key? key}) : super(key: key);
+  const QuanBiaApp({super.key});
 
   @override
   Widget build(BuildContext context) {

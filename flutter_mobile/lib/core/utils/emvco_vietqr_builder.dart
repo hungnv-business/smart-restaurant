@@ -24,7 +24,7 @@ class EmvcoVietQrBuilder {
       accountNo: '19035669437012',
       accountName: 'NGUYEN VAN HUNG',
       amount: servedTotal.toString(), // (tuỳ chọn) cố định số tiền
-      purpose: 'Thanh toan ban ' + tableNumber, // (tuỳ chọn) Tag 62-08
+      purpose: 'Thanh toan ban $tableNumber', // (tuỳ chọn) Tag 62-08
       // ref: 'INV-2025-0001',           // (tuỳ chọn) Tag 62-05
       dynamicQr: false, // '11' static; true => '12' dynamic
     );
@@ -91,7 +91,7 @@ class EmvcoVietQrBuilder {
     final t62 = addl.isEmpty ? '' : _template('62', addl);
 
     // Ghép payload (chưa có CRC): thêm '6304' làm placeholder
-    final payloadNoCRC = t00 + t01 + t38 + t53 + t54 + t58 + t59 + t62 + '6304';
+    final payloadNoCRC = '$t00$t01$t38$t53$t54$t58$t59${t62}6304';
 
     // 63: CRC16-CCITT (poly 0x1021, init 0xFFFF) => 4 hex uppercase
     final crc = _crc16CcittHex(payloadNoCRC).toUpperCase();

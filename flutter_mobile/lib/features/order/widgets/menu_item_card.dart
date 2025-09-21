@@ -11,13 +11,13 @@ class MenuItemCard extends StatelessWidget {
   final VoidCallback? onDecreaseQuantity;
 
   const MenuItemCard({
-    Key? key,
+    super.key,
     required this.menuItem,
     this.onAddToCart,
     this.quantity = 0,
     this.onIncreaseQuantity,
     this.onDecreaseQuantity,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +25,10 @@ class MenuItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -77,27 +74,26 @@ class MenuItemCard extends StatelessWidget {
                     width: double.infinity,
                     height: 100,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => 
+                    errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(context),
                   )
                 : _buildPlaceholder(context),
           ),
-          
+
           // Dark overlay for better text visibility
           Container(
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.3),
-                ],
+                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.3)],
               ),
             ),
           ),
-          
+
           // Popular badge (top-left) - hiển thị mức độ phổ biến
           if (menuItem.isPopular)
             Positioned(
@@ -119,24 +115,21 @@ class MenuItemCard extends StatelessWidget {
                 ),
               ),
             ),
-          
-          
+
           // Unavailable overlay
           if (!menuItem.isAvailable)
             Container(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                color: Colors.black.withOpacity(0.6),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                color: Colors.black.withValues(alpha: 0.6),
               ),
               child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.not_interested,
-                      color: Colors.white,
-                      size: 32,
-                    ),
+                    Icon(Icons.not_interested, color: Colors.white, size: 32),
                     SizedBox(height: 4),
                     Text(
                       'Hết món',
@@ -159,11 +152,11 @@ class MenuItemCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 100,
-      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Icon(
         Icons.restaurant_menu,
         size: 40, // Giảm icon size tương ứng
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
       ),
     );
   }
@@ -188,20 +181,14 @@ class MenuItemCard extends StatelessWidget {
             ),
             // Hiển thị thông tin trạng thái - đã bán hoặc stock status
             if (menuItem.isOutOfStock || menuItem.hasLimitedStock)
-              Flexible(
-                child: _buildCompactStockStatus(context),
-              )
+              Flexible(child: _buildCompactStockStatus(context))
             else if (menuItem.soldQuantity > 0)
               Flexible(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(width: 4), // spacing
-                    Icon(
-                      Icons.trending_up,
-                      size: 12,
-                      color: Colors.green[600],
-                    ),
+                    Icon(Icons.trending_up, size: 12, color: Colors.green[600]),
                     const SizedBox(width: 2),
                     Flexible(
                       child: Text(
@@ -236,7 +223,10 @@ class MenuItemCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: stockColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: stockColor.withValues(alpha: 0.3), width: 1),
+            border: Border.all(
+              color: stockColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
           ),
           child: Text(
             menuItem.stockStatusText,
@@ -263,38 +253,6 @@ class MenuItemCard extends StatelessWidget {
     }
   }
 
-  Widget _buildCategoryInfo(BuildContext context) {
-    if (menuItem.categoryName == null || menuItem.categoryName!.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    
-    return Text(
-      menuItem.categoryName!,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.primary,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  Widget _buildDescription(BuildContext context) {
-    if (menuItem.description == null || menuItem.description!.isEmpty) {
-      return const SizedBox.shrink(); // Không hiển thị gì nếu không có description
-    }
-    
-    return Text(
-      menuItem.description!,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: menuItem.isAvailable ? Colors.grey[600] : Colors.grey[400],
-        fontSize: 12, // Tăng font size lên 12 để dễ đọc hơn
-        height: 1.3, // Tăng line height để text không dính nhau
-      ),
-      maxLines: 3, // Hiển thị 3 dòng để hiện thị đầy đủ hơn
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
   Widget _buildFooter(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,7 +262,7 @@ class MenuItemCard extends StatelessWidget {
           child: Text(
             PriceFormatter.format(menuItem.price),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: menuItem.isAvailable 
+              color: menuItem.isAvailable
                   ? Theme.of(context).colorScheme.primary
                   : Colors.grey,
               fontWeight: FontWeight.bold,
@@ -314,9 +272,8 @@ class MenuItemCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        
+
         const SizedBox(width: 8), // Thêm spacing
-        
         // Add button hoặc Quantity controls
         _buildActionButton(context),
       ],
@@ -337,11 +294,7 @@ class MenuItemCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.add,
-                size: 16,
-                color: Colors.grey[600],
-              ),
+              Icon(Icons.add, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
                 'Thêm',
@@ -365,7 +318,7 @@ class MenuItemCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -381,11 +334,7 @@ class MenuItemCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.add,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+                  const Icon(Icons.add, size: 16, color: Colors.white),
                   const SizedBox(width: 4),
                   const Text(
                     'Thêm',
@@ -408,10 +357,7 @@ class MenuItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -425,18 +371,12 @@ class MenuItemCard extends StatelessWidget {
               child: Container(
                 width: 28,
                 height: 28,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.remove,
-                  size: 16,
-                  color: Colors.grey,
-                ),
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: const Icon(Icons.remove, size: 16, color: Colors.grey),
               ),
             ),
           ),
-          
+
           // Quantity text
           Container(
             constraints: const BoxConstraints(minWidth: 24),
@@ -450,7 +390,7 @@ class MenuItemCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Increase button - cho phép add dù hết stock
           Material(
             color: Colors.transparent,
@@ -460,14 +400,12 @@ class MenuItemCard extends StatelessWidget {
               child: Container(
                 width: 28,
                 height: 28,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
+                decoration: const BoxDecoration(shape: BoxShape.circle),
                 child: Icon(
                   Icons.add,
                   size: 16,
-                  color: _hasStockWarning() 
-                      ? Colors.orange[700] 
+                  color: _hasStockWarning()
+                      ? Colors.orange[700]
                       : Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -482,17 +420,11 @@ class MenuItemCard extends StatelessWidget {
   bool _hasStockWarning() {
     // Nếu hết hàng hoặc vượt quá stock available
     if (menuItem.isOutOfStock) return true;
-    
+
     // Nếu không có giới hạn stock thì không warning
     if (menuItem.maximumQuantityAvailable == 2147483647) return false;
-    
+
     // Warning khi quantity hiện tại >= stock available
     return quantity >= menuItem.maximumQuantityAvailable;
-  }
-
-  /// Kiểm tra có thể tăng quantity không (giữ lại method cũ để tương thích)
-  bool _canIncreaseQuantity() {
-    // Bây giờ luôn cho phép tăng - sẽ verify khi confirm order
-    return true;
   }
 }

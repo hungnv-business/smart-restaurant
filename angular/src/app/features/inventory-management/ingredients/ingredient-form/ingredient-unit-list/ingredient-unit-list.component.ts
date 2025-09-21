@@ -11,7 +11,7 @@ import { GuidLookupItemDto } from '@proxy/common/dto';
 
 /**
  * Component hiển thị danh sách các đơn vị mua hàng của nguyên liệu
- * 
+ *
  * Chức năng chính:
  * - Hiển thị bảng các đơn vị mua hàng với thông tin chi tiết
  * - Hiển thị tỷ lệ quy đổi so với đơn vị cơ bản (VD: 1 thùng = 24 chai)
@@ -19,7 +19,7 @@ import { GuidLookupItemDto } from '@proxy/common/dto';
  * - Đánh dấu đơn vị cơ sở (base unit) với tag đặc biệt
  * - Các action: thêm mới, chỉnh sửa, xóa đơn vị
  * - Responsive table với sorting và filtering
- * 
+ *
  * @example
  * // Sử dụng trong ingredient form:
  * <app-ingredient-unit-list

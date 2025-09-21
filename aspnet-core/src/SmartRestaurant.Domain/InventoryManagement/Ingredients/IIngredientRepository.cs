@@ -10,7 +10,7 @@ namespace SmartRestaurant.InventoryManagement.Ingredients
     {
         /// <summary>Lấy ingredient với đầy đủ navigation properties</summary>
         Task<Ingredient?> GetWithDetailsAsync(
-            Guid id, 
+            Guid id,
             CancellationToken cancellationToken = default);
 
         /// <summary>Lấy danh sách ingredients với navigation properties và phân trang</summary>

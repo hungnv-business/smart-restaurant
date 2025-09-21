@@ -13,7 +13,7 @@ namespace SmartRestaurant.MenuManagement.MenuItems
             CreateMap<CreateUpdateMenuItemDto, MenuItem>()
                 .ForMember(dest => dest.Category, opt => opt.Ignore()) // Navigation property will be loaded automatically
                 .ForMember(dest => dest.Ingredients, opt => opt.Ignore()); // Handled manually in AppService
-                
+
             // Mapping cho nguyên liệu
             CreateMap<MenuItemIngredient, MenuItemIngredientDto>();
         }

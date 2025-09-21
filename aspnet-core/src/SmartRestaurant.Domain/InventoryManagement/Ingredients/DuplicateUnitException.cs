@@ -13,7 +13,7 @@ public class DuplicateUnitException : BusinessException
     /// </summary>
     /// <param name="ingredientName">Tên nguyên liệu</param>
     /// <param name="unitName">Tên đơn vị bị trùng</param>
-    public DuplicateUnitException(string ingredientName, string unitName) 
+    public DuplicateUnitException(string ingredientName, string unitName)
         : base(SmartRestaurantDomainErrorCodes.Ingredients.DuplicateUnit)
     {
         WithData("IngredientName", ingredientName);

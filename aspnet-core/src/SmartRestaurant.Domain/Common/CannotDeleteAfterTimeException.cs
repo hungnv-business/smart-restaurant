@@ -13,7 +13,7 @@ public class CannotDeleteAfterTimeException : BusinessException
     /// </summary>
     /// <param name="creationTime">Thời gian tạo</param>
     /// <param name="timeLimit">Giới hạn thời gian (giờ)</param>
-    public CannotDeleteAfterTimeException(DateTime creationTime, int timeLimit) 
+    public CannotDeleteAfterTimeException(DateTime creationTime, int timeLimit)
         : base(SmartRestaurantDomainErrorCodes.PurchaseInvoices.CannotDeleteAfterSixHours)
     {
         WithData("CreationTime", creationTime.ToString("dd/MM/yyyy HH:mm"));

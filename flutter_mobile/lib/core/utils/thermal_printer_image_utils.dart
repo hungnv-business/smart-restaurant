@@ -39,9 +39,6 @@ class ThermalPrinterImageUtils {
       }
     }
 
-    int blackPixels = 0;
-    int whitePixels = 0;
-
     for (int y = 0; y < contrastedImage.height; y++) {
       for (int x = 0; x < contrastedImage.width; x++) {
         final pixel = contrastedImage.getPixel(x, y);
@@ -50,10 +47,8 @@ class ThermalPrinterImageUtils {
         // Threshold an toàn: < 128 = black, >= 128 = white
         if (gray < 128) {
           monochromeImage.setPixel(x, y, img.getColor(0, 0, 0));
-          blackPixels++;
         } else {
           monochromeImage.setPixel(x, y, img.getColor(255, 255, 255));
-          whitePixels++;
         }
       }
     }

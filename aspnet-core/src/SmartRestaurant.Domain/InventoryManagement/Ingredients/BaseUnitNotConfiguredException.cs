@@ -12,7 +12,7 @@ public class BaseUnitNotConfiguredException : BusinessException
     /// Khởi tạo exception với thông tin nguyên liệu
     /// </summary>
     /// <param name="ingredientName">Tên nguyên liệu</param>
-    public BaseUnitNotConfiguredException(string ingredientName) 
+    public BaseUnitNotConfiguredException(string ingredientName)
         : base(SmartRestaurantDomainErrorCodes.Ingredients.BaseUnitNotConfigured)
     {
         WithData("IngredientName", ingredientName);

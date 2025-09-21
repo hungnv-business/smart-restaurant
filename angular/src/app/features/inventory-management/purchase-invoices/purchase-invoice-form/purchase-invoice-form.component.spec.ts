@@ -32,7 +32,10 @@ describe('PurchaseInvoiceFormComponent', () => {
         { provide: DynamicDialogRef, useValue: mockDialogRef },
         { provide: DynamicDialogConfig, useValue: mockConfig },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
-        { provide: CORE_OPTIONS, useValue: { environment: { production: false }, skipGetAppConfiguration: true } }
+        {
+          provide: CORE_OPTIONS,
+          useValue: { environment: { production: false }, skipGetAppConfiguration: true },
+        },
       ],
     }).compileComponents();
 
@@ -61,10 +64,10 @@ describe('PurchaseInvoiceFormComponent', () => {
 
   it('should add and remove items correctly', () => {
     const initialLength = component.itemsFormArray.length;
-    
+
     component.addItem();
     expect(component.itemsFormArray.length).toBe(initialLength + 1);
-    
+
     component.removeItem(0);
     if (initialLength > 1) {
       expect(component.itemsFormArray.length).toBe(initialLength);
@@ -74,21 +77,21 @@ describe('PurchaseInvoiceFormComponent', () => {
   it('should calculate total amount correctly', () => {
     component.addItem();
     component.addItem();
-    
+
     // Set some test values
     component.itemsFormArray.at(0).patchValue({ totalPrice: 100000 });
     component.itemsFormArray.at(1).patchValue({ totalPrice: 200000 });
-    
+
     expect(component.getTotalAmount()).toBe(300000);
   });
 
   it('should auto-calculate total price when quantity and unit price change', () => {
     component.addItem();
     const itemForm = component.itemsFormArray.at(0);
-    
+
     itemForm.patchValue({ quantity: 5, unitPrice: 20000 });
     component.onQuantityOrPriceChange(0);
-    
+
     expect(itemForm.get('totalPrice')?.value).toBe(100000);
   });
 });
