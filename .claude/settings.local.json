@@ -41,7 +41,8 @@
       "Bash(dart format:*)",
       "mcp__ide__getDiagnostics",
       "Bash(git reset:*)",
-      "Bash(flutter:*)"
+      "Bash(flutter:*)",
+      "Bash(openssl rand:*)"
     ],
     "deny": [],
     "ask": []
