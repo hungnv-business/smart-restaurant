@@ -81,9 +81,9 @@ jobs:
         cd infrastructure/docker
         docker compose -f docker-compose.dev.yml up -d postgres
         
-        # Wait for postgres
-        echo "⏳ Waiting for PostgreSQL..."
-        timeout 60 bash -c 'until docker compose -f docker-compose.dev.yml exec -T postgres pg_isready -U postgres; do sleep 2; done'
+        # Wait for postgres health check to pass
+        echo "⏳ Waiting for PostgreSQL health check..."
+        timeout 60 bash -c 'until docker compose -f docker-compose.dev.yml ps postgres | grep -q "healthy"; do sleep 2; done'
         
         echo "✅ PostgreSQL container started successfully"
         
