@@ -2,25 +2,35 @@ name: Deploy SmartRestaurant to Production (chodocquan.site)
 
 on:
   push:
-    branches: [ main, production ]
+    branches: [ production ]  # Chỉ deploy production từ production branch
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment Environment'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-        - production
-        - staging
+      force_deploy:
+        description: 'Force deploy to production'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: 'Skip CI tests (not recommended)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # Chạy CI tests trước khi deploy (trừ khi skip_tests = true)
+  run-ci-tests:
+    if: ${{ !inputs.skip_tests }}
+    uses: ./.github/workflows/ci.yaml
+    secrets: inherit
+  
   # Build và test backend
   build-backend:
+    needs: [run-ci-tests]
+    if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     outputs:
       api-image: ${{ steps.meta.outputs.tags }}
