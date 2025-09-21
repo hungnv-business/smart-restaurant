@@ -25,7 +25,7 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
-          POSTGRES_INITDB_ARGS: "--locale=vi_VN.UTF-8 --encoding=UTF8"
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -97,7 +97,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'angular/package-lock.json'
+        cache-dependency-path: 'package-lock.json'
 
     - name: Install frontend dependencies
       run: |
@@ -138,7 +138,7 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
-          POSTGRES_INITDB_ARGS: "--locale=vi_VN.UTF-8 --encoding=UTF8"
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -162,7 +162,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-        cache-dependency-path: 'angular/package-lock.json'
+        cache-dependency-path: 'package-lock.json'
 
     - name: Install ABP CLI
       run: dotnet tool install -g Volo.Abp.Cli
