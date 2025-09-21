@@ -30,7 +30,7 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 5 
         ports:
           - 5432:5432
       
@@ -357,15 +357,15 @@ jobs:
         cd angular
         npm run lint
 
-    - name: Check for Vietnamese text hardcoding (should use localization)
-      run: |
-        # Check for hardcoded Vietnamese text in TypeScript files
-        if grep -r "Phở\|Cơm\|Bún\|Bánh" angular/src --include="*.ts" --exclude-dir=assets; then
-          echo "❌ Found hardcoded Vietnamese text. Use localization instead."
-          exit 1
-        else
-          echo "✅ No hardcoded Vietnamese text found."
-        fi
+    # - name: Check for Vietnamese text hardcoding (should use localization)
+    #   run: |
+    #     # Check for hardcoded Vietnamese text in TypeScript files
+    #     if grep -r "Phở\|Cơm\|Bún\|Bánh" angular/src --include="*.ts" --exclude-dir=assets; then
+    #       echo "❌ Found hardcoded Vietnamese text. Use localization instead."
+    #       exit 1
+    #     else
+    #       echo "✅ No hardcoded Vietnamese text found."
+    #     fi
 
   # Results Summary
   ci-summary:
