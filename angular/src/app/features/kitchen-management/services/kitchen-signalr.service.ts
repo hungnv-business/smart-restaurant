@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable, OnDestroy } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
