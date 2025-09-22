@@ -34,6 +34,8 @@ on:
       - '!*.yaml'
       - '!.github/workflows/**'
       - '!infrastructure/docker/**'
+  workflow_call:
+    # Cho phép workflow này được gọi từ workflow khác (như deploy-production.yml)
 
 env:
   DOTNET_VERSION: '8.0.x'
