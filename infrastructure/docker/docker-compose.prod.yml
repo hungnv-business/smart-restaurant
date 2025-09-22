@@ -53,10 +53,8 @@ services:
       resources:
         limits:
           memory: 450M
-          cpus: '0.7'
         reservations:
           memory: 200M
-          cpus: '0.3'
     healthcheck:
       test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost/health || exit 1"]
       interval: 30s
@@ -86,10 +84,8 @@ services:
       resources:
         limits:
           memory: 350M
-          cpus: '0.5'
         reservations:
           memory: 150M
-          cpus: '0.2'
     command: >
       postgres
       -c shared_buffers=80MB
