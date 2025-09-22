@@ -127,7 +127,13 @@ jobs:
         # Force local mode if GHCR permissions issue
         if [[ "${{ steps.docker_push.outcome }}" == "success" ]]; then
           echo "mode=registry" >> $GITHUB_OUTPUT
-          echo "image_ref=${{ steps.meta.outputs.tags }}" >> $GITHUB_OUTPUT
+          # Get first tag from multiline output using EOF delimiter
+          {
+            echo 'image_ref<<EOF'
+            echo '${{ steps.meta.outputs.tags }}' | head -n1
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          echo "✅ Using registry mode with first tag"
         else
           echo "⚠️ GHCR push failed, using local deployment mode"
           echo "mode=local" >> $GITHUB_OUTPUT
@@ -319,8 +325,11 @@ jobs:
           
           if [ "$DEPLOY_MODE" = "registry" ]; then
             echo "📦 Pulling latest API image from registry..."
-            sudo docker pull ${{ needs.build-backend.outputs.image_ref }}
-            sudo docker tag ${{ needs.build-backend.outputs.image_ref }} smartrestaurant/api:latest
+            # Get first tag from multiline output
+            IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
+            echo "Using image: ${IMAGE_REF}"
+            sudo docker pull "${IMAGE_REF}"
+            sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
           else
             echo "📦 Preparing for local Docker image deployment..."
             echo "Will load image from uploaded artifact"
