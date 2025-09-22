@@ -10,11 +10,8 @@ import { appRoutes } from './app.routes';
 import { provideAbpCore, withOptions } from '@abp/ng.core';
 import { registerLocale, storeLocaleData } from '@abp/ng.core/locale';
 import { provideAbpOAuth } from '@abp/ng.oauth';
-import { provideSettingManagementConfig } from '@abp/ng.setting-management/config';
 import { provideAccountConfig } from '@abp/ng.account/config';
 import { provideIdentityConfig } from '@abp/ng.identity/config';
-import { provideTenantManagementConfig } from '@abp/ng.tenant-management/config';
-import { provideFeatureManagementConfig } from '@abp/ng.feature-management';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
@@ -106,11 +103,8 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     provideAbpOAuth(),
-    provideSettingManagementConfig(),
     provideAccountConfig(),
     provideIdentityConfig(),
-    provideTenantManagementConfig(),
-    provideFeatureManagementConfig(),
     MessageService,
     DialogService,
     ConfirmationService,

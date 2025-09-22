@@ -9,15 +9,4 @@ import * as Orders from './orders';
 import * as TableManagement from './table-management';
 import * as Volo from './volo';
 export * from './table-status.enum';
-export {
-  Application,
-  Common,
-  HttpApi,
-  InventoryManagement,
-  Kitchen,
-  MenuManagement,
-  Microsoft,
-  Orders,
-  TableManagement,
-  Volo,
-};
+export { Application, Common, HttpApi, InventoryManagement, Kitchen, MenuManagement, Microsoft, Orders, TableManagement, Volo };

@@ -114,7 +114,7 @@ jobs:
         dotnet list package --vulnerable --include-transitive || true
 
   # Node.js specific security scan
-  npm-security:
+  yarn-security:
     runs-on: ubuntu-latest
     
     steps:
@@ -129,14 +129,14 @@ jobs:
     - name: Install dependencies
       run: |
         cd angular
-        npm ci
+        yarn install --frozen-lockfile
 
-    - name: Run npm audit
+    - name: Run yarn audit
       run: |
         cd angular
-        npm audit --audit-level=high || true
+        yarn audit --level high || true
 
     - name: Check for known vulnerabilities
       run: |
         cd angular
-        npx audit-ci --config audit-ci.json || true
+        yarn dlx audit-ci --config audit-ci.json || true
