@@ -30,8 +30,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.24.0
+    - name: Run Trivy vulnerability scanner (SARIF)
+      uses: aquasecurity/trivy-action@0.28.0
       with:
         scan-type: 'fs'
         scan-ref: '.'
@@ -39,6 +39,17 @@ jobs:
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
         ignore-unfixed: true
+        exit-code: '0'
+        
+    - name: Run Trivy vulnerability scanner (Table for logs)
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'table'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+        exit-code: '0'
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
@@ -47,20 +58,33 @@ jobs:
         sarif_file: 'trivy-results.sarif'
       continue-on-error: true
       
+    - name: Install jq for JSON processing
+      run: sudo apt-get update && sudo apt-get install -y jq
+      
     - name: Show Trivy results summary
       if: always()
       run: |
         if [ -f "trivy-results.sarif" ]; then
           echo "🔍 Security Scan Results:"
-          # Count total vulnerabilities
-          TOTAL_VULNS=$(cat trivy-results.sarif | jq '.runs[0].results | length' || echo "0")
-          echo "Total vulnerabilities found: $TOTAL_VULNS"
           
-          if [ "$TOTAL_VULNS" -gt "0" ]; then
-            echo "❌ Security vulnerabilities detected. Check the Security tab for details."
-            exit 1
+          # Check if file has content
+          if [ -s "trivy-results.sarif" ]; then
+            # Count total vulnerabilities safely
+            TOTAL_VULNS=$(jq '.runs[]?.results? // [] | length' trivy-results.sarif 2>/dev/null || echo "0")
+            echo "Total vulnerabilities found: $TOTAL_VULNS"
+            
+            if [ "$TOTAL_VULNS" -gt "0" ]; then
+              echo "❌ Security vulnerabilities detected. Check the Security tab for details."
+              
+              # Show vulnerability details
+              jq -r '.runs[]?.results[]? | "\(.ruleId // "Unknown"): \(.message.text // "No message")"' trivy-results.sarif 2>/dev/null || echo "Could not parse vulnerability details"
+              
+              exit 1
+            else
+              echo "✅ No security vulnerabilities found."
+            fi
           else
-            echo "✅ No security vulnerabilities found."
+            echo "⚠️ Scan results file is empty"
           fi
         else
           echo "⚠️ No scan results found"
