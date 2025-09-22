@@ -48,7 +48,9 @@
       "Bash(docker logs:*)",
       "Bash(dotnet --version)",
       "Bash(npx prettier:*)",
-      "Bash(dotnet format:*)"
+      "Bash(dotnet format:*)",
+      "Bash(yarn list:*)",
+      "Bash(yarn info:*)"
     ],
     "deny": [],
     "ask": []
