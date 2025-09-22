@@ -416,7 +416,7 @@ jobs:
               # Restore database if available
               if [ -f "database_backup.sql" ]; then
                 echo "💾 Restoring database..."
-                sudo docker-compose -f docker-compose.prod.yml up postgres -d
+                sudo docker-compose -f docker-compose.prod.yml up -d postgres
                 sleep 10
                 sudo docker exec smartrestaurant-postgres-1 psql -U postgres -d SmartRestaurant < database_backup.sql 2>/dev/null || true
               fi
