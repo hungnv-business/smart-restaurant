@@ -50,7 +50,8 @@
       "Bash(npx prettier:*)",
       "Bash(dotnet format:*)",
       "Bash(yarn list:*)",
-      "Bash(yarn info:*)"
+      "Bash(yarn info:*)",
+      "Bash(yarn test:*)"
     ],
     "deny": [],
     "ask": []

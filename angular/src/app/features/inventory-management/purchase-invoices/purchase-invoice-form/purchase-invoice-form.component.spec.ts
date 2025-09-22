@@ -7,14 +7,28 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { DialogService, DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { PermissionService } from '@abp/ng.core';
 import { CORE_OPTIONS } from '@abp/ng.core';
+import { of } from 'rxjs';
 import { PurchaseInvoiceFormComponent } from './purchase-invoice-form.component';
 import { ComponentBase } from '../../../../shared/base/component-base';
+import { GlobalService } from '../../../../proxy/common/global.service';
+import { PurchaseInvoiceService } from '../../../../proxy/inventory-management/purchase-invoices/purchase-invoice.service';
 
 describe('PurchaseInvoiceFormComponent', () => {
   let component: PurchaseInvoiceFormComponent;
   let fixture: ComponentFixture<PurchaseInvoiceFormComponent>;
   let mockDialogRef: jasmine.SpyObj<DynamicDialogRef>;
   let mockConfig: DynamicDialogConfig;
+
+  // Mock services
+  const mockGlobalService = {
+    getIngredientCategoriesLookup: jasmine.createSpy('getIngredientCategoriesLookup').and.returnValue(of({ items: [] }))
+  };
+
+  const mockPurchaseInvoiceService = {
+    create: jasmine.createSpy('create').and.returnValue(of({})),
+    update: jasmine.createSpy('update').and.returnValue(of({})),
+    get: jasmine.createSpy('get').and.returnValue(of({}))
+  };
 
   beforeEach(async () => {
     mockDialogRef = jasmine.createSpyObj('DynamicDialogRef', ['close']);
@@ -32,6 +46,8 @@ describe('PurchaseInvoiceFormComponent', () => {
         { provide: DynamicDialogRef, useValue: mockDialogRef },
         { provide: DynamicDialogConfig, useValue: mockConfig },
         { provide: PermissionService, useValue: { getGrantedPolicy: () => true } },
+        { provide: GlobalService, useValue: mockGlobalService },
+        { provide: PurchaseInvoiceService, useValue: mockPurchaseInvoiceService },
         {
           provide: CORE_OPTIONS,
           useValue: { environment: { production: false }, skipGetAppConfiguration: true },
@@ -53,7 +69,17 @@ describe('PurchaseInvoiceFormComponent', () => {
 
   it('should initialize form with required validators', () => {
     expect(component.form).toBeDefined();
-    expect(component.form.get('invoiceNumber')?.hasError('required')).toBeTruthy();
+    
+    // invoiceNumber không có required validator (được tự động sinh)
+    expect(component.form.get('invoiceNumber')).toBeDefined();
+    expect(component.form.get('invoiceNumber')?.value).toBeTruthy();
+    
+    // invoiceDate có required validator và có default value
+    expect(component.form.get('invoiceDate')).toBeDefined();
+    expect(component.form.get('invoiceDate')?.hasError('required')).toBeFalsy(); // Có default value nên không có lỗi
+    
+    // Kiểm tra khi xóa giá trị invoiceDate
+    component.form.get('invoiceDate')?.setValue(null);
     expect(component.form.get('invoiceDate')?.hasError('required')).toBeTruthy();
   });
 
