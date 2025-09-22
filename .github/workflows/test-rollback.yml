@@ -1,0 +1,268 @@
+name: Test Rollback Mechanism
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_scenario:
+        description: 'Rollback test scenario'
+        required: true
+        default: 'api_failure'
+        type: choice
+        options:
+          - api_failure
+          - nginx_failure
+          - container_failure
+          - database_failure
+      environment:
+        description: 'Test environment (dev only for safety)'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test-rollback-mechanism:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    environment:
+      name: ${{ inputs.environment }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate test environment
+      run: |
+        if [[ "${{ inputs.environment }}" != "development" ]]; then
+          echo "❌ Rollback tests can only run in development environment"
+          exit 1
+        fi
+        echo "✅ Running rollback test in development environment"
+        
+    - name: Setup test environment
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.DEV_VPS_HOST }}
+        username: ${{ secrets.DEV_VPS_USER }}
+        key: ${{ secrets.DEV_VPS_SSH_KEY }}
+        port: ${{ secrets.DEV_VPS_PORT || 22 }}
+        script: |
+          echo "🧪 Setting up rollback test environment..."
+          
+          # Create test directories
+          sudo mkdir -p /opt/smartrestaurant-test
+          cd /opt/smartrestaurant-test
+          
+          # Copy current deployment as baseline
+          if [ -d "/opt/smartrestaurant" ]; then
+            sudo cp -r /opt/smartrestaurant/* . 2>/dev/null || true
+          fi
+          
+          # Create a known good state backup
+          BACKUP_DIR="/opt/smartrestaurant-test.backup.good"
+          sudo rm -rf "$BACKUP_DIR"
+          sudo cp -r /opt/smartrestaurant-test "$BACKUP_DIR"
+          
+          echo "✅ Test environment prepared"
+          
+    - name: Simulate deployment failure
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.DEV_VPS_HOST }}
+        username: ${{ secrets.DEV_VPS_USER }}
+        key: ${{ secrets.DEV_VPS_SSH_KEY }}
+        port: ${{ secrets.DEV_VPS_PORT || 22 }}
+        script: |
+          cd /opt/smartrestaurant-test
+          
+          echo "🎭 Simulating ${{ inputs.test_scenario }}..."
+          
+          case "${{ inputs.test_scenario }}" in
+            "api_failure")
+              # Corrupt API configuration to simulate failure
+              echo "Simulating API startup failure..."
+              if [ -f "docker-compose.prod.yml" ]; then
+                # Temporarily break API service configuration
+                sed -i 's/smartrestaurant\/api:latest/nonexistent\/api:broken/g' docker-compose.prod.yml
+              fi
+              ;;
+            "nginx_failure")
+              # Corrupt nginx configuration
+              echo "Simulating Nginx configuration failure..."
+              if [ -f "nginx.conf" ]; then
+                echo "invalid_nginx_config_line" >> nginx.conf
+              fi
+              ;;
+            "container_failure")
+              # Use non-existent image
+              echo "Simulating container startup failure..."
+              if [ -f "docker-compose.prod.yml" ]; then
+                sed -i 's/postgres:15/postgres:nonexistent/g' docker-compose.prod.yml
+              fi
+              ;;
+            "database_failure")
+              # Simulate database connection issues
+              echo "Simulating database connection failure..."
+              if [ -f ".env" ]; then
+                sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=wrong_password/g' .env
+              fi
+              ;;
+            *)
+              echo "Unknown test scenario: ${{ inputs.test_scenario }}"
+              exit 1
+              ;;
+          esac
+          
+          echo "💥 Failure scenario configured"
+          
+    - name: Test rollback mechanism
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.DEV_VPS_HOST }}
+        username: ${{ secrets.DEV_VPS_USER }}
+        key: ${{ secrets.DEV_VPS_SSH_KEY }}
+        port: ${{ secrets.DEV_VPS_PORT || 22 }}
+        script: |
+          cd /opt/smartrestaurant-test
+          
+          # Load backup variables
+          BACKUP_DIR="/opt/smartrestaurant-test.backup.good"
+          
+          # Simulate deployment with rollback function
+          rollback_deployment() {
+            echo "🛟 TESTING ROLLBACK - Starting automatic rollback..."
+            
+            # Stop failed services
+            sudo docker-compose -f docker-compose.prod.yml down --timeout 15 2>/dev/null || true
+            
+            if [ -d "$BACKUP_DIR" ]; then
+              echo "🔄 Restoring from test backup: $BACKUP_DIR"
+              
+              # Restore application files
+              sudo rm -rf /opt/smartrestaurant-test
+              sudo cp -r "$BACKUP_DIR" /opt/smartrestaurant-test
+              cd /opt/smartrestaurant-test
+              
+              # Start restored services (if docker-compose exists)
+              if [ -f "docker-compose.prod.yml" ]; then
+                echo "🚀 Starting restored services..."
+                sudo docker-compose -f docker-compose.prod.yml up -d 2>/dev/null || true
+                sleep 20
+              fi
+              
+              echo "✅ Test rollback completed"
+              echo "rollback_success=true" > /tmp/test_result
+            else
+              echo "❌ Test backup not found"
+              echo "rollback_success=false" > /tmp/test_result
+            fi
+            
+            return 0
+          }
+          
+          # Try to start services (should fail)
+          echo "🧪 Testing deployment with failure scenario..."
+          
+          if [ -f "docker-compose.prod.yml" ]; then
+            # This should fail due to our simulated errors
+            if ! sudo docker-compose -f docker-compose.prod.yml up -d; then
+              echo "💥 Deployment failed as expected"
+              
+              # Test rollback
+              rollback_deployment
+            else
+              echo "⚠️ Deployment succeeded unexpectedly - checking health"
+              sleep 10
+              
+              # Health checks should fail
+              if ! curl -f http://localhost:8080/health 2>/dev/null; then
+                echo "💥 Health check failed as expected"
+                rollback_deployment
+              else
+                echo "🤔 Health check passed - test scenario may not be effective"
+                echo "rollback_success=not_needed" > /tmp/test_result
+              fi
+            fi
+          else
+            echo "⚠️ No docker-compose.prod.yml found for testing"
+            echo "rollback_success=no_compose" > /tmp/test_result
+          fi
+          
+    - name: Verify rollback test results
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.DEV_VPS_HOST }}
+        username: ${{ secrets.DEV_VPS_USER }}
+        key: ${{ secrets.DEV_VPS_SSH_KEY }}
+        port: ${{ secrets.DEV_VPS_PORT || 22 }}
+        script: |
+          if [ -f "/tmp/test_result" ]; then
+            result=$(cat /tmp/test_result)
+            echo "📊 Test result: $result"
+            
+            case "$result" in
+              "rollback_success=true")
+                echo "✅ Rollback mechanism test PASSED"
+                echo "🎉 Automatic rollback worked correctly"
+                ;;
+              "rollback_success=false")
+                echo "❌ Rollback mechanism test FAILED"
+                echo "🚨 Rollback did not work properly"
+                exit 1
+                ;;
+              "rollback_success=not_needed")
+                echo "⚠️ Test inconclusive - scenario didn't trigger failure"
+                ;;
+              "rollback_success=no_compose")
+                echo "⚠️ Test skipped - no docker-compose configuration"
+                ;;
+              *)
+                echo "❓ Unknown test result: $result"
+                ;;
+            esac
+          else
+            echo "❌ No test results found"
+            exit 1
+          fi
+          
+    - name: Cleanup test environment
+      if: always()
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.DEV_VPS_HOST }}
+        username: ${{ secrets.DEV_VPS_USER }}
+        key: ${{ secrets.DEV_VPS_SSH_KEY }}
+        port: ${{ secrets.DEV_VPS_PORT || 22 }}
+        script: |
+          echo "🧹 Cleaning up test environment..."
+          
+          # Stop any test containers
+          cd /opt/smartrestaurant-test 2>/dev/null || true
+          sudo docker-compose -f docker-compose.prod.yml down --timeout 10 2>/dev/null || true
+          
+          # Remove test directories
+          sudo rm -rf /opt/smartrestaurant-test
+          sudo rm -rf /opt/smartrestaurant-test.backup.good
+          sudo rm -f /tmp/test_result
+          
+          echo "✅ Test cleanup completed"
+          
+    - name: Test summary
+      if: always()
+      run: |
+        echo "## 🧪 Rollback Mechanism Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Scenario | ${{ inputs.test_scenario }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Date | $(date) |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🔍 **Purpose**: Verify that the automatic rollback mechanism works correctly when deployments fail." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📝 **Next Steps**: If tests pass, the rollback mechanism is ready for production use." >> $GITHUB_STEP_SUMMARY

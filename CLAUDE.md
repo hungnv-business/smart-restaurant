@@ -303,13 +303,20 @@ Copy `.env.example` to `.env` and update values for production deployment.
 
 ### Common ABP Framework Issues
 
-#### 1. "ABP CLI not found"
+#### 1. "ABP CLI not found" or "@volo/abp not found"
 ```bash
-# Install ABP CLI globally
-dotnet tool install -g Volo.Abp.Cli
+# ABP v8.2+ uses new CLI package
+# Install new ABP CLI globally
+dotnet tool install -g Volo.Abp.Studio.Cli
 
 # Update ABP CLI
-dotnet tool update -g Volo.Abp.Cli
+dotnet tool update -g Volo.Abp.Studio.Cli
+
+# If new CLI fails, fallback to old CLI
+dotnet tool install -g Volo.Abp.Cli
+
+# Add dotnet tools to PATH if needed
+export PATH="$PATH:$HOME/.dotnet/tools"
 ```
 
 #### 2. "Proxy generation failed"
