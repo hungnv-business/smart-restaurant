@@ -99,22 +99,20 @@ jobs:
         platforms: linux/amd64
       continue-on-error: true
       
-    - name: Fallback - Build for local deployment
-      if: steps.docker_push.outcome == 'failure'
+    - name: Build backup image for local deployment
       run: |
-        echo "⚠️ GHCR push failed, building locally for VPS deployment"
+        echo "📦 Building backup image for local deployment (in case registry fails)"
         
-        # Build image locally without pushing to registry
+        # Build image locally as backup
         docker build -f ./infrastructure/docker/Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
         
-        # Save image as tar file for deployment
+        # Save image as tar file for deployment backup
         mkdir -p ./build-artifacts
         docker save smartrestaurant-api:${{ github.sha }} > ./build-artifacts/api-image.tar
         
-        echo "✅ Local build completed, image saved as tar file"
+        echo "✅ Backup image built and saved as tar file"
         
-    - name: Upload Docker image artifact (fallback)
-      if: steps.docker_push.outcome == 'failure'
+    - name: Upload Docker image artifact (backup)
       uses: actions/upload-artifact@v4
       with:
         name: api-docker-image
@@ -266,8 +264,7 @@ jobs:
         name: angular-dist
         path: ./angular-dist
         
-    - name: Download Docker image (if local build)
-      if: needs.build-backend.outputs.deploy_mode == 'local'
+    - name: Download Docker image backup
       uses: actions/download-artifact@v4
       with:
         name: api-docker-image
@@ -328,8 +325,16 @@ jobs:
             # Get first tag from multiline output
             IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
             echo "Using image: ${IMAGE_REF}"
-            sudo docker pull "${IMAGE_REF}"
-            sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
+            
+            # Try to pull image with error handling
+            if sudo docker pull "${IMAGE_REF}"; then
+              sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
+              echo "✅ Registry image pulled successfully"
+            else
+              echo "⚠️ Failed to pull from registry, switching to local mode"
+              echo "deployment_mode=local" >> /tmp/deployment_vars
+              echo "Will need local image file for deployment"
+            fi
           else
             echo "📦 Preparing for local Docker image deployment..."
             echo "Will load image from uploaded artifact"
@@ -359,8 +364,7 @@ jobs:
         target: "/var/www/html/"
         strip_components: 1
         
-    - name: Copy Docker image (if local build)
-      if: needs.build-backend.outputs.deploy_mode == 'local'
+    - name: Copy Docker image backup to VPS
       uses: appleboy/scp-action@v0.1.5
       with:
         host: ${{ secrets.VPS_HOST }}
