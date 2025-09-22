@@ -58,7 +58,7 @@ services:
           memory: 200M
           cpus: '0.3'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost/health || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -101,7 +101,7 @@ services:
       -c effective_io_concurrency=200
       -c min_wal_size=64MB
       -c max_wal_size=512MB
-      -c log_statement=error
+      -c log_statement=none
       -c log_min_error_statement=error
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d SmartRestaurant"]
