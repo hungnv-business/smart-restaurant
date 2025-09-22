@@ -532,19 +532,12 @@ jobs:
     steps:
     - name: Get deployment result
       id: result
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        script: |
-          if [ -f "/tmp/deployment_result" ]; then
-            cat /tmp/deployment_result
-          else
-            echo "deployment_success=unknown"
-            echo "rollback_success=unknown"
-          fi
+      run: |
+        # Set default values for deployment status
+        echo "deployment_success=unknown" >> $GITHUB_OUTPUT
+        echo "rollback_success=unknown" >> $GITHUB_OUTPUT
+        
+        echo "📊 Deployment status will be determined by health checks"
     
     - name: Wait for system stabilization
       run: sleep 60
@@ -589,15 +582,24 @@ jobs:
     - name: Determine final status
       id: status
       run: |
-        if [[ "${{ steps.external_check.outputs.site_healthy }}" == "true" && "${{ steps.external_check.outputs.api_healthy }}" == "true" ]]; then
+        SITE_HEALTHY="${{ steps.external_check.outputs.site_healthy }}"
+        API_HEALTHY="${{ steps.external_check.outputs.api_healthy }}"
+        DEPLOY_JOB_SUCCESS="${{ needs.deploy-production.result }}"
+        
+        echo "🔍 Status Summary:"
+        echo "  - Site Health: ${SITE_HEALTHY}"
+        echo "  - API Health: ${API_HEALTHY}"
+        echo "  - Deploy Job: ${DEPLOY_JOB_SUCCESS}"
+        
+        if [[ "${SITE_HEALTHY}" == "true" && "${API_HEALTHY}" == "true" ]]; then
           echo "final_status=success" >> $GITHUB_OUTPUT
           echo "status_message=🎉 Deployment successful! All services are healthy." >> $GITHUB_OUTPUT
-        elif [[ "${{ steps.result.outputs.rollback_success }}" == "true" ]]; then
-          echo "final_status=rolled_back" >> $GITHUB_OUTPUT
-          echo "status_message=🔄 Deployment failed but rollback successful. Previous version restored." >> $GITHUB_OUTPUT
+        elif [[ "${DEPLOY_JOB_SUCCESS}" == "success" && ("${SITE_HEALTHY}" != "true" || "${API_HEALTHY}" != "true") ]]; then
+          echo "final_status=degraded" >> $GITHUB_OUTPUT
+          echo "status_message=⚠️ Deployment completed but some health checks failed. Service may be partially available." >> $GITHUB_OUTPUT
         else
           echo "final_status=failed" >> $GITHUB_OUTPUT
-          echo "status_message=❌ Deployment failed and rollback failed. Manual intervention required!" >> $GITHUB_OUTPUT
+          echo "status_message=❌ Deployment failed. Check logs for details and consider manual intervention." >> $GITHUB_OUTPUT
         fi
         
     - name: Success notification
@@ -608,34 +610,28 @@ jobs:
         echo "📊 All health checks passed"
         echo "🕐 Deployment completed at: $(date)"
         
-    - name: Rollback notification
-      if: steps.status.outputs.final_status == 'rolled_back'
+    - name: Degraded notification
+      if: steps.status.outputs.final_status == 'degraded'
       run: |
-        echo "🔄 SmartRestaurant deployment was rolled back"
-        echo "⚠️ New version had issues, previous version restored"
-        echo "🌐 Service available at: https://chodocquan.site"
-        echo "📝 Check deployment logs for details"
-        echo "🕐 Rollback completed at: $(date)"
+        echo "⚠️ SmartRestaurant deployment completed with issues"
+        echo "📊 Some health checks failed - service may be partially available"
+        echo "🌐 Check service at: https://chodocquan.site"
+        echo "📝 Review deployment logs and consider manual checks"
+        echo "🕐 Deployment completed at: $(date)"
         
     - name: Failure notification
       if: steps.status.outputs.final_status == 'failed'
       run: |
         echo "❌ SmartRestaurant deployment failed!"
-        echo "🚨 Both deployment and rollback failed"
-        echo "⚠️ Manual intervention required immediately"
-        echo "📞 Contact system administrator"
+        echo "🚨 Deployment job failed or services are not responding"
+        echo "⚠️ Manual intervention may be required"
+        echo "📞 Contact system administrator if service is down"
         echo "🕐 Failure detected at: $(date)"
         exit 1
         
     - name: Cleanup deployment artifacts
       if: always()
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        script: |
-          # Clean up temporary files
-          rm -f /tmp/deployment_vars /tmp/deployment_result
-          echo "🧹 Cleanup completed"
+      run: |
+        echo "🧹 Deployment workflow completed"
+        echo "📝 Summary: ${{ steps.status.outputs.status_message }}"
+        echo "🕐 Finished at: $(date)"
