@@ -3,8 +3,37 @@ name: CI Pipeline
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      # Chạy CI khi có thay đổi code hoặc config quan trọng
+      - 'aspnet-core/**'
+      - 'angular/**' 
+      - 'flutter_mobile/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      # Loại trừ các file không ảnh hưởng đến build/test
+      - '!**/*.md'                     # Documentation files
+      - '!docs/**'                     # Documentation folder
+      - '!*.yml'                       # YAML files ở root
+      - '!*.yaml'                      # YAML files ở root  
+      - '!.github/workflows/**'       # GitHub workflow files
+      - '!infrastructure/docker/**'   # Docker configs (có workflow riêng)
   pull_request:
     branches: [ main, develop ]
+    paths:
+      # Tương tự như push
+      - 'aspnet-core/**'
+      - 'angular/**'
+      - 'flutter_mobile/**'
+      - 'package.json'
+      - 'package-lock.json' 
+      - 'yarn.lock'
+      - '!**/*.md'
+      - '!docs/**'
+      - '!*.yml'
+      - '!*.yaml'
+      - '!.github/workflows/**'
+      - '!infrastructure/docker/**'
 
 env:
   DOTNET_VERSION: '8.0.x'
