@@ -4,16 +4,32 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      # Chỉ chạy khi có thay đổi liên quan đến Docker
+      # Chỉ chạy khi có thay đổi liên quan đến Docker build
       - 'infrastructure/docker/**'
-      - 'aspnet-core/**'
-      - 'angular/**'
+      - 'aspnet-core/src/**'           # Source code
+      - '!aspnet-core/test/**'         # Loại trừ test projects
+      - 'aspnet-core/global.json'
+      - 'aspnet-core/*.sln'
+      - 'aspnet-core/common.props'
+      - 'angular/src/**'               # Bao gồm cả .spec.ts files
+      - '!angular/src/**/*.spec.ts'    # Loại trừ test files
+      - '!angular/e2e/**'              # Loại trừ e2e tests
+      - 'angular/package.json'
+      - 'angular/package-lock.json'
+      - 'angular/yarn.lock'
+      - 'angular/angular.json'
+      - 'angular/tsconfig*.json'
       - 'Dockerfile*'
       - '.dockerignore'
   pull_request:
     branches: [ main ]
     paths:
       - 'infrastructure/docker/**'
+      - 'aspnet-core/src/**'
+      - '!aspnet-core/test/**'         # Loại trừ test projects
+      - 'angular/src/**'
+      - '!angular/src/**/*.spec.ts'    # Loại trừ test files
+      - '!angular/e2e/**'              # Loại trừ e2e tests
       - 'Dockerfile*'
   workflow_dispatch:
     # Cho phép chạy manual
