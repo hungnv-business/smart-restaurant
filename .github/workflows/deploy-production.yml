@@ -93,6 +93,8 @@ jobs:
 
   # Build Angular frontend
   build-frontend:
+    needs: [run-ci-tests]
+    if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -107,13 +109,15 @@ jobs:
         
     - name: Install dependencies
       run: |
-        cd angular
+        # Install dependencies ở root (workspace setup)
         yarn install --frozen-lockfile
         
-    - name: Install ABP libraries
+    - name: Install ABP CLI and libraries
       run: |
-        cd angular
-        yarn global add @abp/cli
+        # Install ABP CLI using npm (more reliable than yarn global)
+        npm install -g @volo/abp
+        
+        # Install ABP libraries from solution root (not inside angular folder)
         abp install-libs
         
     - name: Generate service proxies
@@ -149,6 +153,8 @@ jobs:
 
   # Test Flutter mobile (build test)
   test-mobile:
+    needs: [run-ci-tests]
+    if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -182,7 +188,7 @@ jobs:
 
   # Deploy to production VPS
   deploy-production:
-    needs: [build-backend, build-frontend]
+    needs: [build-backend, build-frontend, test-mobile]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
     environment:
