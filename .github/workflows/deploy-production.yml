@@ -209,6 +209,63 @@ jobs:
         path: angular/dist/
         retention-days: 1
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true  # Allow fallback to local build
+        
+    - name: Extract metadata for Web
+      id: meta-web
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: Build and push Web Docker image
+      id: docker_push_web
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./infrastructure/docker/Dockerfile.web
+        target: production
+        push: true
+        tags: ${{ steps.meta-web.outputs.tags }}
+        labels: ${{ steps.meta-web.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+      continue-on-error: true
+      
+    - name: Build backup Web image for local deployment
+      run: |
+        echo "📦 Building backup Web image for local deployment (in case registry fails)"
+        
+        # Build image locally as backup
+        docker build -f ./infrastructure/docker/Dockerfile.web -t smartrestaurant-web:${{ github.sha }} .
+        
+        # Save image as tar file for deployment backup
+        mkdir -p ./build-artifacts
+        docker save smartrestaurant-web:${{ github.sha }} > ./build-artifacts/web-image.tar
+        
+        echo "✅ Backup Web image built and saved as tar file"
+        
+    - name: Upload Web Docker image artifact (backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-docker-image
+        path: ./build-artifacts/web-image.tar
+        retention-days: 1
+
   # Test Flutter mobile (build test) - DISABLED TEMPORARILY
   # TODO: Re-enable when flutter_mobile directory and dependencies are ready
   # test-mobile:
@@ -264,10 +321,16 @@ jobs:
         name: angular-dist
         path: ./angular-dist
         
-    - name: Download Docker image backup
+    - name: Download API Docker image backup
       uses: actions/download-artifact@v4
       with:
         name: api-docker-image
+        path: ./docker-artifacts
+        
+    - name: Download Web Docker image backup
+      uses: actions/download-artifact@v4
+      with:
+        name: web-docker-image
         path: ./docker-artifacts
         
     - name: Create deployment package
@@ -375,6 +438,17 @@ jobs:
         target: "/opt/smartrestaurant/"
         strip_components: 1
         
+    - name: Copy Web Docker image backup to VPS
+      uses: appleboy/scp-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        source: "docker-artifacts/web-image.tar"
+        target: "/opt/smartrestaurant/"
+        strip_components: 1
+        
     - name: Deploy with health checks and auto-rollback
       id: deploy
       uses: appleboy/ssh-action@v0.1.8
@@ -457,13 +531,22 @@ jobs:
           sudo chown -R www-data:www-data /var/www/html
           sudo chmod -R 755 /var/www/html
           
-          # Load Docker image if using local mode
+          # Load Docker images if using local mode
           source /tmp/deployment_vars
-          if [ "$deployment_mode" = "local" ] && [ -f "api-image.tar" ]; then
-            echo "🐳 Loading Docker image from local file..."
-            sudo docker load < api-image.tar
-            sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:latest
-            echo "✅ Docker image loaded successfully"
+          if [ "$deployment_mode" = "local" ]; then
+            if [ -f "api-image.tar" ]; then
+              echo "🐳 Loading API Docker image from local file..."
+              sudo docker load < api-image.tar
+              sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:latest
+              echo "✅ API Docker image loaded successfully"
+            fi
+            
+            if [ -f "web-image.tar" ]; then
+              echo "🐳 Loading Web Docker image from local file..."
+              sudo docker load < web-image.tar
+              sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:latest
+              echo "✅ Web Docker image loaded successfully"
+            fi
           fi
           
           # Stop old services gracefully
