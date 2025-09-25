@@ -244,14 +244,22 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64
+        build-args: |
+          API_URL=${{ vars.WEB_API_URL }}
+          BASE_URL=${{ vars.WEB_BASE_URL }}
+          CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
       continue-on-error: true
       
     - name: Build backup Web image for local deployment
       run: |
         echo "📦 Building backup Web image for local deployment (in case registry fails)"
         
-        # Build image locally as backup
-        docker build -f ./infrastructure/docker/Dockerfile.web -t smartrestaurant-web:${{ github.sha }} .
+        # Build image locally as backup with build args
+        docker build -f ./infrastructure/docker/Dockerfile.web \
+          --build-arg API_URL=${{ vars.WEB_API_URL }} \
+          --build-arg BASE_URL=${{ vars.WEB_BASE_URL }} \
+          --build-arg CLIENT_ID=${{ vars.WEB_CLIENT_ID }} \
+          -t smartrestaurant-web:${{ github.sha }} .
         
         # Save image as tar file for deployment backup
         mkdir -p ./build-artifacts
@@ -517,14 +525,22 @@ jobs:
             return 1
           }
           
-          # Create .env if not exists
-          if [ ! -f ".env" ]; then
-            echo "Creating .env file..."
-            cat > .env << EOF
+          # Create .env file with GitHub Secrets
+          echo "Creating .env file with GitHub Secrets..."
+          cat > .env << EOF
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          APP_SELF_URL=${{ vars.APP_SELF_URL }}
+          APP_CLIENT_URL=${{ vars.APP_CLIENT_URL }}
+          APP_CORS_ORIGINS=${{ vars.APP_CORS_ORIGINS }}
+          APP_REDIRECT_URLS=${{ vars.APP_REDIRECT_URLS }}
+          AUTH_SERVER_AUTHORITY=${{ vars.AUTH_SERVER_AUTHORITY }}
+          AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
+          SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
+          ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
+          WEB_API_URL=${{ vars.WEB_API_URL }}
+          WEB_BASE_URL=${{ vars.WEB_BASE_URL }}
+          WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
           EOF
-          fi
           
           # Set proper permissions
           sudo chown -R $USER:$USER /opt/smartrestaurant

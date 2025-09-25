@@ -50,12 +50,12 @@ sudo mkdir -p /opt/smartrestaurant
 sudo chown -R $USER:$USER /opt/smartrestaurant
 
 # Copy Docker Compose và configs
-scp infrastructure/docker/docker-compose.yml user@your-vps:/opt/smartrestaurant/
-scp infrastructure/docker/nginx.conf user@your-vps:/opt/smartrestaurant/
-scp infrastructure/.env user@your-vps:/opt/smartrestaurant/.env
+scp infrastructure/docker/docker-compose.yml root@103.245.236.236:/opt/smartrestaurant/
+scp infrastructure/docker/nginx.conf root@103.245.236.236:/opt/smartrestaurant/
+scp infrastructure/.env root@103.245.236.236:/opt/smartrestaurant/.env
 
 # Copy scripts
-scp -r infrastructure/scripts/ user@your-vps:/opt/smartrestaurant/
+scp -r infrastructure/scripts/ root@103.245.236.236:/opt/smartrestaurant/
 chmod +x /opt/smartrestaurant/scripts/*.sh
 ```
 

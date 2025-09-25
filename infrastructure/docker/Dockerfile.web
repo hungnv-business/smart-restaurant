@@ -23,6 +23,11 @@ CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200"]
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Build arguments for environment configuration
+ARG API_URL=https://api.smartrestaurant.vn
+ARG BASE_URL=https://smartrestaurant.vn
+ARG CLIENT_ID=SmartRestaurant_Angular
+
 # Copy package files
 COPY angular/package*.json ./
 
@@ -31,6 +36,11 @@ RUN npm install --legacy-peer-deps && npm install -g @angular/cli
 
 # Copy source code
 COPY angular/ .
+
+# Replace environment variables in production config
+RUN sed -i "s|https://api.smartrestaurant.vn|${API_URL}|g" src/environments/environment.prod.ts && \
+    sed -i "s|https://smartrestaurant.vn|${BASE_URL}|g" src/environments/environment.prod.ts && \
+    sed -i "s|SmartRestaurant_Angular|${CLIENT_ID}|g" src/environments/environment.prod.ts
 
 # Build the application for production
 RUN npm run build:prod

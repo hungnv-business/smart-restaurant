@@ -7,7 +7,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/html:/var/www/html:ro
       - /opt/smartrestaurant/logs:/var/log/nginx
@@ -37,9 +37,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
-      - JwtSettings__SecretKey=${JWT_SECRET}
-      - JwtSettings__Issuer=chodocquan.site
-      - JwtSettings__Audience=chodocquan.site
+      - App__SelfUrl=${APP_SELF_URL}
+      - App__ClientUrl=${APP_CLIENT_URL}
+      - App__CorsOrigins=${APP_CORS_ORIGINS}
+      - App__RedirectAllowedUrls=${APP_REDIRECT_URLS}
+      - AuthServer__Authority=${AUTH_SERVER_AUTHORITY}
+      - AuthServer__RequireHttpsMetadata=${AUTH_REQUIRE_HTTPS}
+      - AuthServer__SwaggerClientId=${SWAGGER_CLIENT_ID}
+      - StringEncryption__DefaultPassPhrase=${ENCRYPTION_PASSPHRASE}
       - Serilog__MinimumLevel__Default=Warning
       - DOTNET_GCHeapHardLimit=400000000
     volumes:
@@ -65,11 +70,15 @@ services:
 
   # Angular Frontend (Production Build)
   web:
-    image: ghcr.io/hungnv-business/smart-restaurant/web:production
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.web
+      target: production
+      args:
+        - API_URL=${WEB_API_URL}
+        - BASE_URL=${WEB_BASE_URL}
+        - CLIENT_ID=${WEB_CLIENT_ID}
     container_name: smartrestaurant_web
-    volumes:
-      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro  # Override config
-      - /etc/letsencrypt:/etc/letsencrypt:ro    # SSL certificates
     networks:
       - smartrestaurant-network
     restart: unless-stopped
@@ -101,11 +110,13 @@ services:
       - postgres_data_prod:/var/lib/postgresql/data
       - /opt/smartrestaurant/backups:/backups
       - /opt/smartrestaurant/logs:/var/log/postgresql
+      - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     networks:
       - smartrestaurant-network
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     deploy:
       resources:
         limits:
@@ -114,17 +125,8 @@ services:
           memory: 150M
     command: >
       postgres
-      -c shared_buffers=80MB
-      -c effective_cache_size=200MB
-      -c maintenance_work_mem=24MB
-      -c work_mem=2MB
-      -c max_connections=40
-      -c random_page_cost=1.1
-      -c effective_io_concurrency=200
-      -c min_wal_size=64MB
-      -c max_wal_size=512MB
-      -c log_statement=none
-      -c log_min_error_statement=error
+      -c config_file=/var/lib/postgresql/data/postgresql.conf
+      -c hba_file=/var/lib/postgresql/data/pg_hba.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d SmartRestaurant"]
       interval: 30s

@@ -81,30 +81,42 @@ jobs:
         echo "🧪 Testing Docker Compose configurations..."
         cd infrastructure/docker
         
-        # Test development configuration
-        docker compose -f docker-compose.dev.yml config
-        echo "✅ Development configuration valid"
-        
-        # Test production configuration
-        docker compose -f docker-compose.prod.yml config
-        echo "✅ Production configuration valid"
+        # Test docker-compose configuration
+        docker compose -f docker-compose.yml config
+        echo "✅ Docker compose configuration valid"
 
     - name: Test container startup
       run: |
         echo "🚀 Testing container startup..."
         
-        # Start containers
+        # Create test .env file
         cd infrastructure/docker
-        docker compose -f docker-compose.dev.yml up -d postgres
+        cat > .env << EOF
+        DB_PASSWORD=test_password
+        APP_SELF_URL=https://test.com/api
+        APP_CLIENT_URL=https://test.com
+        APP_CORS_ORIGINS=https://test.com
+        APP_REDIRECT_URLS=https://test.com
+        AUTH_SERVER_AUTHORITY=https://test.com/api
+        AUTH_REQUIRE_HTTPS=false
+        SWAGGER_CLIENT_ID=SmartRestaurant_Swagger
+        ENCRYPTION_PASSPHRASE=test_encryption_key_32chars_long
+        WEB_API_URL=https://test.com/api
+        WEB_BASE_URL=https://test.com
+        WEB_CLIENT_ID=SmartRestaurant_Angular
+        EOF
+        
+        # Start containers
+        docker compose up -d postgres
         
         # Wait for postgres health check to pass
         echo "⏳ Waiting for PostgreSQL health check..."
-        timeout 60 bash -c 'until docker compose -f docker-compose.dev.yml ps postgres | grep -q "healthy"; do sleep 2; done'
+        timeout 60 bash -c 'until docker compose ps postgres | grep -q "healthy"; do sleep 2; done'
         
         echo "✅ PostgreSQL container started successfully"
         
         # Cleanup
-        docker compose -f docker-compose.dev.yml down
+        docker compose down
 
   # Security scan for Docker images
   docker-security:
