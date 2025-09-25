@@ -48,6 +48,25 @@ jobs:
       with:
         dotnet-version: 8.0.x
         
+    - name: Install ABP CLI for backend
+      run: |
+        # Install new ABP CLI (v8.2+ uses dotnet tool)
+        echo "📦 Installing ABP CLI for backend..."
+        
+        # Try new CLI first
+        if ! dotnet tool install -g Volo.Abp.Studio.Cli; then
+          echo "⚠️ New ABP CLI failed, trying fallback..."
+          # Fallback to old CLI if new one fails
+          dotnet tool install -g Volo.Abp.Cli || echo "Old CLI also failed, continuing..."
+        fi
+        
+        # Add dotnet tools to PATH
+        export PATH="$PATH:$HOME/.dotnet/tools"
+        
+        # Install ABP libraries for backend
+        echo "📚 Installing ABP libraries for backend..."
+        abp install-libs || echo "⚠️ ABP install-libs failed, using existing libraries"
+        
     - name: Restore dependencies
       run: |
         cd aspnet-core
@@ -158,25 +177,6 @@ jobs:
       run: |
         # Install dependencies ở root (workspace setup)
         yarn install --frozen-lockfile
-        
-    - name: Install ABP CLI and libraries
-      run: |
-        # Install new ABP CLI (v8.2+ uses dotnet tool)
-        echo "📦 Installing ABP CLI..."
-        
-        # Try new CLI first
-        if ! dotnet tool install -g Volo.Abp.Studio.Cli; then
-          echo "⚠️ New ABP CLI failed, trying fallback..."
-          # Fallback to old CLI if new one fails
-          dotnet tool install -g Volo.Abp.Cli || echo "Old CLI also failed, continuing..."
-        fi
-        
-        # Add dotnet tools to PATH
-        export PATH="$PATH:$HOME/.dotnet/tools"
-        
-        # Install ABP libraries from solution root (not inside angular folder)
-        echo "📚 Installing ABP libraries..."
-        abp install-libs || echo "⚠️ ABP install-libs failed, using existing libraries"
         
     - name: Generate service proxies
       run: |
