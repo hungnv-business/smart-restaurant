@@ -51,7 +51,8 @@
       "Bash(dotnet format:*)",
       "Bash(yarn list:*)",
       "Bash(yarn info:*)",
-      "Bash(yarn test:*)"
+      "Bash(yarn test:*)",
+      "Bash(npm run docker:dev:*)"
     ],
     "deny": [],
     "ask": []

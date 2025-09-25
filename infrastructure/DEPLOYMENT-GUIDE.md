@@ -50,9 +50,9 @@ sudo mkdir -p /opt/smartrestaurant
 sudo chown -R $USER:$USER /opt/smartrestaurant
 
 # Copy Docker Compose và configs
-scp infrastructure/docker/docker-compose.prod.yml user@your-vps:/opt/smartrestaurant/
-scp infrastructure/docker/nginx.prod.conf user@your-vps:/opt/smartrestaurant/
-scp infrastructure/.env.production user@your-vps:/opt/smartrestaurant/.env
+scp infrastructure/docker/docker-compose.yml user@your-vps:/opt/smartrestaurant/
+scp infrastructure/docker/nginx.conf user@your-vps:/opt/smartrestaurant/
+scp infrastructure/.env user@your-vps:/opt/smartrestaurant/.env
 
 # Copy scripts
 scp -r infrastructure/scripts/ user@your-vps:/opt/smartrestaurant/
@@ -107,7 +107,7 @@ cat ~/.ssh/id_rsa
 cd /opt/smartrestaurant
 
 # Khởi động chỉ PostgreSQL
-docker-compose -f docker-compose.prod.yml up -d postgres
+docker-compose -f docker-compose.yml up -d postgres
 
 # Đợi database sẵn sàng
 sleep 30
@@ -165,10 +165,10 @@ scp -r dist/* user@your-vps:/var/www/html/
 ```bash
 # Trên VPS
 cd /opt/smartrestaurant
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.yml up -d
 
 # Kiểm tra logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose -f docker-compose.yml logs -f
 ```
 
 ## 🔍 Bước 6: Verification & Testing
@@ -177,7 +177,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 
 ```bash
 # Kiểm tra containers
-docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.yml ps
 
 # Kiểm tra health endpoints
 curl http://localhost/health
@@ -259,12 +259,12 @@ flutter build apk --release
 #### Container không start được:
 ```bash
 # Kiểm tra logs chi tiết
-docker-compose -f docker-compose.prod.yml logs nginx
-docker-compose -f docker-compose.prod.yml logs api
-docker-compose -f docker-compose.prod.yml logs postgres
+docker-compose -f docker-compose.yml logs nginx
+docker-compose -f docker-compose.yml logs api
+docker-compose -f docker-compose.yml logs postgres
 
 # Restart services
-docker-compose -f docker-compose.prod.yml restart
+docker-compose -f docker-compose.yml restart
 ```
 
 #### SSL certificate issues:
@@ -292,14 +292,14 @@ free -h
 docker stats
 
 # Restart containers nếu cần
-docker-compose -f docker-compose.prod.yml restart
+docker-compose -f docker-compose.yml restart
 ```
 
 ### 9.2 Performance Optimization
 
 #### Nếu gặp vấn đề về memory:
 ```bash
-# Giảm PostgreSQL memory settings trong docker-compose.prod.yml
+# Giảm PostgreSQL memory settings trong docker-compose.yml
 # Giảm .NET heap limit trong environment variables
 # Restart containers
 ```
@@ -308,7 +308,7 @@ docker-compose -f docker-compose.prod.yml restart
 ```bash
 # Edit nginx.prod.conf để tune cache settings
 # Reload Nginx config
-docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
+docker-compose -f docker-compose.yml exec nginx nginx -s reload
 ```
 
 ## 🚀 Bước 10: Go Live Checklist

@@ -124,9 +124,9 @@ chmod +x /opt/smartrestaurant/health-check.sh
 
 echo "✅ VPS Setup completed!"
 echo "📍 Next steps:"
-echo "1. Copy docker-compose.prod.yml to /opt/smartrestaurant/"
+echo "1. Copy docker-compose.yml to /opt/smartrestaurant/"
 echo "2. Copy nginx.conf to /etc/nginx/"
-echo "3. Copy .env.production to /opt/smartrestaurant/.env"
-echo "4. Run: cd /opt/smartrestaurant && docker-compose -f docker-compose.prod.yml up -d"
+echo "3. Copy .env to /opt/smartrestaurant/.env"
+echo "4. Run: cd /opt/smartrestaurant && docker-compose up -d"
 echo ""
 echo "🌐 Your site will be available at: https://chodocquan.site"

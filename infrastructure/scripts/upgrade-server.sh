@@ -71,8 +71,8 @@ determine_config() {
 update_docker_compose() {
     echo -e "${YELLOW}🐳 Updating Docker Compose configuration...${NC}"
     
-    COMPOSE_FILE="/opt/smartrestaurant/docker-compose.prod.yml"
-    BACKUP_FILE="/opt/smartrestaurant/docker-compose.prod.yml.backup.$(date +%Y%m%d_%H%M%S)"
+    COMPOSE_FILE="/opt/smartrestaurant/docker-compose.yml"
+    BACKUP_FILE="/opt/smartrestaurant/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)"
     
     # Backup current config
     cp "$COMPOSE_FILE" "$BACKUP_FILE"
@@ -160,10 +160,10 @@ restart_services() {
     
     # Graceful restart
     echo "  ⏹️ Stopping services..."
-    docker-compose -f docker-compose.prod.yml down --timeout 30
+    docker-compose -f docker-compose.yml down --timeout 30
     
     echo "  🚀 Starting services with new configuration..."
-    docker-compose -f docker-compose.prod.yml up -d
+    docker-compose -f docker-compose.yml up -d
     
     # Wait for services to be ready
     echo "  ⏳ Waiting for services to start..."
@@ -209,7 +209,7 @@ show_recommendations() {
 
 # Check if we're on the production server
 check_environment() {
-    if [ ! -f "/opt/smartrestaurant/docker-compose.prod.yml" ]; then
+    if [ ! -f "/opt/smartrestaurant/docker-compose.yml" ]; then
         echo "❌ This script must be run on the production server"
         echo "Expected location: /opt/smartrestaurant/"
         exit 1

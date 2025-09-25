@@ -192,13 +192,13 @@ GitHub Repository → Settings → Secrets and variables → Actions → New rep
 cd /Volumes/Work/my-data/source-code/smart-restaurant
 
 # Copy environment configuration
-scp infrastructure/.env.production root@103.245.236.236:/opt/smartrestaurant/.env
+scp infrastructure/.env root@103.245.236.236:/opt/smartrestaurant/.env
 
 # Copy docker compose
-scp infrastructure/docker/docker-compose.prod.yml root@103.245.236.236:/opt/smartrestaurant/
+scp infrastructure/docker/docker-compose.yml root@103.245.236.236:/opt/smartrestaurant/
 
 # Copy nginx configuration  
-scp infrastructure/docker/nginx.prod.conf root@103.245.236.236:/opt/smartrestaurant/
+scp infrastructure/docker/nginx.conf root@103.245.236.236:/opt/smartrestaurant/
 
 # Copy backup và monitoring scripts
 scp -r infrastructure/scripts/ root@103.245.236.236:/opt/smartrestaurant/

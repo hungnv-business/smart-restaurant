@@ -16,7 +16,7 @@ Vietnamese restaurant management system built with ABP Framework 8.0, .NET 8, An
 ```bash
 # Start development environment with Docker
 cd infrastructure/docker
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
 # Or run locally (requires PostgreSQL running)
 npm run dev
@@ -177,11 +177,11 @@ angular/
 ├── angular.json                          # Angular workspace configuration
 ├── karma.conf.js                         # Test runner configuration
 ├── package.json                          # Dependencies and scripts
+├── package-lock.json                     # NPM dependency lock file
 ├── tailwind.config.js                    # Tailwind CSS configuration
 ├── tsconfig.json                         # TypeScript configuration
 ├── tsconfig.app.json                     # App-specific TypeScript config
-├── tsconfig.spec.json                    # Test TypeScript config
-└── yarn.lock                             # Dependency lock file
+└── tsconfig.spec.json                    # Test TypeScript config
 ```
 
 **Note**: Restaurant feature modules (dashboard, orders, menu, etc.) will be implemented in future development under `features/` directory.
@@ -209,14 +209,20 @@ flutter_mobile/
 ### Infrastructure
 ```
 infrastructure/
-└── docker/
-    ├── docker-compose.dev.yml           # Development environment
-    ├── docker-compose.prod.yml          # Production environment
-    ├── Dockerfile.api                   # Backend container
-    ├── Dockerfile.web                   # Frontend container
-    ├── nginx.conf                       # Reverse proxy config
-    └── init-scripts/                    # Database initialization
-        └── 01-vietnamese-collation.sql  # Vietnamese text support
+├── DEPLOYMENT-GUIDE.md                  # Deployment documentation
+├── docker/                              # Docker configuration
+│   ├── docker-compose.yml               # Docker compose configuration
+│   ├── Dockerfile.api                   # Backend container
+│   ├── Dockerfile.web                   # Frontend container
+│   ├── nginx.conf                       # Nginx reverse proxy config
+│   └── init-scripts/                    # Database initialization
+│       └── 01-vietnamese-collation.sql  # Vietnamese text support
+├── scripts/                             # Deployment and maintenance scripts
+│   ├── backup-database.sh               # Database backup script
+│   ├── health-monitor.sh                # Health monitoring script
+│   ├── test-deployment.sh               # Deployment testing script
+│   └── upgrade-server.sh                # Server upgrade script
+└── vps-setup.sh                         # VPS initial setup script
 ```
 
 ## Development Workflow
@@ -337,7 +343,7 @@ docker ps | grep postgres
 
 # Or start with Docker Compose
 cd infrastructure/docker
-docker-compose -f docker-compose.dev.yml up postgres -d
+docker-compose up postgres -d
 
 # Check connection string in appsettings.json
 ```
@@ -445,15 +451,15 @@ SELECT remove_vietnamese_accents('Phở Bò Tái Nạm');
 #### Container won't start
 ```bash
 # Check logs
-docker-compose -f infrastructure/docker/docker-compose.dev.yml logs
+docker-compose -f infrastructure/docker/docker-compose.yml logs
 
 # Rebuild containers
-docker-compose -f infrastructure/docker/docker-compose.dev.yml build --no-cache
+docker-compose -f infrastructure/docker/docker-compose.yml build --no-cache
 
 # Clean up and restart
-docker-compose -f infrastructure/docker/docker-compose.dev.yml down
+docker-compose -f infrastructure/docker/docker-compose.yml down
 docker system prune -f
-docker-compose -f infrastructure/docker/docker-compose.dev.yml up -d
+docker-compose -f infrastructure/docker/docker-compose.yml up -d
 ```
 
 #### Port conflicts
@@ -568,7 +574,7 @@ npm run test:integration
 ```bash
 # Build and deploy with Docker Compose
 cd infrastructure/docker
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose up -d --build
 
 # Or build separately
 docker build -f Dockerfile.api -t smartrestaurant-api .
