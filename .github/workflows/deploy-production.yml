@@ -109,7 +109,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.api
+        file: ./Dockerfile.api
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -123,7 +123,7 @@ jobs:
         echo "📦 Building backup image for local deployment (in case registry fails)"
         
         # Build image locally as backup
-        docker build -f ./infrastructure/docker/Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
+        docker build -f ./Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
         
         # Save image as tar file for deployment backup
         mkdir -p ./build-artifacts
@@ -236,7 +236,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.web
+        file: ./Dockerfile.web
         target: production
         push: true
         tags: ${{ steps.meta-web.outputs.tags }}
@@ -255,7 +255,7 @@ jobs:
         echo "📦 Building backup Web image for local deployment (in case registry fails)"
         
         # Build image locally as backup with build args
-        docker build -f ./infrastructure/docker/Dockerfile.web \
+        docker build -f ./Dockerfile.web \
           --build-arg API_URL=${{ vars.WEB_API_URL }} \
           --build-arg BASE_URL=${{ vars.WEB_BASE_URL }} \
           --build-arg CLIENT_ID=${{ vars.WEB_CLIENT_ID }} \
@@ -344,7 +344,7 @@ jobs:
     - name: Create deployment package
       run: |
         mkdir -p deployment-package
-        cp -r infrastructure/docker/* deployment-package/
+        cp -r * deployment-package/
         cp -r angular-dist/* deployment-package/static/
         
     - name: Prepare deployment with backup

@@ -5,7 +5,7 @@ on:
     branches: [ main, develop ]
     paths:
       # Chỉ chạy khi có thay đổi liên quan đến Docker build
-      - 'infrastructure/docker/**'
+      - '**'
       - 'aspnet-core/src/**'           # Source code
       - '!aspnet-core/test/**'         # Loại trừ test projects
       - 'aspnet-core/global.json'
@@ -23,7 +23,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'infrastructure/docker/**'
+      - '**'
       - 'aspnet-core/src/**'
       - '!aspnet-core/test/**'         # Loại trừ test projects
       - 'angular/src/**'
@@ -55,7 +55,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.api
+        file: ./Dockerfile.api
         target: production
         push: false
         tags: smartrestaurant-api:test
@@ -67,7 +67,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.web
+        file: ./Dockerfile.web
         target: production
         push: false
         tags: smartrestaurant-web:test
@@ -77,9 +77,6 @@ jobs:
 
     - name: Test Docker Compose configurations
       run: |
-        echo "🧪 Testing Docker Compose configurations..."
-        cd infrastructure/docker
-        
         # Test docker-compose configuration
         docker compose -f docker-compose.yml config
         echo "✅ Docker compose configuration valid"
@@ -89,7 +86,6 @@ jobs:
         echo "🚀 Testing container startup..."
         
         # Create test .env file
-        cd infrastructure/docker
         cat > .env << EOF
         DB_PASSWORD=test_password
         APP_SELF_URL=https://test.com/api
@@ -133,7 +129,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.api
+        file: ./Dockerfile.api
         target: production
         push: false
         tags: smartrestaurant-api:scan
@@ -151,7 +147,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./infrastructure/docker/Dockerfile.web
+        file: ./Dockerfile.web
         target: production
         push: false
         tags: smartrestaurant-web:scan
