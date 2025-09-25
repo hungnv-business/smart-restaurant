@@ -170,13 +170,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'yarn'
-        cache-dependency-path: 'yarn.lock'
+        cache: 'npm'
+        cache-dependency-path: 'angular/package-lock.json'
         
     - name: Install dependencies
       run: |
-        # Install dependencies ở root (workspace setup)
-        yarn install --frozen-lockfile
+        cd angular
+        npm ci
         
     - name: Generate service proxies
       run: |
@@ -188,19 +188,19 @@ jobs:
     - name: Lint
       run: |
         cd angular
-        yarn lint
+        npm run lint
         
     - name: Test
       run: |
         cd angular
-        yarn test:ci
+        npm run test:ci
       env:
         CI: true
         
     - name: Build for production
       run: |
         cd angular
-        yarn build:prod
+        npm run build:prod
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
