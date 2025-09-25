@@ -16,7 +16,7 @@ on:
       - '!angular/e2e/**'              # Loại trừ e2e tests
       - 'angular/package.json'
       - 'angular/package-lock.json'
-      - 'angular/yarn.lock'
+      - 'angular/package-lock.json'
       - 'angular/angular.json'
       - 'angular/tsconfig*.json'
       - 'Dockerfile*'
