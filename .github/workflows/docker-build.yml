@@ -15,8 +15,7 @@ on:
       - '!angular/src/**/*.spec.ts'    # Loại trừ test files
       - '!angular/e2e/**'              # Loại trừ e2e tests
       - 'angular/package.json'
-      - 'angular/package-lock.json'
-      - 'angular/package-lock.json'
+      - 'angular/yarn.lock'
       - 'angular/angular.json'
       - 'angular/tsconfig*.json'
       - 'Dockerfile*'

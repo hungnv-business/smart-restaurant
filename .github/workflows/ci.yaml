@@ -10,7 +10,7 @@ on:
       - 'flutter_mobile/**'
       - 'package.json'
       - 'package-lock.json'
-      - 'angular/package-lock.json'
+      - 'angular/yarn.lock'
       # Loại trừ các file không ảnh hưởng đến build/test
       - '!**/*.md'                     # Documentation files
       - '!docs/**'                     # Documentation folder
@@ -27,7 +27,7 @@ on:
       - 'flutter_mobile/**'
       - 'package.json'
       - 'package-lock.json' 
-      - 'angular/package-lock.json'
+      - 'angular/yarn.lock'
       - '!**/*.md'
       - '!docs/**'
       - '!*.yml'
@@ -62,8 +62,8 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: 'angular/package-lock.json'
+        cache: 'yarn'
+        cache-dependency-path: 'angular/yarn.lock'
 
     - name: Install .NET format tool
       run: dotnet tool install -g dotnet-format
@@ -86,17 +86,17 @@ jobs:
     - name: Install Angular dependencies
       run: |
         cd angular
-        npm ci
+        yarn install --frozen-lockfile
 
     - name: Lint Angular code
       run: |
         cd angular
-        npm run lint
+        yarn lint
 
     - name: Build Angular for production
       run: |
         cd angular
-        npm run build:prod
+        yarn build:prod
 
   # Backend Tests
   backend-tests:
@@ -159,18 +159,18 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: 'angular/package-lock.json'
+        cache: 'yarn'
+        cache-dependency-path: 'angular/yarn.lock'
 
     - name: Install dependencies
       run: |
         cd angular
-        npm ci
+        yarn install --frozen-lockfile
 
     - name: Run Angular unit tests
       run: |
         cd angular
-        npm run test:ci
+        yarn test:ci
       env:
         CI: true
 
