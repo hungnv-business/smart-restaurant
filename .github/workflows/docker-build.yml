@@ -55,7 +55,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile.api
+        file: ./infrastructure/docker/Dockerfile.api
         target: production
         push: false
         tags: smartrestaurant-api:test
@@ -67,7 +67,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile.web
+        file: ./infrastructure/docker/Dockerfile.web
         target: production
         push: false
         tags: smartrestaurant-web:test
@@ -78,7 +78,7 @@ jobs:
     - name: Test Docker Compose configurations
       run: |
         # Test docker-compose configuration
-        docker compose -f docker-compose.yml config
+        docker compose -f infrastructure/docker/docker-compose.yml config
         echo "✅ Docker compose configuration valid"
 
     - name: Test container startup
@@ -102,16 +102,16 @@ jobs:
         EOF
         
         # Start containers
-        docker compose up -d postgres
+        docker compose -f infrastructure/docker/docker-compose.yml up -d postgres
         
         # Wait for postgres health check to pass
         echo "⏳ Waiting for PostgreSQL health check..."
-        timeout 60 bash -c 'until docker compose ps postgres | grep -q "healthy"; do sleep 2; done'
+        timeout 60 bash -c 'until docker compose -f infrastructure/docker/docker-compose.yml ps postgres | grep -q "healthy"; do sleep 2; done'
         
         echo "✅ PostgreSQL container started successfully"
         
         # Cleanup
-        docker compose down
+        docker compose -f infrastructure/docker/docker-compose.yml down
 
   # Security scan for Docker images
   docker-security:
@@ -129,7 +129,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile.api
+        file: ./infrastructure/docker/Dockerfile.api
         target: production
         push: false
         tags: smartrestaurant-api:scan
@@ -147,7 +147,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile.web
+        file: ./infrastructure/docker/Dockerfile.web
         target: production
         push: false
         tags: smartrestaurant-web:scan
