@@ -371,7 +371,8 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
           script: |
-            set -e
+            set -e  # Exit on error
+            set -x  # Debug mode - show all commands
 
             echo "🚀 Starting deployment preparation for SmartRestaurant..."
 
@@ -383,37 +384,100 @@ jobs:
             # Create comprehensive backup
             if [ -d "/opt/smartrestaurant" ]; then
               echo "📦 Creating backup at ${BACKUP_DIR}..."
-              sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"
               
-              # Backup database
+              # Create backup directory first
+              if sudo mkdir -p "${BACKUP_DIR}"; then
+                echo "✅ Backup directory created: ${BACKUP_DIR}"
+              else
+                echo "❌ Failed to create backup directory"
+                exit 1
+              fi
+              
+              # Copy application files
+              if sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"; then
+                echo "✅ Application files backed up successfully"
+              else
+                echo "❌ Failed to backup application files"
+                exit 1
+              fi
+              
+              # Backup database with better error handling
               echo "💾 Creating database backup..."
-              sudo docker exec smartrestaurant-postgres-1 pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null || true
+              POSTGRES_CONTAINERS=$(sudo docker ps --format "{{.Names}}" | grep -E "(postgres|db)" || echo "")
+              if [ -n "$POSTGRES_CONTAINERS" ]; then
+                for container in $POSTGRES_CONTAINERS; do
+                  echo "Trying to backup from container: $container"
+                  if sudo docker exec "$container" pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null; then
+                    echo "✅ Database backup created successfully from $container"
+                    break
+                  else
+                    echo "⚠️ Database backup failed from $container, trying next container..."
+                  fi
+                done
+              else
+                echo "⚠️ No PostgreSQL containers found, skipping database backup"
+              fi
               
-              # Save current docker images
+              # Save current docker images with better error handling
               echo "🐳 Backing up current Docker images..."
-              sudo docker save smartrestaurant/api:production > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null || true
+              if sudo docker image inspect smartrestaurant/api:production >/dev/null 2>&1; then
+                if sudo docker save smartrestaurant/api:production > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
+                  echo "✅ API image backup created successfully"
+                else
+                  echo "⚠️ Failed to save API image backup"
+                fi
+              else
+                echo "⚠️ API image smartrestaurant/api:production not found, skipping image backup"
+              fi
               
-              echo "✅ Backup completed at ${BACKUP_DIR}"
+              echo "✅ Backup process completed at ${BACKUP_DIR}"
             else
               echo "ℹ️ No existing deployment found, fresh installation"
+              # Create empty backup directory for consistency
+              sudo mkdir -p "${BACKUP_DIR}"
+              echo "✅ Created empty backup directory for first-time installation"
             fi
 
             # Prepare directories với cấu trúc đầy đủ
             echo "📁 Tạo cấu trúc thư mục VPS..."
-            sudo mkdir -p /opt/smartrestaurant
-            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker
-            sudo mkdir -p /opt/smartrestaurant/logs
-            sudo mkdir -p /opt/smartrestaurant/backups
-            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres
-            sudo mkdir -p /var/www/html
-            sudo mkdir -p /etc/letsencrypt
+            
+            # Create directories with proper error handling
+            set +e  # Disable exit on error for directory creation
+            
+            sudo mkdir -p /opt/smartrestaurant || { echo "⚠️ Failed to create /opt/smartrestaurant"; }
+            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker || { echo "⚠️ Failed to create infrastructure/docker"; }
+            sudo mkdir -p /opt/smartrestaurant/logs || { echo "⚠️ Failed to create logs directory"; }
+            sudo mkdir -p /opt/smartrestaurant/backups || { echo "⚠️ Failed to create backups directory"; }
+            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres || { echo "⚠️ Failed to create postgres data directory"; }
+            sudo mkdir -p /var/www/html || { echo "⚠️ Failed to create web directory"; }
+            sudo mkdir -p /etc/letsencrypt || { echo "⚠️ Failed to create letsencrypt directory"; }
+            
+            set -e  # Re-enable exit on error
 
-            # Set quyền cho các thư mục
-            sudo chown -R $USER:$USER /opt/smartrestaurant
-            sudo chown -R www-data:www-data /var/www/html
-            sudo chmod -R 755 /var/www/html
-            sudo chmod -R 755 /opt/smartrestaurant/logs
-            sudo chmod -R 700 /opt/smartrestaurant/backups
+            # Set quyền cho các thư mục with error handling
+            echo "🔐 Setting directory permissions..."
+            
+            set +e  # Disable exit on error for permission setting
+            
+            if sudo chown -R $USER:$USER /opt/smartrestaurant 2>/dev/null; then
+              echo "✅ Set ownership for /opt/smartrestaurant"
+            else
+              echo "⚠️ Failed to set ownership for /opt/smartrestaurant"
+            fi
+            
+            if sudo chown -R www-data:www-data /var/www/html 2>/dev/null; then
+              echo "✅ Set ownership for /var/www/html"
+            else
+              echo "⚠️ Failed to set ownership for /var/www/html"
+            fi
+            
+            sudo chmod -R 755 /var/www/html 2>/dev/null || echo "⚠️ Failed to set permissions for /var/www/html"
+            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null || echo "⚠️ Failed to set permissions for logs"
+            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null || echo "⚠️ Failed to set permissions for backups"
+            
+            set -e  # Re-enable exit on error
+            
+            echo "✅ Directory setup completed"
 
             cd /opt/smartrestaurant
 
@@ -440,15 +504,24 @@ jobs:
               else
                 echo "Using image: ${IMAGE_REF}"
                 
-                # Try to pull image with error handling
-                if sudo docker pull "${IMAGE_REF}"; then
-                  sudo docker tag "${IMAGE_REF}" smartrestaurant/api:production
-                  echo "✅ Registry image pulled successfully"
+                # Try to pull image with error handling (don't exit on failure)
+                set +e  # Disable exit on error for this section
+                echo "🔄 Attempting to pull Docker image..."
+                
+                if sudo docker pull "${IMAGE_REF}" 2>&1; then
+                  if sudo docker tag "${IMAGE_REF}" smartrestaurant/api:production 2>&1; then
+                    echo "✅ Registry image pulled and tagged successfully"
+                  else
+                    echo "⚠️ Failed to tag image, switching to local mode"
+                    echo "deployment_mode=local" >> /tmp/deployment_vars
+                  fi
                 else
-                  echo "⚠️ Failed to pull from registry, switching to local mode"
+                  echo "⚠️ Failed to pull from registry (this is expected for first deployment), switching to local mode"
                   echo "deployment_mode=local" >> /tmp/deployment_vars
-                  echo "Will need local image file for deployment"
+                  echo "Will use local image file for deployment"
                 fi
+                
+                set -e  # Re-enable exit on error
               fi
             else
               echo "📦 Preparing for local Docker image deployment..."
