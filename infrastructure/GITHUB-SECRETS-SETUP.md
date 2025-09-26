@@ -4,13 +4,13 @@
 
 ### 🔒 Database & Security Secrets
 ```
-DB_PASSWORD=5yIV0jLRwo8qocfw8jc6EhMd75G3j9Hr
-ENCRYPTION_PASSPHRASE=froLqucNEUJgzTCL
+DB_PASSWORD=your_strong_database_password
+ENCRYPTION_PASSPHRASE=your_encryption_passphrase_32chars
 ```
 
 ### 🔒 VPS Deployment Secrets
 ```
-VPS_HOST=103.245.236.236
+VPS_HOST=your_vps_ip
 VPS_USER=root
 VPS_SSH_KEY=-----BEGIN OPENSSH PRIVATE KEY-----
 [your-private-key-content]
@@ -20,26 +20,17 @@ VPS_PORT=22
 
 ## Repository Variables (Settings → Secrets and variables → Actions → Variables)
 
-### 🌐 Application URLs
+### 🌐 Domain Configuration
 ```
-APP_SELF_URL=https://chodocquan.site/api
-APP_CLIENT_URL=https://chodocquan.site
-APP_CORS_ORIGINS=https://*.SmartRestaurant.com,https://chodocquan.site
-APP_REDIRECT_URLS=https://chodocquan.site
+FRONTEND_BASE_URL=https://chodocquan.site
+BACKEND_BASE_URL=https://chodocquan.site/api
 ```
 
-### 🔐 Auth Server Configuration
+### 🔐 Client IDs & Settings
 ```
-AUTH_SERVER_AUTHORITY=https://chodocquan.site/api
-AUTH_REQUIRE_HTTPS=false
 SWAGGER_CLIENT_ID=SmartRestaurant_Swagger
-```
-
-### 🎨 Frontend Configuration
-```
-WEB_API_URL=https://chodocquan.site/api
-WEB_BASE_URL=https://chodocquan.site
 WEB_CLIENT_ID=SmartRestaurant_Angular
+AUTH_REQUIRE_HTTPS=false
 ```
 
 ## Environment-specific Variables (Optional)
@@ -51,9 +42,8 @@ WEB_CLIENT_ID=SmartRestaurant_Angular
 ### Staging Environment (Optional)
 - Tạo environment "staging" với các variables riêng:
 ```
-APP_SELF_URL=https://staging.chodocquan.site/api
-WEB_API_URL=https://staging.chodocquan.site/api
-WEB_BASE_URL=https://staging.chodocquan.site
+FRONTEND_BASE_URL=https://staging.chodocquan.site
+BACKEND_BASE_URL=https://staging.chodocquan.site/api
 ```
 
 ## Cách setup trên GitHub:
@@ -78,3 +68,9 @@ WEB_BASE_URL=https://staging.chodocquan.site
 - ✅ Variables có thể nhìn thấy trong logs (dùng cho URLs, configs)
 - ⚠️ SSH Key phải là private key có quyền truy cập VPS
 - ⚠️ DB_PASSWORD phải trùng với password trong VPS PostgreSQL
+
+## Tóm tắt đơn giản hóa:
+- **Giảm từ 10+ variables xuống còn 5 variables**
+- **Chỉ cần 2 URLs chính:** `FRONTEND_BASE_URL` và `BACKEND_BASE_URL`
+- **Dễ thay đổi domain:** chỉ cần sửa 2 biến thay vì nhiều biến
+- **Tránh lỗi typo** do trùng lặp URLs

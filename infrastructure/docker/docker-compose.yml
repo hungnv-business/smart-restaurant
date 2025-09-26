@@ -37,11 +37,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
-      - App__SelfUrl=${APP_SELF_URL}
-      - App__ClientUrl=${APP_CLIENT_URL}
-      - App__CorsOrigins=${APP_CORS_ORIGINS}
-      - App__RedirectAllowedUrls=${APP_REDIRECT_URLS}
-      - AuthServer__Authority=${AUTH_SERVER_AUTHORITY}
+      - App__SelfUrl=${BACKEND_BASE_URL}
+      - App__ClientUrl=${FRONTEND_BASE_URL}
+      - App__CorsOrigins=${FRONTEND_BASE_URL}
+      - App__RedirectAllowedUrls=${FRONTEND_BASE_URL}
+      - AuthServer__Authority=${BACKEND_BASE_URL}
       - AuthServer__RequireHttpsMetadata=${AUTH_REQUIRE_HTTPS}
       - AuthServer__SwaggerClientId=${SWAGGER_CLIENT_ID}
       - StringEncryption__DefaultPassPhrase=${ENCRYPTION_PASSPHRASE}
@@ -75,8 +75,8 @@ services:
       dockerfile: infrastructure/docker/Dockerfile.web
       target: production
       args:
-        - API_URL=${WEB_API_URL}
-        - BASE_URL=${WEB_BASE_URL}
+        - API_URL=${BACKEND_BASE_URL}
+        - BASE_URL=${FRONTEND_BASE_URL}
         - CLIENT_ID=${WEB_CLIENT_ID}
     container_name: smartrestaurant_web
     networks:
