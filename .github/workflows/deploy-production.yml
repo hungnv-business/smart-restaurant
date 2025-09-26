@@ -391,7 +391,7 @@ jobs:
               
               # Save current docker images
               echo "🐳 Backing up current Docker images..."
-              sudo docker save smartrestaurant/api:latest > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null || true
+              sudo docker save smartrestaurant/api:production > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null || true
               
               echo "✅ Backup completed at ${BACKUP_DIR}"
             else
@@ -442,7 +442,7 @@ jobs:
                 
                 # Try to pull image with error handling
                 if sudo docker pull "${IMAGE_REF}"; then
-                  sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
+                  sudo docker tag "${IMAGE_REF}" smartrestaurant/api:production
                   echo "✅ Registry image pulled successfully"
                 else
                   echo "⚠️ Failed to pull from registry, switching to local mode"
@@ -596,14 +596,14 @@ jobs:
               if [ -f "api-image.tar" ]; then
                 echo "🐳 Loading API Docker image from local file..."
                 sudo docker load < api-image.tar
-                sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:latest
+                sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:production
                 echo "✅ API Docker image loaded successfully"
               fi
               
               if [ -f "web-image.tar" ]; then
                 echo "🐳 Loading Web Docker image from local file..."
                 sudo docker load < web-image.tar
-                sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:latest
+                sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:production
                 echo "✅ Web Docker image loaded successfully"
               fi
             fi
