@@ -30,7 +30,7 @@ jobs:
   # Build và test backend
   build-backend:
     needs: [run-ci-tests]
-    if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
+    if: ${{ always() && (needs.run-ci-tests.result == 'success' || needs.run-ci-tests.result == 'skipped' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -141,8 +141,8 @@ jobs:
     - name: Set deployment mode
       id: deploy_mode
       run: |
-        # Force local mode if GHCR permissions issue
-        if [[ "${{ steps.docker_push.outcome }}" == "success" ]]; then
+        # Force local mode if GHCR permissions issue or build step failed
+        if [[ "${{ steps.docker_push.outcome }}" == "success" ]] && [[ -n "${{ steps.meta.outputs.tags }}" ]]; then
           echo "mode=registry" >> $GITHUB_OUTPUT
           # Get first tag from multiline output using EOF delimiter
           {
@@ -150,17 +150,23 @@ jobs:
             echo '${{ steps.meta.outputs.tags }}' | head -n1
             echo 'EOF'
           } >> $GITHUB_OUTPUT
-          echo "✅ Using registry mode with first tag"
+          echo "✅ Using registry mode with first tag: $(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
         else
-          echo "⚠️ GHCR push failed, using local deployment mode"
+          echo "⚠️ GHCR push failed or no tags available, using local deployment mode"
           echo "mode=local" >> $GITHUB_OUTPUT
           echo "image_ref=smartrestaurant-api:${{ github.sha }}" >> $GITHUB_OUTPUT
         fi
+        
+        # Debug output for troubleshooting
+        echo "🔍 Debug info:"
+        echo "  - docker_push outcome: ${{ steps.docker_push.outcome }}"
+        echo "  - meta tags: ${{ steps.meta.outputs.tags }}"
+        echo "  - github sha: ${{ github.sha }}"
 
   # Build Angular frontend
   build-frontend:
     needs: [run-ci-tests]
-    if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
+    if: ${{ always() && (needs.run-ci-tests.result == 'success' || needs.run-ci-tests.result == 'skipped' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -314,7 +320,7 @@ jobs:
   deploy-production:
     needs: [build-backend, build-frontend]  # test-mobile disabled temporarily
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
+    if: ${{ always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production') && (needs.build-backend.result == 'success' && needs.build-frontend.result == 'success') }}
     environment:
       name: production
       url: https://chodocquan.site
@@ -411,24 +417,38 @@ jobs:
           
           cd /opt/smartrestaurant
           
-          # Handle image deployment based on mode
+          # Handle image deployment based on mode with error handling
           DEPLOY_MODE="${{ needs.build-backend.outputs.deploy_mode }}"
+          
+          # Default to local mode if deploy_mode is empty or null
+          if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
+            echo "⚠️ Deploy mode not set, defaulting to local mode"
+            DEPLOY_MODE="local"
+          fi
+          
           echo "deployment_mode=${DEPLOY_MODE}" >> /tmp/deployment_vars
+          echo "🔧 Using deployment mode: ${DEPLOY_MODE}"
           
           if [ "$DEPLOY_MODE" = "registry" ]; then
             echo "📦 Pulling latest API image from registry..."
-            # Get first tag from multiline output
             IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
-            echo "Using image: ${IMAGE_REF}"
             
-            # Try to pull image with error handling
-            if sudo docker pull "${IMAGE_REF}"; then
-              sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
-              echo "✅ Registry image pulled successfully"
-            else
-              echo "⚠️ Failed to pull from registry, switching to local mode"
+            # Check if image_ref is set
+            if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
+              echo "⚠️ Image ref not set, switching to local mode"
               echo "deployment_mode=local" >> /tmp/deployment_vars
-              echo "Will need local image file for deployment"
+            else
+              echo "Using image: ${IMAGE_REF}"
+              
+              # Try to pull image with error handling
+              if sudo docker pull "${IMAGE_REF}"; then
+                sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
+                echo "✅ Registry image pulled successfully"
+              else
+                echo "⚠️ Failed to pull from registry, switching to local mode"
+                echo "deployment_mode=local" >> /tmp/deployment_vars
+                echo "Will need local image file for deployment"
+              fi
             fi
           else
             echo "📦 Preparing for local Docker image deployment..."
