@@ -344,8 +344,13 @@ jobs:
     - name: Create deployment package
       run: |
         mkdir -p deployment-package
-        cp -r * deployment-package/
-        cp -r angular-dist/* deployment-package/static/
+        
+        # Copy only necessary files for deployment
+        cp -r infrastructure/docker/ deployment-package/
+        cp -r scripts/ deployment-package/
+        
+        # Copy root files if needed (env examples, etc)
+        find . -maxdepth 1 -type f -name "*.md" -exec cp {} deployment-package/ \; 2>/dev/null || true
         
     - name: Prepare deployment with backup
       uses: appleboy/ssh-action@v0.1.8
