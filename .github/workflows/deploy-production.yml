@@ -2,16 +2,16 @@ name: Deploy SmartRestaurant to Production (chodocquan.site)
 
 on:
   push:
-    branches: [ production ]  # Chỉ deploy production từ production branch
+    branches: [production] # Chỉ deploy production từ production branch
   workflow_dispatch:
     inputs:
       force_deploy:
-        description: 'Force deploy to production'
+        description: "Force deploy to production"
         required: false
         default: false
         type: boolean
       skip_tests:
-        description: 'Skip CI tests (not recommended)'
+        description: "Skip CI tests (not recommended)"
         required: false
         default: false
         type: boolean
@@ -26,7 +26,7 @@ jobs:
     if: ${{ !inputs.skip_tests }}
     uses: ./.github/workflows/ci.yaml
     secrets: inherit
-  
+
   # Build và test backend
   build-backend:
     needs: [run-ci-tests]
@@ -40,128 +40,128 @@ jobs:
       deploy_mode: ${{ steps.deploy_mode.outputs.mode }}
       image_ref: ${{ steps.deploy_mode.outputs.image_ref }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-        
-    - name: Install ABP CLI for backend
-      run: |
-        # Install new ABP CLI (v8.2+ uses dotnet tool)
-        echo "📦 Installing ABP CLI for backend..."
-        
-        # Try new CLI first
-        if ! dotnet tool install -g Volo.Abp.Studio.Cli; then
-          echo "⚠️ New ABP CLI failed, trying fallback..."
-          # Fallback to old CLI if new one fails
-          dotnet tool install -g Volo.Abp.Cli || echo "Old CLI also failed, continuing..."
-        fi
-        
-        # Add dotnet tools to PATH
-        export PATH="$PATH:$HOME/.dotnet/tools"
-        
-        # Install ABP libraries for backend
-        echo "📚 Installing ABP libraries for backend..."
-        abp install-libs || echo "⚠️ ABP install-libs failed, using existing libraries"
-        
-    - name: Restore dependencies
-      run: |
-        cd aspnet-core
-        dotnet restore SmartRestaurant.sln
-        
-    - name: Build
-      run: |
-        cd aspnet-core
-        dotnet build SmartRestaurant.sln --configuration Release --no-restore
-        
-    - name: Run tests
-      run: |
-        cd aspnet-core
-        dotnet test SmartRestaurant.sln --configuration Release --no-build --verbosity normal
-        
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true  # Allow fallback to local build
-        
-    - name: Extract metadata for API
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
-          
-    - name: Build and push API Docker image
-      id: docker_push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./infrastructure/docker/Dockerfile.api
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64
-      continue-on-error: true
-      
-    - name: Build backup image for local deployment
-      run: |
-        echo "📦 Building backup image for local deployment (in case registry fails)"
-        
-        # Build image locally as backup
-        docker build -f ./infrastructure/docker/Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
-        
-        # Save image as tar file for deployment backup
-        mkdir -p ./build-artifacts
-        docker save smartrestaurant-api:${{ github.sha }} > ./build-artifacts/api-image.tar
-        
-        echo "✅ Backup image built and saved as tar file"
-        
-    - name: Upload Docker image artifact (backup)
-      uses: actions/upload-artifact@v4
-      with:
-        name: api-docker-image
-        path: ./build-artifacts/api-image.tar
-        retention-days: 1
-        
-    - name: Set deployment mode
-      id: deploy_mode
-      run: |
-        # Force local mode if GHCR permissions issue or build step failed
-        if [[ "${{ steps.docker_push.outcome }}" == "success" ]] && [[ -n "${{ steps.meta.outputs.tags }}" ]]; then
-          echo "mode=registry" >> $GITHUB_OUTPUT
-          # Get first tag from multiline output using EOF delimiter
-          {
-            echo 'image_ref<<EOF'
-            echo '${{ steps.meta.outputs.tags }}' | head -n1
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-          echo "✅ Using registry mode with first tag: $(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
-        else
-          echo "⚠️ GHCR push failed or no tags available, using local deployment mode"
-          echo "mode=local" >> $GITHUB_OUTPUT
-          echo "image_ref=smartrestaurant-api:${{ github.sha }}" >> $GITHUB_OUTPUT
-        fi
-        
-        # Debug output for troubleshooting
-        echo "🔍 Debug info:"
-        echo "  - docker_push outcome: ${{ steps.docker_push.outcome }}"
-        echo "  - meta tags: ${{ steps.meta.outputs.tags }}"
-        echo "  - github sha: ${{ github.sha }}"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install ABP CLI for backend
+        run: |
+          # Install new ABP CLI (v8.2+ uses dotnet tool)
+          echo "📦 Installing ABP CLI for backend..."
+
+          # Try new CLI first
+          if ! dotnet tool install -g Volo.Abp.Studio.Cli; then
+            echo "⚠️ New ABP CLI failed, trying fallback..."
+            # Fallback to old CLI if new one fails
+            dotnet tool install -g Volo.Abp.Cli || echo "Old CLI also failed, continuing..."
+          fi
+
+          # Add dotnet tools to PATH
+          export PATH="$PATH:$HOME/.dotnet/tools"
+
+          # Install ABP libraries for backend
+          echo "📚 Installing ABP libraries for backend..."
+          abp install-libs || echo "⚠️ ABP install-libs failed, using existing libraries"
+
+      - name: Restore dependencies
+        run: |
+          cd aspnet-core
+          dotnet restore SmartRestaurant.sln
+
+      - name: Build
+        run: |
+          cd aspnet-core
+          dotnet build SmartRestaurant.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: |
+          cd aspnet-core
+          dotnet test SmartRestaurant.sln --configuration Release --no-build --verbosity normal
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true # Allow fallback to local build
+
+      - name: Extract metadata for API
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push API Docker image
+        id: docker_push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infrastructure/docker/Dockerfile.api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+        continue-on-error: true
+
+      - name: Build backup image for local deployment
+        run: |
+          echo "📦 Building backup image for local deployment (in case registry fails)"
+
+          # Build image locally as backup
+          docker build -f ./infrastructure/docker/Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
+
+          # Save image as tar file for deployment backup
+          mkdir -p ./build-artifacts
+          docker save smartrestaurant-api:${{ github.sha }} > ./build-artifacts/api-image.tar
+
+          echo "✅ Backup image built and saved as tar file"
+
+      - name: Upload Docker image artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docker-image
+          path: ./build-artifacts/api-image.tar
+          retention-days: 1
+
+      - name: Set deployment mode
+        id: deploy_mode
+        run: |
+          # Force local mode if GHCR permissions issue or build step failed
+          if [[ "${{ steps.docker_push.outcome }}" == "success" ]] && [[ -n "${{ steps.meta.outputs.tags }}" ]]; then
+            echo "mode=registry" >> $GITHUB_OUTPUT
+            # Get first tag from multiline output using EOF delimiter
+            {
+              echo 'image_ref<<EOF'
+              echo '${{ steps.meta.outputs.tags }}' | head -n1
+              echo 'EOF'
+            } >> $GITHUB_OUTPUT
+            echo "✅ Using registry mode with first tag: $(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
+          else
+            echo "⚠️ GHCR push failed or no tags available, using local deployment mode"
+            echo "mode=local" >> $GITHUB_OUTPUT
+            echo "image_ref=smartrestaurant-api:${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+          # Debug output for troubleshooting
+          echo "🔍 Debug info:"
+          echo "  - docker_push outcome: ${{ steps.docker_push.outcome }}"
+          echo "  - meta tags: ${{ steps.meta.outputs.tags }}"
+          echo "  - github sha: ${{ github.sha }}"
 
   # Build Angular frontend
   build-frontend:
@@ -169,116 +169,116 @@ jobs:
     if: ${{ always() && (needs.run-ci-tests.result == 'success' || needs.run-ci-tests.result == 'skipped' || inputs.skip_tests || inputs.force_deploy) }}
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'yarn'
-        cache-dependency-path: 'angular/yarn.lock'
-        
-    - name: Install dependencies
-      run: |
-        cd angular
-        yarn install --frozen-lockfile
-        
-    - name: Generate service proxies
-      run: |
-        cd angular
-        # Note: Trong production workflow, cần API đang chạy
-        # Hoặc dùng pre-generated proxies
-        echo "Using pre-generated service proxies"
-        
-    - name: Lint
-      run: |
-        cd angular
-        yarn lint
-        
-    - name: Test
-      run: |
-        cd angular
-        yarn test:ci
-      env:
-        CI: true
-        
-    - name: Build for production
-      run: |
-        cd angular
-        yarn build:prod
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: angular-dist
-        path: angular/dist/
-        retention-days: 1
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true  # Allow fallback to local build
-        
-    - name: Extract metadata for Web
-      id: meta-web
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
-          
-    - name: Build and push Web Docker image
-      id: docker_push_web
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./infrastructure/docker/Dockerfile.web
-        target: production
-        push: true
-        tags: ${{ steps.meta-web.outputs.tags }}
-        labels: ${{ steps.meta-web.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64
-        build-args: |
-          API_URL=${{ vars.BACKEND_BASE_URL }}
-          BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-          CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
-      continue-on-error: true
-      
-    - name: Build backup Web image for local deployment
-      run: |
-        echo "📦 Building backup Web image for local deployment (in case registry fails)"
-        
-        # Build image locally as backup with build args
-        docker build -f ./infrastructure/docker/Dockerfile.web \
-          --build-arg API_URL=${{ vars.BACKEND_BASE_URL }} \
-          --build-arg BASE_URL=${{ vars.FRONTEND_BASE_URL }} \
-          --build-arg CLIENT_ID=${{ vars.WEB_CLIENT_ID }} \
-          -t smartrestaurant-web:${{ github.sha }} .
-        
-        # Save image as tar file for deployment backup
-        mkdir -p ./build-artifacts
-        docker save smartrestaurant-web:${{ github.sha }} > ./build-artifacts/web-image.tar
-        
-        echo "✅ Backup Web image built and saved as tar file"
-        
-    - name: Upload Web Docker image artifact (backup)
-      uses: actions/upload-artifact@v4
-      with:
-        name: web-docker-image
-        path: ./build-artifacts/web-image.tar
-        retention-days: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: "angular/yarn.lock"
+
+      - name: Install dependencies
+        run: |
+          cd angular
+          yarn install --frozen-lockfile
+
+      - name: Generate service proxies
+        run: |
+          cd angular
+          # Note: Trong production workflow, cần API đang chạy
+          # Hoặc dùng pre-generated proxies
+          echo "Using pre-generated service proxies"
+
+      - name: Lint
+        run: |
+          cd angular
+          yarn lint
+
+      - name: Test
+        run: |
+          cd angular
+          yarn test:ci
+        env:
+          CI: true
+
+      - name: Build for production
+        run: |
+          cd angular
+          yarn build:prod
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: angular/dist/
+          retention-days: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true # Allow fallback to local build
+
+      - name: Extract metadata for Web
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Web Docker image
+        id: docker_push_web
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infrastructure/docker/Dockerfile.web
+          target: production
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          build-args: |
+            API_URL=${{ vars.BACKEND_BASE_URL }}
+            BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+            CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
+        continue-on-error: true
+
+      - name: Build backup Web image for local deployment
+        run: |
+          echo "📦 Building backup Web image for local deployment (in case registry fails)"
+
+          # Build image locally as backup with build args
+          docker build -f ./infrastructure/docker/Dockerfile.web \
+            --build-arg API_URL=${{ vars.BACKEND_BASE_URL }} \
+            --build-arg BASE_URL=${{ vars.FRONTEND_BASE_URL }} \
+            --build-arg CLIENT_ID=${{ vars.WEB_CLIENT_ID }} \
+            -t smartrestaurant-web:${{ github.sha }} .
+
+          # Save image as tar file for deployment backup
+          mkdir -p ./build-artifacts
+          docker save smartrestaurant-web:${{ github.sha }} > ./build-artifacts/web-image.tar
+
+          echo "✅ Backup Web image built and saved as tar file"
+
+      - name: Upload Web Docker image artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-docker-image
+          path: ./build-artifacts/web-image.tar
+          retention-days: 1
 
   # Test Flutter mobile (build test) - DISABLED TEMPORARILY
   # TODO: Re-enable when flutter_mobile directory and dependencies are ready
@@ -289,28 +289,28 @@ jobs:
   #   steps:
   #   - name: Checkout code
   #     uses: actions/checkout@v4
-  #     
+  #
   #   - name: Setup Flutter
   #     uses: subosito/flutter-action@v2
   #     with:
   #       flutter-version: '3.35.1'
   #       channel: 'stable'
-  #       
+  #
   #   - name: Get dependencies
   #     run: |
   #       cd flutter_mobile
   #       flutter pub get
-  #       
+  #
   #   - name: Analyze code
   #     run: |
   #       cd flutter_mobile
   #       flutter analyze
-  #       
+  #
   #   - name: Run tests
   #     run: |
   #       cd flutter_mobile
   #       flutter test
-  #       
+  #
   #   - name: Build APK (test build)
   #     run: |
   #       cd flutter_mobile
@@ -318,471 +318,471 @@ jobs:
 
   # Deploy to production VPS
   deploy-production:
-    needs: [build-backend, build-frontend]  # test-mobile disabled temporarily
+    needs: [build-backend, build-frontend] # test-mobile disabled temporarily
     runs-on: ubuntu-latest
     if: ${{ always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production') && (needs.build-backend.result == 'success' && needs.build-frontend.result == 'success') }}
     environment:
       name: production
       url: https://chodocquan.site
-      
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Download Angular build
-      uses: actions/download-artifact@v4
-      with:
-        name: angular-dist
-        path: ./angular-dist
-        
-    - name: Download API Docker image backup
-      uses: actions/download-artifact@v4
-      with:
-        name: api-docker-image
-        path: ./docker-artifacts
-        
-    - name: Download Web Docker image backup
-      uses: actions/download-artifact@v4
-      with:
-        name: web-docker-image
-        path: ./docker-artifacts
-        
-    - name: Create deployment package
-      run: |
-        mkdir -p deployment-package
-        
-        # Copy infrastructure files với cấu trúc đúng
-        cp -r infrastructure/ deployment-package/
-        
-        # Copy scripts nếu có
-        [ -d "scripts/" ] && cp -r scripts/ deployment-package/ || true
-        
-        # Copy root files if needed (env examples, etc)
-        find . -maxdepth 1 -type f -name "*.md" -exec cp {} deployment-package/ \; 2>/dev/null || true
-        
-        echo "✅ Đã tạo deployment package với cấu trúc đầy đủ"
-        
-    - name: Prepare deployment with backup
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        script_stop: true
-        script: |
-          set -e
-          
-          echo "🚀 Starting deployment preparation for SmartRestaurant..."
-          
-          # Define backup timestamp
-          BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          export BACKUP_DIR="/opt/smartrestaurant.backup.${BACKUP_TIMESTAMP}"
-          echo "BACKUP_DIR=${BACKUP_DIR}" > /tmp/deployment_vars
-          
-          # Create comprehensive backup
-          if [ -d "/opt/smartrestaurant" ]; then
-            echo "📦 Creating backup at ${BACKUP_DIR}..."
-            sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"
-            
-            # Backup database
-            echo "💾 Creating database backup..."
-            sudo docker exec smartrestaurant-postgres-1 pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null || true
-            
-            # Save current docker images
-            echo "🐳 Backing up current Docker images..."
-            sudo docker save smartrestaurant/api:latest > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null || true
-            
-            echo "✅ Backup completed at ${BACKUP_DIR}"
-          else
-            echo "ℹ️ No existing deployment found, fresh installation"
-          fi
-          
-          # Prepare directories với cấu trúc đầy đủ
-          echo "📁 Tạo cấu trúc thư mục VPS..."
-          sudo mkdir -p /opt/smartrestaurant
-          sudo mkdir -p /opt/smartrestaurant/infrastructure/docker
-          sudo mkdir -p /opt/smartrestaurant/logs
-          sudo mkdir -p /opt/smartrestaurant/backups
-          sudo mkdir -p /opt/smartrestaurant/docker-data/postgres
-          sudo mkdir -p /var/www/html
-          sudo mkdir -p /etc/letsencrypt
-          
-          # Set quyền cho các thư mục
-          sudo chown -R $USER:$USER /opt/smartrestaurant
-          sudo chown -R www-data:www-data /var/www/html
-          sudo chmod -R 755 /var/www/html
-          sudo chmod -R 755 /opt/smartrestaurant/logs
-          sudo chmod -R 700 /opt/smartrestaurant/backups
-          
-          cd /opt/smartrestaurant
-          
-          # Handle image deployment based on mode with error handling
-          DEPLOY_MODE="${{ needs.build-backend.outputs.deploy_mode }}"
-          
-          # Default to local mode if deploy_mode is empty or null
-          if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
-            echo "⚠️ Deploy mode not set, defaulting to local mode"
-            DEPLOY_MODE="local"
-          fi
-          
-          echo "deployment_mode=${DEPLOY_MODE}" >> /tmp/deployment_vars
-          echo "🔧 Using deployment mode: ${DEPLOY_MODE}"
-          
-          if [ "$DEPLOY_MODE" = "registry" ]; then
-            echo "📦 Pulling latest API image from registry..."
-            IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
-            
-            # Check if image_ref is set
-            if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
-              echo "⚠️ Image ref not set, switching to local mode"
-              echo "deployment_mode=local" >> /tmp/deployment_vars
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Angular build
+        uses: actions/download-artifact@v4
+        with:
+          name: angular-dist
+          path: ./angular-dist
+
+      - name: Download API Docker image backup
+        uses: actions/download-artifact@v4
+        with:
+          name: api-docker-image
+          path: ./docker-artifacts
+
+      - name: Download Web Docker image backup
+        uses: actions/download-artifact@v4
+        with:
+          name: web-docker-image
+          path: ./docker-artifacts
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment-package
+
+          # Copy infrastructure files với cấu trúc đúng
+          cp -r infrastructure/ deployment-package/
+
+          # Copy scripts nếu có
+          [ -d "scripts/" ] && cp -r scripts/ deployment-package/ || true
+
+          # Copy root files if needed (env examples, etc)
+          find . -maxdepth 1 -type f -name "*.md" -exec cp {} deployment-package/ \; 2>/dev/null || true
+
+          echo "✅ Đã tạo deployment package với cấu trúc đầy đủ"
+
+      - name: Prepare deployment with backup
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+
+            echo "🚀 Starting deployment preparation for SmartRestaurant..."
+
+            # Define backup timestamp
+            BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            export BACKUP_DIR="/opt/smartrestaurant.backup.${BACKUP_TIMESTAMP}"
+            echo "BACKUP_DIR=${BACKUP_DIR}" > /tmp/deployment_vars
+
+            # Create comprehensive backup
+            if [ -d "/opt/smartrestaurant" ]; then
+              echo "📦 Creating backup at ${BACKUP_DIR}..."
+              sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"
+              
+              # Backup database
+              echo "💾 Creating database backup..."
+              sudo docker exec smartrestaurant-postgres-1 pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null || true
+              
+              # Save current docker images
+              echo "🐳 Backing up current Docker images..."
+              sudo docker save smartrestaurant/api:latest > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null || true
+              
+              echo "✅ Backup completed at ${BACKUP_DIR}"
             else
-              echo "Using image: ${IMAGE_REF}"
-              
-              # Try to pull image with error handling
-              if sudo docker pull "${IMAGE_REF}"; then
-                sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
-                echo "✅ Registry image pulled successfully"
-              else
-                echo "⚠️ Failed to pull from registry, switching to local mode"
-                echo "deployment_mode=local" >> /tmp/deployment_vars
-                echo "Will need local image file for deployment"
-              fi
+              echo "ℹ️ No existing deployment found, fresh installation"
             fi
-          else
-            echo "📦 Preparing for local Docker image deployment..."
-            echo "Will load image from uploaded artifact"
-          fi
-          
-          echo "✅ Deployment preparation completed"
-          
-    - name: Copy deployment files
-      uses: appleboy/scp-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        source: "deployment-package/*"
-        target: "/opt/smartrestaurant/"
-        strip_components: 1
-        
-    - name: Copy Angular static files
-      uses: appleboy/scp-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        source: "angular-dist/*"
-        target: "/var/www/html/"
-        strip_components: 1
-        
-    - name: Copy Docker image backup to VPS
-      uses: appleboy/scp-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        source: "docker-artifacts/api-image.tar"
-        target: "/opt/smartrestaurant/"
-        strip_components: 1
-        
-    - name: Copy Web Docker image backup to VPS
-      uses: appleboy/scp-action@v0.1.5
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        source: "docker-artifacts/web-image.tar"
-        target: "/opt/smartrestaurant/"
-        strip_components: 1
-        
-    - name: Deploy with health checks and auto-rollback
-      id: deploy
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        port: ${{ secrets.VPS_PORT || 22 }}
-        script_stop: false  # Changed to false để handle errors manually
-        script: |
-          set +e  # Don't exit on error, we'll handle it manually
-          
-          cd /opt/smartrestaurant
-          
-          # Load backup variables
-          source /tmp/deployment_vars
-          
-          # Function for rollback
-          rollback_deployment() {
-            echo "🛑 DEPLOYMENT FAILED - Starting automatic rollback..."
-            
-            # Stop new services
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 15 2>/dev/null || true
-            
-            if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
-              echo "🔄 Restoring from backup: $BACKUP_DIR"
+
+            # Prepare directories với cấu trúc đầy đủ
+            echo "📁 Tạo cấu trúc thư mục VPS..."
+            sudo mkdir -p /opt/smartrestaurant
+            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker
+            sudo mkdir -p /opt/smartrestaurant/logs
+            sudo mkdir -p /opt/smartrestaurant/backups
+            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres
+            sudo mkdir -p /var/www/html
+            sudo mkdir -p /etc/letsencrypt
+
+            # Set quyền cho các thư mục
+            sudo chown -R $USER:$USER /opt/smartrestaurant
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo chmod -R 755 /opt/smartrestaurant/logs
+            sudo chmod -R 700 /opt/smartrestaurant/backups
+
+            cd /opt/smartrestaurant
+
+            # Handle image deployment based on mode with error handling
+            DEPLOY_MODE="${{ needs.build-backend.outputs.deploy_mode }}"
+
+            # Default to local mode if deploy_mode is empty or null
+            if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
+              echo "⚠️ Deploy mode not set, defaulting to local mode"
+              DEPLOY_MODE="local"
+            fi
+
+            echo "deployment_mode=${DEPLOY_MODE}" >> /tmp/deployment_vars
+            echo "🔧 Using deployment mode: ${DEPLOY_MODE}"
+
+            if [ "$DEPLOY_MODE" = "registry" ]; then
+              echo "📦 Pulling latest API image from registry..."
+              IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
               
-              # Restore application files
-              sudo rm -rf /opt/smartrestaurant
-              sudo cp -r "$BACKUP_DIR" /opt/smartrestaurant
-              cd /opt/smartrestaurant
-              
-              # Restore Docker images if available
-              if [ -f "api_image_backup.tar" ]; then
-                echo "🐳 Restoring API Docker image..."
-                sudo docker load < api_image_backup.tar
-              fi
-              
-              # Restore database if available
-              if [ -f "database_backup.sql" ]; then
-                echo "💾 Restoring database..."
-                sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d postgres
-                sleep 10
-                sudo docker exec smartrestaurant-postgres-1 psql -U postgres -d SmartRestaurant < database_backup.sql 2>/dev/null || true
-              fi
-              
-              # Start restored services
-              echo "🚀 Starting restored services..."
-              sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d
-              sleep 20
-              
-              # Quick health check on restored services
-              if curl -f http://localhost/health 2>/dev/null; then
-                echo "✅ Rollback successful! Services restored."
-                echo "rollback_success=true" >> /tmp/deployment_result
+              # Check if image_ref is set
+              if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
+                echo "⚠️ Image ref not set, switching to local mode"
+                echo "deployment_mode=local" >> /tmp/deployment_vars
               else
-                echo "❌ Rollback failed - manual intervention required!"
+                echo "Using image: ${IMAGE_REF}"
+                
+                # Try to pull image with error handling
+                if sudo docker pull "${IMAGE_REF}"; then
+                  sudo docker tag "${IMAGE_REF}" smartrestaurant/api:latest
+                  echo "✅ Registry image pulled successfully"
+                else
+                  echo "⚠️ Failed to pull from registry, switching to local mode"
+                  echo "deployment_mode=local" >> /tmp/deployment_vars
+                  echo "Will need local image file for deployment"
+                fi
+              fi
+            else
+              echo "📦 Preparing for local Docker image deployment..."
+              echo "Will load image from uploaded artifact"
+            fi
+
+            echo "✅ Deployment preparation completed"
+
+      - name: Copy deployment files
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "deployment-package/*"
+          target: "/opt/smartrestaurant/"
+          strip_components: 1
+
+      - name: Copy Angular static files
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "angular-dist/*"
+          target: "/var/www/html/"
+          strip_components: 1
+
+      - name: Copy Docker image backup to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "docker-artifacts/api-image.tar"
+          target: "/opt/smartrestaurant/"
+          strip_components: 1
+
+      - name: Copy Web Docker image backup to VPS
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "docker-artifacts/web-image.tar"
+          target: "/opt/smartrestaurant/"
+          strip_components: 1
+
+      - name: Deploy with health checks and auto-rollback
+        id: deploy
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: false # Changed to false để handle errors manually
+          script: |
+            set +e  # Don't exit on error, we'll handle it manually
+
+            cd /opt/smartrestaurant
+
+            # Load backup variables
+            source /tmp/deployment_vars
+
+            # Function for rollback
+            rollback_deployment() {
+              echo "🛑 DEPLOYMENT FAILED - Starting automatic rollback..."
+              
+              # Stop new services
+              sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 15 2>/dev/null || true
+              
+              if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
+                echo "🔄 Restoring from backup: $BACKUP_DIR"
+                
+                # Restore application files
+                sudo rm -rf /opt/smartrestaurant
+                sudo cp -r "$BACKUP_DIR" /opt/smartrestaurant
+                cd /opt/smartrestaurant
+                
+                # Restore Docker images if available
+                if [ -f "api_image_backup.tar" ]; then
+                  echo "🐳 Restoring API Docker image..."
+                  sudo docker load < api_image_backup.tar
+                fi
+                
+                # Restore database if available
+                if [ -f "database_backup.sql" ]; then
+                  echo "💾 Restoring database..."
+                  sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d postgres
+                  sleep 10
+                  sudo docker exec smartrestaurant-postgres-1 psql -U postgres -d SmartRestaurant < database_backup.sql 2>/dev/null || true
+                fi
+                
+                # Start restored services
+                echo "🚀 Starting restored services..."
+                sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d
+                sleep 20
+                
+                # Quick health check on restored services
+                if curl -f http://localhost/health 2>/dev/null; then
+                  echo "✅ Rollback successful! Services restored."
+                  echo "rollback_success=true" >> /tmp/deployment_result
+                else
+                  echo "❌ Rollback failed - manual intervention required!"
+                  echo "rollback_success=false" >> /tmp/deployment_result
+                fi
+              else
+                echo "❌ No backup found - manual intervention required!"
                 echo "rollback_success=false" >> /tmp/deployment_result
               fi
-            else
-              echo "❌ No backup found - manual intervention required!"
-              echo "rollback_success=false" >> /tmp/deployment_result
-            fi
-            
-            echo "deployment_success=false" >> /tmp/deployment_result
-            return 1
-          }
-          
-          # Create .env file cùng cấp với docker-compose.yml
-          echo "🔧 Creating .env file with GitHub Secrets..."
-          cat > infrastructure/docker/.env << EOF
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
-          FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-          AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
-          SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
-          ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
-          WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
-          EOF
+              
+              echo "deployment_success=false" >> /tmp/deployment_result
+              return 1
+            }
 
-          # Set permissions cho .env file
-          chmod 600 infrastructure/docker/.env
-          echo "✅ .env file created successfully"
-          
-          # Set proper permissions
-          sudo chown -R $USER:$USER /opt/smartrestaurant
-          sudo chown -R www-data:www-data /var/www/html
-          sudo chmod -R 755 /var/www/html
-          
-          # Load Docker images if using local mode
-          source /tmp/deployment_vars
-          if [ "$deployment_mode" = "local" ]; then
-            if [ -f "api-image.tar" ]; then
-              echo "🐳 Loading API Docker image from local file..."
-              sudo docker load < api-image.tar
-              sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:latest
-              echo "✅ API Docker image loaded successfully"
+            # Create .env file cùng cấp với docker-compose.yml
+            echo "🔧 Creating .env file with GitHub Secrets..."
+            cat > infrastructure/docker/.env << EOF
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
+            FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+            AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
+            SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
+            ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
+            WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
+            EOF
+
+            # Set permissions cho .env file
+            chmod 600 infrastructure/docker/.env
+            echo "✅ .env file created successfully"
+
+            # Set proper permissions
+            sudo chown -R $USER:$USER /opt/smartrestaurant
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            # Load Docker images if using local mode
+            source /tmp/deployment_vars
+            if [ "$deployment_mode" = "local" ]; then
+              if [ -f "api-image.tar" ]; then
+                echo "🐳 Loading API Docker image from local file..."
+                sudo docker load < api-image.tar
+                sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:latest
+                echo "✅ API Docker image loaded successfully"
+              fi
+              
+              if [ -f "web-image.tar" ]; then
+                echo "🐳 Loading Web Docker image from local file..."
+                sudo docker load < web-image.tar
+                sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:latest
+                echo "✅ Web Docker image loaded successfully"
+              fi
             fi
-            
-            if [ -f "web-image.tar" ]; then
-              echo "🐳 Loading Web Docker image from local file..."
-              sudo docker load < web-image.tar
-              sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:latest
-              echo "✅ Web Docker image loaded successfully"
+
+            # Stop old services gracefully
+            if [ -f "infrastructure/docker/docker-compose.yml" ]; then
+              echo "⏹️ Stopping current services..."
+              sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
             fi
-          fi
-          
-          # Stop old services gracefully
-          if [ -f "infrastructure/docker/docker-compose.yml" ]; then
-            echo "⏹️ Stopping current services..."
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
-          fi
-          
-          # Start new services từ thư mục chứa docker-compose.yml
-          echo "🚀 Starting new services..."
-          cd /opt/smartrestaurant/infrastructure/docker
-          
-          # Verify .env file exists
-          if [ -f ".env" ]; then
-            echo "📄 .env file found"
-          else
-            echo "⚠️ Warning: .env file not found"
-          fi
-          
-          sudo docker-compose up -d
-          
-          # Wait for services to be ready
-          echo "⏳ Waiting for services to start..."
-          sleep 30
-          
-          # Health check with automatic rollback on failure
-          echo "🔍 Performing health checks..."
-          
-          # Check if containers are running
-          if ! sudo docker-compose ps | grep -q "Up"; then
-            echo "❌ Some containers failed to start"
-            sudo docker-compose logs
-            rollback_deployment
-            exit 1
-          fi
-          
-          # Check nginx health
-          if ! curl -f http://localhost/health 2>/dev/null; then
-            echo "❌ Nginx health check failed"
-            sudo docker-compose logs nginx
-            rollback_deployment
-            exit 1
-          fi
-          
-          # Check API health (with timeout)
-          if ! timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
-            echo "❌ API health check failed"
-            sudo docker-compose logs api
-            rollback_deployment
-            exit 1
-          fi
-          
-          # All health checks passed
-          echo "✅ All services are healthy!"
-          echo "🌐 SmartRestaurant is now available at https://chodocquan.site"
-          echo "deployment_success=true" >> /tmp/deployment_result
-          echo "rollback_success=false" >> /tmp/deployment_result
-          
-          # Show service status
-          sudo docker-compose ps
-          
-          # Cleanup old backups (keep last 5)
-          echo "🧹 Cleaning up old backups..."
-          cd /opt
-          sudo find . -maxdepth 1 -name "smartrestaurant.backup.*" -type d | sort -r | tail -n +6 | xargs sudo rm -rf 2>/dev/null || true
-          
-          exit 0
+
+            # Start new services từ thư mục chứa docker-compose.yml
+            echo "🚀 Starting new services..."
+            cd /opt/smartrestaurant/infrastructure/docker
+
+            # Verify .env file exists
+            if [ -f ".env" ]; then
+              echo "📄 .env file found"
+            else
+              echo "⚠️ Warning: .env file not found"
+            fi
+
+            sudo docker-compose up -d
+
+            # Wait for services to be ready
+            echo "⏳ Waiting for services to start..."
+            sleep 30
+
+            # Health check with automatic rollback on failure
+            echo "🔍 Performing health checks..."
+
+            # Check if containers are running
+            if ! sudo docker-compose ps | grep -q "Up"; then
+              echo "❌ Some containers failed to start"
+              sudo docker-compose logs
+              rollback_deployment
+              exit 1
+            fi
+
+            # Check nginx health
+            if ! curl -f http://localhost/health 2>/dev/null; then
+              echo "❌ Nginx health check failed"
+              sudo docker-compose logs nginx
+              rollback_deployment
+              exit 1
+            fi
+
+            # Check API health (with timeout)
+            if ! timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
+              echo "❌ API health check failed"
+              sudo docker-compose logs api
+              rollback_deployment
+              exit 1
+            fi
+
+            # All health checks passed
+            echo "✅ All services are healthy!"
+            echo "🌐 SmartRestaurant is now available at https://chodocquan.site"
+            echo "deployment_success=true" >> /tmp/deployment_result
+            echo "rollback_success=false" >> /tmp/deployment_result
+
+            # Show service status
+            sudo docker-compose ps
+
+            # Cleanup old backups (keep last 5)
+            echo "🧹 Cleaning up old backups..."
+            cd /opt
+            sudo find . -maxdepth 1 -name "smartrestaurant.backup.*" -type d | sort -r | tail -n +6 | xargs sudo rm -rf 2>/dev/null || true
+
+            exit 0
 
   # Check deployment result and send notifications
   post-deploy-check:
     needs: [deploy-production]
     runs-on: ubuntu-latest
     if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production')
-    
+
     steps:
-    - name: Get deployment result
-      id: result
-      run: |
-        # Set default values for deployment status
-        echo "deployment_success=unknown" >> $GITHUB_OUTPUT
-        echo "rollback_success=unknown" >> $GITHUB_OUTPUT
-        
-        echo "📊 Deployment status will be determined by health checks"
-    
-    - name: Wait for system stabilization
-      run: sleep 60
-      
-    - name: External health checks
-      id: external_check
-      run: |
-        echo "🔍 Performing external health checks..."
-        
-        # Check main site with retries
-        for i in {1..3}; do
-          if curl -f -s --max-time 10 https://chodocquan.site/health; then
-            echo "✅ Main site health check passed"
-            echo "site_healthy=true" >> $GITHUB_OUTPUT
-            break
-          else
-            echo "⚠️ Main site health check failed (attempt $i/3)"
-            if [ $i -eq 3 ]; then
-              echo "site_healthy=false" >> $GITHUB_OUTPUT
+      - name: Get deployment result
+        id: result
+        run: |
+          # Set default values for deployment status
+          echo "deployment_success=unknown" >> $GITHUB_OUTPUT
+          echo "rollback_success=unknown" >> $GITHUB_OUTPUT
+
+          echo "📊 Deployment status will be determined by health checks"
+
+      - name: Wait for system stabilization
+        run: sleep 60
+
+      - name: External health checks
+        id: external_check
+        run: |
+          echo "🔍 Performing external health checks..."
+
+          # Check main site with retries
+          for i in {1..3}; do
+            if curl -f -s --max-time 10 https://chodocquan.site/health; then
+              echo "✅ Main site health check passed"
+              echo "site_healthy=true" >> $GITHUB_OUTPUT
+              break
             else
-              sleep 10
+              echo "⚠️ Main site health check failed (attempt $i/3)"
+              if [ $i -eq 3 ]; then
+                echo "site_healthy=false" >> $GITHUB_OUTPUT
+              else
+                sleep 10
+              fi
             fi
-          fi
-        done
-        
-        # Check API endpoint with retries
-        for i in {1..3}; do
-          if curl -f -s --max-time 10 https://chodocquan.site/api/health; then
-            echo "✅ API health check passed"
-            echo "api_healthy=true" >> $GITHUB_OUTPUT
-            break
-          else
-            echo "⚠️ API health check failed (attempt $i/3)"
-            if [ $i -eq 3 ]; then
-              echo "api_healthy=false" >> $GITHUB_OUTPUT
+          done
+
+          # Check API endpoint with retries
+          for i in {1..3}; do
+            if curl -f -s --max-time 10 https://chodocquan.site/api/health; then
+              echo "✅ API health check passed"
+              echo "api_healthy=true" >> $GITHUB_OUTPUT
+              break
             else
-              sleep 10
+              echo "⚠️ API health check failed (attempt $i/3)"
+              if [ $i -eq 3 ]; then
+                echo "api_healthy=false" >> $GITHUB_OUTPUT
+              else
+                sleep 10
+              fi
             fi
+          done
+
+      - name: Determine final status
+        id: status
+        run: |
+          SITE_HEALTHY="${{ steps.external_check.outputs.site_healthy }}"
+          API_HEALTHY="${{ steps.external_check.outputs.api_healthy }}"
+          DEPLOY_JOB_SUCCESS="${{ needs.deploy-production.result }}"
+
+          echo "🔍 Status Summary:"
+          echo "  - Site Health: ${SITE_HEALTHY}"
+          echo "  - API Health: ${API_HEALTHY}"
+          echo "  - Deploy Job: ${DEPLOY_JOB_SUCCESS}"
+
+          if [[ "${SITE_HEALTHY}" == "true" && "${API_HEALTHY}" == "true" ]]; then
+            echo "final_status=success" >> $GITHUB_OUTPUT
+            echo "status_message=🎉 Deployment successful! All services are healthy." >> $GITHUB_OUTPUT
+          elif [[ "${DEPLOY_JOB_SUCCESS}" == "success" && ("${SITE_HEALTHY}" != "true" || "${API_HEALTHY}" != "true") ]]; then
+            echo "final_status=degraded" >> $GITHUB_OUTPUT
+            echo "status_message=⚠️ Deployment completed but some health checks failed. Service may be partially available." >> $GITHUB_OUTPUT
+          else
+            echo "final_status=failed" >> $GITHUB_OUTPUT
+            echo "status_message=❌ Deployment failed. Check logs for details and consider manual intervention." >> $GITHUB_OUTPUT
           fi
-        done
-        
-    - name: Determine final status
-      id: status
-      run: |
-        SITE_HEALTHY="${{ steps.external_check.outputs.site_healthy }}"
-        API_HEALTHY="${{ steps.external_check.outputs.api_healthy }}"
-        DEPLOY_JOB_SUCCESS="${{ needs.deploy-production.result }}"
-        
-        echo "🔍 Status Summary:"
-        echo "  - Site Health: ${SITE_HEALTHY}"
-        echo "  - API Health: ${API_HEALTHY}"
-        echo "  - Deploy Job: ${DEPLOY_JOB_SUCCESS}"
-        
-        if [[ "${SITE_HEALTHY}" == "true" && "${API_HEALTHY}" == "true" ]]; then
-          echo "final_status=success" >> $GITHUB_OUTPUT
-          echo "status_message=🎉 Deployment successful! All services are healthy." >> $GITHUB_OUTPUT
-        elif [[ "${DEPLOY_JOB_SUCCESS}" == "success" && ("${SITE_HEALTHY}" != "true" || "${API_HEALTHY}" != "true") ]]; then
-          echo "final_status=degraded" >> $GITHUB_OUTPUT
-          echo "status_message=⚠️ Deployment completed but some health checks failed. Service may be partially available." >> $GITHUB_OUTPUT
-        else
-          echo "final_status=failed" >> $GITHUB_OUTPUT
-          echo "status_message=❌ Deployment failed. Check logs for details and consider manual intervention." >> $GITHUB_OUTPUT
-        fi
-        
-    - name: Success notification
-      if: steps.status.outputs.final_status == 'success'
-      run: |
-        echo "🎉 SmartRestaurant successfully deployed to production!"
-        echo "🌐 Available at: https://chodocquan.site"
-        echo "📊 All health checks passed"
-        echo "🕐 Deployment completed at: $(date)"
-        
-    - name: Degraded notification
-      if: steps.status.outputs.final_status == 'degraded'
-      run: |
-        echo "⚠️ SmartRestaurant deployment completed with issues"
-        echo "📊 Some health checks failed - service may be partially available"
-        echo "🌐 Check service at: https://chodocquan.site"
-        echo "📝 Review deployment logs and consider manual checks"
-        echo "🕐 Deployment completed at: $(date)"
-        
-    - name: Failure notification
-      if: steps.status.outputs.final_status == 'failed'
-      run: |
-        echo "❌ SmartRestaurant deployment failed!"
-        echo "🚨 Deployment job failed or services are not responding"
-        echo "⚠️ Manual intervention may be required"
-        echo "📞 Contact system administrator if service is down"
-        echo "🕐 Failure detected at: $(date)"
-        exit 1
-        
-    - name: Cleanup deployment artifacts
-      if: always()
-      run: |
-        echo "🧹 Deployment workflow completed"
-        echo "📝 Summary: ${{ steps.status.outputs.status_message }}"
-        echo "🕐 Finished at: $(date)"
+
+      - name: Success notification
+        if: steps.status.outputs.final_status == 'success'
+        run: |
+          echo "🎉 SmartRestaurant successfully deployed to production!"
+          echo "🌐 Available at: https://chodocquan.site"
+          echo "📊 All health checks passed"
+          echo "🕐 Deployment completed at: $(date)"
+
+      - name: Degraded notification
+        if: steps.status.outputs.final_status == 'degraded'
+        run: |
+          echo "⚠️ SmartRestaurant deployment completed with issues"
+          echo "📊 Some health checks failed - service may be partially available"
+          echo "🌐 Check service at: https://chodocquan.site"
+          echo "📝 Review deployment logs and consider manual checks"
+          echo "🕐 Deployment completed at: $(date)"
+
+      - name: Failure notification
+        if: steps.status.outputs.final_status == 'failed'
+        run: |
+          echo "❌ SmartRestaurant deployment failed!"
+          echo "🚨 Deployment job failed or services are not responding"
+          echo "⚠️ Manual intervention may be required"
+          echo "📞 Contact system administrator if service is down"
+          echo "🕐 Failure detected at: $(date)"
+          exit 1
+
+      - name: Cleanup deployment artifacts
+        if: always()
+        run: |
+          echo "🧹 Deployment workflow completed"
+          echo "📝 Summary: ${{ steps.status.outputs.status_message }}"
+          echo "🕐 Finished at: $(date)"
