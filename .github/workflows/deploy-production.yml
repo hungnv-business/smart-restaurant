@@ -484,7 +484,7 @@ jobs:
             echo "🛑 DEPLOYMENT FAILED - Starting automatic rollback..."
             
             # Stop new services
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 15 2>/dev/null || true
+            sudo docker-compose -f docker/docker-compose.yml down --timeout 15 2>/dev/null || true
             
             if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
               echo "🔄 Restoring from backup: $BACKUP_DIR"
@@ -503,14 +503,14 @@ jobs:
               # Restore database if available
               if [ -f "database_backup.sql" ]; then
                 echo "💾 Restoring database..."
-                sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d postgres
+                sudo docker-compose -f docker/docker-compose.yml up -d postgres
                 sleep 10
                 sudo docker exec smartrestaurant-postgres-1 psql -U postgres -d SmartRestaurant < database_backup.sql 2>/dev/null || true
               fi
               
               # Start restored services
               echo "🚀 Starting restored services..."
-              sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d
+              sudo docker-compose -f docker/docker-compose.yml up -d
               sleep 20
               
               # Quick health check on restored services
@@ -566,14 +566,14 @@ jobs:
           fi
           
           # Stop old services gracefully
-          if [ -f "infrastructure/docker/docker-compose.yml" ]; then
+          if [ -f "docker/docker-compose.yml" ]; then
             echo "⏹️ Stopping current services..."
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
+            sudo docker-compose -f docker/docker-compose.yml down --timeout 30
           fi
           
           # Start new services
           echo "🚀 Starting new services..."
-          sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d
+          sudo docker-compose -f docker/docker-compose.yml up -d
           
           # Wait for services to be ready
           echo "⏳ Waiting for services to start..."
@@ -583,9 +583,9 @@ jobs:
           echo "🔍 Performing health checks..."
           
           # Check if containers are running
-          if ! sudo docker-compose -f infrastructure/docker/docker-compose.yml ps | grep -q "Up"; then
+          if ! sudo docker-compose -f docker/docker-compose.yml ps | grep -q "Up"; then
             echo "❌ Some containers failed to start"
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml logs
+            sudo docker-compose -f docker/docker-compose.yml logs
             rollback_deployment
             exit 1
           fi
@@ -593,7 +593,7 @@ jobs:
           # Check nginx health
           if ! curl -f http://localhost/health 2>/dev/null; then
             echo "❌ Nginx health check failed"
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml logs nginx
+            sudo docker-compose -f docker/docker-compose.yml logs nginx
             rollback_deployment
             exit 1
           fi
@@ -601,7 +601,7 @@ jobs:
           # Check API health (with timeout)
           if ! timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
             echo "❌ API health check failed"
-            sudo docker-compose -f infrastructure/docker/docker-compose.yml logs api
+            sudo docker-compose -f docker/docker-compose.yml logs api
             rollback_deployment
             exit 1
           fi
@@ -613,7 +613,7 @@ jobs:
           echo "rollback_success=false" >> /tmp/deployment_result
           
           # Show service status
-          sudo docker-compose -f infrastructure/docker/docker-compose.yml ps
+          sudo docker-compose -f docker/docker-compose.yml ps
           
           # Cleanup old backups (keep last 5)
           echo "🧹 Cleaning up old backups..."
