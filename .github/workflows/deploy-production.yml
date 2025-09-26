@@ -529,16 +529,11 @@ jobs:
           echo "Creating .env file with GitHub Secrets..."
           cat > .env << EOF
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          APP_SELF_URL=${{ vars.BACKEND_BASE_URL }}
-          APP_CLIENT_URL=${{ vars.FRONTEND_BASE_URL }}
-          APP_CORS_ORIGINS=${{ vars.FRONTEND_BASE_URL }}
-          APP_REDIRECT_URLS=${{ vars.FRONTEND_BASE_URL }}
-          AUTH_SERVER_AUTHORITY=${{ vars.BACKEND_BASE_URL }}
+          BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
+          FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
           AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
           SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
           ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
-          WEB_API_URL=${{ vars.BACKEND_BASE_URL }}
-          WEB_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
           WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
           EOF
           
