@@ -362,19 +362,32 @@ jobs:
 
           echo "✅ Đã tạo deployment package với cấu trúc đầy đủ"
 
-      - name: Prepare deployment with backup
+      - name: Create backup directories
         uses: appleboy/ssh-action@v0.1.8
+        continue-on-error: false
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
+          timeout: 30m
+          command_timeout: 10m
+          # Add SSH client options to improve reliability
+          envs: GITHUB_SHA,GITHUB_REF
+          debug: false
           script: |
             set -e  # Exit on error
             set -x  # Debug mode - show all commands
 
             echo "🚀 Starting deployment preparation for SmartRestaurant..."
+            
+            # Connection validation
+            echo "🔍 Validating server connection..."
+            whoami
+            pwd
+            df -h
+            echo "✅ Server connection validated"
 
             # Define backup timestamp
             BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -583,6 +596,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: false # Changed to false để handle errors manually
+          timeout: 45m
+          command_timeout: 15m
           script: |
             set +e  # Don't exit on error, we'll handle it manually
 
