@@ -549,34 +549,21 @@ jobs:
             return 1
           }
           
-          # Create .env file ở đúng vị trí với docker-compose.yml
+          # Create .env file cùng cấp với docker-compose.yml
           echo "🔧 Creating .env file with GitHub Secrets..."
           cat > infrastructure/docker/.env << EOF
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
-FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
-SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
-ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
-WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
-EOF
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
+          FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+          AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
+          SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
+          ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
+          WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
+          EOF
 
-          # Also create backup .env in root for compatibility
-          cat > .env << EOF
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
-FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
-SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
-ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}
-WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
-EOF
-
-          # Set permissions cho .env files
-          chmod 600 .env
+          # Set permissions cho .env file
           chmod 600 infrastructure/docker/.env
-          
-          echo "✅ .env files created successfully"
+          echo "✅ .env file created successfully"
           
           # Set proper permissions
           sudo chown -R $USER:$USER /opt/smartrestaurant
@@ -607,21 +594,17 @@ EOF
             sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
           fi
           
-          # Start new services với đường dẫn đúng
+          # Start new services từ thư mục chứa docker-compose.yml
           echo "🚀 Starting new services..."
           cd /opt/smartrestaurant/infrastructure/docker
           
-          # Verify .env file exists and has content
+          # Verify .env file exists
           if [ -f ".env" ]; then
-            echo "📄 .env file found, checking content..."
-            echo "Environment variables loaded:"
-            grep -E "^[A-Z_]+" .env | head -3 | sed 's/=.*/=***/'
+            echo "📄 .env file found"
           else
-            echo "⚠️ Warning: .env file not found in $(pwd)"
-            ls -la
+            echo "⚠️ Warning: .env file not found"
           fi
           
-          # Start services from docker directory
           sudo docker-compose up -d
           
           # Wait for services to be ready
