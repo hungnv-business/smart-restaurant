@@ -20,8 +20,10 @@ RUN apk add --no-cache curl
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY infrastructure/docker/nginx-web-http.conf /etc/nginx/nginx.conf
 
-# Set proper ownership and permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
+# Create directories for nginx non-root user and set permissions
+RUN mkdir -p /var/cache/nginx /var/run/nginx /var/log/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run/nginx /var/log/nginx && \
+    chmod -R 755 /var/cache/nginx /var/run/nginx
 
 USER nginx
 EXPOSE 80
