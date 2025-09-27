@@ -51,11 +51,11 @@ jobs:
       - name: Install ABP CLI for backend
         run: |
           # Install new ABP CLI (v8.2+ uses dotnet tool)
-          echo "📦 Installing ABP CLI for backend..."
+          echo "[DEPLOY] Installing ABP CLI for backend..."
 
           # Try new CLI first
           if ! dotnet tool install -g Volo.Abp.Studio.Cli; then
-            echo "⚠️ New ABP CLI failed, trying fallback..."
+            echo "[WARNING] New ABP CLI failed, trying fallback..."
             # Fallback to old CLI if new one fails
             dotnet tool install -g Volo.Abp.Cli || echo "Old CLI also failed, continuing..."
           fi
@@ -64,8 +64,8 @@ jobs:
           export PATH="$PATH:$HOME/.dotnet/tools"
 
           # Install ABP libraries for backend
-          echo "📚 Installing ABP libraries for backend..."
-          abp install-libs || echo "⚠️ ABP install-libs failed, using existing libraries"
+          echo "[DEPLOY] Installing ABP libraries for backend..."
+          abp install-libs || echo "[WARNING] ABP install-libs failed, using existing libraries"
 
       - name: Restore dependencies
         run: |
@@ -120,7 +120,7 @@ jobs:
 
       - name: Build backup image for local deployment
         run: |
-          echo "📦 Building backup image for local deployment (in case registry fails)"
+          echo "[DEPLOY] Building backup image for local deployment (in case registry fails)"
 
           # Build image locally as backup
           docker build -f ./infrastructure/docker/Dockerfile.api -t smartrestaurant-api:${{ github.sha }} .
@@ -129,7 +129,7 @@ jobs:
           mkdir -p ./build-artifacts
           docker save smartrestaurant-api:${{ github.sha }} > ./build-artifacts/api-image.tar
 
-          echo "✅ Backup image built and saved as tar file"
+          echo "[SUCCESS] Backup image built and saved as tar file"
 
       - name: Upload Docker image artifact (backup)
         uses: actions/upload-artifact@v4
@@ -150,15 +150,15 @@ jobs:
               echo '${{ steps.meta.outputs.tags }}' | head -n1
               echo 'EOF'
             } >> $GITHUB_OUTPUT
-            echo "✅ Using registry mode with first tag: $(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
+            echo "[SUCCESS] Using registry mode with first tag: $(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
           else
-            echo "⚠️ GHCR push failed or no tags available, using local deployment mode"
+            echo "[WARNING] GHCR push failed or no tags available, using local deployment mode"
             echo "mode=local" >> $GITHUB_OUTPUT
             echo "image_ref=smartrestaurant-api:${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
           # Debug output for troubleshooting
-          echo "🔍 Debug info:"
+          echo "[INFO] Debug info:"
           echo "  - docker_push outcome: ${{ steps.docker_push.outcome }}"
           echo "  - meta tags: ${{ steps.meta.outputs.tags }}"
           echo "  - github sha: ${{ github.sha }}"
@@ -258,7 +258,7 @@ jobs:
 
       - name: Build backup Web image for local deployment
         run: |
-          echo "📦 Building backup Web image for local deployment (in case registry fails)"
+          echo "[DEPLOY] Building backup Web image for local deployment (in case registry fails)"
 
           # Build image locally as backup with build args
           docker build -f ./infrastructure/docker/Dockerfile.web \
@@ -271,7 +271,7 @@ jobs:
           mkdir -p ./build-artifacts
           docker save smartrestaurant-web:${{ github.sha }} > ./build-artifacts/web-image.tar
 
-          echo "✅ Backup Web image built and saved as tar file"
+          echo "[SUCCESS] Backup Web image built and saved as tar file"
 
       - name: Upload Web Docker image artifact (backup)
         uses: actions/upload-artifact@v4
@@ -360,7 +360,7 @@ jobs:
           # Copy root files if needed (env examples, etc)
           find . -maxdepth 1 -type f -name "*.md" -exec cp {} deployment-package/ \; 2>/dev/null || true
 
-          echo "✅ Đã tạo deployment package với cấu trúc đầy đủ"
+          echo "[SUCCESS] Đã tạo deployment package với cấu trúc đầy đủ"
 
       - name: Create backup directories
         uses: appleboy/ssh-action@v0.1.8
@@ -380,14 +380,14 @@ jobs:
             set -e  # Exit on error
             set -x  # Debug mode - show all commands
 
-            echo "🚀 Starting deployment preparation for SmartRestaurant..."
+            echo "[DEPLOY] Starting deployment preparation for SmartRestaurant..."
             
             # Connection validation
-            echo "🔍 Validating server connection..."
+            echo "[INFO] Validating server connection..."
             whoami
             pwd
             df -h
-            echo "✅ Server connection validated"
+            echo "[SUCCESS] Server connection validated"
 
             # Define backup timestamp
             BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -396,43 +396,43 @@ jobs:
 
             # Create comprehensive backup
             if [ -d "/opt/smartrestaurant" ]; then
-              echo "📦 Creating backup at ${BACKUP_DIR}..."
+              echo "[BACKUP] Creating backup at ${BACKUP_DIR}..."
               
               # Create backup directory first
               if sudo mkdir -p "${BACKUP_DIR}"; then
-                echo "✅ Backup directory created: ${BACKUP_DIR}"
+                echo "[SUCCESS] Backup directory created: ${BACKUP_DIR}"
               else
-                echo "❌ Failed to create backup directory"
+                echo "[ERROR] Failed to create backup directory"
                 exit 1
               fi
               
               # Copy application files
               if sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"; then
-                echo "✅ Application files backed up successfully"
+                echo "[SUCCESS] Application files backed up successfully"
               else
-                echo "❌ Failed to backup application files"
+                echo "[ERROR] Failed to backup application files"
                 exit 1
               fi
               
               # Backup database with better error handling
-              echo "💾 Creating database backup..."
+              echo "[BACKUP] Creating database backup..."
               POSTGRES_CONTAINERS=$(sudo docker ps --format "{{.Names}}" | grep -E "(postgres|db)" || echo "")
               if [ -n "$POSTGRES_CONTAINERS" ]; then
                 for container in $POSTGRES_CONTAINERS; do
                   echo "Trying to backup from container: $container"
                   if sudo docker exec "$container" pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null; then
-                    echo "✅ Database backup created successfully from $container"
+                    echo "[SUCCESS] Database backup created successfully from $container"
                     break
                   else
-                    echo "⚠️ Database backup failed from $container, trying next container..."
+                    echo "[WARNING] Database backup failed from $container, trying next container..."
                   fi
                 done
               else
-                echo "⚠️ No PostgreSQL containers found, skipping database backup"
+                echo "[WARNING] No PostgreSQL containers found, skipping database backup"
               fi
               
               # Save current docker images with better error handling
-              echo "🐳 Backing up current Docker images..."
+              echo "[BACKUP] Backing up current Docker images..."
               
               # Check for the production image
               POSSIBLE_IMAGES=(
@@ -442,69 +442,69 @@ jobs:
               IMAGE_BACKED_UP=false
               for image in "${POSSIBLE_IMAGES[@]}"; do
                 if sudo docker image inspect "$image" >/dev/null 2>&1; then
-                  echo "📦 Found image: $image"
+                  echo "[BACKUP] Found image: $image"
                   if sudo docker save "$image" > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
-                    echo "✅ API image backup created successfully from: $image"
+                    echo "[SUCCESS] API image backup created successfully from: $image"
                     IMAGE_BACKED_UP=true
                     break
                   else
-                    echo "⚠️ Failed to save image: $image"
+                    echo "[WARNING] Failed to save image: $image"
                   fi
                 fi
               done
               
               if [ "$IMAGE_BACKED_UP" = false ]; then
-                echo "ℹ️ No API images found to backup (this is normal for first deployment)"
+                echo "[INFO] No API images found to backup (this is normal for first deployment)"
               fi
               
-              echo "✅ Backup process completed at ${BACKUP_DIR}"
+              echo "[SUCCESS] Backup process completed at ${BACKUP_DIR}"
             else
-              echo "ℹ️ No existing deployment found, fresh installation"
+              echo "[INFO] No existing deployment found, fresh installation"
               # Create empty backup directory for consistency
               sudo mkdir -p "${BACKUP_DIR}"
-              echo "✅ Created empty backup directory for first-time installation"
+              echo "[SUCCESS] Created empty backup directory for first-time installation"
             fi
 
-            # Prepare directories với cấu trúc đầy đủ
-            echo "📁 Tạo cấu trúc thư mục VPS..."
+            # Prepare directories with full structure
+            echo "[SETUP] Creating VPS directory structure..."
             
             # Create directories with proper error handling
             set +e  # Disable exit on error for directory creation
             
-            sudo mkdir -p /opt/smartrestaurant || { echo "⚠️ Failed to create /opt/smartrestaurant"; }
-            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker || { echo "⚠️ Failed to create infrastructure/docker"; }
-            sudo mkdir -p /opt/smartrestaurant/logs || { echo "⚠️ Failed to create logs directory"; }
-            sudo mkdir -p /opt/smartrestaurant/backups || { echo "⚠️ Failed to create backups directory"; }
-            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres || { echo "⚠️ Failed to create postgres data directory"; }
-            sudo mkdir -p /var/www/html || { echo "⚠️ Failed to create web directory"; }
-            sudo mkdir -p /etc/letsencrypt || { echo "⚠️ Failed to create letsencrypt directory"; }
+            sudo mkdir -p /opt/smartrestaurant || { echo "[WARNING] Failed to create /opt/smartrestaurant"; }
+            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker || { echo "[WARNING] Failed to create infrastructure/docker"; }
+            sudo mkdir -p /opt/smartrestaurant/logs || { echo "[WARNING] Failed to create logs directory"; }
+            sudo mkdir -p /opt/smartrestaurant/backups || { echo "[WARNING] Failed to create backups directory"; }
+            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres || { echo "[WARNING] Failed to create postgres data directory"; }
+            sudo mkdir -p /var/www/html || { echo "[WARNING] Failed to create web directory"; }
+            sudo mkdir -p /etc/letsencrypt || { echo "[WARNING] Failed to create letsencrypt directory"; }
             
             set -e  # Re-enable exit on error
 
-            # Set quyền cho các thư mục with error handling
-            echo "🔐 Setting directory permissions..."
+            # Set directory permissions with error handling
+            echo "[SETUP] Setting directory permissions..."
             
             set +e  # Disable exit on error for permission setting
             
             if sudo chown -R $USER:$USER /opt/smartrestaurant 2>/dev/null; then
-              echo "✅ Set ownership for /opt/smartrestaurant"
+              echo "[SUCCESS] Set ownership for /opt/smartrestaurant"
             else
-              echo "⚠️ Failed to set ownership for /opt/smartrestaurant"
+              echo "[WARNING] Failed to set ownership for /opt/smartrestaurant"
             fi
             
             if sudo chown -R www-data:www-data /var/www/html 2>/dev/null; then
-              echo "✅ Set ownership for /var/www/html"
+              echo "[SUCCESS] Set ownership for /var/www/html"
             else
-              echo "⚠️ Failed to set ownership for /var/www/html"
+              echo "[WARNING] Failed to set ownership for /var/www/html"
             fi
             
-            sudo chmod -R 755 /var/www/html 2>/dev/null || echo "⚠️ Failed to set permissions for /var/www/html"
-            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null || echo "⚠️ Failed to set permissions for logs"
-            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null || echo "⚠️ Failed to set permissions for backups"
+            sudo chmod -R 755 /var/www/html 2>/dev/null || echo "[WARNING] Failed to set permissions for /var/www/html"
+            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null || echo "[WARNING] Failed to set permissions for logs"
+            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null || echo "[WARNING] Failed to set permissions for backups"
             
             set -e  # Re-enable exit on error
             
-            echo "✅ Directory setup completed"
+            echo "[SUCCESS] Directory setup completed"
 
             cd /opt/smartrestaurant
 
@@ -513,37 +513,37 @@ jobs:
 
             # Default to local mode if deploy_mode is empty or null
             if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
-              echo "⚠️ Deploy mode not set, defaulting to local mode"
+              echo "[WARNING] Deploy mode not set, defaulting to local mode"
               DEPLOY_MODE="local"
             fi
 
             echo "deployment_mode=${DEPLOY_MODE}" >> /tmp/deployment_vars
-            echo "🔧 Using deployment mode: ${DEPLOY_MODE}"
+            echo "[DEPLOY] Using deployment mode: ${DEPLOY_MODE}"
 
             if [ "$DEPLOY_MODE" = "registry" ]; then
-              echo "📦 Pulling latest API image from registry..."
+              echo "[DEPLOY] Pulling latest API image from registry..."
               IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
               
               # Check if image_ref is set
               if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
-                echo "⚠️ Image ref not set, switching to local mode"
+                echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
                 echo "Using image: ${IMAGE_REF}"
                 
                 # Try to pull image with error handling (don't exit on failure)
                 set +e  # Disable exit on error for this section
-                echo "🔄 Attempting to pull Docker image..."
+                echo "[DEPLOY] Attempting to pull Docker image..."
                 
                 if sudo docker pull "${IMAGE_REF}" 2>&1; then
                   if sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production 2>&1; then
-                    echo "✅ Registry image pulled and tagged successfully as ghcr.io/hungnv-business/smart-restaurant/api:production"
+                    echo "[SUCCESS] Registry image pulled and tagged successfully as ghcr.io/hungnv-business/smart-restaurant/api:production"
                   else
-                    echo "⚠️ Failed to tag image, switching to local mode"
+                    echo "[WARNING] Failed to tag image, switching to local mode"
                     echo "deployment_mode=local" >> /tmp/deployment_vars
                   fi
                 else
-                  echo "⚠️ Failed to pull from registry (this is expected for first deployment), switching to local mode"
+                  echo "[WARNING] Failed to pull from registry (this is expected for first deployment), switching to local mode"
                   echo "deployment_mode=local" >> /tmp/deployment_vars
                   echo "Will use local image file for deployment"
                 fi
@@ -551,11 +551,11 @@ jobs:
                 set -e  # Re-enable exit on error
               fi
             else
-              echo "📦 Preparing for local Docker image deployment..."
+              echo "[DEPLOY] Preparing for local Docker image deployment..."
               echo "Will load image from uploaded artifact"
             fi
 
-            echo "✅ Deployment preparation completed"
+            echo "[SUCCESS] Deployment preparation completed"
 
       - name: Copy deployment files
         uses: appleboy/scp-action@v0.1.5
@@ -622,13 +622,13 @@ jobs:
 
             # Function for rollback
             rollback_deployment() {
-              echo "🛑 DEPLOYMENT FAILED - Starting automatic rollback..."
+              echo "[ERROR] DEPLOYMENT FAILED - Starting automatic rollback..."
               
               # Stop new services
               sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 15 2>/dev/null || true
               
               if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
-                echo "🔄 Restoring from backup: $BACKUP_DIR"
+                echo "[DEPLOY] Restoring from backup: $BACKUP_DIR"
                 
                 # Restore application files
                 sudo rm -rf /opt/smartrestaurant
@@ -637,33 +637,33 @@ jobs:
                 
                 # Restore Docker images if available
                 if [ -f "api_image_backup.tar" ]; then
-                  echo "🐳 Restoring API Docker image..."
+                  echo "[DOCKER] Restoring API Docker image..."
                   sudo docker load < api_image_backup.tar
                 fi
                 
                 # Restore database if available
                 if [ -f "database_backup.sql" ]; then
-                  echo "💾 Restoring database..."
+                  echo "[BACKUP] Restoring database..."
                   sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d postgres
                   sleep 10
                   sudo docker exec smartrestaurant-postgres-1 psql -U postgres -d SmartRestaurant < database_backup.sql 2>/dev/null || true
                 fi
                 
                 # Start restored services
-                echo "🚀 Starting restored services..."
+                echo "[DEPLOY] Starting restored services..."
                 sudo docker-compose -f infrastructure/docker/docker-compose.yml up -d
                 sleep 20
                 
                 # Quick health check on restored services
                 if curl -f http://localhost/health 2>/dev/null; then
-                  echo "✅ Rollback successful! Services restored."
+                  echo "[SUCCESS] Rollback successful! Services restored."
                   echo "rollback_success=true" >> /tmp/deployment_result
                 else
-                  echo "❌ Rollback failed - manual intervention required!"
+                  echo "[ERROR] Rollback failed - manual intervention required!"
                   echo "rollback_success=false" >> /tmp/deployment_result
                 fi
               else
-                echo "❌ No backup found - manual intervention required!"
+                echo "[ERROR] No backup found - manual intervention required!"
                 echo "rollback_success=false" >> /tmp/deployment_result
               fi
               
@@ -672,7 +672,7 @@ jobs:
             }
 
             # Create .env file cùng cấp với docker-compose.yml
-            echo "🔧 Creating .env file with GitHub Secrets..."
+            echo "[DEPLOY] Creating .env file with GitHub Secrets..."
             cat > infrastructure/docker/.env << EOF
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
@@ -685,7 +685,7 @@ jobs:
 
             # Set permissions cho .env file
             chmod 600 infrastructure/docker/.env
-            echo "✅ .env file created successfully"
+            echo "[SUCCESS] .env file created successfully"
 
             # Set proper permissions
             sudo chown -R $USER:$USER /opt/smartrestaurant
@@ -696,49 +696,49 @@ jobs:
             source /tmp/deployment_vars
             if [ "$deployment_mode" = "local" ]; then
               if [ -f "api-image.tar" ]; then
-                echo "🐳 Loading API Docker image from local file..."
+                echo "[DOCKER] Loading API Docker image from local file..."
                 sudo docker load < api-image.tar
                 sudo docker tag smartrestaurant-api:${{ github.sha }} ghcr.io/hungnv-business/smart-restaurant/api:production
-                echo "✅ API Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/api:production"
+                echo "[SUCCESS] API Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/api:production"
               fi
               
               if [ -f "web-image.tar" ]; then
-                echo "🐳 Loading Web Docker image from local file..."
+                echo "[DOCKER] Loading Web Docker image from local file..."
                 sudo docker load < web-image.tar
                 sudo docker tag smartrestaurant-web:${{ github.sha }} ghcr.io/hungnv-business/smart-restaurant/web:production
-                echo "✅ Web Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/web:production"
+                echo "[SUCCESS] Web Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/web:production"
               fi
             fi
 
             # Stop old services gracefully
             if [ -f "infrastructure/docker/docker-compose.yml" ]; then
-              echo "⏹️ Stopping current services..."
+              echo "[DEPLOY] Stopping current services..."
               sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
             fi
 
             # Start new services từ thư mục chứa docker-compose.yml
-            echo "🚀 Starting new services..."
+            echo "[DEPLOY] Starting new services..."
             cd /opt/smartrestaurant/infrastructure/docker
 
             # Verify .env file exists
             if [ -f ".env" ]; then
-              echo "📄 .env file found"
+              echo "[INFO] .env file found"
             else
-              echo "⚠️ Warning: .env file not found"
+              echo "[WARNING] Warning: .env file not found"
             fi
 
             sudo docker-compose up -d
 
             # Wait for services to be ready
-            echo "⏳ Waiting for services to start..."
+            echo "[DEPLOY] Waiting for services to start..."
             sleep 30
 
             # Health check with automatic rollback on failure
-            echo "🔍 Performing health checks..."
+            echo "[INFO] Performing health checks..."
 
             # Check if containers are running
             if ! sudo docker-compose ps | grep -q "Up"; then
-              echo "❌ Some containers failed to start"
+              echo "[ERROR] Some containers failed to start"
               sudo docker-compose logs
               rollback_deployment
               exit 1
@@ -746,7 +746,7 @@ jobs:
 
             # Check nginx health
             if ! curl -f http://localhost/health 2>/dev/null; then
-              echo "❌ Nginx health check failed"
+              echo "[ERROR] Nginx health check failed"
               sudo docker-compose logs nginx
               rollback_deployment
               exit 1
@@ -754,15 +754,15 @@ jobs:
 
             # Check API health (with timeout)
             if ! timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
-              echo "❌ API health check failed"
+              echo "[ERROR] API health check failed"
               sudo docker-compose logs api
               rollback_deployment
               exit 1
             fi
 
             # All health checks passed
-            echo "✅ All services are healthy!"
-            echo "🌐 SmartRestaurant is now available at https://chodocquan.site"
+            echo "[SUCCESS] All services are healthy!"
+            echo "[SUCCESS] SmartRestaurant is now available at https://chodocquan.site"
             echo "deployment_success=true" >> /tmp/deployment_result
             echo "rollback_success=false" >> /tmp/deployment_result
 
@@ -770,7 +770,7 @@ jobs:
             sudo docker-compose ps
 
             # Cleanup old backups (keep last 5)
-            echo "🧹 Cleaning up old backups..."
+            echo "[CLEANUP] Cleaning up old backups..."
             cd /opt
             sudo find . -maxdepth 1 -name "smartrestaurant.backup.*" -type d | sort -r | tail -n +6 | xargs sudo rm -rf 2>/dev/null || true
 
@@ -790,7 +790,7 @@ jobs:
           echo "deployment_success=unknown" >> $GITHUB_OUTPUT
           echo "rollback_success=unknown" >> $GITHUB_OUTPUT
 
-          echo "📊 Deployment status will be determined by health checks"
+          echo "[INFO] Deployment status will be determined by health checks"
 
       - name: Wait for system stabilization
         run: sleep 60
@@ -798,16 +798,16 @@ jobs:
       - name: External health checks
         id: external_check
         run: |
-          echo "🔍 Performing external health checks..."
+          echo "[INFO] Performing external health checks..."
 
           # Check main site with retries
           for i in {1..3}; do
             if curl -f -s --max-time 10 https://chodocquan.site/health; then
-              echo "✅ Main site health check passed"
+              echo "[SUCCESS] Main site health check passed"
               echo "site_healthy=true" >> $GITHUB_OUTPUT
               break
             else
-              echo "⚠️ Main site health check failed (attempt $i/3)"
+              echo "[WARNING] Main site health check failed (attempt $i/3)"
               if [ $i -eq 3 ]; then
                 echo "site_healthy=false" >> $GITHUB_OUTPUT
               else
@@ -819,11 +819,11 @@ jobs:
           # Check API endpoint with retries
           for i in {1..3}; do
             if curl -f -s --max-time 10 https://chodocquan.site/api/health; then
-              echo "✅ API health check passed"
+              echo "[SUCCESS] API health check passed"
               echo "api_healthy=true" >> $GITHUB_OUTPUT
               break
             else
-              echo "⚠️ API health check failed (attempt $i/3)"
+              echo "[WARNING] API health check failed (attempt $i/3)"
               if [ $i -eq 3 ]; then
                 echo "api_healthy=false" >> $GITHUB_OUTPUT
               else
@@ -839,52 +839,52 @@ jobs:
           API_HEALTHY="${{ steps.external_check.outputs.api_healthy }}"
           DEPLOY_JOB_SUCCESS="${{ needs.deploy-production.result }}"
 
-          echo "🔍 Status Summary:"
+          echo "[INFO] Status Summary:"
           echo "  - Site Health: ${SITE_HEALTHY}"
           echo "  - API Health: ${API_HEALTHY}"
           echo "  - Deploy Job: ${DEPLOY_JOB_SUCCESS}"
 
           if [[ "${SITE_HEALTHY}" == "true" && "${API_HEALTHY}" == "true" ]]; then
             echo "final_status=success" >> $GITHUB_OUTPUT
-            echo "status_message=🎉 Deployment successful! All services are healthy." >> $GITHUB_OUTPUT
+            echo "status_message=[SUCCESS] Deployment successful! All services are healthy." >> $GITHUB_OUTPUT
           elif [[ "${DEPLOY_JOB_SUCCESS}" == "success" && ("${SITE_HEALTHY}" != "true" || "${API_HEALTHY}" != "true") ]]; then
             echo "final_status=degraded" >> $GITHUB_OUTPUT
-            echo "status_message=⚠️ Deployment completed but some health checks failed. Service may be partially available." >> $GITHUB_OUTPUT
+            echo "status_message=[WARNING] Deployment completed but some health checks failed. Service may be partially available." >> $GITHUB_OUTPUT
           else
             echo "final_status=failed" >> $GITHUB_OUTPUT
-            echo "status_message=❌ Deployment failed. Check logs for details and consider manual intervention." >> $GITHUB_OUTPUT
+            echo "status_message=[ERROR] Deployment failed. Check logs for details and consider manual intervention." >> $GITHUB_OUTPUT
           fi
 
       - name: Success notification
         if: steps.status.outputs.final_status == 'success'
         run: |
-          echo "🎉 SmartRestaurant successfully deployed to production!"
-          echo "🌐 Available at: https://chodocquan.site"
-          echo "📊 All health checks passed"
-          echo "🕐 Deployment completed at: $(date)"
+          echo "[SUCCESS] SmartRestaurant successfully deployed to production!"
+          echo "[SUCCESS] Available at: https://chodocquan.site"
+          echo "[INFO] All health checks passed"
+          echo "[INFO] Deployment completed at: $(date)"
 
       - name: Degraded notification
         if: steps.status.outputs.final_status == 'degraded'
         run: |
-          echo "⚠️ SmartRestaurant deployment completed with issues"
-          echo "📊 Some health checks failed - service may be partially available"
-          echo "🌐 Check service at: https://chodocquan.site"
-          echo "📝 Review deployment logs and consider manual checks"
-          echo "🕐 Deployment completed at: $(date)"
+          echo "[WARNING] SmartRestaurant deployment completed with issues"
+          echo "[INFO] Some health checks failed - service may be partially available"
+          echo "[SUCCESS] Check service at: https://chodocquan.site"
+          echo "[INFO] Review deployment logs and consider manual checks"
+          echo "[INFO] Deployment completed at: $(date)"
 
       - name: Failure notification
         if: steps.status.outputs.final_status == 'failed'
         run: |
-          echo "❌ SmartRestaurant deployment failed!"
-          echo "🚨 Deployment job failed or services are not responding"
-          echo "⚠️ Manual intervention may be required"
-          echo "📞 Contact system administrator if service is down"
-          echo "🕐 Failure detected at: $(date)"
+          echo "[ERROR] SmartRestaurant deployment failed!"
+          echo "[ERROR] Deployment job failed or services are not responding"
+          echo "[WARNING] Manual intervention may be required"
+          echo "[INFO] Contact system administrator if service is down"
+          echo "[INFO] Failure detected at: $(date)"
           exit 1
 
       - name: Cleanup deployment artifacts
         if: always()
         run: |
-          echo "🧹 Deployment workflow completed"
-          echo "📝 Summary: ${{ steps.status.outputs.status_message }}"
-          echo "🕐 Finished at: $(date)"
+          echo "[CLEANUP] Deployment workflow completed"
+          echo "[INFO] Summary: ${{ steps.status.outputs.status_message }}"
+          echo "[INFO] Finished at: $(date)"
