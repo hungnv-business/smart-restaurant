@@ -280,42 +280,6 @@ jobs:
           path: ./build-artifacts/web-image.tar
           retention-days: 1
 
-  # Test Flutter mobile (build test) - DISABLED TEMPORARILY
-  # TODO: Re-enable when flutter_mobile directory and dependencies are ready
-  # test-mobile:
-  #   needs: [run-ci-tests]
-  #   if: ${{ always() && (needs.run-ci-tests.result == 'success' || inputs.skip_tests || inputs.force_deploy) }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #
-  #   - name: Setup Flutter
-  #     uses: subosito/flutter-action@v2
-  #     with:
-  #       flutter-version: '3.35.1'
-  #       channel: 'stable'
-  #
-  #   - name: Get dependencies
-  #     run: |
-  #       cd flutter_mobile
-  #       flutter pub get
-  #
-  #   - name: Analyze code
-  #     run: |
-  #       cd flutter_mobile
-  #       flutter analyze
-  #
-  #   - name: Run tests
-  #     run: |
-  #       cd flutter_mobile
-  #       flutter test
-  #
-  #   - name: Build APK (test build)
-  #     run: |
-  #       cd flutter_mobile
-  #       flutter build apk --debug
-
   # Deploy to production VPS
   deploy-production:
     needs: [build-backend, build-frontend] # test-mobile disabled temporarily
@@ -373,7 +337,6 @@ jobs:
           script_stop: true
           timeout: 30m
           command_timeout: 10m
-          # Add SSH client options to improve reliability
           envs: GITHUB_SHA,GITHUB_REF
           debug: false
           script: |
@@ -381,7 +344,7 @@ jobs:
             set -x  # Debug mode - show all commands
 
             echo "[DEPLOY] Starting deployment preparation for SmartRestaurant..."
-            
+
             # Connection validation
             echo "[INFO] Validating server connection..."
             whoami
@@ -431,30 +394,18 @@ jobs:
                 echo "[WARNING] No PostgreSQL containers found, skipping database backup"
               fi
               
-              # Save current docker images with better error handling
-              echo "[BACKUP] Backing up current Docker images..."
-              
-              # Check for the production image
-              POSSIBLE_IMAGES=(
-                "ghcr.io/hungnv-business/smart-restaurant/api:production"
-              )
-              
-              IMAGE_BACKED_UP=false
-              for image in "${POSSIBLE_IMAGES[@]}"; do
-                if sudo docker image inspect "$image" >/dev/null 2>&1; then
-                  echo "[BACKUP] Found image: $image"
-                  if sudo docker save "$image" > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
-                    echo "[SUCCESS] API image backup created successfully from: $image"
-                    IMAGE_BACKED_UP=true
-                    break
-                  else
-                    echo "[WARNING] Failed to save image: $image"
-                  fi
+              # Save current docker image (single image, no for-loop)
+              echo "[BACKUP] Backing up current Docker image..."
+              IMAGE="ghcr.io/hungnv-business/smart-restaurant/api:production"
+              if sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
+                echo "[BACKUP] Found image: $IMAGE"
+                if sudo docker save "$IMAGE" > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
+                  echo "[SUCCESS] API image backup created successfully from: $IMAGE"
+                else
+                  echo "[WARNING] Failed to save image: $IMAGE"
                 fi
-              done
-              
-              if [ "$IMAGE_BACKED_UP" = false ]; then
-                echo "[INFO] No API images found to backup (this is normal for first deployment)"
+              else
+                echo "[INFO] No API image found to backup (this is normal for first deployment)"
               fi
               
               echo "[SUCCESS] Backup process completed at ${BACKUP_DIR}"
@@ -467,51 +418,34 @@ jobs:
 
             # Prepare directories with full structure
             echo "[SETUP] Creating VPS directory structure..."
-            
-            # Create directories with proper error handling
-            set +e  # Disable exit on error for directory creation
-            
-            sudo mkdir -p /opt/smartrestaurant || { echo "[WARNING] Failed to create /opt/smartrestaurant"; }
-            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker || { echo "[WARNING] Failed to create infrastructure/docker"; }
-            sudo mkdir -p /opt/smartrestaurant/logs || { echo "[WARNING] Failed to create logs directory"; }
-            sudo mkdir -p /opt/smartrestaurant/backups || { echo "[WARNING] Failed to create backups directory"; }
-            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres || { echo "[WARNING] Failed to create postgres data directory"; }
-            sudo mkdir -p /var/www/html || { echo "[WARNING] Failed to create web directory"; }
-            sudo mkdir -p /etc/letsencrypt || { echo "[WARNING] Failed to create letsencrypt directory"; }
-            
-            set -e  # Re-enable exit on error
+
+            set +e
+            sudo mkdir -p /opt/smartrestaurant
+            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker
+            sudo mkdir -p /opt/smartrestaurant/logs
+            sudo mkdir -p /opt/smartrestaurant/backups
+            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres
+            sudo mkdir -p /var/www/html
+            sudo mkdir -p /etc/letsencrypt
+            set -e
 
             # Set directory permissions with error handling
             echo "[SETUP] Setting directory permissions..."
-            
-            set +e  # Disable exit on error for permission setting
-            
-            if sudo chown -R $USER:$USER /opt/smartrestaurant 2>/dev/null; then
-              echo "[SUCCESS] Set ownership for /opt/smartrestaurant"
-            else
-              echo "[WARNING] Failed to set ownership for /opt/smartrestaurant"
-            fi
-            
-            if sudo chown -R www-data:www-data /var/www/html 2>/dev/null; then
-              echo "[SUCCESS] Set ownership for /var/www/html"
-            else
-              echo "[WARNING] Failed to set ownership for /var/www/html"
-            fi
-            
-            sudo chmod -R 755 /var/www/html 2>/dev/null || echo "[WARNING] Failed to set permissions for /var/www/html"
-            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null || echo "[WARNING] Failed to set permissions for logs"
-            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null || echo "[WARNING] Failed to set permissions for backups"
-            
-            set -e  # Re-enable exit on error
-            
+
+            set +e
+            sudo chown -R $USER:$USER /opt/smartrestaurant 2>/dev/null
+            sudo chown -R www-data:www-data /var/www/html 2>/dev/null
+            sudo chmod -R 755 /var/www/html 2>/dev/null
+            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null
+            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null
+            set -e
+
             echo "[SUCCESS] Directory setup completed"
 
             cd /opt/smartrestaurant
 
-            # Handle image deployment based on mode with error handling
+            # Handle image deployment mode info
             DEPLOY_MODE="${{ needs.build-backend.outputs.deploy_mode }}"
-
-            # Default to local mode if deploy_mode is empty or null
             if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
               echo "[WARNING] Deploy mode not set, defaulting to local mode"
               DEPLOY_MODE="local"
@@ -524,17 +458,13 @@ jobs:
               echo "[DEPLOY] Pulling latest API image from registry..."
               IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
               
-              # Check if image_ref is set
               if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
                 echo "Using image: ${IMAGE_REF}"
-                
-                # Try to pull image with error handling (don't exit on failure)
-                set +e  # Disable exit on error for this section
+                set +e
                 echo "[DEPLOY] Attempting to pull Docker image..."
-                
                 if sudo docker pull "${IMAGE_REF}" 2>&1; then
                   if sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production 2>&1; then
                     echo "[SUCCESS] Registry image pulled and tagged successfully as ghcr.io/hungnv-business/smart-restaurant/api:production"
@@ -547,8 +477,7 @@ jobs:
                   echo "deployment_mode=local" >> /tmp/deployment_vars
                   echo "Will use local image file for deployment"
                 fi
-                
-                set -e  # Re-enable exit on error
+                set -e
               fi
             else
               echo "[DEPLOY] Preparing for local Docker image deployment..."
@@ -609,7 +538,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          script_stop: false # Changed to false để handle errors manually
+          script_stop: false
           timeout: 45m
           command_timeout: 15m
           script: |
@@ -617,8 +546,8 @@ jobs:
 
             cd /opt/smartrestaurant
 
-            # Load backup variables
-            source /tmp/deployment_vars
+            # Load backup variables (POSIX sh)
+            . /tmp/deployment_vars
 
             # Function for rollback
             rollback_deployment() {
@@ -683,7 +612,6 @@ jobs:
             WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
             EOF
 
-            # Set permissions cho .env file
             chmod 600 infrastructure/docker/.env
             echo "[SUCCESS] .env file created successfully"
 
@@ -693,7 +621,7 @@ jobs:
             sudo chmod -R 755 /var/www/html
 
             # Load Docker images if using local mode
-            source /tmp/deployment_vars
+            . /tmp/deployment_vars
             if [ "$deployment_mode" = "local" ]; then
               if [ -f "api-image.tar" ]; then
                 echo "[DOCKER] Loading API Docker image from local file..."
@@ -716,11 +644,10 @@ jobs:
               sudo docker-compose -f infrastructure/docker/docker-compose.yml down --timeout 30
             fi
 
-            # Start new services từ thư mục chứa docker-compose.yml
+            # Start new services
             echo "[DEPLOY] Starting new services..."
             cd /opt/smartrestaurant/infrastructure/docker
 
-            # Verify .env file exists
             if [ -f ".env" ]; then
               echo "[INFO] .env file found"
             else
@@ -736,7 +663,6 @@ jobs:
             # Health check with automatic rollback on failure
             echo "[INFO] Performing health checks..."
 
-            # Check if containers are running
             if ! sudo docker-compose ps | grep -q "Up"; then
               echo "[ERROR] Some containers failed to start"
               sudo docker-compose logs
@@ -744,7 +670,6 @@ jobs:
               exit 1
             fi
 
-            # Check nginx health
             if ! curl -f http://localhost/health 2>/dev/null; then
               echo "[ERROR] Nginx health check failed"
               sudo docker-compose logs nginx
@@ -752,24 +677,20 @@ jobs:
               exit 1
             fi
 
-            # Check API health (with timeout)
-            if ! timeout 60 bash -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
+            if ! timeout 60 sh -c 'until curl -f http://localhost/api/health 2>/dev/null; do sleep 5; done'; then
               echo "[ERROR] API health check failed"
               sudo docker-compose logs api
               rollback_deployment
               exit 1
             fi
 
-            # All health checks passed
             echo "[SUCCESS] All services are healthy!"
             echo "[SUCCESS] SmartRestaurant is now available at https://chodocquan.site"
             echo "deployment_success=true" >> /tmp/deployment_result
             echo "rollback_success=false" >> /tmp/deployment_result
 
-            # Show service status
             sudo docker-compose ps
 
-            # Cleanup old backups (keep last 5)
             echo "[CLEANUP] Cleaning up old backups..."
             cd /opt
             sudo find . -maxdepth 1 -name "smartrestaurant.backup.*" -type d | sort -r | tail -n +6 | xargs sudo rm -rf 2>/dev/null || true
@@ -786,10 +707,8 @@ jobs:
       - name: Get deployment result
         id: result
         run: |
-          # Set default values for deployment status
           echo "deployment_success=unknown" >> $GITHUB_OUTPUT
           echo "rollback_success=unknown" >> $GITHUB_OUTPUT
-
           echo "[INFO] Deployment status will be determined by health checks"
 
       - name: Wait for system stabilization
@@ -800,7 +719,6 @@ jobs:
         run: |
           echo "[INFO] Performing external health checks..."
 
-          # Check main site with retries
           for i in {1..3}; do
             if curl -f -s --max-time 10 https://chodocquan.site/health; then
               echo "[SUCCESS] Main site health check passed"
@@ -816,7 +734,6 @@ jobs:
             fi
           done
 
-          # Check API endpoint with retries
           for i in {1..3}; do
             if curl -f -s --max-time 10 https://chodocquan.site/api/health; then
               echo "[SUCCESS] API health check passed"
