@@ -378,21 +378,28 @@ jobs:
                 exit 1
               fi
 
-              # Backup database (try any postgres/db containers)
+              # Backup database (robust, không làm fail job nếu không backup được)
               echo "[BACKUP] Creating database backup..."
-              POSTGRES_CONTAINERS=$(sudo docker ps --format "{{.Names}}" | grep -E "(postgres|db)" || echo "")
-              if [ -n "$POSTGRES_CONTAINERS" ]; then
-                for container in $POSTGRES_CONTAINERS; do
-                  echo "Trying to backup from container: $container"
-                  if sudo docker exec "$container" pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql" 2>/dev/null; then
-                    echo "[SUCCESS] Database backup created successfully from $container"
-                    break
-                  else
-                    echo "[WARNING] Database backup failed from $container, trying next container..."
-                  fi
-                done
+
+              # Tìm container Postgres đang chạy/đã tạo
+              set +e
+              PGCONT=$(sudo docker ps -a --format '{{.Names}}' | grep -E '^smartrestaurant_postgres$|postgres|db' | head -n1)
+              set -e
+
+              if [ -n "$PGCONT" ]; then
+                echo "[INFO] Using Postgres container: $PGCONT"
+                # Dump trực tiếp ra file trên host (không cần PGPASSWORD vì chạy "trong" container)
+                set +e
+                sudo docker exec "$PGCONT" pg_dump -U postgres SmartRestaurant > "${BACKUP_DIR}/database_backup.sql"
+                DUMP_EXIT=$?
+                set -e
+                if [ $DUMP_EXIT -eq 0 ]; then
+                  echo "[SUCCESS] Database backup created at ${BACKUP_DIR}/database_backup.sql"
+                else
+                  echo "[WARNING] pg_dump inside container failed (exit=$DUMP_EXIT). Skipping DB backup."
+                fi
               else
-                echo "[WARNING] No PostgreSQL containers found, skipping database backup"
+                echo "[WARNING] No postgres-like container found. Skipping DB backup."
               fi
 
               # Save current docker image (SINGLE image, no array, no for)
