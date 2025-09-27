@@ -340,8 +340,8 @@ jobs:
           envs: GITHUB_SHA,GITHUB_REF
           debug: false
           script: |
-            set -e  # Exit on error
-            set -x  # Debug mode - show all commands
+            set -e
+            set -x
 
             echo "[DEPLOY] Starting deployment preparation for SmartRestaurant..."
 
@@ -354,13 +354,15 @@ jobs:
 
             # Define backup timestamp
             BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-            export BACKUP_DIR="/opt/smartrestaurant.backup.${BACKUP_TIMESTAMP}"
+            BACKUP_DIR="/opt/smartrestaurant.backup.${BACKUP_TIMESTAMP}"
+            export BACKUP_DIR
+            # Ghi biến ra file (POSIX .)
             echo "BACKUP_DIR=${BACKUP_DIR}" > /tmp/deployment_vars
 
             # Create comprehensive backup
             if [ -d "/opt/smartrestaurant" ]; then
               echo "[BACKUP] Creating backup at ${BACKUP_DIR}..."
-              
+
               # Create backup directory first
               if sudo mkdir -p "${BACKUP_DIR}"; then
                 echo "[SUCCESS] Backup directory created: ${BACKUP_DIR}"
@@ -368,7 +370,7 @@ jobs:
                 echo "[ERROR] Failed to create backup directory"
                 exit 1
               fi
-              
+
               # Copy application files
               if sudo cp -r /opt/smartrestaurant "${BACKUP_DIR}"; then
                 echo "[SUCCESS] Application files backed up successfully"
@@ -376,8 +378,8 @@ jobs:
                 echo "[ERROR] Failed to backup application files"
                 exit 1
               fi
-              
-              # Backup database with better error handling
+
+              # Backup database (try any postgres/db containers)
               echo "[BACKUP] Creating database backup..."
               POSTGRES_CONTAINERS=$(sudo docker ps --format "{{.Names}}" | grep -E "(postgres|db)" || echo "")
               if [ -n "$POSTGRES_CONTAINERS" ]; then
@@ -393,8 +395,8 @@ jobs:
               else
                 echo "[WARNING] No PostgreSQL containers found, skipping database backup"
               fi
-              
-              # Save current docker image (single image, no for-loop)
+
+              # Save current docker image (SINGLE image, no array, no for)
               echo "[BACKUP] Backing up current Docker image..."
               IMAGE="ghcr.io/hungnv-business/smart-restaurant/api:production"
               if sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
@@ -407,44 +409,41 @@ jobs:
               else
                 echo "[INFO] No API image found to backup (this is normal for first deployment)"
               fi
-              
+
               echo "[SUCCESS] Backup process completed at ${BACKUP_DIR}"
             else
               echo "[INFO] No existing deployment found, fresh installation"
-              # Create empty backup directory for consistency
-              sudo mkdir -p "${BACKUP_DIR}"
+              sudo mkdir -p "${BACKUP_DIR}" || echo "[WARNING] Could not pre-create backup dir"
               echo "[SUCCESS] Created empty backup directory for first-time installation"
             fi
 
-            # Prepare directories with full structure
+            # Prepare directories with full structure (avoid { …; })
             echo "[SETUP] Creating VPS directory structure..."
-
             set +e
-            sudo mkdir -p /opt/smartrestaurant
-            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker
-            sudo mkdir -p /opt/smartrestaurant/logs
-            sudo mkdir -p /opt/smartrestaurant/backups
-            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres
-            sudo mkdir -p /var/www/html
-            sudo mkdir -p /etc/letsencrypt
+            sudo mkdir -p /opt/smartrestaurant || echo "[WARNING] Failed to create /opt/smartrestaurant"
+            sudo mkdir -p /opt/smartrestaurant/infrastructure/docker || echo "[WARNING] Failed to create infrastructure/docker"
+            sudo mkdir -p /opt/smartrestaurant/logs || echo "[WARNING] Failed to create logs directory"
+            sudo mkdir -p /opt/smartrestaurant/backups || echo "[WARNING] Failed to create backups directory"
+            sudo mkdir -p /opt/smartrestaurant/docker-data/postgres || echo "[WARNING] Failed to create postgres data directory"
+            sudo mkdir -p /var/www/html || echo "[WARNING] Failed to create web directory"
+            sudo mkdir -p /etc/letsencrypt || echo "[WARNING] Failed to create letsencrypt directory"
             set -e
 
-            # Set directory permissions with error handling
+            # Set directory permissions (no { …; })
             echo "[SETUP] Setting directory permissions..."
-
             set +e
-            sudo chown -R $USER:$USER /opt/smartrestaurant 2>/dev/null
-            sudo chown -R www-data:www-data /var/www/html 2>/dev/null
-            sudo chmod -R 755 /var/www/html 2>/dev/null
-            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null
-            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null
+            sudo chown -R "$USER:$USER" /opt/smartrestaurant 2>/dev/null || echo "[WARNING] chown /opt/smartrestaurant failed"
+            sudo chown -R www-data:www-data /var/www/html 2>/dev/null || echo "[WARNING] chown /var/www/html failed"
+            sudo chmod -R 755 /var/www/html 2>/dev/null || echo "[WARNING] chmod /var/www/html failed"
+            sudo chmod -R 755 /opt/smartrestaurant/logs 2>/dev/null || echo "[WARNING] chmod logs failed"
+            sudo chmod -R 700 /opt/smartrestaurant/backups 2>/dev/null || echo "[WARNING] chmod backups failed"
             set -e
 
             echo "[SUCCESS] Directory setup completed"
 
             cd /opt/smartrestaurant
 
-            # Handle image deployment mode info
+            # Handle image deployment mode
             DEPLOY_MODE="${{ needs.build-backend.outputs.deploy_mode }}"
             if [ -z "$DEPLOY_MODE" ] || [ "$DEPLOY_MODE" = "null" ]; then
               echo "[WARNING] Deploy mode not set, defaulting to local mode"
@@ -457,7 +456,7 @@ jobs:
             if [ "$DEPLOY_MODE" = "registry" ]; then
               echo "[DEPLOY] Pulling latest API image from registry..."
               IMAGE_REF="${{ needs.build-backend.outputs.image_ref }}"
-              
+
               if [ -z "$IMAGE_REF" ] || [ "$IMAGE_REF" = "null" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
@@ -467,21 +466,19 @@ jobs:
                 echo "[DEPLOY] Attempting to pull Docker image..."
                 if sudo docker pull "${IMAGE_REF}" 2>&1; then
                   if sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production 2>&1; then
-                    echo "[SUCCESS] Registry image pulled and tagged successfully as ghcr.io/hungnv-business/smart-restaurant/api:production"
+                    echo "[SUCCESS] Registry image pulled and tagged successfully"
                   else
                     echo "[WARNING] Failed to tag image, switching to local mode"
                     echo "deployment_mode=local" >> /tmp/deployment_vars
                   fi
                 else
-                  echo "[WARNING] Failed to pull from registry (this is expected for first deployment), switching to local mode"
+                  echo "[WARNING] Failed to pull from registry (expected for first deployment), switching to local mode"
                   echo "deployment_mode=local" >> /tmp/deployment_vars
-                  echo "Will use local image file for deployment"
                 fi
                 set -e
               fi
             else
-              echo "[DEPLOY] Preparing for local Docker image deployment..."
-              echo "Will load image from uploaded artifact"
+              echo "[DEPLOY] Local deployment mode: will load image from uploaded artifact"
             fi
 
             echo "[SUCCESS] Deployment preparation completed"
