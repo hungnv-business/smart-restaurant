@@ -70,14 +70,7 @@ services:
 
   # Angular Frontend (Production Build)
   web:
-    build:
-      context: ../../
-      dockerfile: infrastructure/docker/Dockerfile.web
-      target: production
-      args:
-        - API_URL=${BACKEND_BASE_URL}
-        - BASE_URL=${FRONTEND_BASE_URL}
-        - CLIENT_ID=${WEB_CLIENT_ID}
+    image: ghcr.io/hungnv-business/smart-restaurant/web:production
     container_name: smartrestaurant_web
     networks:
       - smartrestaurant-network
