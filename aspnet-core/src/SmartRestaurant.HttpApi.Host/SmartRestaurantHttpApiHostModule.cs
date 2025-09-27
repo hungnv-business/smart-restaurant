@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using SmartRestaurant.EntityFrameworkCore;
 using SmartRestaurant.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
@@ -73,6 +74,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
         ConfigureSignalR(context);
+        ConfigureHealthChecks(context);
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -189,6 +191,12 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         });
     }
 
+    private void ConfigureHealthChecks(ServiceConfigurationContext context)
+    {
+        context.Services.AddHealthChecks()
+            .AddDbContextCheck<SmartRestaurantDbContext>();
+    }
+
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
@@ -239,6 +247,9 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         {
             // Cấu hình SignalR Hub cho kitchen
             endpoints.MapHub<KitchenHub>("/signalr-hubs/kitchen");
+            
+            // Health check endpoint
+            endpoints.MapHealthChecks("/health");
         });
     }
 }
