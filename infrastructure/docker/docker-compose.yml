@@ -25,15 +25,7 @@ services:
         reservations:
           memory: 32M
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost/health",
-        ]
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -47,8 +39,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
       - App__SelfUrl=${BACKEND_BASE_URL}
       - App__ClientUrl=${FRONTEND_BASE_URL}
+      - RemoteServices__Default__BaseUrl=${REMOTE_SERVICE_BASE_URL}
       - App__CorsOrigins=${FRONTEND_BASE_URL}
       - App__RedirectAllowedUrls=${FRONTEND_BASE_URL}
       - AuthServer__Authority=${BACKEND_BASE_URL}
