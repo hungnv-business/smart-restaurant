@@ -433,14 +433,28 @@ jobs:
               
               # Save current docker images with better error handling
               echo "🐳 Backing up current Docker images..."
-              if sudo docker image inspect smartrestaurant/api:production >/dev/null 2>&1; then
-                if sudo docker save smartrestaurant/api:production > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
-                  echo "✅ API image backup created successfully"
-                else
-                  echo "⚠️ Failed to save API image backup"
+              
+              # Check for the production image
+              POSSIBLE_IMAGES=(
+                "ghcr.io/hungnv-business/smart-restaurant/api:production"
+              )
+              
+              IMAGE_BACKED_UP=false
+              for image in "${POSSIBLE_IMAGES[@]}"; do
+                if sudo docker image inspect "$image" >/dev/null 2>&1; then
+                  echo "📦 Found image: $image"
+                  if sudo docker save "$image" > "${BACKUP_DIR}/api_image_backup.tar" 2>/dev/null; then
+                    echo "✅ API image backup created successfully from: $image"
+                    IMAGE_BACKED_UP=true
+                    break
+                  else
+                    echo "⚠️ Failed to save image: $image"
+                  fi
                 fi
-              else
-                echo "⚠️ API image smartrestaurant/api:production not found, skipping image backup"
+              done
+              
+              if [ "$IMAGE_BACKED_UP" = false ]; then
+                echo "ℹ️ No API images found to backup (this is normal for first deployment)"
               fi
               
               echo "✅ Backup process completed at ${BACKUP_DIR}"
@@ -522,8 +536,8 @@ jobs:
                 echo "🔄 Attempting to pull Docker image..."
                 
                 if sudo docker pull "${IMAGE_REF}" 2>&1; then
-                  if sudo docker tag "${IMAGE_REF}" smartrestaurant/api:production 2>&1; then
-                    echo "✅ Registry image pulled and tagged successfully"
+                  if sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production 2>&1; then
+                    echo "✅ Registry image pulled and tagged successfully as ghcr.io/hungnv-business/smart-restaurant/api:production"
                   else
                     echo "⚠️ Failed to tag image, switching to local mode"
                     echo "deployment_mode=local" >> /tmp/deployment_vars
@@ -684,15 +698,15 @@ jobs:
               if [ -f "api-image.tar" ]; then
                 echo "🐳 Loading API Docker image from local file..."
                 sudo docker load < api-image.tar
-                sudo docker tag smartrestaurant-api:${{ github.sha }} smartrestaurant/api:production
-                echo "✅ API Docker image loaded successfully"
+                sudo docker tag smartrestaurant-api:${{ github.sha }} ghcr.io/hungnv-business/smart-restaurant/api:production
+                echo "✅ API Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/api:production"
               fi
               
               if [ -f "web-image.tar" ]; then
                 echo "🐳 Loading Web Docker image from local file..."
                 sudo docker load < web-image.tar
-                sudo docker tag smartrestaurant-web:${{ github.sha }} smartrestaurant/web:production
-                echo "✅ Web Docker image loaded successfully"
+                sudo docker tag smartrestaurant-web:${{ github.sha }} ghcr.io/hungnv-business/smart-restaurant/web:production
+                echo "✅ Web Docker image loaded and tagged as ghcr.io/hungnv-business/smart-restaurant/web:production"
               fi
             fi
 

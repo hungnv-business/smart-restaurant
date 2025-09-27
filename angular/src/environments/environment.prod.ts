@@ -7,7 +7,7 @@ export const environment = {
     logoUrl: '/layout/images/logo-white.svg',
   },
   oAuthConfig: {
-    issuer: 'https://api.smartrestaurant.vn',
+    issuer: 'https://api.smartrestaurant.vn/',
     redirectUri: location.origin,
     clientId: 'SmartRestaurant_Angular',
     responseType: 'form',
