@@ -2,25 +2,17 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Các build-args sẽ được truyền từ GitHub Actions (vars) khi build
 ARG BACKEND_BASE_URL=https://localhost
 ARG REMOTE_SERVICE_BASE_URL=https://localhost/api
 ARG FRONTEND_BASE_URL=https://localhost
 ARG WEB_CLIENT_ID=SmartRestaurant_Web
 
-# Cài deps (cache tốt)
 COPY angular/package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copy source
 COPY angular/ .
 
-# Ghi đè cấu hình vào cả environment.ts & environment.prod.ts
-# Mapping:
-# - baseUrl  = FRONTEND_BASE_URL            (origin FE)
-# - issuer   = BACKEND_BASE_URL             (origin BE, KHÔNG /api)
-# - url      = REMOTE_SERVICE_BASE_URL      (API có /api)
-# - clientId = WEB_CLIENT_ID
+# Ghi đè env vào environment*.ts
 RUN sed -i "s|baseUrl: '[^']*'|baseUrl: '${FRONTEND_BASE_URL}'|g" src/environments/environment.ts && \
     sed -i "s|issuer: '[^']*'|issuer: '${BACKEND_BASE_URL}'|g" src/environments/environment.ts && \
     sed -i "s|url: '[^']*'|url: '${REMOTE_SERVICE_BASE_URL}'|g" src/environments/environment.ts && \
@@ -30,25 +22,15 @@ RUN sed -i "s|baseUrl: '[^']*'|baseUrl: '${FRONTEND_BASE_URL}'|g" src/environmen
     sed -i "s|url: '[^']*'|url: '${REMOTE_SERVICE_BASE_URL}'|g" src/environments/environment.prod.ts && \
     sed -i "s|clientId: '[^']*'|clientId: '${WEB_CLIENT_ID}'|g" src/environments/environment.prod.ts
 
-# Build production (đảm bảo script "build:prod" tồn tại trong package.json)
 RUN npm run build:prod
 
 # ---------- Runtime stage ----------
-FROM nginx:1.25-alpine
+FROM nginx:1.25-alpine AS production
 
-# (tùy) cài curl để healthcheck
 RUN apk add --no-cache curl
 
-# Copy build output (tuỳ dự án, nếu Angular build ra dist/<project>, lệnh này vẫn copy toàn bộ)
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Nginx SPA config (file của bạn)
 COPY infrastructure/docker/nginx-web-http.conf /etc/nginx/nginx.conf
-
-# Quyền + healthcheck
-RUN mkdir -p /var/cache/nginx /var/run/nginx /var/log/nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run/nginx /var/log/nginx && \
-    chmod -R 755 /var/cache/nginx /var/run/nginx
 
 USER nginx
 EXPOSE 80
