@@ -250,23 +250,23 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
           build-args: |
-            API_URL=${{ vars.BACKEND_BASE_URL }}
-            BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-            CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
+            BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
+            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}
+            FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+            WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
         continue-on-error: true
 
       - name: Build backup Web image for local deployment
         run: |
           echo "[DEPLOY] Building backup Web image for local deployment (in case registry fails)"
 
-          # Build image locally as backup with build args
           docker build -f ./infrastructure/docker/Dockerfile.web \
-            --build-arg API_URL=${{ vars.BACKEND_BASE_URL }} \
-            --build-arg BASE_URL=${{ vars.FRONTEND_BASE_URL }} \
-            --build-arg CLIENT_ID=${{ vars.WEB_CLIENT_ID }} \
+            --build-arg BACKEND_BASE_URL='${{ vars.BACKEND_BASE_URL }}' \
+            --build-arg REMOTE_SERVICE_BASE_URL='${{ vars.REMOTE_SERVICE_BASE_URL }}' \
+            --build-arg FRONTEND_BASE_URL='${{ vars.FRONTEND_BASE_URL }}' \
+            --build-arg WEB_CLIENT_ID='${{ vars.WEB_CLIENT_ID }}' \
             -t smartrestaurant-web:${{ github.sha }} .
 
-          # Save image as tar file for deployment backup
           mkdir -p ./build-artifacts
           docker save smartrestaurant-web:${{ github.sha }} > ./build-artifacts/web-image.tar
 
@@ -602,6 +602,7 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
             FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}
             AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
             SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
             ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}

@@ -38,19 +38,20 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
       - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=SmartRestaurant;Username=postgres;Password=${DB_PASSWORD}
+
       - App__SelfUrl=${BACKEND_BASE_URL}
       - App__ClientUrl=${FRONTEND_BASE_URL}
       - RemoteServices__Default__BaseUrl=${REMOTE_SERVICE_BASE_URL}
-      - App__CorsOrigins=${FRONTEND_BASE_URL}
-      - App__RedirectAllowedUrls=${FRONTEND_BASE_URL}
+
       - AuthServer__Authority=${BACKEND_BASE_URL}
       - AuthServer__RequireHttpsMetadata=${AUTH_REQUIRE_HTTPS}
       - AuthServer__SwaggerClientId=${SWAGGER_CLIENT_ID}
+
       - StringEncryption__DefaultPassPhrase=${ENCRYPTION_PASSPHRASE}
       - Serilog__MinimumLevel__Default=Warning
-      - DOTNET_GCHeapHardLimit=400000000
     volumes:
       - /opt/smartrestaurant/logs:/app/logs
     networks:
@@ -77,29 +78,27 @@ services:
       start_period: 60s
 
   # Angular Frontend (Production Build) - HTTP Only
-  web:
-    image: ghcr.io/hungnv-business/smart-restaurant/web:production
-    pull_policy: always
-    container_name: smartrestaurant_web
-    volumes:
-      - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - smartrestaurant-network
-    restart: unless-stopped
-    depends_on:
-      - api
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    web:
+      image: ghcr.io/hungnv-business/smart-restaurant/web:production
+      container_name: smartrestaurant_web
+      volumes:
+        - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
+      networks:
+        - smartrestaurant-network
+      restart: unless-stopped
+      depends_on:
+        - api
+      environment:
+        - BASE_URL=https://chodocquan.site
+        - API_URL=https://chodocquan.site/api
+        - OIDC_ISSUER=https://chodocquan.site
+        - CLIENT_ID=SmartRestaurant_Web
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost/health"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 30s
 
   # PostgreSQL Database (Optimized for 2GB RAM)
   postgres:
