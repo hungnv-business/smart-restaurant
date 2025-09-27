@@ -194,7 +194,7 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
     private void ConfigureHealthChecks(ServiceConfigurationContext context)
     {
         context.Services.AddHealthChecks()
-            .AddDbContextCheck<SmartRestaurantDbContext>();
+            .AddDbContextCheck<SmartRestaurantDbContext>("database");
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -247,7 +247,6 @@ public class SmartRestaurantHttpApiHostModule : AbpModule
         {
             // Cấu hình SignalR Hub cho kitchen
             endpoints.MapHub<KitchenHub>("/signalr-hubs/kitchen");
-            
             // Health check endpoint
             endpoints.MapHealthChecks("/health");
         });
