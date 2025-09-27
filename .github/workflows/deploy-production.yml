@@ -63,9 +63,8 @@ jobs:
           # Add dotnet tools to PATH
           export PATH="$PATH:$HOME/.dotnet/tools"
 
-          # Install ABP libraries for backend
-          echo "[DEPLOY] Installing ABP libraries for backend..."
-          abp install-libs || echo "[WARNING] ABP install-libs failed, using existing libraries"
+          # Skip ABP install-libs as we include pre-built libs in wwwroot
+          echo "[DEPLOY] Using pre-built ABP libraries from wwwroot/libs"
 
       - name: Restore dependencies
         run: |

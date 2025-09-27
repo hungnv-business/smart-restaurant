@@ -50,10 +50,6 @@ RUN dotnet restore src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host
 # Copy the entire source code
 COPY aspnet-core/ .
 
-# Navigate to HttpApi.Host project and install ABP libs
-WORKDIR /src/src/SmartRestaurant.HttpApi.Host
-RUN abp install-libs
-
 # Back to source root for publish
 WORKDIR /src
 

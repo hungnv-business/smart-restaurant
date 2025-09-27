@@ -261,5 +261,5 @@ src/SmartRestaurant.DbMigrator/Logs/*
 src/SmartRestaurant.Blazor.Server/Logs/*
 src/SmartRestaurant.Blazor.Server.Tiered/Logs/*
 
-# Use abp install-libs to restore.
-**/wwwroot/libs/*
+# ABP libs are now pre-built and committed to avoid dependency issues
+# **/wwwroot/libs/*
