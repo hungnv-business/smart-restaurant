@@ -54,8 +54,8 @@ RUN apk add --no-cache curl
 # Copy built Angular app
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY infrastructure/docker/nginx.conf /etc/nginx/nginx.conf
+# Copy custom nginx configuration for HTTP only
+COPY infrastructure/docker/nginx-web-http.conf /etc/nginx/nginx.conf
 
 # Set permissions for nginx user (user already exists in nginx image)
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
@@ -69,8 +69,8 @@ RUN mkdir -p /var/log/nginx && \
 # Switch to non-root user
 USER nginx
 
-# Expose ports
-EXPOSE 80 443
+# Expose HTTP port only
+EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

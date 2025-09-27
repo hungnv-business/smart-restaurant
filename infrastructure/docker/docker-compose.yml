@@ -41,6 +41,7 @@ services:
   # .NET API Backend (Optimized for 2GB RAM)
   api:
     image: ghcr.io/hungnv-business/smart-restaurant/api:production
+    pull_policy: always
     container_name: smartrestaurant_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
@@ -81,10 +82,13 @@ services:
       retries: 5
       start_period: 60s
 
-  # Angular Frontend (Production Build)
+  # Angular Frontend (Production Build) - HTTP Only
   web:
     image: ghcr.io/hungnv-business/smart-restaurant/web:production
+    pull_policy: always
     container_name: smartrestaurant_web
+    volumes:
+      - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
     networks:
       - smartrestaurant-network
     restart: unless-stopped

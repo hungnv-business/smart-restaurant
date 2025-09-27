@@ -14,7 +14,6 @@ apt update && apt upgrade -y
 echo "🔧 Installing Docker, Nginx, Certbot..."
 apt install -y \
     docker.io \
-    docker-compose \
     nginx \
     certbot \
     python3-certbot-nginx \
@@ -23,6 +22,13 @@ apt install -y \
     unzip \
     htop \
     ufw
+
+# Install Docker Compose V2 manually (latest version)
+echo "🔧 Installing Docker Compose V2 (latest)..."
+COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+curl -L "https://github.com/docker/compose/releases/download/$COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+echo "✅ Installed Docker Compose $COMPOSE_VERSION"
 
 # Enable services
 echo "⚙️ Enabling services..."
