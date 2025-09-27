@@ -1,80 +1,32 @@
-# Multi-stage Dockerfile for Angular 19 Frontend
-
-# Development stage (for docker-compose.dev.yml)
-FROM node:20-alpine AS development
-WORKDIR /app
-
-# Copy package files
-COPY angular/package*.json ./
-
-# Install dependencies
-RUN npm install --legacy-peer-deps && npm install -g @angular/cli
-
-# Copy source code
-COPY angular/ .
-
-# Expose development port
-EXPOSE 4200
-
-# Start development server
-CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200"]
-
-# Build stage
+# Optimized Multi-stage Dockerfile for Angular 19
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Build arguments for environment configuration
-ARG API_URL=https://api.smartrestaurant.vn
-ARG BASE_URL=https://smartrestaurant.vn
-ARG CLIENT_ID=SmartRestaurant_Angular
-
-# Copy package files
+# Copy package files and install dependencies
 COPY angular/package*.json ./
+RUN npm install --legacy-peer-deps
 
-# Install dependencies
-RUN npm install --legacy-peer-deps && npm install -g @angular/cli
-
-# Copy source code
+# Copy source and build for production
 COPY angular/ .
-
-# Replace environment variables in production config
-RUN sed -i "s|https://api.smartrestaurant.vn|${API_URL}|g" src/environments/environment.prod.ts && \
-    sed -i "s|https://smartrestaurant.vn|${BASE_URL}|g" src/environments/environment.prod.ts && \
-    sed -i "s|SmartRestaurant_Angular|${CLIENT_ID}|g" src/environments/environment.prod.ts
-
-# Build the application for production
 RUN npm run build:prod
 
-# Production stage with Nginx
+# Production runtime with Nginx
 FROM nginx:1.25-alpine AS production
 
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Copy built Angular app
+# Copy built app and nginx config
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy custom nginx configuration for HTTP only
 COPY infrastructure/docker/nginx-web-http.conf /etc/nginx/nginx.conf
 
-# Set permissions for nginx user (user already exists in nginx image)
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chmod -R 755 /usr/share/nginx/html
+# Set proper ownership and permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html
 
-# Create log directories
-RUN mkdir -p /var/log/nginx && \
-    chown -R nginx:nginx /var/log/nginx
-
-# Switch to non-root user
 USER nginx
-
-# Expose HTTP port only
 EXPOSE 80
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/health || exit 1
 
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

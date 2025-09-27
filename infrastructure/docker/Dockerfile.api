@@ -1,118 +1,43 @@
-# Multi-stage Dockerfile for ABP .NET 8 Backend
-
-# Base runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Build stage
+# Optimized Multi-stage Dockerfile for .NET 8 API
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Install Node.js for ABP CLI
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
-
-# Install ABP CLI (fallback to old version if new fails)
-RUN dotnet tool install -g Volo.Abp.Studio.Cli || dotnet tool install -g Volo.Abp.Cli --version 8.0.5
-ENV PATH="$PATH:/root/.dotnet/tools"
-
-# Copy solution and project files
-COPY aspnet-core/SmartRestaurant.sln .
-COPY aspnet-core/common.props .
-COPY aspnet-core/NuGet.Config .
-
-# Copy all project files
-COPY aspnet-core/src/SmartRestaurant.Domain.Shared/SmartRestaurant.Domain.Shared.csproj src/SmartRestaurant.Domain.Shared/
-COPY aspnet-core/src/SmartRestaurant.Domain/SmartRestaurant.Domain.csproj src/SmartRestaurant.Domain/
-COPY aspnet-core/src/SmartRestaurant.Application.Contracts/SmartRestaurant.Application.Contracts.csproj src/SmartRestaurant.Application.Contracts/
-COPY aspnet-core/src/SmartRestaurant.Application/SmartRestaurant.Application.csproj src/SmartRestaurant.Application/
-COPY aspnet-core/src/SmartRestaurant.EntityFrameworkCore/SmartRestaurant.EntityFrameworkCore.csproj src/SmartRestaurant.EntityFrameworkCore/
-COPY aspnet-core/src/SmartRestaurant.HttpApi/SmartRestaurant.HttpApi.csproj src/SmartRestaurant.HttpApi/
-COPY aspnet-core/src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj src/SmartRestaurant.HttpApi.Host/
-COPY aspnet-core/src/SmartRestaurant.HttpApi.Client/SmartRestaurant.HttpApi.Client.csproj src/SmartRestaurant.HttpApi.Client/
-COPY aspnet-core/src/SmartRestaurant.DbMigrator/SmartRestaurant.DbMigrator.csproj src/SmartRestaurant.DbMigrator/
-
-# Copy test project files
-COPY aspnet-core/test/SmartRestaurant.TestBase/SmartRestaurant.TestBase.csproj test/SmartRestaurant.TestBase/
-COPY aspnet-core/test/SmartRestaurant.Domain.Tests/SmartRestaurant.Domain.Tests.csproj test/SmartRestaurant.Domain.Tests/
-COPY aspnet-core/test/SmartRestaurant.Application.Tests/SmartRestaurant.Application.Tests.csproj test/SmartRestaurant.Application.Tests/
-COPY aspnet-core/test/SmartRestaurant.EntityFrameworkCore.Tests/SmartRestaurant.EntityFrameworkCore.Tests.csproj test/SmartRestaurant.EntityFrameworkCore.Tests/
-COPY aspnet-core/test/SmartRestaurant.HttpApi.Client.ConsoleTestApp/SmartRestaurant.HttpApi.Client.ConsoleTestApp.csproj test/SmartRestaurant.HttpApi.Client.ConsoleTestApp/
-
-# Restore dependencies (exclude test projects to avoid dependency issues)
-RUN dotnet restore src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj
-
-# Copy the entire source code
+# Copy solution and restore dependencies
 COPY aspnet-core/ .
+RUN dotnet restore SmartRestaurant.sln
 
-# Back to source root for publish
-WORKDIR /src
+# Build and publish
+RUN dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj \
+    -c Release -o /app/publish --no-restore
 
-# Publish stage - publish directly without separate build step
-FROM build AS publish  
-RUN dotnet publish src/SmartRestaurant.HttpApi.Host/SmartRestaurant.HttpApi.Host.csproj -c Release -o /app/publish
-
-# Development stage (for docker-compose.dev.yml)
-FROM base AS development
-WORKDIR /app
-COPY --from=publish /app/publish .
-
-# Install the ABP CLI for development
-RUN dotnet tool install -g Volo.Abp.Studio.Cli || dotnet tool install -g Volo.Abp.Cli --version 8.0.5
-ENV PATH="$PATH:/root/.dotnet/tools"
-
-ENTRYPOINT ["dotnet", "SmartRestaurant.HttpApi.Host.dll"]
-
-# Production stage (for docker-compose.prod.yml) - Optimized for 2GB VPS
+# Production runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS production
 
-# Install Vietnamese support and health check tools
-RUN apk add --no-cache \
-    icu-libs \
-    icu-data-full \
-    curl \
-    tzdata && \
+# Install essentials and Vietnamese support
+RUN apk add --no-cache icu-libs curl tzdata && \
     rm -rf /var/cache/apk/*
 
-# Set timezone to Vietnam
+# Set timezone
 ENV TZ=Asia/Ho_Chi_Minh
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S appuser -u 1001 -G appgroup
+# Create non-root user and set permissions
+RUN addgroup -g 1001 appgroup && \
+    adduser -S -u 1001 -G appgroup appuser && \
+    mkdir -p logs && \
+    chown -R appuser:appgroup /app
 
-# Create logs directory and set permissions
-RUN mkdir -p /app/logs && \
-    chown -R appuser:appgroup /app && \
-    chmod -R 755 /app
-
-# Set environment variables for production optimization
+# Production environment
 ENV ASPNETCORE_ENVIRONMENT=Production \
     ASPNETCORE_URLS=http://+:80 \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    DOTNET_EnableDiagnostics=0 \
-    DOTNET_USE_POLLING_FILE_WATCHER=true \
-    DOTNET_RUNNING_IN_CONTAINER=true
-
-# Memory optimization for 2GB VPS
-ENV DOTNET_GCHeapHardLimit=400000000 \
-    DOTNET_GCConserveMemory=9 \
-    DOTNET_ThreadPool_UnfairSemaphoreSpinLimit=6
+    DOTNET_GCHeapHardLimit=400000000
 
 USER appuser
+EXPOSE 80
 
-# Health check endpoint for Vietnamese restaurant API
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost/health || exit 1
 
