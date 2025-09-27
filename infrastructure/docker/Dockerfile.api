@@ -17,8 +17,8 @@ WORKDIR /src
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
-# Install ABP CLI
-RUN dotnet tool install -g Volo.Abp.Cli
+# Install ABP CLI (fallback to old version if new fails)
+RUN dotnet tool install -g Volo.Abp.Studio.Cli || dotnet tool install -g Volo.Abp.Cli --version 8.0.5
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 # Copy solution and project files
@@ -67,7 +67,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Install the ABP CLI for development
-RUN dotnet tool install -g Volo.Abp.Cli
+RUN dotnet tool install -g Volo.Abp.Studio.Cli || dotnet tool install -g Volo.Abp.Cli --version 8.0.5
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 ENTRYPOINT ["dotnet", "SmartRestaurant.HttpApi.Host.dll"]
