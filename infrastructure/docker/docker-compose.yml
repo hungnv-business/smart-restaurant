@@ -12,6 +12,12 @@ services:
       - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
       - /var/www/html:/var/www/html:ro
       - /opt/smartrestaurant/logs:/var/log/nginx
+    # Ép chạy root để Nginx có thể tạo các thư mục temp
+    user: "0:0"
+    # Tạo tmpfs cho cache & run (writable) → tránh lỗi permission
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
     networks:
       - smartrestaurant-network
     restart: unless-stopped
@@ -25,7 +31,7 @@ services:
         reservations:
           memory: 32M
     healthcheck:
-      test: ["CMD-SHELL", "nginx -t || exit 1"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -78,27 +84,20 @@ services:
       start_period: 60s
 
   # Angular Frontend (Production Build) - HTTP Only
-    web:
-      image: ghcr.io/hungnv-business/smart-restaurant/web:production
-      container_name: smartrestaurant_web
-      volumes:
-        - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
-      networks:
-        - smartrestaurant-network
-      restart: unless-stopped
-      depends_on:
-        - api
-      environment:
-        - BASE_URL=https://chodocquan.site
-        - API_URL=https://chodocquan.site/api
-        - OIDC_ISSUER=https://chodocquan.site
-        - CLIENT_ID=SmartRestaurant_Web
-      healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost/health"]
-        interval: 30s
-        timeout: 10s
-        retries: 3
-        start_period: 30s
+  web:
+    image: ghcr.io/hungnv-business/smart-restaurant/web:production
+    container_name: smartrestaurant_web
+    volumes:
+      - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
+    user: "0:0"              # ép chạy root để không lỗi quyền
+    tmpfs:
+      - /var/cache/nginx     # nơi tạo client_temp
+      - /var/run
+    networks:
+      - smartrestaurant-network
+    restart: unless-stopped
+    depends_on:
+      - api
 
   # PostgreSQL Database (Optimized for 2GB RAM)
   postgres:

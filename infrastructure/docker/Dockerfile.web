@@ -2,35 +2,56 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Build args (nhận từ GitHub Actions build-args)
 ARG BACKEND_BASE_URL=https://localhost
 ARG REMOTE_SERVICE_BASE_URL=https://localhost/api
 ARG FRONTEND_BASE_URL=https://localhost
-ARG WEB_CLIENT_ID=SmartRestaurant_Web
+ARG WEB_CLIENT_ID=SmartRestaurant_App
 
+# Cài deps
 COPY angular/package*.json ./
 RUN npm install --legacy-peer-deps
 
+# Copy source
 COPY angular/ .
 
-# Ghi đè env vào environment*.ts
-RUN sed -i "s|baseUrl: '[^']*'|baseUrl: '${FRONTEND_BASE_URL}'|g" src/environments/environment.ts && \
-    sed -i "s|issuer: '[^']*'|issuer: '${BACKEND_BASE_URL}'|g" src/environments/environment.ts && \
-    sed -i "s|url: '[^']*'|url: '${REMOTE_SERVICE_BASE_URL}'|g" src/environments/environment.ts && \
-    sed -i "s|clientId: '[^']*'|clientId: '${WEB_CLIENT_ID}'|g" src/environments/environment.ts && \
-    sed -i "s|baseUrl: '[^']*'|baseUrl: '${FRONTEND_BASE_URL}'|g" src/environments/environment.prod.ts && \
-    sed -i "s|issuer: '[^']*'|issuer: '${BACKEND_BASE_URL}'|g" src/environments/environment.prod.ts && \
-    sed -i "s|url: '[^']*'|url: '${REMOTE_SERVICE_BASE_URL}'|g" src/environments/environment.prod.ts && \
-    sed -i "s|clientId: '[^']*'|clientId: '${WEB_CLIENT_ID}'|g" src/environments/environment.prod.ts
+# Sanitize biến & ghi đè environment.ts / environment.prod.ts bằng sed
+# (loại bỏ mọi whitespace và dấu # tránh chui vào bundle như bạn gặp)
+RUN set -e; \
+    BB=$(printf "%s" "$BACKEND_BASE_URL"         | tr -d '[:space:]#'); \
+    RS=$(printf "%s" "$REMOTE_SERVICE_BASE_URL"  | tr -d '[:space:]#'); \
+    FB=$(printf "%s" "$FRONTEND_BASE_URL"        | tr -d '[:space:]#'); \
+    CID=$(printf "%s" "$WEB_CLIENT_ID"           | tr -d '[:space:]#'); \
+    \
+    sed -i "s|baseUrl: '[^']*'|baseUrl: '${FB}'|g"            src/environments/environment.ts && \
+    sed -i "s|issuer: '[^']*'|issuer: '${BB}'|g"              src/environments/environment.ts && \
+    sed -i "s|url: '[^']*'|url: '${RS}'|g"                    src/environments/environment.ts && \
+    sed -i "s|clientId: '[^']*'|clientId: '${CID}'|g"         src/environments/environment.ts && \
+    sed -i "s|baseUrl: '[^']*'|baseUrl: '${FB}'|g"            src/environments/environment.prod.ts && \
+    sed -i "s|issuer: '[^']*'|issuer: '${BB}'|g"              src/environments/environment.prod.ts && \
+    sed -i "s|url: '[^']*'|url: '${RS}'|g"                    src/environments/environment.prod.ts && \
+    sed -i "s|clientId: '[^']*'|clientId: '${CID}'|g"         src/environments/environment.prod.ts
 
+# Build Angular production
 RUN npm run build:prod
 
 # ---------- Runtime stage ----------
 FROM nginx:1.25-alpine AS production
 
+# Dùng curl cho healthcheck
 RUN apk add --no-cache curl
 
+# Copy build ra Nginx. Nếu app name khác "SmartRestaurant", đổi lại đường dẫn dưới.
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy cấu hình Nginx của web container (HTTP only)
+# Lưu ý: trong nginx-web-http.conf KHÔNG nên có dòng "user nginx;"
 COPY infrastructure/docker/nginx-web-http.conf /etc/nginx/nginx.conf
+
+# Chuẩn bị quyền cho Nginx khi chạy non-root (ngăn lỗi client_temp)
+RUN mkdir -p /var/cache/nginx /var/run/nginx /var/log/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run/nginx /var/log/nginx && \
+    chmod -R 755 /var/cache/nginx /var/run/nginx
 
 USER nginx
 EXPOSE 80
