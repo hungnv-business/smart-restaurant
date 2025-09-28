@@ -98,7 +98,7 @@ jobs:
         ENCRYPTION_PASSPHRASE=test_encryption_key_32chars_long
         WEB_API_URL=https://test.com/api
         WEB_BASE_URL=https://test.com
-        WEB_CLIENT_ID=SmartRestaurant_Angular
+        WEB_CLIENT_ID=SmartRestaurant_App
         EOF
         
         # Start containers

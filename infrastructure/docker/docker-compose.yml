@@ -87,6 +87,11 @@ services:
   web:
     image: ghcr.io/hungnv-business/smart-restaurant/web:production
     container_name: smartrestaurant_web
+    environment:
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+      - BACKEND_BASE_URL=${BACKEND_BASE_URL}
+      - REMOTE_SERVICE_BASE_URL=${REMOTE_SERVICE_BASE_URL}
+      - WEB_CLIENT_ID=${WEB_CLIENT_ID}
     volumes:
       - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro
     user: "0:0"              # ép chạy root để không lỗi quyền
