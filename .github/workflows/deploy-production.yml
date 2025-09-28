@@ -213,10 +213,10 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
           build-args: |
-            BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}            # https://chodocquan.site
-            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}  # https://chodocquan.site/api
-            FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}          # https://chodocquan.site
-            WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}                  # SmartRestaurant_Web
+            BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
+            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}
+            FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+            WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
         continue-on-error: true
 
       - name: Build local Web fallback
@@ -418,18 +418,6 @@ jobs:
           source: "deployment-package/*"
           target: "/opt/smartrestaurant/"
           strip_components: 1
-
-      # (Tùy chọn) Không cần nếu FE chạy trong container web
-      # - name: Copy Angular static files
-      #   uses: appleboy/scp-action@v0.1.5
-      #   with:
-      #     host: ${{ secrets.VPS_HOST }}
-      #     username: ${{ secrets.VPS_USER }}
-      #     key: ${{ secrets.VPS_SSH_KEY }}
-      #     port: ${{ secrets.VPS_PORT || 22 }}
-      #     source: "angular-dist/*"
-      #     target: "/var/www/html/"
-      #     strip_components: 1
 
       - name: Copy API image tar (fallback)
         uses: appleboy/scp-action@v0.1.5
