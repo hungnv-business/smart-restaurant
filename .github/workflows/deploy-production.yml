@@ -276,7 +276,7 @@ jobs:
       - name: Create backup directories (SSH)
         uses: appleboy/ssh-action@v0.1.8
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -285,7 +285,7 @@ jobs:
           script_stop: true
           timeout: 30m
           command_timeout: 10m
-          envs: GITHUB_SHA,GITHUB_REF,GITHUB_TOKEN,GITHUB_ACTOR
+          envs: GITHUB_SHA,GITHUB_REF,GHCR_TOKEN,GITHUB_ACTOR
           debug: false
           script: |
             set -e
@@ -384,22 +384,24 @@ jobs:
             if [ "${DEPLOY_MODE}" = "registry" ]; then
               echo "[DEPLOY] Pulling latest API image from registry..."
               IMAGE_REF="ghcr.io/hungnv-business/smart-restaurant/api:production"
+              echo "[DEBUG] After setting IMAGE_REF"
 
               if [ -z "${IMAGE_REF:-}" ] || [ "${IMAGE_REF}" = "null" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
                 echo "Using image: ${IMAGE_REF}"
-                echo "[DEBUG] GITHUB_TOKEN available: $([ -n "${GITHUB_TOKEN:-}" ] && echo 'yes' || echo 'no')"
+                echo "[DEBUG] About to check GHCR_TOKEN"
+                echo "[DEBUG] GHCR_TOKEN available: $([ -n "${GHCR_TOKEN:-}" ] && echo 'yes' || echo 'no')"
                 echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR:-'not-set'}"
-                echo "[INFO] Attempting to login to GHCR..."
+                echo "[INFO] Attempting to login to GHCR with Personal Access Token..."
                 set +e
-                # Try to login to GitHub Container Registry for private images
-                if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_ACTOR:-}" ]; then
-                  echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin 2>/dev/null
+                # Use Personal Access Token for GHCR authentication
+                if [ -n "${GHCR_TOKEN:-}" ] && [ -n "${GITHUB_ACTOR:-}" ]; then
+                  echo "${GHCR_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin 2>/dev/null
                   LOGIN_EXIT=$?
                   if [ $LOGIN_EXIT -eq 0 ]; then
-                    echo "[SUCCESS] GHCR login successful"
+                    echo "[SUCCESS] GHCR login successful with PAT"
                     if sudo docker pull "${IMAGE_REF}"; then
                       sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
                       echo "[SUCCESS] Registry image pulled and tagged successfully"
@@ -408,22 +410,22 @@ jobs:
                       echo "deployment_mode=local" >> /tmp/deployment_vars
                     fi
                   else
-                    echo "[WARNING] GHCR login failed, trying pull without auth..."
+                    echo "[WARNING] GHCR login failed with PAT, trying pull without auth..."
                     if sudo docker pull "${IMAGE_REF}"; then
                       sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
-                      echo "[SUCCESS] Registry image pulled and tagged successfully"
+                      echo "[SUCCESS] Registry image pulled successfully"
                     else
-                      echo "[WARNING] Failed to pull from registry, switching to local mode"
+                      echo "[INFO] Failed to pull from registry, switching to local mode"
                       echo "deployment_mode=local" >> /tmp/deployment_vars
                     fi
                   fi
                 else
-                  echo "[WARNING] GITHUB_TOKEN or GITHUB_ACTOR not available, trying pull without auth..."
+                  echo "[WARNING] GHCR_TOKEN or GITHUB_ACTOR not available, trying pull without auth..."
                   if sudo docker pull "${IMAGE_REF}"; then
                     sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
-                    echo "[SUCCESS] Registry image pulled and tagged successfully"
+                    echo "[SUCCESS] Registry image pulled successfully"
                   else
-                    echo "[WARNING] Failed to pull from registry, switching to local mode"
+                    echo "[INFO] Failed to pull from registry, switching to local mode"
                     echo "deployment_mode=local" >> /tmp/deployment_vars
                   fi
                 fi
@@ -472,7 +474,7 @@ jobs:
         id: deploy
         uses: appleboy/ssh-action@v0.1.8
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -481,7 +483,7 @@ jobs:
           script_stop: false
           timeout: 45m
           command_timeout: 15m
-          envs: GITHUB_SHA,GITHUB_REF,GITHUB_TOKEN,GITHUB_ACTOR
+          envs: GITHUB_SHA,GITHUB_REF,GHCR_TOKEN,GITHUB_ACTOR
           script: |
             set +e
             cd /opt/smartrestaurant
