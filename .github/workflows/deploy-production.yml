@@ -390,22 +390,35 @@ jobs:
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
                 echo "Using image: ${IMAGE_REF}"
+                echo "[DEBUG] GITHUB_TOKEN length: ${#GITHUB_TOKEN}"
+                echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR}"
                 echo "[INFO] Attempting to login to GHCR..."
                 set +e
                 # Try to login to GitHub Container Registry for private images
-                echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin 2>/dev/null
-                LOGIN_EXIT=$?
-                if [ $LOGIN_EXIT -eq 0 ]; then
-                  echo "[SUCCESS] GHCR login successful"
-                  if sudo docker pull "${IMAGE_REF}"; then
-                    sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
-                    echo "[SUCCESS] Registry image pulled and tagged successfully"
+                if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_ACTOR:-}" ]; then
+                  echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin 2>/dev/null
+                  LOGIN_EXIT=$?
+                  if [ $LOGIN_EXIT -eq 0 ]; then
+                    echo "[SUCCESS] GHCR login successful"
+                    if sudo docker pull "${IMAGE_REF}"; then
+                      sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
+                      echo "[SUCCESS] Registry image pulled and tagged successfully"
+                    else
+                      echo "[WARNING] Failed to pull from registry after login, switching to local mode"
+                      echo "deployment_mode=local" >> /tmp/deployment_vars
+                    fi
                   else
-                    echo "[WARNING] Failed to pull from registry after login, switching to local mode"
-                    echo "deployment_mode=local" >> /tmp/deployment_vars
+                    echo "[WARNING] GHCR login failed, trying pull without auth..."
+                    if sudo docker pull "${IMAGE_REF}"; then
+                      sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
+                      echo "[SUCCESS] Registry image pulled and tagged successfully"
+                    else
+                      echo "[WARNING] Failed to pull from registry, switching to local mode"
+                      echo "deployment_mode=local" >> /tmp/deployment_vars
+                    fi
                   fi
                 else
-                  echo "[WARNING] GHCR login failed, trying pull without auth..."
+                  echo "[WARNING] GITHUB_TOKEN or GITHUB_ACTOR not available, trying pull without auth..."
                   if sudo docker pull "${IMAGE_REF}"; then
                     sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
                     echo "[SUCCESS] Registry image pulled and tagged successfully"
