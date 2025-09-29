@@ -214,7 +214,6 @@ jobs:
           platforms: linux/amd64
           build-args: |
             BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
-            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}
             FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
             WEB_CLIENT_ID=${{ vars.WEB_CLIENT_ID }}
         continue-on-error: true
@@ -223,7 +222,6 @@ jobs:
         run: |
           docker build -f ./infrastructure/docker/Dockerfile.web \
             --build-arg BACKEND_BASE_URL='${{ vars.BACKEND_BASE_URL }}' \
-            --build-arg REMOTE_SERVICE_BASE_URL='${{ vars.REMOTE_SERVICE_BASE_URL }}' \
             --build-arg FRONTEND_BASE_URL='${{ vars.FRONTEND_BASE_URL }}' \
             --build-arg WEB_CLIENT_ID='${{ vars.WEB_CLIENT_ID }}' \
             --target production \
@@ -497,7 +495,6 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
             FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
-            REMOTE_SERVICE_BASE_URL=${{ vars.REMOTE_SERVICE_BASE_URL }}
             AUTH_REQUIRE_HTTPS=${{ vars.AUTH_REQUIRE_HTTPS }}
             SWAGGER_CLIENT_ID=${{ vars.SWAGGER_CLIENT_ID }}
             ENCRYPTION_PASSPHRASE=${{ secrets.ENCRYPTION_PASSPHRASE }}

@@ -50,7 +50,7 @@ services:
 
       - App__SelfUrl=${BACKEND_BASE_URL}
       - App__ClientUrl=${FRONTEND_BASE_URL}
-      - RemoteServices__Default__BaseUrl=${REMOTE_SERVICE_BASE_URL}
+      - RemoteServices__Default__BaseUrl=${BACKEND_BASE_URL}
 
       - AuthServer__Authority=${BACKEND_BASE_URL}
       - AuthServer__RequireHttpsMetadata=${AUTH_REQUIRE_HTTPS}
@@ -91,7 +91,6 @@ services:
     environment:
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
       - BACKEND_BASE_URL=${BACKEND_BASE_URL}
-      - REMOTE_SERVICE_BASE_URL=${REMOTE_SERVICE_BASE_URL}
       - WEB_CLIENT_ID=${WEB_CLIENT_ID}
     volumes:
       - ./nginx-web-http.conf:/etc/nginx/nginx.conf:ro

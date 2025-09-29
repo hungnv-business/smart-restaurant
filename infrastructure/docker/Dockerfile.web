@@ -47,10 +47,8 @@ CMD ["/bin/sh", "-c", \
 "env && \
 echo FRONTEND_BASE_URL=[$FRONTEND_BASE_URL] && \
 echo BACKEND_BASE_URL=[$BACKEND_BASE_URL] && \
-echo REMOTE_SERVICE_BASE_URL=[$REMOTE_SERVICE_BASE_URL] && \
 echo WEB_CLIENT_ID=[$WEB_CLIENT_ID] && \
 sed -i s#MY_FRONTEND_BASE_URL#$FRONTEND_BASE_URL#g /usr/share/nginx/html/SmartRestaurant/main*.js && \
 sed -i s#MY_BACKEND_BASE_URL#$BACKEND_BASE_URL#g /usr/share/nginx/html/SmartRestaurant/main*.js && \
-sed -i s#MY_REMOTE_SERVICE_BASE_URL#$REMOTE_SERVICE_BASE_URL#g /usr/share/nginx/html/SmartRestaurant/main*.js && \
 sed -i s#MY_WEB_CLIENT_ID#$WEB_CLIENT_ID#g /usr/share/nginx/html/SmartRestaurant/main*.js && \
 nginx -g 'daemon off;'"]

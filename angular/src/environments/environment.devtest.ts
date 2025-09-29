@@ -18,7 +18,7 @@ export const environment = {
   },
   apis: {
     default: {
-      url: 'MY_REMOTE_SERVICE_BASE_URL',
+      url: 'MY_BACKEND_BASE_URL',
       rootNamespace: 'SmartRestaurant',
     },
   },
