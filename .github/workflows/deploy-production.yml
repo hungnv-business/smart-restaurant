@@ -386,7 +386,7 @@ jobs:
               IMAGE_REF="ghcr.io/hungnv-business/smart-restaurant/api:production"
               echo "[DEBUG] After setting IMAGE_REF"
               echo "[DEBUG] About to check if IMAGE_REF is empty or null"
-
+              set +e
               if [ -z "$IMAGE_REF" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
@@ -432,6 +432,7 @@ jobs:
                 fi
                 set -e
               fi
+              set -e
             else
               echo "[DEPLOY] Local deployment mode: will load image from uploaded artifact"
             fi
