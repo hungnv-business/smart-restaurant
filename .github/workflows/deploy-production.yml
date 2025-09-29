@@ -389,9 +389,7 @@ jobs:
               else
                 echo "Using image: ${IMAGE_REF}"
                 set +e
-                sudo docker pull "${IMAGE_REF}"
-                PULL_EXIT=$?
-                if [ ${PULL_EXIT} -eq 0 ]; then
+                if sudo docker pull "${IMAGE_REF}"; then
                   sudo docker tag "${IMAGE_REF}" ghcr.io/hungnv-business/smart-restaurant/api:production || true
                   echo "[SUCCESS] Registry image pulled and tagged successfully"
                 else
