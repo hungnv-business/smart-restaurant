@@ -86,6 +86,7 @@ services:
   # Angular Frontend (Production Build) - HTTP Only
   web:
     image: ghcr.io/hungnv-business/smart-restaurant/web:production
+    pull_policy: always
     container_name: smartrestaurant_web
     environment:
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
