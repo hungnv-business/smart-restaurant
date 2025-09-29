@@ -53,7 +53,9 @@
       "Bash(yarn info:*)",
       "Bash(yarn test:*)",
       "Bash(npm run docker:dev:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

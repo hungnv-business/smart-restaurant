@@ -392,7 +392,11 @@ jobs:
               else
                 echo "Using image: ${IMAGE_REF}"
                 echo "[DEBUG] About to check GHCR_TOKEN"
-                echo "[DEBUG] GHCR_TOKEN available: $([ -n "${GHCR_TOKEN:-}" ] && echo 'yes' || echo 'no')"
+                if [ -n "${GHCR_TOKEN:-}" ]; then
+                  echo "[DEBUG] GHCR_TOKEN: available"
+                else
+                  echo "[DEBUG] GHCR_TOKEN: not available"
+                fi
                 echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR:-'not-set'}"
                 echo "[INFO] Attempting to login to GHCR with Personal Access Token..."
                 set +e
