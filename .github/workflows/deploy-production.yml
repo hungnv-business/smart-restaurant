@@ -387,7 +387,7 @@ jobs:
               echo "[DEBUG] After setting IMAGE_REF"
               echo "[DEBUG] About to check if IMAGE_REF is empty or null"
 
-              if [ -z "${IMAGE_REF:-}" ] || [ "${IMAGE_REF}" = "null" ]; then
+              if [ -z "${IMAGE_REF:-}" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
