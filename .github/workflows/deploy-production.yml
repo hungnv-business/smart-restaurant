@@ -390,8 +390,8 @@ jobs:
                 echo "deployment_mode=local" >> /tmp/deployment_vars
               else
                 echo "Using image: ${IMAGE_REF}"
-                echo "[DEBUG] GITHUB_TOKEN length: ${#GITHUB_TOKEN}"
-                echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR}"
+                echo "[DEBUG] GITHUB_TOKEN available: $([ -n "${GITHUB_TOKEN:-}" ] && echo 'yes' || echo 'no')"
+                echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR:-'not-set'}"
                 echo "[INFO] Attempting to login to GHCR..."
                 set +e
                 # Try to login to GitHub Container Registry for private images
