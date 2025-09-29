@@ -385,6 +385,7 @@ jobs:
               echo "[DEPLOY] Pulling latest API image from registry..."
               IMAGE_REF="ghcr.io/hungnv-business/smart-restaurant/api:production"
               echo "[DEBUG] After setting IMAGE_REF"
+              echo "[DEBUG] About to check if IMAGE_REF is empty or null"
 
               if [ -z "${IMAGE_REF:-}" ] || [ "${IMAGE_REF}" = "null" ]; then
                 echo "[WARNING] Image ref not set, switching to local mode"
@@ -392,11 +393,7 @@ jobs:
               else
                 echo "Using image: ${IMAGE_REF}"
                 echo "[DEBUG] About to check GHCR_TOKEN"
-                if [ -n "${GHCR_TOKEN:-}" ]; then
-                  echo "[DEBUG] GHCR_TOKEN: available"
-                else
-                  echo "[DEBUG] GHCR_TOKEN: not available"
-                fi
+                echo "[DEBUG] GHCR_TOKEN status: $(if [ -n "${GHCR_TOKEN:-}" ]; then echo 'available'; else echo 'not-available'; fi)"
                 echo "[DEBUG] GITHUB_ACTOR: ${GITHUB_ACTOR:-'not-set'}"
                 echo "[INFO] Attempting to login to GHCR with Personal Access Token..."
                 set +e
