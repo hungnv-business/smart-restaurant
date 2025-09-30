@@ -40,18 +40,27 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    print('🚀 [LoginScreen] Bắt đầu quá trình đăng nhập');
+
     // Clear previous error
-    setState(() {
-      _errorMessage = null;
-    });
+    if (mounted) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
 
     final authService = Provider.of<AuthService>(context, listen: false);
+
+    print('🚀 [LoginScreen] AuthService loading: ${authService.isLoading}');
+    print('🚀 [LoginScreen] Username: ${_usernameController.text.trim()}');
 
     try {
       await authService.login(
         _usernameController.text.trim(),
         _passwordController.text,
       );
+      
+      print('✅ [LoginScreen] Login completed. Is logged in: ${authService.isLoggedIn}');
 
       // Chuyển đến màn hình home nếu đăng nhập thành công
       if (mounted && authService.isLoggedIn) {
@@ -60,9 +69,15 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on AuthException catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
+      print('❌ [LoginScreen] AuthException: ${e.message}');
+      print('❌ [LoginScreen] Error code: ${e.errorCode}');
+      print('❌ [LoginScreen] Status code: ${e.statusCode}');
+      
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+        });
+      }
       
       // Show error snackbar
       if (mounted) {
@@ -82,9 +97,14 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Lỗi không xác định: ${e.toString()}';
-      });
+      print('❌ [LoginScreen] Unexpected error: ${e.toString()}');
+      print('❌ [LoginScreen] Error type: ${e.runtimeType}');
+      
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Lỗi không xác định: ${e.toString()}';
+        });
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

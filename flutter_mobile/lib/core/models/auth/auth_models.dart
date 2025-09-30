@@ -1,4 +1,6 @@
 /// Models cho authentication response từ API
+
+import '../../constants/app_constants.dart';
 class AuthResponse {
   final String accessToken;
   final String refreshToken;
@@ -47,9 +49,9 @@ class LoginRequest {
     required this.username,
     required this.password,
     this.grantType = 'password',
-    this.clientId = 'SmartRestaurant_App',
+    String? clientId,
     this.scope = 'offline_access SmartRestaurant',
-  });
+  }) : clientId = clientId ?? AppConstants.oauthClientId;
 
   Map<String, String> toFormData() {
     return {

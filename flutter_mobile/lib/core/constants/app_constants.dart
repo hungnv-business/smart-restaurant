@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Các hằng số ứng dụng Quán bia
 class AppConstants {
@@ -16,11 +17,16 @@ class AppConstants {
   static const String takeawayRoute = '/takeaway';
   static const String paymentRoute = '/payment';
   
-  // API endpoints
-  // Thay đổi URL này thành IP của máy chạy backend
-  // Ví dụ: static const String baseUrl = 'https://192.168.1.100:44346';
-  // Hoặc domain name: static const String baseUrl = 'https://your-backend-domain.com';
-  static const String baseUrl = 'https://localhost:44346'; // TODO: Update this URL
+  // API endpoints - đọc từ .env file
+  static String get baseUrl => dotenv.env['API_BASE_URL'] ?? 'https://localhost:44346';
+  
+  // API configuration
+  static int get apiTimeout => int.tryParse(dotenv.env['API_TIMEOUT'] ?? '30000') ?? 30000;
+  static bool get debugMode => dotenv.env['DEBUG_MODE']?.toLowerCase() == 'true';
+  
+  // ABP Backend Configuration
+  static String get oauthClientId => dotenv.env['OAUTH_CLIENT_ID'] ?? 'flutter_mobile';
+  static String get oauthClientSecret => dotenv.env['OAUTH_CLIENT_SECRET'] ?? '1q2w3e*';
   
   // Storage keys
   static const String tokenKey = 'auth_token';

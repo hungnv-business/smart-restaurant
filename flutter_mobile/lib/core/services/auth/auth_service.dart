@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:io';
 import '../../constants/app_constants.dart';
 import '../../models/auth/auth_models.dart';
 import '../../utils/jwt_helper.dart';
@@ -34,13 +36,52 @@ class AuthService extends ChangeNotifier {
     _dio = Dio();
     _dio.options = BaseOptions(
       baseUrl: AppConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
       },
     );
+    
+    // Cấu hình để bỏ qua SSL certificate validation trong development
+    if (kDebugMode) {
+      _dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+            print('🔒 [SSL] Bypassing certificate check for $host:$port');
+            return true; // Always accept certificates in debug mode
+          };
+          return client;
+        },
+      );
+      
+      _dio.interceptors.add(InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (kDebugMode) {
+            print('🌐 [Dio] Request: ${options.method} ${options.uri}');
+            print('🌐 [Dio] Headers: ${options.headers}');
+            print('🌐 [Dio] Data: ${options.data}');
+          }
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          if (kDebugMode) {
+            print('🌐 [Dio] Response: ${response.statusCode} ${response.statusMessage}');
+            print('🌐 [Dio] Data: ${response.data}');
+          }
+          handler.next(response);
+        },
+        onError: (error, handler) {
+          if (kDebugMode) {
+            print('🌐 [Dio] Error: ${error.type} - ${error.message}');
+            print('🌐 [Dio] Error details: ${error.error}');
+          }
+          handler.next(error);
+        },
+      ));
+    }
     
     // Initialize HTTP client service với auth service reference
     _httpClientService.initialize(this);
@@ -50,11 +91,22 @@ class AuthService extends ChangeNotifier {
   Future<void> login(String username, String password) async {
     try {
       _setLoading(true);
+      
+      if (kDebugMode) {
+        print('🔐 [AuthService] Bắt đầu đăng nhập...');
+        print('🔐 [AuthService] Base URL: ${AppConstants.baseUrl}');
+        print('🔐 [AuthService] Username: $username');
+      }
 
       final loginRequest = LoginRequest(
         username: username,
         password: password,
       );
+
+      if (kDebugMode) {
+        print('🔐 [AuthService] Gửi request tới: ${AppConstants.baseUrl}/connect/token');
+        print('🔐 [AuthService] Form data: ${loginRequest.toFormData()}');
+      }
 
       final response = await _dio.post(
         '/connect/token',
@@ -63,6 +115,11 @@ class AuthService extends ChangeNotifier {
           contentType: Headers.formUrlEncodedContentType,
         ),
       );
+      
+      if (kDebugMode) {
+        print('🔐 [AuthService] Response status: ${response.statusCode}');
+        print('🔐 [AuthService] Response data: ${response.data}');
+      }
 
       if (response.statusCode == 200 && response.data != null) {
         _authResponse = AuthResponse.fromJson(response.data);
@@ -89,6 +146,20 @@ class AuthService extends ChangeNotifier {
         );
       }
     } on DioException catch (e) {
+      if (kDebugMode) {
+        print('❌ [AuthService] DioException occurred');
+        print('❌ [AuthService] Type: ${e.type}');
+        print('❌ [AuthService] Message: ${e.message}');
+        print('❌ [AuthService] Error: ${e.error}');
+        print('❌ [AuthService] StackTrace: ${e.stackTrace}');
+        print('❌ [AuthService] Request URI: ${e.requestOptions.uri}');
+        print('❌ [AuthService] Request Method: ${e.requestOptions.method}');
+        print('❌ [AuthService] Request Headers: ${e.requestOptions.headers}');
+        print('❌ [AuthService] Request Data: ${e.requestOptions.data}');
+        print('❌ [AuthService] Response: ${e.response?.data}');
+        print('❌ [AuthService] Status Code: ${e.response?.statusCode}');
+      }
+      
       String message = 'Lỗi kết nối';
       String? errorCode;
       
