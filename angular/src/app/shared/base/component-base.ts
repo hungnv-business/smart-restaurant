@@ -127,7 +127,7 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected handleApiError(
     error: {
-      error?: { error?: { message?: string } };
+      error?: any;
       status?: number;
       message?: string;
     },
@@ -136,10 +136,9 @@ export abstract class ComponentBase implements OnDestroy {
     console.error('API Error:', error);
 
     let errorMessage = defaultMessage;
-
     // Handle specific error cases
-    if (error.error?.error?.message) {
-      errorMessage = error.error.error.message;
+    if (error.error.error?.data?.ValidationMessage) {
+      errorMessage = error.error.error.data.ValidationMessage;
     } else if (error.status === 400) {
       errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
     } else if (error.status === 401) {
@@ -330,6 +329,17 @@ export abstract class ComponentBase implements OnDestroy {
    */
   protected hasValidImage(imageUrl?: string | null): boolean {
     return !!(imageUrl && imageUrl.trim());
+  }
+
+  /**
+   * Handle image error - set default image when loading fails
+   */
+  protected onImageError(
+    event: any,
+    defaultImage: string = '/assets/layout/images/no-image.jpg',
+  ): void {
+    
+    event.target.src = defaultImage;
   }
 
   // ==================== PAGINATION UTILITIES ====================

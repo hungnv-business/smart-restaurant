@@ -179,6 +179,7 @@ export class MenuItemListComponent extends ComponentBase implements OnInit {
     return isAvailable ? 'success' : 'danger';
   }
 
+
   // Load danh sách categories
   private async loadCategories() {
     try {

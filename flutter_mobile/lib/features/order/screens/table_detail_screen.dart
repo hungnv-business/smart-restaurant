@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,9 @@ import '../../../core/enums/restaurant_enums.dart';
 import '../../../core/models/order/dinein_table_models.dart';
 import '../../../core/models/order/order_details_models.dart';
 import '../../../core/models/order/takeaway_models.dart';
+import '../../../core/models/notification/notification_models.dart';
 import '../../../core/services/order/order_service.dart';
+import '../../../core/services/notification/signalr_service.dart';
 import '../../../core/services/printer/network_thermal_printer_service.dart';
 import '../../../shared/widgets/common_app_bar.dart';
 import '../widgets/order_item_card.dart';
@@ -35,14 +38,19 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   OrderDetailsDto? _orderDetails;
   bool _isLoading = true;
   String? _errorMessage;
+  StreamSubscription<BaseNotification>? _notificationSubscription;
+  Timer? _refreshDebounceTimer;
   @override
   void initState() {
     super.initState();
     _loadTableDetails();
+    _setupNotificationListener();
   }
 
   @override
   void dispose() {
+    _notificationSubscription?.cancel();
+    _refreshDebounceTimer?.cancel();
     super.dispose();
   }
 
@@ -53,13 +61,15 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         _errorMessage = null;
       });
 
+      OrderDetailsDto? newOrderDetails;
+      
       if (widget.isForTakeaway) {
         if (widget.takeawayOrder != null) {
           final orderService = Provider.of<OrderService>(
             context,
             listen: false,
           );
-          _orderDetails = await orderService.getOrderDetails(
+          newOrderDetails = await orderService.getOrderDetails(
             widget.takeawayOrder!.id,
           );
         }
@@ -69,13 +79,14 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
             context,
             listen: false,
           );
-          _orderDetails = await orderService.getOrderDetails(
+          newOrderDetails = await orderService.getOrderDetails(
             widget.table!.currentOrderId!,
           );
         }
       }
 
       setState(() {
+        _orderDetails = newOrderDetails;
         _isLoading = false;
       });
     } catch (e) {
@@ -86,6 +97,67 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Setup notification listener để auto-refresh khi có món sẵn sàng
+  void _setupNotificationListener() {
+    try {
+      final signalRService = Provider.of<SignalRService>(context, listen: false);
+      _notificationSubscription = signalRService.notifications.listen((notification) {
+        if (notification is OrderItemStatusUpdatedNotification) {
+          _handleStatusUpdateNotification(notification);
+        }
+      });
+    } catch (e) {
+      // Ignore errors khi setup listener
+    }
+  }
+
+  /// Xử lý notification cập nhật trạng thái món ăn
+  void _handleStatusUpdateNotification(OrderItemStatusUpdatedNotification notification) {
+    // Chỉ xử lý khi đang ở đúng bàn và món ăn chuyển sang trạng thái Ready
+    if (!mounted) return;
+    
+    print('🔔 TableDetail nhận notification: ${notification.message}');
+    print('📍 Table trong notification: ${notification.tableName}');
+    print('📊 Status mới: ${notification.newStatus} (${notification.statusDisplay})');
+    
+    final currentTableName = widget.isForTakeaway 
+        ? widget.takeawayOrder?.orderNumber 
+        : widget.table?.tableNumber;
+    
+    print('🎯 Table hiện tại: $currentTableName');
+    
+    // Kiểm tra notification có phải cho bàn hiện tại
+    if (currentTableName == null || !notification.tableName.contains(currentTableName)) {
+      print('❌ Notification không phải cho bàn hiện tại');
+      return;
+    }
+    
+    // Kiểm tra trạng thái là Ready (thường là status = 2)
+    // Hoặc có thể kiểm tra statusDisplay chứa "Sẵn sàng" / "Ready"
+    if (notification.newStatus == 2 || 
+        (notification.statusDisplay?.toLowerCase().contains('ready') == true) ||
+        (notification.statusDisplay?.toLowerCase().contains('sẵn sàng') == true)) {
+      print('✅ Món sẵn sàng! Đang schedule refresh...');
+      _scheduleRefresh();
+    } else {
+      print('⏳ Món chưa sẵn sàng, status: ${notification.newStatus}');
+    }
+  }
+
+  /// Schedule debounced refresh để tránh refresh quá nhiều lần
+  void _scheduleRefresh() {
+    print('🔄 Scheduling refresh...');
+    _refreshDebounceTimer?.cancel();
+    _refreshDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted && !_isLoading) {
+        print('🔃 Executing refresh now...');
+        _loadTableDetails();
+      } else {
+        print('❌ Skip refresh - mounted: $mounted, isLoading: $_isLoading');
+      }
+    });
   }
 
   @override

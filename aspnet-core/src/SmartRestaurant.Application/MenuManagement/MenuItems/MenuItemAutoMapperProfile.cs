@@ -15,7 +15,9 @@ namespace SmartRestaurant.MenuManagement.MenuItems
                 .ForMember(dest => dest.Ingredients, opt => opt.Ignore()); // Handled manually in AppService
 
             // Mapping cho nguyên liệu
-            CreateMap<MenuItemIngredient, MenuItemIngredientDto>();
+            CreateMap<MenuItemIngredient, MenuItemIngredientDto>()
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.Ingredient.CategoryId));
+            CreateMap<MenuItemIngredientDto, MenuItemIngredient>();
         }
     }
 }

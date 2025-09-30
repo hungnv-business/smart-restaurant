@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
 
@@ -27,6 +27,7 @@ import { NotificationSoundService } from '../../services/notification-sound.serv
 // Components
 import { KitchenStatusColumnComponent } from './kitchen-status-column/kitchen-status-column.component';
 import { StatusUpdateEvent } from './shared/order-item-card/order-item-card.component';
+import { ComponentBase } from '@/shared/base/component-base';
 
 @Component({
   selector: 'app-kitchen-dashboard',
@@ -43,10 +44,7 @@ import { StatusUpdateEvent } from './shared/order-item-card/order-item-card.comp
   templateUrl: './kitchen-dashboard.component.html',
   styleUrl: './kitchen-dashboard.component.scss',
 })
-export class KitchenDashboardComponent implements OnInit, OnDestroy {
-  // Reactive state using Angular signals
-  private readonly destroy$ = new Subject<void>();
-
+export class KitchenDashboardComponent extends ComponentBase implements OnInit, OnDestroy {
   // Data signals - separated by status
   pendingTableGroups = signal<KitchenTableGroupDto[]>([]);
   preparingTableGroups = signal<KitchenTableGroupDto[]>([]);
@@ -67,7 +65,9 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     private kitchenSignalRService: KitchenSignalRService,
     private messageService: MessageService,
     private notificationSoundService: NotificationSoundService,
-  ) {}
+  ) {
+    super();
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -76,8 +76,6 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
     this.kitchenSignalRService.disconnect();
   }
 
@@ -93,13 +91,9 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
     orders$
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this.destroyed$),
         catchError(error => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Lỗi',
-            detail: 'Không thể tải danh sách món ăn',
-          });
+          this.handleApiError(error);
           console.error('Error loading cooking orders:', error);
           return of([]);
         }),
@@ -112,7 +106,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
     stats$
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntil(this.destroyed$),
         catchError(error => {
           console.error('Error loading cooking stats:', error);
           return of(null);
@@ -130,7 +124,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     // Listen to connection state changes
     this.kitchenSignalRService
       .getConnectionState()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroyed$))
       .subscribe(state => {
         this.signalRConnectionState.set(state);
       });
@@ -138,7 +132,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
     // Listen to kitchen updates
     this.kitchenSignalRService
       .getKitchenUpdates()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroyed$))
       .subscribe(update => {
         if (update) {
           this.handleSignalRUpdate(update);
@@ -296,7 +290,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
 
     this.kitchenDashboardService
       .updateOrderItemStatus(updateInput)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroyed$))
       .subscribe({
         next: () => {
           this.messageService.add({
@@ -309,12 +303,7 @@ export class KitchenDashboardComponent implements OnInit, OnDestroy {
           this.onRefresh();
         },
         error: error => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Lỗi',
-            detail: 'Không thể cập nhật trạng thái món',
-          });
-          console.error('Error updating order item status:', error);
+          this.handleApiError(error);
         },
       });
   }

@@ -15,6 +15,14 @@ export interface MenuItemDto extends FullAuditedEntityDto<string> {
   maximumQuantityAvailable: number;
   isOutOfStock: boolean;
   hasLimitedStock: boolean;
+  ingredients: MenuItemIngredientDto[];
+}
+
+export interface MenuItemIngredientDto extends EntityDto<string> {
+  ingredientId: string;
+  categoryId?: string;
+  requiredQuantity: number;
+  displayOrder: number;
 }
 
 export interface CreateUpdateMenuItemDto {
@@ -33,10 +41,4 @@ export interface GetMenuItemListRequestDto extends PagedAndSortedResultRequestDt
   filter?: string;
   categoryId?: string;
   onlyAvailable: boolean;
-}
-
-export interface MenuItemIngredientDto extends EntityDto<string> {
-  ingredientId: string;
-  requiredQuantity: number;
-  displayOrder: number;
 }

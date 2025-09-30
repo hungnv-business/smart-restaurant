@@ -8,10 +8,6 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-
-// PrimeNG Services
-import { ConfirmationService } from 'primeng/api';
 
 // ABP Proxy Types
 import { KitchenOrderItemDto } from '../../../../../../proxy/kitchen/dtos/models';
@@ -32,9 +28,7 @@ export interface StatusUpdateEvent {
     TagModule,
     BadgeModule,
     TooltipModule,
-    ConfirmDialogModule,
   ],
-  providers: [ConfirmationService],
   templateUrl: './order-item-card.component.html',
   styleUrl: './order-item-card.component.scss',
 })
@@ -49,7 +43,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   currentWaitingTime = signal<string>('0:00');
 
-  constructor(private confirmationService: ConfirmationService) {}
+  constructor() {}
 
   ngOnInit(): void {
     this.updateWaitingTime();
@@ -100,17 +94,7 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
    */
   startPreparation(): void {
     if (this.canTransitionTo(OrderItemStatus.Preparing)) {
-      debugger;
-      this.confirmationService.confirm({
-        message: `Bắt đầu nấu món "${this.orderItem.menuItemName}"?`,
-        header: 'Xác Nhận',
-        icon: 'pi pi-play',
-        acceptLabel: 'Bắt Đầu',
-        rejectLabel: 'Hủy',
-        accept: () => {
-          this.updateStatus(OrderItemStatus.Preparing);
-        },
-      });
+      this.updateStatus(OrderItemStatus.Preparing);
     }
   }
 
@@ -119,16 +103,25 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
    */
   markAsReady(): void {
     if (this.canTransitionTo(OrderItemStatus.Ready)) {
-      this.confirmationService.confirm({
-        message: `Đánh dấu món "${this.orderItem.menuItemName}" đã hoàn thành?`,
-        header: 'Xác Nhận',
-        icon: 'pi pi-check',
-        acceptLabel: 'Hoàn Thành',
-        rejectLabel: 'Hủy',
-        accept: () => {
-          this.updateStatus(OrderItemStatus.Ready);
-        },
-      });
+      this.updateStatus(OrderItemStatus.Ready);
+    }
+  }
+
+  /**
+   * Lùi về trạng thái Đơn Mới (Preparing → Pending)
+   */
+  revertToPending(): void {
+    if (this.canRevertTo(OrderItemStatus.Pending)) {
+      this.updateStatus(OrderItemStatus.Pending);
+    }
+  }
+
+  /**
+   * Lùi về trạng thái Đang Làm (Ready → Preparing)
+   */
+  revertToPreparing(): void {
+    if (this.canRevertTo(OrderItemStatus.Preparing)) {
+      this.updateStatus(OrderItemStatus.Preparing);
     }
   }
 
@@ -164,18 +157,37 @@ export class OrderItemCardComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Kiểm tra có thể lùi về trạng thái trước không
+   */
+  canRevertTo(revertStatus: OrderItemStatus): boolean {
+    const currentStatus = this.orderItem.status || OrderItemStatus.Pending;
+    switch (currentStatus) {
+      case OrderItemStatus.Preparing:
+        return revertStatus === OrderItemStatus.Pending;
+      case OrderItemStatus.Ready:
+        return revertStatus === OrderItemStatus.Preparing;
+      case OrderItemStatus.Pending:
+      case OrderItemStatus.Served:
+      case OrderItemStatus.Canceled:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  /**
    * Lấy severity cho status tag
    */
   getStatusSeverity(
     status: OrderItemStatus,
-  ): 'secondary' | 'info' | 'success' | 'warning' | 'danger' {
+  ): 'secondary' | 'info' | 'success' | 'warn' | 'danger' {
     switch (status) {
       case OrderItemStatus.Pending:
-        return 'secondary';
+        return 'info'; // Xanh dương cho Đơn Mới
       case OrderItemStatus.Preparing:
-        return 'info';
+        return 'warn'; // Cam cho Đang Làm
       case OrderItemStatus.Ready:
-        return 'success';
+        return 'success'; // Xanh lá cho Sẵn Sàng
       case OrderItemStatus.Served:
         return 'success';
       case OrderItemStatus.Canceled:

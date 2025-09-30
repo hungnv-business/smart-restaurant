@@ -15,11 +15,19 @@ public class OrderItemValidationException : BusinessException
     }
 
     /// <summary>
+    /// Chỉ có thể quay lại Pending khi ở trạng thái Preparing
+    /// </summary>
+    public static OrderItemValidationException CannotBackPendingNonPreparingItem()
+    {
+        return new OrderItemValidationException("Chỉ có thể quay lại đơn mới khi ở trạng thái Đang làm");
+    }
+
+    /// <summary>
     /// Chỉ có thể bắt đầu chuẩn bị món ở trạng thái Pending
     /// </summary>
     public static OrderItemValidationException CannotStartPreparationNonPendingItem()
     {
-        return new OrderItemValidationException("Chỉ có thể bắt đầu chuẩn bị món ở trạng thái Pending");
+        return new OrderItemValidationException("Chỉ có thể bắt đầu chuẩn bị món ở trạng thái Đơn mới");
     }
 
     /// <summary>

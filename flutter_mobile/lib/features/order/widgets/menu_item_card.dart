@@ -165,91 +165,105 @@ class MenuItemCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Tên món ăn
+        Text(
+          menuItem.name,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: menuItem.canOrder ? Colors.black87 : Colors.grey,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        // Hiển thị thông tin trạng thái - luôn hiển thị stock status hoặc số lượng đã bán
         Row(
           children: [
-            Expanded(
-              child: Text(
-                menuItem.name,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: menuItem.canOrder ? Colors.black87 : Colors.grey,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            // Hiển thị thông tin trạng thái - đã bán hoặc stock status
-            if (menuItem.isOutOfStock || menuItem.hasLimitedStock)
-              Flexible(child: _buildCompactStockStatus(context))
+            // Ưu tiên hiển thị stock status trước
+            if (menuItem.isOutOfStock || menuItem.hasLimitedStock || menuItem.maximumQuantityAvailable != 2147483647)
+              _buildCompactStockStatus(context)
             else if (menuItem.soldQuantity > 0)
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(width: 4), // spacing
-                    Icon(Icons.trending_up, size: 12, color: Colors.green[600]),
-                    const SizedBox(width: 2),
-                    Flexible(
-                      child: Text(
-                        '${menuItem.soldQuantity} đã bán',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.trending_up, size: 12, color: Colors.green[600]),
+                  const SizedBox(width: 2),
+                  Text(
+                    '${menuItem.soldQuantity} đã bán',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.green[600],
                     ),
-                  ],
-                ),
-              ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              )
+            else
+              // Hiển thị "Còn hàng" cho những món không có thông tin cụ thể
+              _buildCompactStockStatus(context),
           ],
         ),
-        // Không cần stock status riêng nữa vì đã hiển thị trong title row
       ],
     );
   }
 
   Widget _buildCompactStockStatus(BuildContext context) {
     final stockColor = _getStockStatusColor();
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(width: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          decoration: BoxDecoration(
-            color: stockColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: stockColor.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: Text(
-            menuItem.stockStatusText,
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              color: stockColor,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: stockColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: stockColor.withValues(alpha: 0.3),
+          width: 1,
         ),
-      ],
+      ),
+      child: Text(
+        menuItem.stockStatusText,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: stockColor,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 
   Color _getStockStatusColor() {
+    // Hết hàng - màu đỏ
     if (menuItem.isOutOfStock) {
       return Colors.red[700]!;
-    } else if (menuItem.hasLimitedStock) {
-      return Colors.orange[700]!;
+    }
+    
+    // Không giới hạn số lượng (int.maxValue) - màu xanh đậm
+    if (menuItem.maximumQuantityAvailable == 2147483647) {
+      return Colors.green[600]!;
+    }
+    
+    // Phân loại theo số lượng còn lại
+    final remainingStock = menuItem.maximumQuantityAvailable;
+    
+    if (remainingStock >= 10) {
+      // Còn nhiều (>=10) - màu xanh lá đậm
+      return Colors.green[600]!;
+    } else if (remainingStock >= 5) {
+      // Còn vừa phải (5-9) - màu xanh lá nhạt
+      return Colors.green[500]!;
+    } else if (remainingStock >= 2) {
+      // Còn ít (2-4) - màu cam cảnh báo
+      return Colors.orange[600]!;
+    } else if (remainingStock == 1) {
+      // Chỉ còn 1 - màu cam đậm
+      return Colors.deepOrange[600]!;
     } else {
-      return Colors.green[700]!;
+      // Mặc định - màu xám
+      return Colors.grey[600]!;
     }
   }
 
@@ -405,7 +419,7 @@ class MenuItemCard extends StatelessWidget {
                   Icons.add,
                   size: 16,
                   color: _hasStockWarning()
-                      ? Colors.orange[700]
+                      ? _getStockWarningColor()
                       : Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -426,5 +440,20 @@ class MenuItemCard extends StatelessWidget {
 
     // Warning khi quantity hiện tại >= stock available
     return quantity >= menuItem.maximumQuantityAvailable;
+  }
+  
+  /// Lấy màu cảnh báo dựa trên mức độ stock
+  Color _getStockWarningColor() {
+    final remainingStock = menuItem.maximumQuantityAvailable - quantity;
+    
+    if (remainingStock <= 0) {
+      return Colors.red[600]!; // Đã hết hoặc vượt quá
+    } else if (remainingStock == 1) {
+      return Colors.deepOrange[600]!; // Chỉ còn 1
+    } else if (remainingStock <= 2) {
+      return Colors.orange[600]!; // Còn rất ít
+    } else {
+      return Colors.orange[500]!; // Mức cảnh báo thấp
+    }
   }
 }

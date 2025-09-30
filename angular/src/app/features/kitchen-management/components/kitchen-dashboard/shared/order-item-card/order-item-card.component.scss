@@ -30,6 +30,11 @@
   }
 }
 
+// Quantity container positioning
+.quantity-container {
+  transform: translateY(-50%);
+}
+
 // Animation cho waiting time khi urgent
 .text-red-600 {
   animation: pulse-urgent 2s infinite;

@@ -100,6 +100,7 @@ public class EfCoreMenuItemRepository : EfCoreRepository<SmartRestaurantDbContex
             .Include(m => m.Category)
             .Include(m => m.Ingredients)
                 .ThenInclude(mi => mi.Ingredient)
+                    .ThenInclude(i => i.Category)
             .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
     }
 

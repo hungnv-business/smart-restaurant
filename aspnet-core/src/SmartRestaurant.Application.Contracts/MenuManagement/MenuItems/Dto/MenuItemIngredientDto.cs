@@ -12,6 +12,11 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         [Required]
         public Guid IngredientId { get; set; }
 
+        /// <summary>
+        /// ID danh mục nguyên liệu - để hiển thị trong form
+        /// </summary>
+        public Guid? CategoryId { get; set; }
+
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0")]
         public int RequiredQuantity { get; set; }

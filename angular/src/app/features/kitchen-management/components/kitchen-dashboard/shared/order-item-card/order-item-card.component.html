@@ -22,64 +22,103 @@
   </div>
 
   <!-- Quantity badge position absolute căn giữa toàn bộ card -->
-  <div class="absolute right-2" style="top: 50%; transform: translateY(-50%);">
+  <div class="absolute right-2 quantity-container">
     <p-badge
-      [value]="orderItem.quantity.toString() + 'x'"
+      [value]="orderItem.quantity"
       severity="info"
       badgeSize="xlarge"
-      styleClass="text-base font-bold"
+      styleClass="text-base font-bold quantity-badge"
     >
     </p-badge>
   </div>
 
-  <!-- Status và Time Info -->
-  <div class="flex justify-content-between items-center mb-1">
+  <!-- Time Info -->
+  <div class="flex justify-content-end items-center mb-2">
+    <!-- Thời gian chờ -->
     <div class="flex items-center gap-2 text-sm" [ngClass]="getTimeDisplayClass()">
       <i class="pi pi-clock"></i>
       <span class="font-medium">{{ currentWaitingTime() }}</span>
     </div>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="flex gap-2">
-    @switch (orderItem.status || OrderItemStatus.Pending) {
-      @case (OrderItemStatus.Pending) {
-        <p-button
-          label="Bắt Đầu"
-          icon="pi pi-play"
-          size="small"
-          (onClick)="startPreparation()"
-          severity="warn"
-        >
-        </p-button>
-      }
+  <!-- Chờ phục vụ - riêng một dòng -->
+  @if ((orderItem.status || OrderItemStatus.Pending) === OrderItemStatus.Ready) {
+    <div class="w-full text-left mb-2">
+      <span class="text-green-600 font-medium text-sm">
+        <i class="pi pi-check-circle mr-1"></i>
+        Chờ phục vụ
+      </span>
+    </div>
+  }
 
+  <!-- Action Buttons - Responsive: chỉ desktop lớn mới 2 button cùng dòng -->
+  <div class="flex flex-col xl:flex-row gap-2">
+    <!-- Nút lùi trạng thái - mobile/tablet: dưới, desktop: trái -->
+    @switch (orderItem.status || OrderItemStatus.Pending) {
       @case (OrderItemStatus.Preparing) {
-        <p-button
-          label="Hoàn Thành"
-          icon="pi pi-check"
-          size="small"
-          (onClick)="markAsReady()"
-          severity="success"
-        >
-        </p-button>
+        <div class="flex-1 order-2 xl:order-1">
+          <p-button
+            label="Đơn Mới"
+            icon="pi pi-step-backward"
+            size="small"
+            (onClick)="revertToPending()"
+            severity="info"
+            styleClass="w-full"
+          >
+          </p-button>
+        </div>
       }
 
       @case (OrderItemStatus.Ready) {
-        <div class="w-full">
-          <span class="text-green-600 font-medium">
-            <i class="pi pi-check-circle mr-2"></i>
-            Chờ phục vụ
-          </span>
-        </div>
-      }
-
-      @default {
-        <div class="w-full">
-          <span class="text-600"> Trạng thái không xác định </span>
+        <div class="flex-1 order-2 xl:order-1">
+          <p-button
+            label="Đang Làm"
+            icon="pi pi-step-backward"
+            size="small"
+            (onClick)="revertToPreparing()"
+            severity="warn"
+            styleClass="w-full"
+          >
+          </p-button>
         </div>
       }
     }
+
+    <!-- Nút tiến trạng thái - mobile/tablet: trên, desktop: phải -->
+    <div class="flex-1 order-1 xl:order-2">
+      @switch (orderItem.status || OrderItemStatus.Pending) {
+        @case (OrderItemStatus.Pending) {
+          <p-button
+            label="Đang Làm"
+            icon="pi pi-play"
+            size="small"
+            (onClick)="startPreparation()"
+            severity="warn"
+            styleClass="w-full"
+          >
+          </p-button>
+        }
+
+        @case (OrderItemStatus.Preparing) {
+          <p-button
+            label="Hoàn Thành"
+            icon="pi pi-check"
+            size="small"
+            (onClick)="markAsReady()"
+            severity="success"
+            styleClass="w-full"
+          >
+          </p-button>
+        }
+
+        @default {
+          @if ((orderItem.status || OrderItemStatus.Pending) !== OrderItemStatus.Ready) {
+            <div class="w-full text-center py-2">
+              <span class="text-600 text-sm"> Trạng thái không xác định </span>
+            </div>
+          }
+        }
+      }
+    </div>
   </div>
 </div>
-<p-confirmDialog></p-confirmDialog>

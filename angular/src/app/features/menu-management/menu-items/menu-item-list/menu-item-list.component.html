@@ -104,8 +104,9 @@
               [src]="getImageUrl(menuItem.imageUrl)"
               alt="{{ menuItem.name }}"
               width="60"
-              [preview]="true"
+              [preview]="hasValidImage(menuItem.imageUrl)"
               styleClass="border-round shadow-2"
+              (onImageError)="onImageError($event)"
             />
           </div>
         </td>

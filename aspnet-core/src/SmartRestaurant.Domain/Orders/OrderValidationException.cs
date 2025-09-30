@@ -295,14 +295,6 @@ public class OrderValidationException : BusinessException
     }
 
     /// <summary>
-    /// Không hỗ trợ chuyển đổi sang trạng thái này
-    /// </summary>
-    public static OrderValidationException UnsupportedStatusTransition(OrderItemStatus status)
-    {
-        return new OrderValidationException($"Không hỗ trợ chuyển đổi sang trạng thái {status}");
-    }
-
-    /// <summary>
     /// Không thể chuyển từ trạng thái này sang trạng thái kia
     /// </summary>
     public static OrderValidationException InvalidStatusTransition(OrderItemStatus currentStatus, OrderItemStatus newStatus)

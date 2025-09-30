@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
 
 namespace SmartRestaurant.MenuManagement.MenuItems.Dto
@@ -54,5 +55,10 @@ namespace SmartRestaurant.MenuManagement.MenuItems.Dto
         /// Có tồn kho hạn chế không (< 10 phần)
         /// </summary>
         public bool HasLimitedStock { get; set; }
+
+        /// <summary>
+        /// Danh sách nguyên liệu cho món ăn
+        /// </summary>
+        public List<MenuItemIngredientDto> Ingredients { get; set; } = [];
     }
 }

@@ -148,6 +148,23 @@ public class OrderItem : FullAuditedEntity<Guid>
     /// <summary>
     /// Bắt đầu chuẩn bị món (Pending → Preparing)
     /// </summary>
+    public void BacktoPending()
+    {
+        if (!IsPreparing())
+        {
+            throw OrderItemValidationException.CannotBackPendingNonPreparingItem();
+        }
+
+        Status = OrderItemStatus.Pending;
+        PreparationStartTime = DateTime.UtcNow;
+
+        // TODO: Thêm domain event khi cần real-time kitchen dashboard
+        // AddLocalEvent(new OrderItemPreparationStartedEvent(Id, OrderId, MenuItemName));
+    }
+
+    /// <summary>
+    /// Bắt đầu chuẩn bị món (Pending → Preparing)
+    /// </summary>
     public void StartPreparation()
     {
         if (!IsPending())
@@ -222,17 +239,17 @@ public class OrderItem : FullAuditedEntity<Guid>
     public bool IsCanceled() => Status == OrderItemStatus.Canceled;
 
     /// <summary>
-    /// Kiểm tra có thể chuyển sang trạng thái mới không
+    /// Kiểm tra có thể chuyển sang trạng thái mới không - chỉ cho phép tiến 1 bước
     /// </summary>
     public bool CanTransitionTo(OrderItemStatus newStatus)
     {
         return Status switch
         {
             OrderItemStatus.Pending => newStatus == OrderItemStatus.Preparing || newStatus == OrderItemStatus.Canceled,
-            OrderItemStatus.Preparing => newStatus == OrderItemStatus.Ready,
-            OrderItemStatus.Ready => newStatus == OrderItemStatus.Served,
-            OrderItemStatus.Served => false,
-            OrderItemStatus.Canceled => false,
+            OrderItemStatus.Preparing => newStatus == OrderItemStatus.Ready || newStatus == OrderItemStatus.Pending, // Cho phép lùi về Pending
+            OrderItemStatus.Ready => newStatus == OrderItemStatus.Served || newStatus == OrderItemStatus.Preparing, // Cho phép lùi về Preparing
+            OrderItemStatus.Served => false, // Đã phục vụ không cho chuyển
+            OrderItemStatus.Canceled => false, // Đã hủy không cho chuyển
             _ => false
         };
     }

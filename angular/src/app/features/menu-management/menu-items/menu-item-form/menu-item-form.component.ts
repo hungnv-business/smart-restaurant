@@ -283,6 +283,37 @@ export class MenuItemFormComponent extends ComponentBase implements OnInit {
       requiresCooking: menuItem.requiresCooking ?? true,
     });
 
+    // Populate danh sách nguyên liệu
+    this.populateIngredients(menuItem.ingredients || []);
+
     this.form.markAsPristine();
+  }
+
+  /**
+   * Điền danh sách nguyên liệu vào form
+   * @param ingredients Danh sách nguyên liệu hiện có
+   */
+  private populateIngredients(ingredients: any[]) {
+    // Xóa tất cả nguyên liệu hiện có trong form
+    while (this.ingredientsFormArray.length !== 0) {
+      this.ingredientsFormArray.removeAt(0);
+    }
+
+    // Thêm từng nguyên liệu vào form
+    ingredients.forEach(ingredient => {
+      const ingredientGroup = this.fb.group({
+        categoryId: [ingredient.categoryId || '', [Validators.required]],
+        ingredientId: [ingredient.ingredientId || '', [Validators.required]],
+        requiredQuantity: [ingredient.requiredQuantity || 1, [Validators.required, Validators.min(1)]],
+        displayOrder: [ingredient.displayOrder || 0],
+      });
+
+      this.ingredientsFormArray.push(ingredientGroup);
+
+      // Load danh sách nguyên liệu theo category nếu có categoryId
+      if (ingredient.categoryId) {
+        this.loadIngredientsByCategory(ingredient.categoryId);
+      }
+    });
   }
 }

@@ -529,17 +529,6 @@ namespace SmartRestaurant.Kitchen
         /// </exception>
         public async Task UpdateOrderItemStatusAsync(Guid orderItemId, OrderItemStatus status)
         {
-            // Kiểm tra bếp chỉ được phép cập nhật 3 trạng thái này
-            // Served phải do nhân viên phục vụ thực hiện, không phải bếp
-            if (status != OrderItemStatus.Preparing &&
-                status != OrderItemStatus.Ready &&
-                status != OrderItemStatus.Canceled)
-            {
-                Logger.LogWarning("Kitchen attempted to update OrderItem {OrderItemId} to invalid status {Status}",
-                    orderItemId, status);
-                throw OrderValidationException.UnsupportedStatusTransition(status);
-            }
-
             Logger.LogInformation("Kitchen đang cập nhật trạng thái OrderItem {OrderItemId} thành {Status}",
                 orderItemId, status);
 
@@ -573,6 +562,12 @@ namespace SmartRestaurant.Kitchen
             // Mỗi method sẽ tự động cập nhật timestamp tương ứng
             switch (status)
             {
+                case OrderItemStatus.Pending:
+                    orderItem.BacktoPending();
+                    Logger.LogDebug("OrderItem {OrderItemId} quay lại đơn mới bị lúc {Time}",
+                       orderItemId, DateTime.UtcNow);
+                    break;
+
                 case OrderItemStatus.Preparing:
                     // Bắt đầu nấu món, ghi lại thời gian bắt đầu
                     orderItem.StartPreparation();
@@ -594,9 +589,6 @@ namespace SmartRestaurant.Kitchen
                         orderItemId, DateTime.UtcNow);
                     break;
             }
-
-            // Lưu thay đổi vào database
-            await _orderRepository.UpdateAsync(targetOrder);
 
             Logger.LogInformation("Kitchen đã cập nhật thành công OrderItem {OrderItemId} từ {OldStatus} sang {NewStatus}",
                 orderItemId, orderItem.Status, status);

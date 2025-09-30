@@ -629,9 +629,11 @@ class _MenuScreenState extends State<MenuScreen> {
       final verificationResult = await _orderService
           .verifyIngredientsAvailability(verificationRequest);
 
-      // Bước 2: Hiển thị dialog verification result
-      bool? userConfirmed;
-      if (mounted) {
+      // Bước 2: Chỉ hiển thị dialog nếu có thiếu nguyên liệu
+      bool? userConfirmed = true; // Mặc định OK nếu không thiếu gì
+      
+      if (!verificationResult.isAvailable && mounted) {
+        // Chỉ hiển thị popup khi thiếu nguyên liệu
         userConfirmed = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
